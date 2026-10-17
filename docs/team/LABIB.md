@@ -46,9 +46,27 @@ Check `C:\hishab\integration.log` now and then; if a run shows FAILED, post in t
 
 - **10:00–14:00 shops** (WP-20): consent → statement export → 2–4 baki-khata photos →
   5-minute interview → one quote. Raw files go **only** into the private team Drive folder.
-- **Afternoon:** Kaggle notebooks in `ml/` (RUNBOOK §5.5): GPU T4 x2, Internet on, Run All,
-  **Save Version**, download `ml/artifacts/*`, commit on branch `wp-17-ml`, open a PR
-  (`gh pr create --fill --base main`).
+- **Afternoon: Kaggle notebooks** (notebook 02 is already done; you run 01, 03 and 04).
+  Get the files: `cd C:\hishab\repo; git fetch; git switch wp-17-ml; git pull`. The notebooks
+  are in `ml\notebooks\*.ipynb`. On kaggle.com: **Create → New Notebook → File → Import
+  Notebook** → pick the `.ipynb`. After each run: **Save Version** (Save & Run All), then open
+  the **Output** tab and download the files named below.
+
+  | Notebook | Kaggle settings | Add data (right panel → *Add Input*) | Download → put in `ml\artifacts\` |
+  | --- | --- | --- | --- |
+  | `01_forecast_backtest` | CPU, Internet off | search **online retail ii uci** → `mashlyn/online-retail-ii-uci` | `hishab_ml/forecast_backtest.json`, `hishab_ml/forecast_backtest_origins.csv` |
+  | `03_injection_classifier` | **GPU T4 x2**, **Internet on** | *Upload* → `data\public\injection\injection_corpus.jsonl` from the repo | `hishab_ml/injection_metrics.json` → `ml\artifacts\`; zip the folder `hishab_ml/injection_onnx_int8` → upload the zip to `My Drive\hishab-backups\models\` (too big for git) |
+  | `04_market_backtest` | CPU, Internet off | first download **AgriPriceBD** from https://data.mendeley.com/datasets/bkmxnrn3hn (button *Download All*), unzip, then *Upload* the files as a new Kaggle dataset | `hishab_ml/market_alert_backtest.json` |
+
+  Then commit on the same branch and push:
+  ```powershell
+  cd C:\hishab\repo
+  git add ml\artifacts
+  git commit -m "WP-17: Kaggle results for notebooks 01, 03, 04"
+  git push
+  ```
+  Post "WP-17 results pushed" in the group. If a notebook errors, screenshot the red cell and
+  post it; don't change the code yourself.
 - **When WP-03 (privacy) is merged:** run the anonymiser on your shop files (the orchestrator
   posts the exact command), check the output has no names or numbers, commit only the
   anonymised files to `data/real_anonymised/` on branch `wp-20-data`, open a PR.
