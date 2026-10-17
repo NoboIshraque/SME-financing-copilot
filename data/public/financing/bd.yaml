@@ -1,0 +1,267 @@
+# Bangladesh financing catalogue for Hishab (WP-06). Every row was opened and checked on
+# 2026-10-18; `evidence_quote` is verbatim from the source. `rate_basis` says how the rate is
+# known (published / rate_sheet_upper / regulatory_cap / last_published). Products whose
+# provider publishes no rate are listed under `unpriced` and shown as "ask the lender": they
+# are never ranked on a guessed cost.
+#
+# Assumptions made explicit (shown in the UI as "assumed"):
+# - rate_type for bank loans is reducing balance (the Bangladesh norm) unless stated.
+# - Bank loans carry the Bangladesh Bank processing-fee ceiling of 0.5% (bank schedules of
+#   charges: "up to 0.50% (max BDT 15,000)"), modelled as 0.5% upfront without the Tk cap.
+# - Where a page lists no eligibility, a trade licence is assumed (standard bank KYC) and the
+#   rule is labelled "typical".
+data_mode: public
+products:
+  - id: bd-primebank-chalti
+    provider: "Prime Bank PLC"
+    name: "Prime Chalti (SME working capital)"
+    kind: working_capital
+    rate_type: reducing_balance
+    nominal_rate_pa: 15.0
+    rate_basis: rate_sheet_upper
+    fees:
+      - {name: "processing (BB ceiling 0.5%)", kind: percent_of_principal, value: 0.5, timing: upfront}
+    max_amount: 50000000
+    max_tenor_days: 1825
+    collateral_required: true
+    rules:
+      - {id: prime-experience, metric: business_age_months, op: ">=", threshold: 36, description_key: rule.business_age}
+      - {id: prime-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence}
+    source_url: "https://www.primebank.com.bd/sme/borrow/prime-chalti"
+    checked_on: 2026-10-18
+    evidence_quote: "Loan Amount up to BDT 5 Crore"
+    notes: "Rate from Prime Bank rate sheet as on 24-09-2026 (https://www.primebank.com.bd/conventional-rates): SMI working capital 14.00% declared, 13.00-15.00% range; upper bound used. Collateral: mortgage, hypothecation or FDR lien."
+
+  - id: bd-bankasia-sme-term
+    provider: "Bank Asia PLC"
+    name: "SME term loan (rate sheet: small and medium industries)"
+    kind: term_loan
+    rate_type: reducing_balance
+    nominal_rate_pa: 13.0
+    rate_basis: rate_sheet_upper
+    fees:
+      - {name: "processing (BB ceiling 0.5%)", kind: percent_of_principal, value: 0.5, timing: upfront}
+    rules:
+      - {id: bankasia-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence_typical}
+    source_url: "https://www.bankasia-bd.com/downloads/Lending_Rate_Economy-sec-24-Aug-2026.pdf"
+    checked_on: 2026-10-18
+    evidence_quote: "b) Small and Medium Industries 12.00% 11.00% 13.00%"
+    notes: "Rate sheet as on 24-08-2026 (declared 12.00%, range 11.00-13.00%; upper bound used). The sheet names a category, not a product: no limits, tenor or collateral published."
+
+  - id: bd-bankasia-micro-wc
+    provider: "Bank Asia PLC"
+    name: "Cottage/micro working capital (rate sheet)"
+    kind: working_capital
+    rate_type: reducing_balance
+    nominal_rate_pa: 13.0
+    rate_basis: rate_sheet_upper
+    fees:
+      - {name: "processing (BB ceiling 0.5%)", kind: percent_of_principal, value: 0.5, timing: upfront}
+    rules:
+      - {id: bankasia-wc-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence_typical}
+    source_url: "https://www.bankasia-bd.com/downloads/Lending_Rate_Economy-sec-24-Aug-2026.pdf"
+    checked_on: 2026-10-18
+    evidence_quote: "c) Cottage Industries/Micro Industries 12.00% 11.00% 13.00%"
+    notes: "Rate sheet as on 24-08-2026; upper bound used. Small/medium working capital on the same sheet: 11.00% declared, 10.00-12.00%."
+
+  - id: bd-bankasia-lease
+    provider: "Bank Asia PLC"
+    name: "Lease financing (rate sheet)"
+    kind: leasing
+    rate_type: reducing_balance
+    nominal_rate_pa: 12.5
+    rate_basis: rate_sheet_upper
+    rules:
+      - {id: bankasia-lease-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence_typical}
+    source_url: "https://www.bankasia-bd.com/downloads/Lending_Rate_Economy-sec-24-Aug-2026.pdf"
+    checked_on: 2026-10-18
+    evidence_quote: "6. Lease Financing/Leasing 11.50% 10.50% 12.50%"
+    notes: "Not SME-specific; range 10.50-12.50%, upper bound used. No tenor or limits published."
+
+  - id: bd-sbac-cmsme-term
+    provider: "South Bangla Agriculture and Commerce (SBAC) Bank PLC"
+    name: "CMSME term / working capital loan"
+    kind: term_loan
+    rate_type: reducing_balance
+    nominal_rate_pa: 15.25
+    rate_basis: published
+    fees:
+      - {name: "processing (BB ceiling 0.5%)", kind: percent_of_principal, value: 0.5, timing: upfront}
+    rules:
+      - {id: sbac-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence_typical}
+    source_url: "https://www.sbacbank.com/files/loan-advance-interest-rates-2025.pdf"
+    checked_on: 2026-10-18
+    evidence_quote: "Term Loan 15.25% (Mid-Rate)"
+    notes: "Effective 29 May 2025 (circular SBAC/HO/CR/2025/8507); a mid-rate, may predate the June 2026 4% spread cap."
+
+  - id: bd-mercantile-anannya
+    provider: "Mercantile Bank PLC"
+    name: "ANANNYA (women entrepreneurs)"
+    kind: term_loan
+    rate_type: reducing_balance
+    nominal_rate_pa: 5.0
+    rate_basis: published
+    min_amount: 50000
+    max_amount: 10000000
+    min_tenor_days: 365
+    max_tenor_days: 2555
+    rules:
+      - {id: anannya-woman, metric: owner_is_woman, op: exists, description_key: rule.woman_entrepreneur}
+      - {id: anannya-experience, metric: business_age_months, op: ">=", threshold: 24, description_key: rule.business_age}
+    source_url: "https://www.mblbd.com/sme-financing"
+    checked_on: 2026-10-18
+    evidence_quote: "0.50 lac to 100.00 lac at 5.00% p.a. (up to Small Enterprise)"
+    notes: "5% applies up to Small Enterprise; larger CMSME amounts at the prevailing rate. Collateral not specified."
+
+  - id: bd-citybank-bkash-loan
+    provider: "The City Bank PLC (via bKash)"
+    name: "bKash digital loan"
+    kind: nano_loan
+    rate_type: daily_debit
+    nominal_rate_pa: 9.0
+    rate_basis: last_published
+    fees:
+      - {name: "processing (0.5% + VAT)", kind: percent_of_principal, value: 0.575, timing: upfront}
+    min_amount: 500
+    max_amount: 50000
+    max_tenor_days: 180
+    collateral_required: false
+    rules:
+      - {id: bkash-user, metric: bkash_account_active, op: exists, description_key: rule.bkash_account}
+    source_url: "https://www.bkash.com/en/page/bkash-loan-faq"
+    checked_on: 2026-10-18
+    evidence_quote: "Loan Processing fee is 0.575% on the loan amount (0.5% + VAT)."
+    notes: "Current rate is shown only in the app ('may vary based on customer'). 9% p.a. is the launch rate (Prothom Alo, Dec 2021); Bangladesh Bank's e-loan rule (BRPD Circular 11, May 2026) caps refinanced e-loans at 9%. Tk 500-50,000 and 6 months: TBS, 18 Jun 2025. Retail product; repayment structure as shown in the app (daily debit assumed)."
+
+  - id: bd-bb-cmsme-wc-refinance-2026
+    provider: "Bangladesh Bank (via participating banks)"
+    name: "CMSME working capital refinance fund (Tk 5,000 crore)"
+    kind: refinance_scheme
+    rate_type: reducing_balance
+    nominal_rate_pa: 9.0
+    rate_basis: regulatory_cap
+    fees:
+      - {name: "processing (BB ceiling 0.5%)", kind: percent_of_principal, value: 0.5, timing: upfront}
+    rules:
+      - {id: wc-fund-no-default, metric: no_default_record, op: exists, description_key: rule.no_default}
+      - {id: wc-fund-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence_typical}
+    source_url: "https://regalert.today/document/e4ba4802-cfc4-4d26-86f8-7b4b0b6fd6eb/text"
+    checked_on: 2026-10-18
+    evidence_quote: "maximum 9% (nine percent)"
+    notes: "SMSPD Circular No. 04, 8 Jun 2026 (read via a mirror of the Bangladesh Bank circular). Banks refinance at 4%; 3 or 6 months grace; fund runs 3 years. No per-borrower cap or tenor stated."
+
+  - id: bd-bb-cmsme-prefinance-25000cr
+    provider: "Bangladesh Bank (via banks and FIs)"
+    name: "Tk 25,000 crore CMSME refinance / pre-finance scheme"
+    kind: refinance_scheme
+    rate_type: reducing_balance
+    nominal_rate_pa: 7.0
+    rate_basis: regulatory_cap
+    max_tenor_days: 1825
+    rules:
+      - {id: pf-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence_typical}
+      - {id: pf-no-default, metric: no_default_record, op: exists, description_key: rule.no_default}
+    source_url: "https://unb.com.bd/category/business/bangladesh-bank-eases-sme-loan-rules-for-refinance-fund-amid-rising-defaults/172967"
+    checked_on: 2026-10-18
+    evidence_quote: "at a maximum interest rate of 7 percent"
+    notes: "News source (UNB, 13 Nov 2025). Banks borrow at 2%; up to 5 years including grace; at least 75% of the fund for cottage, micro and small."
+
+  - id: bd-bb-women-refinance
+    provider: "Bangladesh Bank (via PFIs, e.g. IIDFC)"
+    name: "Small enterprise refinance scheme for women entrepreneurs"
+    kind: refinance_scheme
+    rate_type: reducing_balance
+    nominal_rate_pa: 5.0
+    rate_basis: regulatory_cap
+    max_amount: 10000000
+    rules:
+      - {id: women-ref-woman, metric: owner_is_woman, op: exists, description_key: rule.woman_entrepreneur}
+    source_url: "https://www.iidfc.com/refinenance-scheme"
+    checked_on: 2026-10-18
+    evidence_quote: "5.00% p.a."
+    notes: "Cap confirmed by The Daily Star (26 Jun 2025): 'The maximum interest rate under the scheme is capped at 5%.' Tier caps: marginal 5 lakh, cottage 20 lakh, micro 50 lakh, small 1 crore."
+
+  - id: bd-bb-startup-fund
+    provider: "Bangladesh Bank (via banks and FIs)"
+    name: "Startup financing (SMESPD Circular 02, 9 Jul 2025)"
+    kind: refinance_scheme
+    rate_type: reducing_balance
+    nominal_rate_pa: 4.0
+    rate_basis: regulatory_cap
+    max_amount: 80000000
+    rules:
+      - {id: startup-young, metric: business_age_months, op: "<=", threshold: 144, description_key: rule.startup_age}
+      - {id: startup-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence_typical}
+    source_url: "https://thefinancialexpress.com.bd/economy/bangladesh-bank-introduces-new-policy-to-boost-startup-financing-and-youth-employment"
+    checked_on: 2026-10-18
+    evidence_quote: "a maximum of 4%, applied on a quarterly compounding basis"
+    notes: "News source (FE, 9 Jul 2025); Prime Bank's Sep 2026 rate sheet lists 4.00%. Business registered for at most 12 years; quarterly compounding approximated as reducing balance."
+
+  - id: bd-bb-closed-industry-prefinance
+    provider: "Bangladesh Bank (via banks)"
+    name: "Tk 20,000 crore pre-financing for closed enterprises"
+    kind: refinance_scheme
+    rate_type: reducing_balance
+    nominal_rate_pa: 7.0
+    rate_basis: regulatory_cap
+    rules:
+      - {id: closed-only, metric: enterprise_closed, op: exists, description_key: rule.closed_enterprise}
+    source_url: "https://www.dhakatribune.com/business/banks/420177/bb-caps-7%25-interest-rate-on-loans-for-closed"
+    checked_on: 2026-10-18
+    evidence_quote: "Bangladesh Bank has capped the maximum interest rate at 7% for loans under a Tk20,000 crore pre-financing scheme"
+    notes: "News source (Sep 2026). 7% includes all charges; six-month grace. For closed industries; CMSME eligibility unclear."
+
+  - id: bd-pksf-microenterprise
+    provider: "Palli Karma-Sahayak Foundation (via partner MFIs)"
+    name: "Microenterprise programme loan"
+    kind: mfi_loan
+    rate_type: reducing_balance
+    nominal_rate_pa: 24.0
+    rate_basis: regulatory_cap
+    max_amount: 1000000
+    source_url: "https://pksf.org.bd/our-activities/core-programmes/microenterprise-programme/"
+    checked_on: 2026-10-18
+    evidence_quote: "An individual entrepreneur can take loan of up to BDT 1.0 million under the program."
+    notes: "PKSF publishes no rate; the Microcredit Regulatory Authority cap of 24% is used (bdnews24, 13 Oct 2026: 'the maximum microcredit service charge was set at 24 percent'). Declining-balance basis assumed (not confirmed from a primary MRA source)."
+
+unpriced:
+  - id: bd-primebank-shongjog
+    provider: "Prime Bank PLC"
+    name: "Prime Shongjog (invoice financing)"
+    kind: invoice_discounting
+    max_amount: 100000000
+    source_url: "https://www.primebank.com.bd/sme/borrow/prime-shongjog"
+    checked_on: 2026-10-18
+    notes: "Up to 80% of each invoice, up to 180 days; needs 1+ year supplying a renowned corporate buyer and the buyer's payment-assignment letter."
+  - id: bd-bracbank-bkash-merchant-loan
+    provider: "BRAC Bank PLC (via bKash Merchant App)"
+    name: "Digital loan for bKash merchants"
+    kind: nano_loan
+    max_amount: 50000
+    source_url: "https://thefinancialexpress.com.bd/sci-tech/addressing-financing-gap-brac-bank-bkash-introduce-digital-loan-for-merchants"
+    checked_on: 2026-10-18
+    notes: "Up to Tk 50,000 for eligible bKash merchants, assessed on merchant-account history (FE, 7 Sep 2026)."
+  - id: bd-bracbank-shafollo-eloan
+    provider: "BRAC Bank PLC"
+    name: "Shafollo e-loan"
+    kind: nano_loan
+    max_amount: 50000
+    source_url: "https://www.tbsnews.net/node/1232376"
+    checked_on: 2026-10-18
+    notes: "For petty traders and store owners; National ID only; repaid over six months."
+  - id: bd-bracbank-supplier-financing
+    provider: "BRAC Bank PLC"
+    name: "Supplier financing (supply chain finance)"
+    kind: invoice_discounting
+    max_amount: 250000000
+    source_url: "https://bracbank.com/sme/loan/supply-chain-finance"
+    checked_on: 2026-10-18
+    notes: "Tk 5 lakh to 25 crore, 12-month renewable facility; 'Lowest Market rate' (no figure)."
+  - id: bd-mercantile-factoring
+    provider: "Mercantile Bank PLC"
+    name: "Factoring of receivables"
+    kind: factoring
+    max_amount: 50000000
+    source_url: "https://www.mblbd.com/sme-financing"
+    checked_on: 2026-10-18
+    notes: "30-90 days, up to Tk 5 crore per client, 20-50% retention; 'prevailing rate'."

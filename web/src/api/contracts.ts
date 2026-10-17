@@ -1,4 +1,4 @@
-/* Generated from docs/api/contracts.json (contracts v1.0.0). Do not edit. */
+/* Generated from docs/api/contracts.json (contracts v1.1.0). Do not edit. */
 /* Money amounts are decimal strings: never convert them to floats. */
 
 export type Detail = string | null;
@@ -396,7 +396,13 @@ export type Name1 = string;
  * Percent per year as published, e.g. 9
  */
 export type NominalRatePa = string;
+export type Notes = string | null;
 export type Provider = string;
+/**
+ * How we know the rate. Shown next to every rate in the UI.
+ */
+export type RateBasis =
+  "published" | "rate_sheet_upper" | "regulatory_cap" | "last_published" | "modelled" | "own_terms";
 /**
  * This interface was referenced by `HishabContracts`'s JSON-Schema
  * via the `definition` "RateType".
@@ -620,6 +626,14 @@ export type Role = "owner" | "accountant" | "staff" | "lender_viewer" | "complia
 export type Scopes = string[];
 export type TenantId13 = string;
 export type UserId = string;
+/**
+ * How we know the rate. Shown next to every rate in the UI.
+ *
+ * This interface was referenced by `HishabContracts`'s JSON-Schema
+ * via the `definition` "RateBasis".
+ */
+export type RateBasis1 =
+  "published" | "rate_sheet_upper" | "regulatory_cap" | "last_published" | "modelled" | "own_terms";
 export type Benchmark = string | null;
 export type InterpretationKey = string | null;
 /**
@@ -807,6 +821,7 @@ export interface HishabContracts {
   Principal?: Principal;
   ProductKind?: ProductKind;
   Provenance?: Provenance;
+  RateBasis?: RateBasis1;
   RateType?: RateType;
   Ratio?: Ratio;
   Recommendation?: Recommendation;
@@ -1295,7 +1310,9 @@ export interface FinancingProduct {
   min_tenor_days?: MinTenorDays;
   name: Name1;
   nominal_rate_pa: NominalRatePa;
+  notes?: Notes;
   provider: Provider;
+  rate_basis?: RateBasis;
   rate_type: RateType;
   rules?: Rules;
   source_url?: SourceUrl;
@@ -1687,4 +1704,4 @@ export interface VerifyResult {
   valid: Valid;
 }
 
-export const CONTRACTS_VERSION = "1.0.0";
+export const CONTRACTS_VERSION = "1.1.0";

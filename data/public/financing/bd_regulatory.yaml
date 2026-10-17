@@ -1,0 +1,23 @@
+# Regulatory facts behind the Bangladesh catalogue (checked 2026-10-18). Quotes are verbatim.
+data_mode: public
+facts:
+  - id: mra_cap
+    statement: "Microcredit service charge is capped at 24% a year."
+    source_url: "https://bdnews24.com/bangladesh/m7xqnypocz"
+    quote: "the maximum microcredit service charge was set at 24 percent"
+  - id: market_based_rates
+    statement: "Bank lending rates are market-based since SMART was scrapped on 8 May 2024."
+    source_url: "https://thefinancialexpress.com.bd/economy/bb-discards-smart-formula"
+    quote: "banks and NBFIs can set interest rates based on market demand and supply as well as the banker-customer relationship"
+  - id: spread_cap
+    statement: "Since 29 Jun 2026 the average lending-deposit spread is capped at 4 percentage points."
+    source_url: "https://thefinancialexpress.com.bd/economy/bb-caps-loan-deposit-interest-spread-at-4pc"
+    quote: "setting the maximum interest rate spread at 4 percent"
+  - id: eloan_rule
+    statement: "E-loans: at most Tk 50,000 at a time, up to 12 months, at most 9% when refinanced."
+    source_url: "https://regalert.today/document/f576cd53-eea2-43ae-a135-fa438c412659/text"
+    quote: "A customer may avail maximum of BDT 50,000 (Taka Fifty Thousand) as an e-loan at a time"
+  - id: processing_fee_cap
+    statement: "Processing fee at most 0.5% (max Tk 15,000) for loans up to Tk 50 lakh; no early-settlement fee on CMSME loans."
+    source_url: "https://www.thedailystar.net/business/news/relief-customers-bb-lowers-charges-deposits-loans-2108837"
+    quote: "lenders can charge a maximum of 0.5 per cent as a processing fee"
