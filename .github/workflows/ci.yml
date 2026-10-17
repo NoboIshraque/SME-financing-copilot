@@ -103,3 +103,34 @@ jobs:
         run: |
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz | tar -xz gitleaks
           ./gitleaks git --redact --verbose --exit-code 1 .
+
+  stack:
+    name: Docker stack (build + boot + smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      POSTGRES_PASSWORD: ci-only-password
+      SECRET_KEY: ci-only-secret-key-0123456789abcdef0123456789
+      VAULT_KEY: ci-only-vault-key-0123456789abcdef01234567890
+      DEPLOY_DOMAIN: localhost
+      LLM_MODE: fixtures
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: docker compose -f infra/docker-compose.yml build
+      - name: Boot the stack
+        run: docker compose -f infra/docker-compose.yml up -d --wait --wait-timeout 180
+      - name: Smoke test through Caddy (TLS, headers, API proxy, SPA fallback)
+        run: |
+          curl -fsSk https://localhost/api/health | tee health.json | grep -q '"status":"ok"'
+          grep -q '"database":"postgresql"' health.json
+          curl -fsSk https://localhost/ | grep -q '<div id="root">'
+          curl -fsSk https://localhost/cash | grep -q '<div id="root">'
+          headers=$(curl -fsSkI https://localhost/)
+          echo "$headers" | grep -qi '^content-security-policy:'
+          echo "$headers" | grep -qi '^strict-transport-security:'
+          echo "$headers" | grep -qi '^x-frame-options: DENY'
+          curl -sS -o /dev/null -w '%{http_code}' http://localhost/ | grep -qE '30[18]'
+      - name: Logs on failure
+        if: failure()
+        run: docker compose -f infra/docker-compose.yml logs --no-color --tail 200

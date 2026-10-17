@@ -218,7 +218,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-15 | not started | — | 0 | |
 | WP-16 | not started | — | 0 | needs P3 approval |
 | WP-17 | not started | — | 0 | |
-| WP-18 | not started | — | 0 | |
+| WP-18 | in progress (4/6) | wp-18-infra | 14 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; China checks + mirror pending |
 | WP-19 | not started | — | — | |
 | WP-20 | not started | — | — | needs P7 approval |
 

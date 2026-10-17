@@ -1,0 +1,85 @@
+name: Deploy
+
+# Runs after CI passes on main. Ships the exact commit to the Singapore server, rebuilds the
+# stack, checks https://<DEPLOY_DOMAIN>/api/health, and rolls back to the previous release if
+# the check fails. Needs repo secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_DOMAIN.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_DOMAIN: ${{ secrets.DEPLOY_DOMAIN }}
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - name: Skip when the server is not configured yet
+        id: gate
+        run: |
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_DOMAIN" ]; then
+            echo "Deploy secrets not set yet - skipping." >> "$GITHUB_STEP_SUMMARY"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.ready == 'true'
+        with:
+          ref: ${{ env.SHA }}
+
+      - name: SSH key
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          ssh-keyscan -T 15 "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Ship release and rebuild
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          git archive --format=tar.gz "$SHA" | ssh -i ~/.ssh/deploy "$DEPLOY_USER@$DEPLOY_HOST" \
+            "set -e; R=\$HOME/hishab/releases/$SHA; mkdir -p \$R; tar -xzf - -C \$R"
+          ssh -i ~/.ssh/deploy "$DEPLOY_USER@$DEPLOY_HOST" bash -s -- "$SHA" < infra/remote-deploy.sh
+
+      - name: Smoke test over HTTPS
+        id: smoke
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 10 "https://$DEPLOY_DOMAIN/api/health" | grep -q '"status":"ok"'; then
+              curl -fsS --max-time 10 -o /dev/null "https://$DEPLOY_DOMAIN/" && echo "healthy" && exit 0
+            fi
+            sleep 10
+          done
+          echo "Smoke test failed" && exit 1
+
+      - name: Promote release
+        if: steps.gate.outputs.ready == 'true' && steps.smoke.outcome == 'success'
+        run: |
+          ssh -i ~/.ssh/deploy "$DEPLOY_USER@$DEPLOY_HOST" \
+            "ln -sfn \$HOME/hishab/releases/$SHA \$HOME/hishab/current; cd \$HOME/hishab/releases && ls -1t | tail -n +4 | xargs -r rm -rf"
+          echo "Deployed $SHA to https://$DEPLOY_DOMAIN" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Roll back
+        if: failure() && steps.gate.outputs.ready == 'true'
+        run: |
+          ssh -i ~/.ssh/deploy "$DEPLOY_USER@$DEPLOY_HOST" bash -s -- rollback < infra/remote-deploy.sh
+          echo "Rolled back after a failed deploy of $SHA" >> "$GITHUB_STEP_SUMMARY"

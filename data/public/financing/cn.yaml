@@ -1,0 +1,55 @@
+# P14 China jurisdiction pack: MODELLED products, not offers. They show the ranking engine is
+# portable to a second market. Shapes follow publicly described features of digital SME credit
+# in China (daily-interest revolving credit from internet banks, invoice-based supply-chain
+# finance, PBoC inclusive re-lending). Every number below is an illustrative assumption, labelled
+# `is_modelled: true` and shown as "modelled" in the UI. Amounts are in BDT-equivalent units so
+# they rank alongside the Bangladesh catalogue in the demo.
+data_mode: public
+products:
+  - id: cn-modelled-digital-revolving
+    provider: "Modelled internet bank (China)"
+    name: "Digital revolving SME credit (modelled)"
+    kind: digital_credit_modelled
+    rate_type: daily_debit
+    nominal_rate_pa: 10.95          # assumption: 0.03% per day simple interest
+    min_amount: 10000
+    max_amount: 3000000
+    min_tenor_days: 1
+    max_tenor_days: 365
+    collateral_required: false
+    is_modelled: true
+    rules:
+      - {id: cn-tax-record, metric: tax_records_months, op: ">=", threshold: 12, description_key: rule.tax_record_months}
+      - {id: cn-age, metric: business_age_months, op: ">=", threshold: 24, description_key: rule.business_age}
+    notes: "Shape: credit line drawn and repaid daily via app; underwriting on tax and payment data."
+  - id: cn-modelled-invoice-scf
+    provider: "Modelled supply-chain platform (China)"
+    name: "Invoice-based supply-chain finance (modelled)"
+    kind: invoice_discounting
+    rate_type: discount
+    nominal_rate_pa: 6.5            # assumption
+    min_amount: 50000
+    max_amount: 5000000
+    min_tenor_days: 30
+    max_tenor_days: 180
+    collateral_required: false
+    is_modelled: true
+    rules:
+      - {id: cn-core-buyer, metric: invoice_confirmed_by_buyer, op: exists, description_key: rule.buyer_confirmed_invoice}
+    notes: "Shape: core buyer confirms the receivable on a platform; financier discounts it."
+  - id: cn-modelled-inclusive-relending
+    provider: "Modelled bank under inclusive re-lending (China)"
+    name: "Inclusive small-business loan (modelled)"
+    kind: working_capital
+    rate_type: reducing_balance
+    nominal_rate_pa: 4.0            # assumption
+    min_amount: 100000
+    max_amount: 10000000
+    min_tenor_days: 90
+    max_tenor_days: 1095
+    collateral_required: false
+    is_modelled: true
+    rules:
+      - {id: cn-age-wc, metric: business_age_months, op: ">=", threshold: 12, description_key: rule.business_age}
+      - {id: cn-licence, metric: trade_licence, op: exists, description_key: rule.trade_licence}
+    notes: "Shape: central-bank re-lending lowers the bank's funding cost for small-business loans."
