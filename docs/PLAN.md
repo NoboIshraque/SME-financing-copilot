@@ -66,7 +66,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | WP-05 | Receivables & collections: aging, risk, limits, ladder, disputes (Q2) | A1 | 2 | 60 |
 | WP-06 | Financing: catalogue, effective APR, eligibility, ranking, lender check (P1, N20, P14) | Orchestrator | 2 | 90 |
 | WP-07 | Analysis: P&L, ratios, variance, scenarios, stability score (N1, N12, N16) | A1 | 2 | 90 |
-| WP-08 | in progress (5/8) | wp-08-mesh | 83 | engine, consent, attestations, anchor done; API waits for WP-01/11 |
+| WP-08 | Liquidity mesh: netting, consent, attestations, Sepolia anchor (N14, Q4) | Orchestrator | 2 | 70 |
 | WP-09 | Market watch, vendor ranking, negotiation (N3, N19) | Worker C* | 2 | 50 |
 | WP-10 | LLM gateway + agents: orchestrator, checker, critic, agreement, abstention (N7–N11, N17, P13) | B2 | 2 | 90 |
 | WP-11 | Security: auth, roles, tiers, approvals, audit chain, injection guard (P2, P5) | B2 | 1–2 | 110 |
