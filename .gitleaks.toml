@@ -1,0 +1,11 @@
+# Gitleaks config: default rules, plus allow-listing synthetic data and example files.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Synthetic data and examples contain no real secrets"
+paths = [
+  '''data/synthetic/universe/.*''',
+  '''backend/\.env\.example''',
+  '''docs/api/contracts\.json''',
+]

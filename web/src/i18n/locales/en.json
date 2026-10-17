@@ -1,0 +1,33 @@
+{
+  "app": {
+    "name": "Hishab",
+    "tagline": "Your shop's finance copilot"
+  },
+  "banner": {
+    "synthetic": "Demo data: everything shown is synthetic, not a real business."
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "bn": "বাংলা",
+    "zh": "中文"
+  },
+  "nav": {
+    "today": "Today",
+    "cash": "Cash",
+    "receivables": "Receivables",
+    "financing": "Financing",
+    "analysis": "Analysis",
+    "mesh": "Mesh",
+    "market": "Market",
+    "messages": "Messages",
+    "reports": "Reports",
+    "trust": "Trust & audit",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading…",
+    "comingSoon": "This screen is being built.",
+    "error": "Something went wrong. Please try again."
+  }
+}

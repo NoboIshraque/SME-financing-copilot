@@ -1,0 +1,257 @@
+id,occurred_at,channel,direction,amount,category,counterparty,phone,reference,data_mode
+sme_garment-T000001,2025-04-01T17:07:35,bank,outflow,289060.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00013,synthetic
+sme_garment-T000002,2025-04-03T14:33:44,bank,outflow,289060.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00014,synthetic
+sme_garment-T000003,2025-04-05T13:22:28,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202504,synthetic
+sme_garment-T000004,2025-04-10T11:47:37,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202504,synthetic
+sme_garment-T000005,2025-04-10T15:02:15,bank,outflow,835218.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00015,synthetic
+sme_garment-T000006,2025-04-13T19:35:55,bank,inflow,671236.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00012,synthetic
+sme_garment-T000007,2025-04-15T16:20:34,bank,outflow,59806.00,transfer,Own bkash account,,TOPUP-BKASH-250415-729,synthetic
+sme_garment-T000008,2025-04-15T16:20:34,bkash,inflow,59806.00,transfer,Own bank account,,TOPUP-BKASH-250415-729,synthetic
+sme_garment-T000009,2025-04-15T16:25:34,bkash,outflow,59806.00,utility,DESCO / Titas utilities,,UTIL-202504,synthetic
+sme_garment-T000010,2025-04-15T18:52:36,bank,inflow,613475.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00013,synthetic
+sme_garment-T000011,2025-04-17T12:42:07,bank,outflow,322991.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00016,synthetic
+sme_garment-T000012,2025-04-17T14:42:26,bank,outflow,322991.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00017,synthetic
+sme_garment-T000013,2025-04-20T14:50:37,bank,inflow,551260.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00014,synthetic
+sme_garment-T000014,2025-04-24T13:35:29,bank,inflow,479873.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00015,synthetic
+sme_garment-T000015,2025-04-29T17:33:48,bank,outflow,128586.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00018,synthetic
+sme_garment-T000016,2025-04-30T20:49:03,bank,outflow,620000.00,salary,Staff payroll,,SAL-202504,synthetic
+sme_garment-T000017,2025-05-01T16:27:58,bank,inflow,797509.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00016,synthetic
+sme_garment-T000018,2025-05-05T10:58:53,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202505,synthetic
+sme_garment-T000019,2025-05-06T17:47:26,bank,outflow,173561.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00019,synthetic
+sme_garment-T000020,2025-05-10T09:41:06,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202505,synthetic
+sme_garment-T000021,2025-05-13T16:45:42,bank,outflow,540151.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00020,synthetic
+sme_garment-T000022,2025-05-13T21:45:53,bank,inflow,714366.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00017,synthetic
+sme_garment-T000023,2025-05-15T11:27:08,bank,outflow,58175.00,transfer,Own bkash account,,TOPUP-BKASH-250515-392,synthetic
+sme_garment-T000024,2025-05-15T11:27:08,bkash,inflow,58175.00,transfer,Own bank account,,TOPUP-BKASH-250515-392,synthetic
+sme_garment-T000025,2025-05-15T11:32:08,bkash,outflow,58175.00,utility,DESCO / Titas utilities,,UTIL-202505,synthetic
+sme_garment-T000026,2025-05-20T20:07:41,bank,inflow,964229.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00018,synthetic
+sme_garment-T000027,2025-05-23T19:12:40,bank,inflow,917317.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00019,synthetic
+sme_garment-T000028,2025-05-27T17:08:35,bank,inflow,738776.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00020,synthetic
+sme_garment-T000029,2025-05-27T17:40:47,bank,outflow,160339.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00021,synthetic
+sme_garment-T000030,2025-05-31T15:01:14,bank,outflow,620000.00,salary,Staff payroll,,BONUS-EID_UL_ADHA-2025,synthetic
+sme_garment-T000031,2025-05-31T18:13:48,bank,outflow,620000.00,salary,Staff payroll,,SAL-202505,synthetic
+sme_garment-T000032,2025-06-05T13:16:13,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202506,synthetic
+sme_garment-T000033,2025-06-10T10:10:33,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202506,synthetic
+sme_garment-T000034,2025-06-11T16:45:16,bank,outflow,263865.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00022,synthetic
+sme_garment-T000035,2025-06-13T12:11:32,bank,outflow,263865.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00023,synthetic
+sme_garment-T000036,2025-06-15T15:43:28,bank,outflow,48204.00,transfer,Own bkash account,,TOPUP-BKASH-250615-303,synthetic
+sme_garment-T000037,2025-06-15T15:43:28,bkash,inflow,48204.00,transfer,Own bank account,,TOPUP-BKASH-250615-303,synthetic
+sme_garment-T000038,2025-06-15T15:48:28,bkash,outflow,48204.00,utility,DESCO / Titas utilities,,UTIL-202506,synthetic
+sme_garment-T000039,2025-06-16T12:07:08,bank,inflow,356308.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00021,synthetic
+sme_garment-T000040,2025-06-20T19:57:18,bank,inflow,403217.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00022,synthetic
+sme_garment-T000041,2025-06-26T17:48:28,bank,outflow,118583.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00024,synthetic
+sme_garment-T000042,2025-06-27T12:12:10,bank,outflow,118583.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00025,synthetic
+sme_garment-T000043,2025-06-30T17:36:09,bank,outflow,620000.00,salary,Staff payroll,,SAL-202506,synthetic
+sme_garment-T000044,2025-07-01T11:48:48,bank,inflow,769517.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00023,synthetic
+sme_garment-T000045,2025-07-05T12:05:58,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202507,synthetic
+sme_garment-T000046,2025-07-10T09:19:14,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202507,synthetic
+sme_garment-T000047,2025-07-14T13:04:17,bank,inflow,527034.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00024,synthetic
+sme_garment-T000048,2025-07-15T15:16:56,bank,outflow,66585.00,transfer,Own bkash account,,TOPUP-BKASH-250715-577,synthetic
+sme_garment-T000049,2025-07-15T15:16:56,bkash,inflow,66585.00,transfer,Own bank account,,TOPUP-BKASH-250715-577,synthetic
+sme_garment-T000050,2025-07-15T15:21:56,bkash,outflow,66585.00,utility,DESCO / Titas utilities,,UTIL-202507,synthetic
+sme_garment-T000051,2025-07-23T11:37:32,bank,outflow,188960.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00026,synthetic
+sme_garment-T000052,2025-07-31T17:02:00,bank,outflow,620000.00,salary,Staff payroll,,SAL-202507,synthetic
+sme_garment-T000053,2025-08-05T11:49:40,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202508,synthetic
+sme_garment-T000054,2025-08-07T11:22:21,bank,inflow,419911.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00025,synthetic
+sme_garment-T000055,2025-08-10T09:31:15,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202508,synthetic
+sme_garment-T000056,2025-08-12T13:37:29,bank,outflow,289521.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00027,synthetic
+sme_garment-T000057,2025-08-15T16:30:33,bank,outflow,62233.00,transfer,Own bkash account,,TOPUP-BKASH-250815-339,synthetic
+sme_garment-T000058,2025-08-15T16:30:33,bkash,inflow,62233.00,transfer,Own bank account,,TOPUP-BKASH-250815-339,synthetic
+sme_garment-T000059,2025-08-15T16:35:33,bkash,outflow,62233.00,utility,DESCO / Titas utilities,,UTIL-202508,synthetic
+sme_garment-T000060,2025-08-19T11:15:04,bank,outflow,144417.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00028,synthetic
+sme_garment-T000061,2025-08-30T12:05:51,bank,inflow,320926.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00027,synthetic
+sme_garment-T000062,2025-08-31T20:13:25,bank,outflow,620000.00,salary,Staff payroll,,SAL-202508,synthetic
+sme_garment-T000063,2025-09-02T14:07:24,bank,inflow,643381.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00026,synthetic
+sme_garment-T000064,2025-09-05T11:33:21,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202509,synthetic
+sme_garment-T000065,2025-09-10T11:04:36,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202509,synthetic
+sme_garment-T000066,2025-09-15T12:14:35,bank,outflow,65205.00,transfer,Own bkash account,,TOPUP-BKASH-250915-451,synthetic
+sme_garment-T000067,2025-09-15T12:14:35,bkash,inflow,65205.00,transfer,Own bank account,,TOPUP-BKASH-250915-451,synthetic
+sme_garment-T000068,2025-09-15T12:19:35,bkash,outflow,65205.00,utility,DESCO / Titas utilities,,UTIL-202509,synthetic
+sme_garment-T000069,2025-09-16T15:30:05,bank,outflow,265763.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00029,synthetic
+sme_garment-T000070,2025-09-18T10:01:14,bank,outflow,265763.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00030,synthetic
+sme_garment-T000071,2025-09-23T10:39:30,bank,outflow,541128.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00031,synthetic
+sme_garment-T000072,2025-09-30T10:09:51,bank,outflow,116851.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00033,synthetic
+sme_garment-T000073,2025-09-30T20:11:59,bank,outflow,620000.00,salary,Staff payroll,,SAL-202509,synthetic
+sme_garment-T000074,2025-09-30T21:28:01,bank,inflow,811317.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00028,synthetic
+sme_garment-T000075,2025-10-01T11:16:40,bank,outflow,116851.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00032,synthetic
+sme_garment-T000076,2025-10-01T15:27:34,bank,inflow,369853.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00029,synthetic
+sme_garment-T000077,2025-10-05T10:49:53,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202510,synthetic
+sme_garment-T000078,2025-10-06T11:12:32,bank,inflow,401055.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00031,synthetic
+sme_garment-T000079,2025-10-07T10:12:55,bank,outflow,270515.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00034,synthetic
+sme_garment-T000080,2025-10-09T17:11:07,bank,inflow,801451.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00030,synthetic
+sme_garment-T000081,2025-10-10T10:42:02,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202510,synthetic
+sme_garment-T000082,2025-10-13T10:21:46,bank,inflow,519337.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00032,synthetic
+sme_garment-T000083,2025-10-15T13:45:24,bank,outflow,61845.00,transfer,Own bkash account,,TOPUP-BKASH-251015-815,synthetic
+sme_garment-T000084,2025-10-15T13:45:24,bkash,inflow,61845.00,transfer,Own bank account,,TOPUP-BKASH-251015-815,synthetic
+sme_garment-T000085,2025-10-15T13:50:24,bkash,outflow,61845.00,utility,DESCO / Titas utilities,,UTIL-202510,synthetic
+sme_garment-T000086,2025-10-21T12:22:21,bank,outflow,525440.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00035,synthetic
+sme_garment-T000087,2025-10-23T14:43:10,bank,outflow,525440.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00036,synthetic
+sme_garment-T000088,2025-10-23T21:57:07,bank,inflow,601145.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00033,synthetic
+sme_garment-T000089,2025-10-30T17:08:17,bank,outflow,365074.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00037,synthetic
+sme_garment-T000090,2025-10-31T18:37:26,bank,inflow,692866.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00035,synthetic
+sme_garment-T000091,2025-10-31T19:06:55,bank,outflow,620000.00,salary,Staff payroll,,SAL-202510,synthetic
+sme_garment-T000092,2025-11-02T20:11:27,bank,inflow,448440.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00034,synthetic
+sme_garment-T000093,2025-11-04T13:18:52,bank,outflow,318332.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00038,synthetic
+sme_garment-T000094,2025-11-05T10:40:28,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202511,synthetic
+sme_garment-T000095,2025-11-06T19:54:37,bank,inflow,718646.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00036,synthetic
+sme_garment-T000096,2025-11-08T12:41:15,bank,inflow,475335.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00037,synthetic
+sme_garment-T000097,2025-11-10T11:40:59,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202511,synthetic
+sme_garment-T000098,2025-11-11T17:04:19,bank,inflow,811276.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00038,synthetic
+sme_garment-T000099,2025-11-15T14:24:32,bank,outflow,58926.00,transfer,Own bkash account,,TOPUP-BKASH-251115-599,synthetic
+sme_garment-T000100,2025-11-15T14:24:32,bkash,inflow,58926.00,transfer,Own bank account,,TOPUP-BKASH-251115-599,synthetic
+sme_garment-T000101,2025-11-15T14:29:32,bkash,outflow,58926.00,utility,DESCO / Titas utilities,,UTIL-202511,synthetic
+sme_garment-T000102,2025-11-20T12:44:11,bank,outflow,215098.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00039,synthetic
+sme_garment-T000103,2025-11-20T13:02:34,bank,outflow,215098.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00040,synthetic
+sme_garment-T000104,2025-11-22T18:05:54,bank,inflow,707405.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00039,synthetic
+sme_garment-T000105,2025-11-25T12:19:43,bank,outflow,165475.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00041,synthetic
+sme_garment-T000106,2025-11-27T15:56:08,bank,outflow,165475.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00042,synthetic
+sme_garment-T000107,2025-11-30T20:57:16,bank,outflow,620000.00,salary,Staff payroll,,SAL-202511,synthetic
+sme_garment-T000108,2025-12-02T15:12:30,bank,outflow,525203.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00043,synthetic
+sme_garment-T000109,2025-12-03T20:30:02,bank,inflow,372127.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00041,synthetic
+sme_garment-T000110,2025-12-04T21:26:50,bank,inflow,583864.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00040,synthetic
+sme_garment-T000111,2025-12-05T13:55:58,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202512,synthetic
+sme_garment-T000112,2025-12-10T09:32:21,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202512,synthetic
+sme_garment-T000113,2025-12-11T21:11:50,bank,inflow,735445.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00042,synthetic
+sme_garment-T000114,2025-12-12T15:12:49,bank,outflow,313759.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00044,synthetic
+sme_garment-T000115,2025-12-15T12:06:06,bank,inflow,432059.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00043,synthetic
+sme_garment-T000116,2025-12-15T16:02:12,bank,outflow,68464.00,transfer,Own bkash account,,TOPUP-BKASH-251215-019,synthetic
+sme_garment-T000117,2025-12-15T16:02:12,bkash,inflow,68464.00,transfer,Own bank account,,TOPUP-BKASH-251215-019,synthetic
+sme_garment-T000118,2025-12-15T16:07:12,bkash,outflow,68464.00,utility,DESCO / Titas utilities,,UTIL-202512,synthetic
+sme_garment-T000119,2025-12-19T11:31:26,bank,outflow,292957.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00045,synthetic
+sme_garment-T000120,2025-12-22T14:41:46,bank,inflow,735058.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00044,synthetic
+sme_garment-T000121,2025-12-23T10:45:16,bank,outflow,73030.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00046,synthetic
+sme_garment-T000122,2025-12-24T11:58:58,bank,outflow,73030.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00047,synthetic
+sme_garment-T000123,2025-12-27T13:52:23,bank,inflow,697242.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00045,synthetic
+sme_garment-T000124,2025-12-30T13:09:22,bank,outflow,152146.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00048,synthetic
+sme_garment-T000125,2025-12-31T19:42:10,bank,outflow,620000.00,salary,Staff payroll,,SAL-202512,synthetic
+sme_garment-T000126,2026-01-02T08:00:00,bank,outflow,318208.00,owner_draw,Owner (personal account),,DRAW-202601,synthetic
+sme_garment-T000127,2026-01-02T15:03:17,bank,outflow,152146.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00049,synthetic
+sme_garment-T000128,2026-01-05T11:49:10,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202601,synthetic
+sme_garment-T000129,2026-01-06T13:13:28,bank,outflow,117010.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00050,synthetic
+sme_garment-T000130,2026-01-06T14:42:43,bank,inflow,651015.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00046,synthetic
+sme_garment-T000131,2026-01-07T15:05:39,bank,outflow,117010.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00051,synthetic
+sme_garment-T000132,2026-01-10T09:53:56,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202601,synthetic
+sme_garment-T000133,2026-01-11T20:14:31,bank,inflow,324578.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00047,synthetic
+sme_garment-T000134,2026-01-13T15:21:18,bank,outflow,248565.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00052,synthetic
+sme_garment-T000135,2026-01-14T19:16:12,bank,inflow,676203.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00048,synthetic
+sme_garment-T000136,2026-01-15T14:47:10,bank,outflow,49987.00,transfer,Own bkash account,,TOPUP-BKASH-260115-931,synthetic
+sme_garment-T000137,2026-01-15T14:47:10,bkash,inflow,49987.00,transfer,Own bank account,,TOPUP-BKASH-260115-931,synthetic
+sme_garment-T000138,2026-01-15T14:52:10,bkash,outflow,49987.00,utility,DESCO / Titas utilities,,UTIL-202601,synthetic
+sme_garment-T000139,2026-01-17T17:27:50,bank,inflow,520046.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00049,synthetic
+sme_garment-T000140,2026-01-21T11:03:15,bank,outflow,170303.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00053,synthetic
+sme_garment-T000141,2026-01-21T14:11:38,bank,outflow,170303.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00054,synthetic
+sme_garment-T000142,2026-01-27T11:57:42,bank,outflow,778837.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00055,synthetic
+sme_garment-T000143,2026-01-31T17:15:04,bank,outflow,620000.00,salary,Staff payroll,,SAL-202601,synthetic
+sme_garment-T000144,2026-02-02T12:46:50,bank,inflow,552367.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00050,synthetic
+sme_garment-T000145,2026-02-03T10:31:30,bank,outflow,257320.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00056,synthetic
+sme_garment-T000146,2026-02-03T11:48:11,bank,inflow,291598.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00051,synthetic
+sme_garment-T000147,2026-02-05T10:08:31,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202602,synthetic
+sme_garment-T000148,2026-02-08T11:39:45,bank,inflow,465303.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00052,synthetic
+sme_garment-T000149,2026-02-08T12:08:54,bank,inflow,789189.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00053,synthetic
+sme_garment-T000150,2026-02-08T12:30:50,bank,inflow,649047.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00054,synthetic
+sme_garment-T000151,2026-02-10T10:06:02,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202602,synthetic
+sme_garment-T000152,2026-02-11T13:25:26,bank,inflow,292512.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00055,synthetic
+sme_garment-T000153,2026-02-15T10:30:14,bank,outflow,64486.00,transfer,Own bkash account,,TOPUP-BKASH-260215-238,synthetic
+sme_garment-T000154,2026-02-15T10:30:14,bkash,inflow,64486.00,transfer,Own bank account,,TOPUP-BKASH-260215-238,synthetic
+sme_garment-T000155,2026-02-15T10:35:14,bkash,outflow,64486.00,utility,DESCO / Titas utilities,,UTIL-202602,synthetic
+sme_garment-T000156,2026-02-17T16:57:51,bank,outflow,175177.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00057,synthetic
+sme_garment-T000157,2026-02-19T18:07:50,bank,inflow,571823.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00056,synthetic
+sme_garment-T000158,2026-02-24T16:46:42,bank,outflow,354689.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00058,synthetic
+sme_garment-T000159,2026-02-28T14:04:13,bank,inflow,389282.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00057,synthetic
+sme_garment-T000160,2026-02-28T20:39:43,bank,outflow,620000.00,salary,Staff payroll,,SAL-202602,synthetic
+sme_garment-T000161,2026-03-03T08:00:00,bank,outflow,1247561.00,owner_draw,Owner (personal account),,DRAW-202603,synthetic
+sme_garment-T000162,2026-03-03T12:26:21,bank,outflow,301553.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00059,synthetic
+sme_garment-T000163,2026-03-05T11:30:57,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202603,synthetic
+sme_garment-T000164,2026-03-09T21:13:09,bank,inflow,788198.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00058,synthetic
+sme_garment-T000165,2026-03-10T09:48:10,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202603,synthetic
+sme_garment-T000166,2026-03-10T17:09:04,bank,outflow,117184.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00061,synthetic
+sme_garment-T000167,2026-03-12T15:24:27,bank,outflow,117184.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00060,synthetic
+sme_garment-T000168,2026-03-14T17:09:35,bank,outflow,620000.00,salary,Staff payroll,,BONUS-EID_UL_FITR-2026,synthetic
+sme_garment-T000169,2026-03-15T15:18:37,bank,outflow,58529.00,transfer,Own bkash account,,TOPUP-BKASH-260315-435,synthetic
+sme_garment-T000170,2026-03-15T15:18:37,bkash,inflow,58529.00,transfer,Own bank account,,TOPUP-BKASH-260315-435,synthetic
+sme_garment-T000171,2026-03-15T15:23:37,bkash,outflow,58529.00,utility,DESCO / Titas utilities,,UTIL-202603,synthetic
+sme_garment-T000172,2026-03-17T11:35:44,bank,outflow,154107.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00063,synthetic
+sme_garment-T000173,2026-03-17T15:32:06,bank,outflow,154107.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00062,synthetic
+sme_garment-T000174,2026-03-19T16:07:36,bank,inflow,670117.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00059,synthetic
+sme_garment-T000175,2026-03-27T10:34:13,bank,inflow,520818.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00060,synthetic
+sme_garment-T000176,2026-03-31T19:40:23,bank,outflow,620000.00,salary,Staff payroll,,SAL-202603,synthetic
+sme_garment-T000177,2026-04-02T08:00:00,bank,outflow,277906.00,owner_draw,Owner (personal account),,DRAW-202604,synthetic
+sme_garment-T000178,2026-04-02T15:32:27,bank,inflow,684920.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00061,synthetic
+sme_garment-T000179,2026-04-05T11:20:49,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202604,synthetic
+sme_garment-T000180,2026-04-10T09:28:09,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202604,synthetic
+sme_garment-T000181,2026-04-15T16:31:32,bank,outflow,50129.00,transfer,Own bkash account,,TOPUP-BKASH-260415-553,synthetic
+sme_garment-T000182,2026-04-15T16:31:32,bkash,inflow,50129.00,transfer,Own bank account,,TOPUP-BKASH-260415-553,synthetic
+sme_garment-T000183,2026-04-15T16:36:32,bkash,outflow,50129.00,utility,DESCO / Titas utilities,,UTIL-202604,synthetic
+sme_garment-T000184,2026-04-23T13:40:50,bank,outflow,705817.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00064,synthetic
+sme_garment-T000185,2026-04-30T19:53:58,bank,outflow,620000.00,salary,Staff payroll,,SAL-202604,synthetic
+sme_garment-T000186,2026-05-05T10:46:44,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202605,synthetic
+sme_garment-T000187,2026-05-06T10:34:13,bank,inflow,678552.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00063,synthetic
+sme_garment-T000188,2026-05-07T10:39:44,bank,inflow,889930.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00062,synthetic
+sme_garment-T000189,2026-05-07T11:54:10,bank,outflow,646441.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00065,synthetic
+sme_garment-T000190,2026-05-10T10:49:48,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202605,synthetic
+sme_garment-T000191,2026-05-15T15:25:04,bank,outflow,61589.00,transfer,Own bkash account,,TOPUP-BKASH-260515-687,synthetic
+sme_garment-T000192,2026-05-15T15:25:04,bkash,inflow,61589.00,transfer,Own bank account,,TOPUP-BKASH-260515-687,synthetic
+sme_garment-T000193,2026-05-15T15:30:04,bkash,outflow,61589.00,utility,DESCO / Titas utilities,,UTIL-202605,synthetic
+sme_garment-T000194,2026-05-16T15:51:09,bank,inflow,430631.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00064,synthetic
+sme_garment-T000195,2026-05-20T18:07:36,bank,outflow,620000.00,salary,Staff payroll,,BONUS-EID_UL_ADHA-2026,synthetic
+sme_garment-T000196,2026-05-21T10:23:57,bank,inflow,1005905.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00065,synthetic
+sme_garment-T000197,2026-05-31T17:11:25,bank,outflow,620000.00,salary,Staff payroll,,SAL-202605,synthetic
+sme_garment-T000198,2026-06-05T08:00:00,bank,outflow,84739.00,owner_draw,Owner (personal account),,DRAW-202606,synthetic
+sme_garment-T000199,2026-06-05T13:04:18,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202606,synthetic
+sme_garment-T000200,2026-06-10T10:27:37,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202606,synthetic
+sme_garment-T000201,2026-06-15T15:26:15,bank,outflow,48401.00,transfer,Own bkash account,,TOPUP-BKASH-260615-785,synthetic
+sme_garment-T000202,2026-06-15T15:26:15,bkash,inflow,48401.00,transfer,Own bank account,,TOPUP-BKASH-260615-785,synthetic
+sme_garment-T000203,2026-06-15T15:31:15,bkash,outflow,48401.00,utility,DESCO / Titas utilities,,UTIL-202606,synthetic
+sme_garment-T000204,2026-06-16T15:06:54,bank,outflow,162579.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00066,synthetic
+sme_garment-T000205,2026-06-23T15:49:57,bank,outflow,307393.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00067,synthetic
+sme_garment-T000206,2026-06-30T20:17:14,bank,outflow,620000.00,salary,Staff payroll,,SAL-202606,synthetic
+sme_garment-T000207,2026-07-01T09:20:00,bank,inflow,282256.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00066,synthetic
+sme_garment-T000208,2026-07-01T13:45:34,bank,outflow,205499.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00068,synthetic
+sme_garment-T000209,2026-07-05T12:32:12,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202607,synthetic
+sme_garment-T000210,2026-07-09T16:10:41,bank,inflow,533668.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00067,synthetic
+sme_garment-T000211,2026-07-10T11:48:25,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202607,synthetic
+sme_garment-T000212,2026-07-14T17:56:04,bank,outflow,75804.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00069,synthetic
+sme_garment-T000213,2026-07-15T16:49:39,bank,outflow,64597.00,transfer,Own bkash account,,TOPUP-BKASH-260715-086,synthetic
+sme_garment-T000214,2026-07-15T16:49:39,bkash,inflow,64597.00,transfer,Own bank account,,TOPUP-BKASH-260715-086,synthetic
+sme_garment-T000215,2026-07-15T16:54:39,bkash,outflow,64597.00,utility,DESCO / Titas utilities,,UTIL-202607,synthetic
+sme_garment-T000216,2026-07-17T11:29:53,bank,outflow,75804.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00070,synthetic
+sme_garment-T000217,2026-07-17T15:27:57,bank,inflow,685123.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00068,synthetic
+sme_garment-T000218,2026-07-21T10:33:38,bank,outflow,148058.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00072,synthetic
+sme_garment-T000219,2026-07-21T11:01:26,bank,outflow,148058.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00071,synthetic
+sme_garment-T000220,2026-07-28T11:01:55,bank,outflow,368898.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00073,synthetic
+sme_garment-T000221,2026-07-29T14:47:09,bank,inflow,336905.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00069,synthetic
+sme_garment-T000222,2026-07-31T20:17:52,bank,outflow,620000.00,salary,Staff payroll,,SAL-202607,synthetic
+sme_garment-T000223,2026-08-04T15:18:03,bank,outflow,83282.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00074,synthetic
+sme_garment-T000224,2026-08-05T11:04:07,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202608,synthetic
+sme_garment-T000225,2026-08-06T12:30:46,bank,outflow,83282.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00075,synthetic
+sme_garment-T000226,2026-08-09T21:23:18,bank,inflow,348312.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00070,synthetic
+sme_garment-T000227,2026-08-10T09:44:51,bank,inflow,309722.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00071,synthetic
+sme_garment-T000228,2026-08-10T11:04:40,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202608,synthetic
+sme_garment-T000229,2026-08-10T15:25:11,bank,inflow,819773.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00072,synthetic
+sme_garment-T000230,2026-08-11T12:06:13,bank,outflow,359277.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00076,synthetic
+sme_garment-T000231,2026-08-15T12:13:06,bank,outflow,58655.00,transfer,Own bkash account,,TOPUP-BKASH-260815-064,synthetic
+sme_garment-T000232,2026-08-15T12:13:06,bkash,inflow,58655.00,transfer,Own bank account,,TOPUP-BKASH-260815-064,synthetic
+sme_garment-T000233,2026-08-15T12:18:06,bkash,outflow,58655.00,utility,DESCO / Titas utilities,,UTIL-202608,synthetic
+sme_garment-T000234,2026-08-17T15:01:09,bank,inflow,370140.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00073,synthetic
+sme_garment-T000235,2026-08-20T15:46:45,bank,outflow,370346.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00077,synthetic
+sme_garment-T000236,2026-08-23T09:40:39,bank,inflow,467533.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00074,synthetic
+sme_garment-T000237,2026-08-26T17:56:48,bank,inflow,330861.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00075,synthetic
+sme_garment-T000238,2026-08-30T14:31:01,bank,inflow,499848.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00076,synthetic
+sme_garment-T000239,2026-08-31T18:02:03,bank,outflow,620000.00,salary,Staff payroll,,SAL-202608,synthetic
+sme_garment-T000240,2026-09-01T08:00:00,bank,outflow,3421.00,owner_draw,Owner (personal account),,DRAW-202609,synthetic
+sme_garment-T000241,2026-09-01T11:04:24,bank,outflow,125361.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00079,synthetic
+sme_garment-T000242,2026-09-04T11:10:28,bank,outflow,125361.00,supplier_payment,Al-Amin Store,01865394537,GAR-BILL-00078,synthetic
+sme_garment-T000243,2026-09-04T15:29:29,bank,inflow,323142.00,collection,Exporter 1 Ltd,01886126360,GAR-INV-00077,synthetic
+sme_garment-T000244,2026-09-05T10:40:41,bank,outflow,120000.00,rent,Mizan Molla,01488108293,RENT-202609,synthetic
+sme_garment-T000245,2026-09-10T10:38:55,bank,outflow,85000.00,loan_repayment,Sonali Commerce Bank PLC (synthetic),,EMI-202609,synthetic
+sme_garment-T000246,2026-09-10T17:17:01,bank,outflow,443838.00,supplier_payment,Bismillah Bhandar,01600521771,GAR-BILL-00080,synthetic
+sme_garment-T000247,2026-09-15T11:31:55,bank,inflow,557162.00,collection,Exporter 2 Ltd,01982775371,GAR-INV-00078,synthetic
+sme_garment-T000248,2026-09-15T12:48:23,bank,outflow,67224.00,transfer,Own bkash account,,TOPUP-BKASH-260915-505,synthetic
+sme_garment-T000249,2026-09-15T12:48:23,bkash,inflow,67224.00,transfer,Own bank account,,TOPUP-BKASH-260915-505,synthetic
+sme_garment-T000250,2026-09-15T12:53:23,bkash,outflow,67224.00,utility,DESCO / Titas utilities,,UTIL-202609,synthetic
+sme_garment-T000251,2026-09-18T17:59:58,bank,outflow,194027.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00081,synthetic
+sme_garment-T000252,2026-09-21T21:52:22,bank,inflow,514003.00,collection,Exporter 3 Ltd,01331355710,GAR-INV-00079,synthetic
+sme_garment-T000253,2026-09-22T12:16:20,bank,inflow,472304.00,collection,Exporter 4 Ltd,01418742962,GAR-INV-00080,synthetic
+sme_garment-T000254,2026-09-22T17:22:09,bank,outflow,221771.00,supplier_payment,Shapla Agency,01398187877,GAR-BILL-00083,synthetic
+sme_garment-T000255,2026-09-24T10:22:14,bank,outflow,221771.00,supplier_payment,Mayer Doa Store,01377872977,GAR-BILL-00082,synthetic
+sme_garment-T000256,2026-09-30T20:46:27,bank,outflow,620000.00,salary,Staff payroll,,SAL-202609,synthetic

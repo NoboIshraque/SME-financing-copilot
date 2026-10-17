@@ -1,0 +1,5 @@
+kind,counterparty,amount,frequency,day_of_period,start_date,data_mode
+rent,Delwar Sarkar,60000.00,monthly,5,2025-04-01,synthetic
+salary,Staff payroll,95000.00,monthly,31,2025-04-01,synthetic
+utility,DESCO / Titas utilities,10000.00,monthly,15,2025-04-01,synthetic
+emi,Sonali Commerce Bank PLC (synthetic),42000.00,monthly,10,2025-04-01,synthetic

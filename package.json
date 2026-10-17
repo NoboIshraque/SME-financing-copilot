@@ -1,0 +1,29 @@
+{
+  "name": "hishab",
+  "private": true,
+  "description": "Hishab - SME Finance Copilot (FinTechathon 2026, Topic E). Task runner: works in PowerShell, CMD and Git Bash.",
+  "scripts": {
+    "setup": "npm install && npm run setup:backend && npm run setup:web",
+    "setup:backend": "uv --directory backend sync",
+    "setup:web": "npm --prefix web install",
+    "test": "npm run test:backend && npm run test:web",
+    "test:backend": "uv --directory backend run pytest -q",
+    "test:web": "npm --prefix web test -- --run",
+    "e2e": "npm --prefix web run e2e",
+    "lint": "npm run lint:backend && npm run lint:web",
+    "lint:backend": "uv --directory backend run ruff check . ../data/synthetic",
+    "lint:web": "npm --prefix web run lint",
+    "format:backend": "uv --directory backend run ruff check --fix . ../data/synthetic",
+    "dev": "concurrently -k -n api,web -c cyan,magenta \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "uv --directory backend run uvicorn --factory app.main:create_app --reload --port 8000",
+    "dev:web": "npm --prefix web run dev",
+    "build:web": "npm --prefix web run build",
+    "contracts": "uv --directory backend run python -m app.contracts.export && npm --prefix web run gen:contracts",
+    "synthetic": "uv --directory backend run python ../data/synthetic/generate.py",
+    "eval": "uv --directory backend run python -m eval.run",
+    "evidence": "uv --directory backend run python -m eval.evidence"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5"
+  }
+}

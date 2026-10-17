@@ -1,0 +1,783 @@
+date,party,category,type,amount,channel,ref,data_mode
+2025-04-02,Mayer Doa Bhandar,collection,in,35944.00,cash,FAB-INV-00187,synthetic
+2025-04-02,Own bank account,transfer,out,35944.00,cash,SWEEP-CASH-250402,synthetic
+2025-04-04,Shapla House,collection,in,16186.00,cash,FAB-INV-00147,synthetic
+2025-04-04,Rupali Corporation,collection,in,29202.00,cash,FAB-INV-00197,synthetic
+2025-04-04,Own bank account,transfer,out,45388.00,cash,SWEEP-CASH-250404,synthetic
+2025-04-08,Sonali Traders,collection,in,6707.00,cash,FAB-INV-00196,synthetic
+2025-04-08,Walk-in customer,sales,in,7216.00,cash,SALE-250408,synthetic
+2025-04-09,Madina Traders,collection,in,29018.00,cash,FAB-INV-00204,synthetic
+2025-04-09,Own bank account,transfer,out,42941.00,cash,SWEEP-CASH-250409,synthetic
+2025-04-10,Walk-in customer,sales,in,37990.00,cash,SALE-250410,synthetic
+2025-04-10,Own bank account,transfer,out,37990.00,cash,SWEEP-CASH-250410,synthetic
+2025-04-11,Walk-in customer,sales,in,28310.00,cash,SALE-250411,synthetic
+2025-04-11,Own bank account,transfer,out,28310.00,cash,SWEEP-CASH-250411,synthetic
+2025-04-12,Mayer Doa Bhandar,collection,in,47270.00,cash,FAB-INV-00180,synthetic
+2025-04-12,Madina Bhandar,collection,in,22467.00,cash,FAB-INV-00194,synthetic
+2025-04-12,Own bank account,transfer,out,69737.00,cash,SWEEP-CASH-250412,synthetic
+2025-04-15,Shapla House,collection,in,19017.00,cash,FAB-INV-00172,synthetic
+2025-04-15,Walk-in customer,sales,in,17539.00,cash,SALE-250415,synthetic
+2025-04-15,Own bank account,transfer,out,36556.00,cash,SWEEP-CASH-250415,synthetic
+2025-04-17,Bismillah Agency,collection,in,29292.00,cash,FAB-INV-00154,synthetic
+2025-04-17,Shapla Store,collection,in,16231.00,cash,FAB-INV-00222,synthetic
+2025-04-17,Walk-in customer,sales,in,23613.00,cash,SALE-250417,synthetic
+2025-04-17,Own bank account,transfer,out,69136.00,cash,SWEEP-CASH-250417,synthetic
+2025-04-19,Madina Traders,collection,in,34836.00,cash,FAB-INV-00228,synthetic
+2025-04-19,Madina Bhandar,collection,in,36293.00,cash,FAB-INV-00229,synthetic
+2025-04-19,Walk-in customer,sales,in,62512.00,cash,SALE-250419,synthetic
+2025-04-19,Own bank account,transfer,out,133641.00,cash,SWEEP-CASH-250419,synthetic
+2025-04-20,Rupali Corporation,collection,in,17944.00,cash,FAB-INV-00250,synthetic
+2025-04-21,Madina Bhandar,collection,in,22143.00,cash,FAB-INV-00217,synthetic
+2025-04-21,Own bank account,transfer,out,40087.00,cash,SWEEP-CASH-250421,synthetic
+2025-04-22,Sonali Traders,collection,in,18757.00,cash,FAB-INV-00249,synthetic
+2025-04-22,Walk-in customer,sales,in,38149.00,cash,SALE-250422,synthetic
+2025-04-22,Own bank account,transfer,out,56906.00,cash,SWEEP-CASH-250422,synthetic
+2025-04-23,Walk-in customer,sales,in,32473.00,cash,SALE-250423,synthetic
+2025-04-23,Own bank account,transfer,out,32473.00,cash,SWEEP-CASH-250423,synthetic
+2025-04-24,Shapla Corporation,collection,in,24509.00,cash,FAB-INV-00237,synthetic
+2025-04-24,Bhai Bhai Bhandar,collection,in,31345.00,cash,FAB-INV-00253,synthetic
+2025-04-24,Madina Bhandar,collection,in,11409.00,cash,FAB-INV-00257,synthetic
+2025-04-24,Walk-in customer,sales,in,34525.00,cash,SALE-250424,synthetic
+2025-04-24,Own bank account,transfer,out,101788.00,cash,SWEEP-CASH-250424,synthetic
+2025-04-25,New House,collection,in,18951.00,cash,FAB-INV-00216,synthetic
+2025-04-25,Madina Traders,collection,in,31387.00,cash,FAB-INV-00260,synthetic
+2025-04-25,Own bank account,transfer,out,50338.00,cash,SWEEP-CASH-250425,synthetic
+2025-04-26,Mayer Doa Bhandar,collection,in,38720.00,cash,FAB-INV-00242,synthetic
+2025-04-26,Own bank account,transfer,out,38720.00,cash,SWEEP-CASH-250426,synthetic
+2025-04-27,Rupali Corporation,collection,in,7430.00,cash,FAB-INV-00251,synthetic
+2025-04-28,Walk-in customer,sales,in,36203.00,cash,SALE-250428,synthetic
+2025-04-28,Own bank account,transfer,out,43633.00,cash,SWEEP-CASH-250428,synthetic
+2025-04-29,New House,collection,in,15684.00,cash,FAB-INV-00235,synthetic
+2025-05-01,Bhai Bhai Enterprise,collection,in,22186.00,cash,FAB-INV-00246,synthetic
+2025-05-01,Own bank account,transfer,out,37870.00,cash,SWEEP-CASH-250501,synthetic
+2025-05-02,Walk-in customer,sales,in,20078.00,cash,SALE-250502,synthetic
+2025-05-02,Own bank account,transfer,out,20078.00,cash,SWEEP-CASH-250502,synthetic
+2025-05-03,Walk-in customer,sales,in,33605.00,cash,SALE-250503,synthetic
+2025-05-03,Own bank account,transfer,out,33605.00,cash,SWEEP-CASH-250503,synthetic
+2025-05-04,Walk-in customer,sales,in,33767.00,cash,SALE-250504,synthetic
+2025-05-04,Own bank account,transfer,out,33767.00,cash,SWEEP-CASH-250504,synthetic
+2025-05-06,New House,collection,in,27441.00,cash,FAB-INV-00265,synthetic
+2025-05-06,Mayer Doa Corporation,collection,in,16200.00,cash,FAB-INV-00270,synthetic
+2025-05-06,Walk-in customer,sales,in,11856.00,cash,SALE-250506,synthetic
+2025-05-06,Own bank account,transfer,out,55497.00,cash,SWEEP-CASH-250506,synthetic
+2025-05-07,Walk-in customer,sales,in,20917.00,cash,SALE-250507,synthetic
+2025-05-07,Own bank account,transfer,out,20917.00,cash,SWEEP-CASH-250507,synthetic
+2025-05-08,Sonali Traders,collection,in,10122.00,cash,FAB-INV-00275,synthetic
+2025-05-08,Madina Traders,collection,in,53926.00,cash,FAB-INV-00290,synthetic
+2025-05-08,Own bank account,transfer,out,64048.00,cash,SWEEP-CASH-250508,synthetic
+2025-05-10,Mayer Doa Corporation,collection,in,37887.00,cash,FAB-INV-00271,synthetic
+2025-05-10,New Corporation,collection,in,23775.00,cash,FAB-INV-00273,synthetic
+2025-05-10,Own bank account,transfer,out,61662.00,cash,SWEEP-CASH-250510,synthetic
+2025-05-12,Walk-in customer,sales,in,20316.00,cash,SALE-250512,synthetic
+2025-05-12,Own bank account,transfer,out,20316.00,cash,SWEEP-CASH-250512,synthetic
+2025-05-13,Bhai Bhai Bhandar,collection,in,39267.00,cash,FAB-INV-00292,synthetic
+2025-05-13,Own bank account,transfer,out,39267.00,cash,SWEEP-CASH-250513,synthetic
+2025-05-14,Bhai Bhai Enterprise,collection,in,50752.00,cash,FAB-INV-00223,synthetic
+2025-05-14,Own bank account,transfer,out,50752.00,cash,SWEEP-CASH-250514,synthetic
+2025-05-15,Shapla House,collection,in,32599.00,cash,FAB-INV-00259,synthetic
+2025-05-15,Walk-in customer,sales,in,36191.00,cash,SALE-250515,synthetic
+2025-05-15,Walk-in customer,sales,in,48951.00,cash,SALE-250515,synthetic
+2025-05-15,Own bank account,transfer,out,117741.00,cash,SWEEP-CASH-250515,synthetic
+2025-05-16,Mayer Doa Traders,collection,in,24039.00,cash,FAB-INV-00278,synthetic
+2025-05-16,Own bank account,transfer,out,24039.00,cash,SWEEP-CASH-250516,synthetic
+2025-05-17,Shapla Enterprise,collection,in,18759.00,cash,FAB-INV-00299,synthetic
+2025-05-20,Walk-in customer,sales,in,28952.00,cash,SALE-250520,synthetic
+2025-05-20,Own bank account,transfer,out,47711.00,cash,SWEEP-CASH-250520,synthetic
+2025-05-22,Mayer Doa Traders,collection,in,34302.00,cash,FAB-INV-00291,synthetic
+2025-05-22,Own bank account,transfer,out,34302.00,cash,SWEEP-CASH-250522,synthetic
+2025-05-24,Walk-in customer,sales,in,29539.00,cash,SALE-250524,synthetic
+2025-05-24,Own bank account,transfer,out,29539.00,cash,SWEEP-CASH-250524,synthetic
+2025-05-26,Janata Bhandar,collection,in,11024.00,cash,FAB-INV-00294,synthetic
+2025-05-26,Walk-in customer,sales,in,26668.00,cash,SALE-250526,synthetic
+2025-05-26,Own bank account,transfer,out,37692.00,cash,SWEEP-CASH-250526,synthetic
+2025-05-27,Mayer Doa Corporation,collection,in,12408.00,cash,FAB-INV-00307,synthetic
+2025-05-27,Walk-in customer,sales,in,7302.00,cash,SALE-250527,synthetic
+2025-05-31,Walk-in customer,sales,in,11246.00,cash,SALE-250531,synthetic
+2025-05-31,Walk-in customer,sales,in,51774.00,cash,SALE-250531,synthetic
+2025-05-31,Own bank account,transfer,out,82730.00,cash,SWEEP-CASH-250531,synthetic
+2025-06-01,Walk-in customer,sales,in,17719.00,cash,SALE-250601,synthetic
+2025-06-02,Mayer Doa Bhandar,collection,in,27864.00,cash,FAB-INV-00309,synthetic
+2025-06-02,Walk-in customer,sales,in,33759.00,cash,SALE-250602,synthetic
+2025-06-02,Own bank account,transfer,out,79342.00,cash,SWEEP-CASH-250602,synthetic
+2025-06-04,Walk-in customer,sales,in,58422.00,cash,SALE-250604,synthetic
+2025-06-04,Own bank account,transfer,out,58422.00,cash,SWEEP-CASH-250604,synthetic
+2025-06-08,Shapla House,collection,in,14770.00,cash,FAB-INV-00297,synthetic
+2025-06-10,Walk-in customer,sales,in,24305.00,cash,SALE-250610,synthetic
+2025-06-10,Own bank account,transfer,out,39075.00,cash,SWEEP-CASH-250610,synthetic
+2025-06-12,Shapla Enterprise,collection,in,8296.00,cash,FAB-INV-00347,synthetic
+2025-06-14,Bhai Bhai Bhandar,collection,in,28227.00,cash,FAB-INV-00350,synthetic
+2025-06-14,Own bank account,transfer,out,36523.00,cash,SWEEP-CASH-250614,synthetic
+2025-06-15,Shapla Corporation,collection,in,38107.00,cash,FAB-INV-00336,synthetic
+2025-06-15,Own bank account,transfer,out,38107.00,cash,SWEEP-CASH-250615,synthetic
+2025-06-16,Shapla House,collection,in,25736.00,cash,FAB-INV-00324,synthetic
+2025-06-16,Own bank account,transfer,out,25736.00,cash,SWEEP-CASH-250616,synthetic
+2025-06-19,Walk-in customer,sales,in,29885.00,cash,SALE-250619,synthetic
+2025-06-19,Own bank account,transfer,out,29885.00,cash,SWEEP-CASH-250619,synthetic
+2025-06-21,Walk-in customer,sales,in,25334.00,cash,SALE-250621,synthetic
+2025-06-21,Own bank account,transfer,out,25334.00,cash,SWEEP-CASH-250621,synthetic
+2025-06-22,Janata Store,collection,in,42951.00,cash,FAB-INV-00361,synthetic
+2025-06-22,Walk-in customer,sales,in,39401.00,cash,SALE-250622,synthetic
+2025-06-22,Own bank account,transfer,out,82352.00,cash,SWEEP-CASH-250622,synthetic
+2025-06-25,Bismillah Agency,collection,in,27107.00,cash,FAB-INV-00325,synthetic
+2025-06-25,Own bank account,transfer,out,27107.00,cash,SWEEP-CASH-250625,synthetic
+2025-06-26,Bhai Bhai Enterprise,collection,in,42428.00,cash,FAB-INV-00335,synthetic
+2025-06-26,Own bank account,transfer,out,42428.00,cash,SWEEP-CASH-250626,synthetic
+2025-06-27,Walk-in customer,sales,in,22442.00,cash,SALE-250627,synthetic
+2025-06-27,Own bank account,transfer,out,22442.00,cash,SWEEP-CASH-250627,synthetic
+2025-06-28,Madina Bhandar,collection,in,36589.00,cash,FAB-INV-00363,synthetic
+2025-06-28,Rupali Corporation,collection,in,49378.00,cash,FAB-INV-00369,synthetic
+2025-06-28,Walk-in customer,sales,in,23411.00,cash,SALE-250628,synthetic
+2025-06-28,Own bank account,transfer,out,109378.00,cash,SWEEP-CASH-250628,synthetic
+2025-06-29,Sonali Traders,collection,in,31473.00,cash,FAB-INV-00373,synthetic
+2025-06-29,Own bank account,transfer,out,31473.00,cash,SWEEP-CASH-250629,synthetic
+2025-06-30,Walk-in customer,sales,in,32146.00,cash,SALE-250630,synthetic
+2025-06-30,Own bank account,transfer,out,32146.00,cash,SWEEP-CASH-250630,synthetic
+2025-07-01,Walk-in customer,sales,in,49321.00,cash,SALE-250701,synthetic
+2025-07-01,Own bank account,transfer,out,49321.00,cash,SWEEP-CASH-250701,synthetic
+2025-07-04,Shapla Store,collection,in,19101.00,cash,FAB-INV-00372,synthetic
+2025-07-04,Dhaka Store,collection,in,17884.00,cash,FAB-INV-00383,synthetic
+2025-07-04,Own bank account,transfer,out,36985.00,cash,SWEEP-CASH-250704,synthetic
+2025-07-06,Mayer Doa Corporation,collection,in,18691.00,cash,FAB-INV-00385,synthetic
+2025-07-06,Walk-in customer,sales,in,34728.00,cash,SALE-250706,synthetic
+2025-07-06,Own bank account,transfer,out,53419.00,cash,SWEEP-CASH-250706,synthetic
+2025-07-08,Walk-in customer,sales,in,29924.00,cash,SALE-250708,synthetic
+2025-07-08,Own bank account,transfer,out,29924.00,cash,SWEEP-CASH-250708,synthetic
+2025-07-09,Mayer Doa Bhandar,collection,in,12549.00,cash,FAB-INV-00377,synthetic
+2025-07-09,Shapla Corporation,collection,in,21446.00,cash,FAB-INV-00384,synthetic
+2025-07-09,Walk-in customer,sales,in,31087.00,cash,SALE-250709,synthetic
+2025-07-09,Own bank account,transfer,out,65082.00,cash,SWEEP-CASH-250709,synthetic
+2025-07-12,Shapla Enterprise,collection,in,16504.00,cash,FAB-INV-00399,synthetic
+2025-07-14,Mayer Doa Corporation,collection,in,19783.00,cash,FAB-INV-00390,synthetic
+2025-07-14,Walk-in customer,sales,in,11462.00,cash,SALE-250714,synthetic
+2025-07-14,Walk-in customer,sales,in,32826.00,cash,SALE-250714,synthetic
+2025-07-14,Own bank account,transfer,out,80575.00,cash,SWEEP-CASH-250714,synthetic
+2025-07-15,Mayer Doa Bhandar,collection,in,27061.00,cash,FAB-INV-00394,synthetic
+2025-07-15,Walk-in customer,sales,in,37095.00,cash,SALE-250715,synthetic
+2025-07-15,Own bank account,transfer,out,64156.00,cash,SWEEP-CASH-250715,synthetic
+2025-07-16,Sonali Agency,collection,in,35753.00,cash,FAB-INV-00396,synthetic
+2025-07-16,Own bank account,transfer,out,35753.00,cash,SWEEP-CASH-250716,synthetic
+2025-07-17,Bismillah Agency,collection,in,40507.00,cash,FAB-INV-00378,synthetic
+2025-07-17,Bhai Bhai Enterprise,collection,in,25994.00,cash,FAB-INV-00387,synthetic
+2025-07-17,Janata Store,collection,in,10041.00,cash,FAB-INV-00409,synthetic
+2025-07-17,Own bank account,transfer,out,76542.00,cash,SWEEP-CASH-250717,synthetic
+2025-07-20,Rupali Corporation,collection,in,38669.00,cash,FAB-INV-00417,synthetic
+2025-07-20,Own bank account,transfer,out,38669.00,cash,SWEEP-CASH-250720,synthetic
+2025-07-21,Walk-in customer,sales,in,34242.00,cash,SALE-250721,synthetic
+2025-07-21,Own bank account,transfer,out,34242.00,cash,SWEEP-CASH-250721,synthetic
+2025-07-23,Walk-in customer,sales,in,47168.00,cash,SALE-250723,synthetic
+2025-07-23,Own bank account,transfer,out,47168.00,cash,SWEEP-CASH-250723,synthetic
+2025-07-25,Bhai Bhai Bhandar,collection,in,20358.00,cash,FAB-INV-00424,synthetic
+2025-07-25,Walk-in customer,sales,in,20971.00,cash,SALE-250725,synthetic
+2025-07-25,Own bank account,transfer,out,41329.00,cash,SWEEP-CASH-250725,synthetic
+2025-07-26,Walk-in customer,sales,in,38899.00,cash,SALE-250726,synthetic
+2025-07-26,Own bank account,transfer,out,38899.00,cash,SWEEP-CASH-250726,synthetic
+2025-07-27,Walk-in customer,sales,in,27406.00,cash,SALE-250727,synthetic
+2025-07-27,Own bank account,transfer,out,27406.00,cash,SWEEP-CASH-250727,synthetic
+2025-07-28,Walk-in customer,sales,in,24822.00,cash,SALE-250728,synthetic
+2025-07-28,Walk-in customer,sales,in,42581.00,cash,SALE-250728,synthetic
+2025-07-28,Own bank account,transfer,out,67403.00,cash,SWEEP-CASH-250728,synthetic
+2025-07-29,Walk-in customer,sales,in,12521.00,cash,SALE-250729,synthetic
+2025-07-30,Sonali Agency,collection,in,29261.00,cash,FAB-INV-00420,synthetic
+2025-07-30,Own bank account,transfer,out,41782.00,cash,SWEEP-CASH-250730,synthetic
+2025-07-31,Madina Bhandar,collection,in,49841.00,cash,FAB-INV-00426,synthetic
+2025-07-31,Walk-in customer,sales,in,43111.00,cash,SALE-250731,synthetic
+2025-07-31,Own bank account,transfer,out,92952.00,cash,SWEEP-CASH-250731,synthetic
+2025-08-03,Walk-in customer,sales,in,33655.00,cash,SALE-250803,synthetic
+2025-08-03,Own bank account,transfer,out,33655.00,cash,SWEEP-CASH-250803,synthetic
+2025-08-05,Walk-in customer,sales,in,12383.00,cash,SALE-250805,synthetic
+2025-08-05,Walk-in customer,sales,in,29090.00,cash,SALE-250805,synthetic
+2025-08-05,Own bank account,transfer,out,41473.00,cash,SWEEP-CASH-250805,synthetic
+2025-08-07,Shapla Store,collection,in,21463.00,cash,FAB-INV-00441,synthetic
+2025-08-07,Dhaka Store,collection,in,15286.00,cash,FAB-INV-00451,synthetic
+2025-08-07,Own bank account,transfer,out,36749.00,cash,SWEEP-CASH-250807,synthetic
+2025-08-10,Mayer Doa Traders,collection,in,24132.00,cash,FAB-INV-00432,synthetic
+2025-08-10,Bhai Bhai Bhandar,collection,in,46617.00,cash,FAB-INV-00460,synthetic
+2025-08-10,Own bank account,transfer,out,70749.00,cash,SWEEP-CASH-250810,synthetic
+2025-08-11,Walk-in customer,sales,in,14761.00,cash,SALE-250811,synthetic
+2025-08-12,New House,collection,in,25311.00,cash,FAB-INV-00450,synthetic
+2025-08-12,Own bank account,transfer,out,40072.00,cash,SWEEP-CASH-250812,synthetic
+2025-08-13,Madina Traders,collection,in,52397.00,cash,FAB-INV-00457,synthetic
+2025-08-13,Own bank account,transfer,out,52397.00,cash,SWEEP-CASH-250813,synthetic
+2025-08-14,Madina Traders,collection,in,44638.00,cash,FAB-INV-00445,synthetic
+2025-08-14,Own bank account,transfer,out,44638.00,cash,SWEEP-CASH-250814,synthetic
+2025-08-18,Walk-in customer,sales,in,38207.00,cash,SALE-250818,synthetic
+2025-08-18,Own bank account,transfer,out,38207.00,cash,SWEEP-CASH-250818,synthetic
+2025-08-19,Mayer Doa Traders,collection,in,21509.00,cash,FAB-INV-00465,synthetic
+2025-08-19,Own bank account,transfer,out,21509.00,cash,SWEEP-CASH-250819,synthetic
+2025-08-20,Bhai Bhai Enterprise,collection,in,11930.00,cash,FAB-INV-00413,synthetic
+2025-08-25,Bhai Bhai Enterprise,collection,in,24375.00,cash,FAB-INV-00468,synthetic
+2025-08-25,Own bank account,transfer,out,36305.00,cash,SWEEP-CASH-250825,synthetic
+2025-08-26,Bhai Bhai Enterprise,collection,in,24403.00,cash,FAB-INV-00438,synthetic
+2025-08-26,Own bank account,transfer,out,24403.00,cash,SWEEP-CASH-250826,synthetic
+2025-08-27,Madina Traders,collection,in,32602.00,cash,FAB-INV-00481,synthetic
+2025-08-27,Walk-in customer,sales,in,24123.00,cash,SALE-250827,synthetic
+2025-08-27,Own bank account,transfer,out,56725.00,cash,SWEEP-CASH-250827,synthetic
+2025-08-28,Walk-in customer,sales,in,25624.00,cash,SALE-250828,synthetic
+2025-08-28,Own bank account,transfer,out,25624.00,cash,SWEEP-CASH-250828,synthetic
+2025-08-29,Bhai Bhai Enterprise,collection,in,30047.00,cash,FAB-INV-00448,synthetic
+2025-08-29,Own bank account,transfer,out,30047.00,cash,SWEEP-CASH-250829,synthetic
+2025-08-31,Mayer Doa Corporation,collection,in,25281.00,cash,FAB-INV-00483,synthetic
+2025-08-31,Walk-in customer,sales,in,39002.00,cash,SALE-250831,synthetic
+2025-08-31,Own bank account,transfer,out,64283.00,cash,SWEEP-CASH-250831,synthetic
+2025-09-01,Bhai Bhai Bhandar,collection,in,26401.00,cash,FAB-INV-00492,synthetic
+2025-09-01,Own bank account,transfer,out,26401.00,cash,SWEEP-CASH-250901,synthetic
+2025-09-03,Sonali Traders,collection,in,39182.00,cash,FAB-INV-00494,synthetic
+2025-09-03,Own bank account,transfer,out,39182.00,cash,SWEEP-CASH-250903,synthetic
+2025-09-04,Madina Traders,collection,in,18257.00,cash,FAB-INV-00490,synthetic
+2025-09-04,Walk-in customer,sales,in,44895.00,cash,SALE-250904,synthetic
+2025-09-04,Own bank account,transfer,out,63152.00,cash,SWEEP-CASH-250904,synthetic
+2025-09-06,Walk-in customer,sales,in,34684.00,cash,SALE-250906,synthetic
+2025-09-06,Own bank account,transfer,out,34684.00,cash,SWEEP-CASH-250906,synthetic
+2025-09-08,Mayer Doa Corporation,collection,in,37474.00,cash,FAB-INV-00496,synthetic
+2025-09-08,Own bank account,transfer,out,37474.00,cash,SWEEP-CASH-250908,synthetic
+2025-09-09,Walk-in customer,sales,in,19206.00,cash,SALE-250909,synthetic
+2025-09-10,Madina Traders,collection,in,11088.00,cash,FAB-INV-00502,synthetic
+2025-09-10,Own bank account,transfer,out,30294.00,cash,SWEEP-CASH-250910,synthetic
+2025-09-11,Walk-in customer,sales,in,33461.00,cash,SALE-250911,synthetic
+2025-09-11,Own bank account,transfer,out,33461.00,cash,SWEEP-CASH-250911,synthetic
+2025-09-13,Rupali Corporation,collection,in,22325.00,cash,FAB-INV-00517,synthetic
+2025-09-13,Walk-in customer,sales,in,50940.00,cash,SALE-250913,synthetic
+2025-09-13,Own bank account,transfer,out,73265.00,cash,SWEEP-CASH-250913,synthetic
+2025-09-14,Walk-in customer,sales,in,26221.00,cash,SALE-250914,synthetic
+2025-09-14,Own bank account,transfer,out,26221.00,cash,SWEEP-CASH-250914,synthetic
+2025-09-15,Rupali Corporation,collection,in,27387.00,cash,FAB-INV-00519,synthetic
+2025-09-15,Own bank account,transfer,out,27387.00,cash,SWEEP-CASH-250915,synthetic
+2025-09-17,Shapla House,collection,in,41894.00,cash,FAB-INV-00486,synthetic
+2025-09-17,Own bank account,transfer,out,41894.00,cash,SWEEP-CASH-250917,synthetic
+2025-09-18,Janata Bhandar,collection,in,26899.00,cash,FAB-INV-00501,synthetic
+2025-09-18,Walk-in customer,sales,in,23280.00,cash,SALE-250918,synthetic
+2025-09-18,Own bank account,transfer,out,50179.00,cash,SWEEP-CASH-250918,synthetic
+2025-09-19,Sonali Traders,collection,in,20331.00,cash,FAB-INV-00524,synthetic
+2025-09-19,Own bank account,transfer,out,20331.00,cash,SWEEP-CASH-250919,synthetic
+2025-09-20,Shapla Corporation,collection,in,21544.00,cash,FAB-INV-00522,synthetic
+2025-09-20,Own bank account,transfer,out,21544.00,cash,SWEEP-CASH-250920,synthetic
+2025-09-21,Walk-in customer,sales,in,36060.00,cash,SALE-250921,synthetic
+2025-09-21,Own bank account,transfer,out,36060.00,cash,SWEEP-CASH-250921,synthetic
+2025-09-23,Bismillah Agency,collection,in,31913.00,cash,FAB-INV-00497,synthetic
+2025-09-23,Shapla Store,collection,in,49482.00,cash,FAB-INV-00521,synthetic
+2025-09-23,Walk-in customer,sales,in,12609.00,cash,SALE-250923,synthetic
+2025-09-23,Walk-in customer,sales,in,48846.00,cash,SALE-250923,synthetic
+2025-09-23,Own bank account,transfer,out,142850.00,cash,SWEEP-CASH-250923,synthetic
+2025-09-24,Madina Bhandar,collection,in,33658.00,cash,FAB-INV-00509,synthetic
+2025-09-24,Mayer Doa Bhandar,collection,in,18458.00,cash,FAB-INV-00516,synthetic
+2025-09-24,Own bank account,transfer,out,52116.00,cash,SWEEP-CASH-250924,synthetic
+2025-09-27,Madina Traders,collection,in,23383.00,cash,FAB-INV-00547,synthetic
+2025-09-27,Walk-in customer,sales,in,45580.00,cash,SALE-250927,synthetic
+2025-09-27,Own bank account,transfer,out,68963.00,cash,SWEEP-CASH-250927,synthetic
+2025-09-29,Mayer Doa Corporation,collection,in,40029.00,cash,FAB-INV-00544,synthetic
+2025-09-29,Walk-in customer,sales,in,25773.00,cash,SALE-250929,synthetic
+2025-09-29,Own bank account,transfer,out,65802.00,cash,SWEEP-CASH-250929,synthetic
+2025-10-01,Bhai Bhai Bhandar,collection,in,9328.00,cash,FAB-INV-00553,synthetic
+2025-10-03,Mayer Doa Traders,collection,in,28715.00,cash,FAB-INV-00534,synthetic
+2025-10-03,Own bank account,transfer,out,38043.00,cash,SWEEP-CASH-251003,synthetic
+2025-10-06,Bhai Bhai Bhandar,collection,in,20807.00,cash,FAB-INV-00555,synthetic
+2025-10-06,Own bank account,transfer,out,20807.00,cash,SWEEP-CASH-251006,synthetic
+2025-10-07,Shapla Store,collection,in,48504.00,cash,FAB-INV-00560,synthetic
+2025-10-07,Dhaka Store,collection,in,18712.00,cash,FAB-INV-00570,synthetic
+2025-10-07,Walk-in customer,sales,in,15246.00,cash,SALE-251007,synthetic
+2025-10-07,Own bank account,transfer,out,82462.00,cash,SWEEP-CASH-251007,synthetic
+2025-10-09,Bhai Bhai Enterprise,collection,in,12907.00,cash,FAB-INV-00538,synthetic
+2025-10-09,Madina Traders,collection,in,43754.00,cash,FAB-INV-00561,synthetic
+2025-10-09,Shapla Store,collection,in,23653.00,cash,FAB-INV-00566,synthetic
+2025-10-09,Own bank account,transfer,out,80314.00,cash,SWEEP-CASH-251009,synthetic
+2025-10-11,Shapla House,collection,in,26382.00,cash,FAB-INV-00531,synthetic
+2025-10-11,Shapla House,collection,in,43639.00,cash,FAB-INV-00542,synthetic
+2025-10-11,Walk-in customer,sales,in,26196.00,cash,SALE-251011,synthetic
+2025-10-11,Own bank account,transfer,out,96217.00,cash,SWEEP-CASH-251011,synthetic
+2025-10-13,Mayer Doa Traders,collection,in,19467.00,cash,FAB-INV-00562,synthetic
+2025-10-13,Madina Bhandar,collection,in,29634.00,cash,FAB-INV-00583,synthetic
+2025-10-13,Own bank account,transfer,out,49101.00,cash,SWEEP-CASH-251013,synthetic
+2025-10-14,Bismillah Agency,collection,in,37722.00,cash,FAB-INV-00540,synthetic
+2025-10-14,Own bank account,transfer,out,37722.00,cash,SWEEP-CASH-251014,synthetic
+2025-10-16,Janata Bhandar,collection,in,52967.00,cash,FAB-INV-00565,synthetic
+2025-10-16,Sonali Agency,collection,in,41890.00,cash,FAB-INV-00573,synthetic
+2025-10-16,Own bank account,transfer,out,94857.00,cash,SWEEP-CASH-251016,synthetic
+2025-10-20,Walk-in customer,sales,in,35636.00,cash,SALE-251020,synthetic
+2025-10-20,Own bank account,transfer,out,35636.00,cash,SWEEP-CASH-251020,synthetic
+2025-10-22,Mayer Doa Corporation,collection,in,27876.00,cash,FAB-INV-00582,synthetic
+2025-10-22,Janata Store,collection,in,29184.00,cash,FAB-INV-00591,synthetic
+2025-10-22,Walk-in customer,sales,in,54530.00,cash,SALE-251022,synthetic
+2025-10-22,Own bank account,transfer,out,111590.00,cash,SWEEP-CASH-251022,synthetic
+2025-10-26,Shapla Enterprise,collection,in,25720.00,cash,FAB-INV-00597,synthetic
+2025-10-26,Janata Store,collection,in,25475.00,cash,FAB-INV-00600,synthetic
+2025-10-26,Own bank account,transfer,out,51195.00,cash,SWEEP-CASH-251026,synthetic
+2025-10-27,Walk-in customer,sales,in,44763.00,cash,SALE-251027,synthetic
+2025-10-27,Own bank account,transfer,out,44763.00,cash,SWEEP-CASH-251027,synthetic
+2025-10-29,Bismillah Agency,collection,in,15646.00,cash,FAB-INV-00567,synthetic
+2025-10-29,Sonali Agency,collection,in,39250.00,cash,FAB-INV-00596,synthetic
+2025-10-29,Shapla Enterprise,collection,in,20648.00,cash,FAB-INV-00603,synthetic
+2025-10-29,Own bank account,transfer,out,75544.00,cash,SWEEP-CASH-251029,synthetic
+2025-10-30,Walk-in customer,sales,in,33682.00,cash,SALE-251030,synthetic
+2025-10-30,Own bank account,transfer,out,33682.00,cash,SWEEP-CASH-251030,synthetic
+2025-11-01,New Corporation,collection,in,14320.00,cash,FAB-INV-00595,synthetic
+2025-11-01,Walk-in customer,sales,in,31114.00,cash,SALE-251101,synthetic
+2025-11-01,Walk-in customer,sales,in,38857.00,cash,SALE-251101,synthetic
+2025-11-01,Own bank account,transfer,out,84291.00,cash,SWEEP-CASH-251101,synthetic
+2025-11-02,Madina Bhandar,collection,in,15626.00,cash,FAB-INV-00604,synthetic
+2025-11-02,Walk-in customer,sales,in,21233.00,cash,SALE-251102,synthetic
+2025-11-02,Own bank account,transfer,out,36859.00,cash,SWEEP-CASH-251102,synthetic
+2025-11-04,Bhai Bhai Bhandar,collection,in,26310.00,cash,FAB-INV-00618,synthetic
+2025-11-04,Own bank account,transfer,out,26310.00,cash,SWEEP-CASH-251104,synthetic
+2025-11-06,Shapla Store,collection,in,17208.00,cash,FAB-INV-00616,synthetic
+2025-11-08,Walk-in customer,sales,in,54206.00,cash,SALE-251108,synthetic
+2025-11-08,Own bank account,transfer,out,71414.00,cash,SWEEP-CASH-251108,synthetic
+2025-11-09,Shapla Enterprise,collection,in,26798.00,cash,FAB-INV-00626,synthetic
+2025-11-09,Shapla Enterprise,collection,in,26692.00,cash,FAB-INV-00634,synthetic
+2025-11-09,Walk-in customer,sales,in,53389.00,cash,SALE-251109,synthetic
+2025-11-09,Own bank account,transfer,out,106879.00,cash,SWEEP-CASH-251109,synthetic
+2025-11-11,Walk-in customer,sales,in,38386.00,cash,SALE-251111,synthetic
+2025-11-11,Own bank account,transfer,out,38386.00,cash,SWEEP-CASH-251111,synthetic
+2025-11-12,Shapla Enterprise,collection,in,53506.00,cash,FAB-INV-00633,synthetic
+2025-11-12,Janata Store,collection,in,37534.00,cash,FAB-INV-00635,synthetic
+2025-11-12,Madina Traders,collection,in,27240.00,cash,FAB-INV-00639,synthetic
+2025-11-12,Own bank account,transfer,out,118280.00,cash,SWEEP-CASH-251112,synthetic
+2025-11-13,Walk-in customer,sales,in,23076.00,cash,SALE-251113,synthetic
+2025-11-13,Walk-in customer,sales,in,35672.00,cash,SALE-251113,synthetic
+2025-11-13,Own bank account,transfer,out,58748.00,cash,SWEEP-CASH-251113,synthetic
+2025-11-17,Madina Bhandar,collection,in,27420.00,cash,FAB-INV-00627,synthetic
+2025-11-17,Mayer Doa Bhandar,collection,in,34696.00,cash,FAB-INV-00636,synthetic
+2025-11-17,Own bank account,transfer,out,62116.00,cash,SWEEP-CASH-251117,synthetic
+2025-11-21,Janata Bhandar,collection,in,54504.00,cash,FAB-INV-00608,synthetic
+2025-11-21,Madina Traders,collection,in,41526.00,cash,FAB-INV-00657,synthetic
+2025-11-21,Own bank account,transfer,out,96030.00,cash,SWEEP-CASH-251121,synthetic
+2025-11-22,Janata Store,collection,in,13519.00,cash,FAB-INV-00649,synthetic
+2025-11-23,Shapla House,collection,in,39711.00,cash,FAB-INV-00607,synthetic
+2025-11-23,Own bank account,transfer,out,53230.00,cash,SWEEP-CASH-251123,synthetic
+2025-11-24,New House,collection,in,20859.00,cash,FAB-INV-00648,synthetic
+2025-11-24,Rupali Corporation,collection,in,27314.00,cash,FAB-INV-00660,synthetic
+2025-11-24,Own bank account,transfer,out,48173.00,cash,SWEEP-CASH-251124,synthetic
+2025-11-25,Walk-in customer,sales,in,42864.00,cash,SALE-251125,synthetic
+2025-11-25,Own bank account,transfer,out,42864.00,cash,SWEEP-CASH-251125,synthetic
+2025-11-26,Bismillah Agency,collection,in,44643.00,cash,FAB-INV-00613,synthetic
+2025-11-26,Shapla Corporation,collection,in,31812.00,cash,FAB-INV-00669,synthetic
+2025-11-26,Walk-in customer,sales,in,31595.00,cash,SALE-251126,synthetic
+2025-11-26,Own bank account,transfer,out,108050.00,cash,SWEEP-CASH-251126,synthetic
+2025-11-27,Walk-in customer,sales,in,40618.00,cash,SALE-251127,synthetic
+2025-11-27,Own bank account,transfer,out,40618.00,cash,SWEEP-CASH-251127,synthetic
+2025-11-29,New Corporation,collection,in,11198.00,cash,FAB-INV-00666,synthetic
+2025-11-30,Shapla Store,collection,in,46250.00,cash,FAB-INV-00671,synthetic
+2025-11-30,Madina Traders,collection,in,27016.00,cash,FAB-INV-00679,synthetic
+2025-11-30,Own bank account,transfer,out,84464.00,cash,SWEEP-CASH-251130,synthetic
+2025-12-03,Walk-in customer,sales,in,43542.00,cash,SALE-251203,synthetic
+2025-12-03,Own bank account,transfer,out,43542.00,cash,SWEEP-CASH-251203,synthetic
+2025-12-05,Shapla House,collection,in,26884.00,cash,FAB-INV-00656,synthetic
+2025-12-05,Own bank account,transfer,out,26884.00,cash,SWEEP-CASH-251205,synthetic
+2025-12-06,Bhai Bhai Bhandar,collection,in,34015.00,cash,FAB-INV-00691,synthetic
+2025-12-06,Own bank account,transfer,out,34015.00,cash,SWEEP-CASH-251206,synthetic
+2025-12-07,New Corporation,collection,in,14812.00,cash,FAB-INV-00676,synthetic
+2025-12-09,Shapla House,collection,in,30719.00,cash,FAB-INV-00638,synthetic
+2025-12-09,Own bank account,transfer,out,45531.00,cash,SWEEP-CASH-251209,synthetic
+2025-12-10,Janata Store,collection,in,50410.00,cash,FAB-INV-00697,synthetic
+2025-12-10,Walk-in customer,sales,in,34974.00,cash,SALE-251210,synthetic
+2025-12-10,Own bank account,transfer,out,85384.00,cash,SWEEP-CASH-251210,synthetic
+2025-12-11,Bhai Bhai Enterprise,collection,in,28232.00,cash,FAB-INV-00629,synthetic
+2025-12-11,Sonali Agency,collection,in,28563.00,cash,FAB-INV-00685,synthetic
+2025-12-11,Walk-in customer,sales,in,57807.00,cash,SALE-251211,synthetic
+2025-12-11,Own bank account,transfer,out,114602.00,cash,SWEEP-CASH-251211,synthetic
+2025-12-12,Shapla Enterprise,collection,in,20158.00,cash,FAB-INV-00694,synthetic
+2025-12-12,Own bank account,transfer,out,20158.00,cash,SWEEP-CASH-251212,synthetic
+2025-12-16,Sonali Agency,collection,in,32849.00,cash,FAB-INV-00703,synthetic
+2025-12-16,Walk-in customer,sales,in,12942.00,cash,SALE-251216,synthetic
+2025-12-16,Walk-in customer,sales,in,16251.00,cash,SALE-251216,synthetic
+2025-12-16,Own bank account,transfer,out,62042.00,cash,SWEEP-CASH-251216,synthetic
+2025-12-17,Walk-in customer,sales,in,51549.00,cash,SALE-251217,synthetic
+2025-12-17,Own bank account,transfer,out,51549.00,cash,SWEEP-CASH-251217,synthetic
+2025-12-18,Mayer Doa Traders,collection,in,21113.00,cash,FAB-INV-00698,synthetic
+2025-12-18,Walk-in customer,sales,in,34067.00,cash,SALE-251218,synthetic
+2025-12-18,Own bank account,transfer,out,55180.00,cash,SWEEP-CASH-251218,synthetic
+2025-12-19,Walk-in customer,sales,in,22640.00,cash,SALE-251219,synthetic
+2025-12-19,Own bank account,transfer,out,22640.00,cash,SWEEP-CASH-251219,synthetic
+2025-12-21,New House,collection,in,40833.00,cash,FAB-INV-00700,synthetic
+2025-12-21,Own bank account,transfer,out,40833.00,cash,SWEEP-CASH-251221,synthetic
+2025-12-23,Mayer Doa Traders,collection,in,15884.00,cash,FAB-INV-00708,synthetic
+2025-12-23,Walk-in customer,sales,in,29402.00,cash,SALE-251223,synthetic
+2025-12-23,Own bank account,transfer,out,45286.00,cash,SWEEP-CASH-251223,synthetic
+2025-12-26,Mayer Doa Bhandar,collection,in,50435.00,cash,FAB-INV-00709,synthetic
+2025-12-26,Own bank account,transfer,out,50435.00,cash,SWEEP-CASH-251226,synthetic
+2025-12-28,Madina Traders,collection,in,43405.00,cash,FAB-INV-00724,synthetic
+2025-12-28,Own bank account,transfer,out,43405.00,cash,SWEEP-CASH-251228,synthetic
+2025-12-30,Walk-in customer,sales,in,42574.00,cash,SALE-251230,synthetic
+2025-12-30,Own bank account,transfer,out,42574.00,cash,SWEEP-CASH-251230,synthetic
+2026-01-01,Shapla Enterprise,collection,in,36781.00,cash,FAB-INV-00738,synthetic
+2026-01-01,Own bank account,transfer,out,36781.00,cash,SWEEP-CASH-260101,synthetic
+2026-01-02,Janata Bhandar,collection,in,35540.00,cash,FAB-INV-00734,synthetic
+2026-01-02,Own bank account,transfer,out,35540.00,cash,SWEEP-CASH-260102,synthetic
+2026-01-05,Walk-in customer,sales,in,22882.00,cash,SALE-260105,synthetic
+2026-01-05,Own bank account,transfer,out,22882.00,cash,SWEEP-CASH-260105,synthetic
+2026-01-10,Shapla Store,collection,in,16503.00,cash,FAB-INV-00748,synthetic
+2026-01-11,Walk-in customer,sales,in,33460.00,cash,SALE-260111,synthetic
+2026-01-11,Own bank account,transfer,out,49963.00,cash,SWEEP-CASH-260111,synthetic
+2026-01-12,Bismillah Agency,collection,in,58792.00,cash,FAB-INV-00719,synthetic
+2026-01-12,Shapla House,collection,in,40957.00,cash,FAB-INV-00730,synthetic
+2026-01-12,Rupali Corporation,collection,in,28789.00,cash,FAB-INV-00757,synthetic
+2026-01-12,Walk-in customer,sales,in,36013.00,cash,SALE-260112,synthetic
+2026-01-12,Own bank account,transfer,out,164551.00,cash,SWEEP-CASH-260112,synthetic
+2026-01-13,Shapla Enterprise,collection,in,14299.00,cash,FAB-INV-00752,synthetic
+2026-01-13,Walk-in customer,sales,in,39210.00,cash,SALE-260113,synthetic
+2026-01-13,Own bank account,transfer,out,53509.00,cash,SWEEP-CASH-260113,synthetic
+2026-01-14,Walk-in customer,sales,in,20606.00,cash,SALE-260114,synthetic
+2026-01-14,Own bank account,transfer,out,20606.00,cash,SWEEP-CASH-260114,synthetic
+2026-01-15,Shapla Enterprise,collection,in,25237.00,cash,FAB-INV-00758,synthetic
+2026-01-15,Own bank account,transfer,out,25237.00,cash,SWEEP-CASH-260115,synthetic
+2026-01-18,New Corporation,collection,in,19897.00,cash,FAB-INV-00745,synthetic
+2026-01-18,Shapla Corporation,collection,in,16481.00,cash,FAB-INV-00766,synthetic
+2026-01-18,Own bank account,transfer,out,36378.00,cash,SWEEP-CASH-260118,synthetic
+2026-01-20,Walk-in customer,sales,in,33931.00,cash,SALE-260120,synthetic
+2026-01-20,Own bank account,transfer,out,33931.00,cash,SWEEP-CASH-260120,synthetic
+2026-01-22,Walk-in customer,sales,in,11094.00,cash,SALE-260122,synthetic
+2026-01-22,Walk-in customer,sales,in,13157.00,cash,SALE-260122,synthetic
+2026-01-22,Own bank account,transfer,out,24251.00,cash,SWEEP-CASH-260122,synthetic
+2026-01-24,Dhaka Store,collection,in,26597.00,cash,FAB-INV-00791,synthetic
+2026-01-24,Own bank account,transfer,out,26597.00,cash,SWEEP-CASH-260124,synthetic
+2026-01-26,Shapla Corporation,collection,in,26237.00,cash,FAB-INV-00772,synthetic
+2026-01-26,Walk-in customer,sales,in,15637.00,cash,SALE-260126,synthetic
+2026-01-26,Walk-in customer,sales,in,18293.00,cash,SALE-260126,synthetic
+2026-01-26,Own bank account,transfer,out,60167.00,cash,SWEEP-CASH-260126,synthetic
+2026-01-27,New Corporation,collection,in,28515.00,cash,FAB-INV-00760,synthetic
+2026-01-27,Own bank account,transfer,out,28515.00,cash,SWEEP-CASH-260127,synthetic
+2026-01-29,Sonali Traders,collection,in,34077.00,cash,FAB-INV-00795,synthetic
+2026-01-29,Own bank account,transfer,out,34077.00,cash,SWEEP-CASH-260129,synthetic
+2026-01-31,Walk-in customer,sales,in,30671.00,cash,SALE-260131,synthetic
+2026-01-31,Own bank account,transfer,out,30671.00,cash,SWEEP-CASH-260131,synthetic
+2026-02-02,Walk-in customer,sales,in,50148.00,cash,SALE-260202,synthetic
+2026-02-02,Own bank account,transfer,out,50148.00,cash,SWEEP-CASH-260202,synthetic
+2026-02-03,Janata Store,collection,in,34327.00,cash,FAB-INV-00806,synthetic
+2026-02-03,Own bank account,transfer,out,34327.00,cash,SWEEP-CASH-260203,synthetic
+2026-02-07,Walk-in customer,sales,in,9927.00,cash,SALE-260207,synthetic
+2026-02-08,Mayer Doa Bhandar,collection,in,10192.00,cash,FAB-INV-00790,synthetic
+2026-02-08,Madina Traders,collection,in,29888.00,cash,FAB-INV-00807,synthetic
+2026-02-08,Rupali Corporation,collection,in,18083.00,cash,FAB-INV-00816,synthetic
+2026-02-08,Walk-in customer,sales,in,11695.00,cash,SALE-260208,synthetic
+2026-02-08,Walk-in customer,sales,in,25370.00,cash,SALE-260208,synthetic
+2026-02-08,Own bank account,transfer,out,105155.00,cash,SWEEP-CASH-260208,synthetic
+2026-02-09,New House,collection,in,44906.00,cash,FAB-INV-00802,synthetic
+2026-02-09,Walk-in customer,sales,in,14289.00,cash,SALE-260209,synthetic
+2026-02-09,Own bank account,transfer,out,59195.00,cash,SWEEP-CASH-260209,synthetic
+2026-02-10,Bhai Bhai Bhandar,collection,in,10512.00,cash,FAB-INV-00820,synthetic
+2026-02-12,Mayer Doa Traders,collection,in,10218.00,cash,FAB-INV-00812,synthetic
+2026-02-12,Own bank account,transfer,out,20730.00,cash,SWEEP-CASH-260212,synthetic
+2026-02-13,Madina Bhandar,collection,in,45643.00,cash,FAB-INV-00822,synthetic
+2026-02-13,Sonali Agency,collection,in,6552.00,cash,FAB-INV-00828,synthetic
+2026-02-13,Walk-in customer,sales,in,22800.00,cash,SALE-260213,synthetic
+2026-02-13,Own bank account,transfer,out,74995.00,cash,SWEEP-CASH-260213,synthetic
+2026-02-15,Mayer Doa Corporation,collection,in,9290.00,cash,FAB-INV-00825,synthetic
+2026-02-15,Walk-in customer,sales,in,42861.00,cash,SALE-260215,synthetic
+2026-02-15,Own bank account,transfer,out,52151.00,cash,SWEEP-CASH-260215,synthetic
+2026-02-16,New House,collection,in,17617.00,cash,FAB-INV-00821,synthetic
+2026-02-16,Janata Bhandar,collection,in,18235.00,cash,FAB-INV-00829,synthetic
+2026-02-16,Walk-in customer,sales,in,47033.00,cash,SALE-260216,synthetic
+2026-02-16,Own bank account,transfer,out,82885.00,cash,SWEEP-CASH-260216,synthetic
+2026-02-17,Shapla Store,collection,in,17930.00,cash,FAB-INV-00830,synthetic
+2026-02-18,Walk-in customer,sales,in,15608.00,cash,SALE-260218,synthetic
+2026-02-18,Walk-in customer,sales,in,25351.00,cash,SALE-260218,synthetic
+2026-02-18,Own bank account,transfer,out,58889.00,cash,SWEEP-CASH-260218,synthetic
+2026-02-19,Walk-in customer,sales,in,16323.00,cash,SALE-260219,synthetic
+2026-02-21,Janata Bhandar,collection,in,28291.00,cash,FAB-INV-00838,synthetic
+2026-02-21,New Corporation,collection,in,24963.00,cash,FAB-INV-00844,synthetic
+2026-02-21,Own bank account,transfer,out,69577.00,cash,SWEEP-CASH-260221,synthetic
+2026-02-22,Walk-in customer,sales,in,23705.00,cash,SALE-260222,synthetic
+2026-02-22,Own bank account,transfer,out,23705.00,cash,SWEEP-CASH-260222,synthetic
+2026-02-26,Janata Store,collection,in,43555.00,cash,FAB-INV-00861,synthetic
+2026-02-26,Own bank account,transfer,out,43555.00,cash,SWEEP-CASH-260226,synthetic
+2026-02-27,Sonali Traders,collection,in,32697.00,cash,FAB-INV-00858,synthetic
+2026-02-27,Own bank account,transfer,out,32697.00,cash,SWEEP-CASH-260227,synthetic
+2026-02-28,Mayer Doa Corporation,collection,in,20288.00,cash,FAB-INV-00843,synthetic
+2026-02-28,Own bank account,transfer,out,20288.00,cash,SWEEP-CASH-260228,synthetic
+2026-03-01,Walk-in customer,sales,in,38362.00,cash,SALE-260301,synthetic
+2026-03-01,Own bank account,transfer,out,38362.00,cash,SWEEP-CASH-260301,synthetic
+2026-03-02,New Corporation,collection,in,10715.00,cash,FAB-INV-00846,synthetic
+2026-03-02,New Corporation,collection,in,32888.00,cash,FAB-INV-00847,synthetic
+2026-03-02,Walk-in customer,sales,in,33512.00,cash,SALE-260302,synthetic
+2026-03-02,Own bank account,transfer,out,77115.00,cash,SWEEP-CASH-260302,synthetic
+2026-03-03,Dhaka Store,collection,in,10338.00,cash,FAB-INV-00865,synthetic
+2026-03-03,Walk-in customer,sales,in,28194.00,cash,SALE-260303,synthetic
+2026-03-03,Own bank account,transfer,out,38532.00,cash,SWEEP-CASH-260303,synthetic
+2026-03-04,Walk-in customer,sales,in,27661.00,cash,SALE-260304,synthetic
+2026-03-04,Own bank account,transfer,out,27661.00,cash,SWEEP-CASH-260304,synthetic
+2026-03-05,Walk-in customer,sales,in,33162.00,cash,SALE-260305,synthetic
+2026-03-05,Own bank account,transfer,out,33162.00,cash,SWEEP-CASH-260305,synthetic
+2026-03-08,Bhai Bhai Enterprise,collection,in,18782.00,cash,FAB-INV-00842,synthetic
+2026-03-09,Walk-in customer,sales,in,67619.00,cash,SALE-260309,synthetic
+2026-03-09,Own bank account,transfer,out,86401.00,cash,SWEEP-CASH-260309,synthetic
+2026-03-10,Janata Store,collection,in,45763.00,cash,FAB-INV-00875,synthetic
+2026-03-10,Walk-in customer,sales,in,55248.00,cash,SALE-260310,synthetic
+2026-03-10,Own bank account,transfer,out,101011.00,cash,SWEEP-CASH-260310,synthetic
+2026-03-11,Mayer Doa Traders,collection,in,14859.00,cash,FAB-INV-00864,synthetic
+2026-03-11,Walk-in customer,sales,in,15905.00,cash,SALE-260311,synthetic
+2026-03-11,Walk-in customer,sales,in,50253.00,cash,SALE-260311,synthetic
+2026-03-11,Own bank account,transfer,out,81017.00,cash,SWEEP-CASH-260311,synthetic
+2026-03-12,Walk-in customer,sales,in,24831.00,cash,SALE-260312,synthetic
+2026-03-12,Own bank account,transfer,out,24831.00,cash,SWEEP-CASH-260312,synthetic
+2026-03-15,Walk-in customer,sales,in,41762.00,cash,SALE-260315,synthetic
+2026-03-15,Own bank account,transfer,out,41762.00,cash,SWEEP-CASH-260315,synthetic
+2026-03-17,Bhai Bhai Enterprise,collection,in,21031.00,cash,FAB-INV-00840,synthetic
+2026-03-17,Walk-in customer,sales,in,13774.00,cash,SALE-260317,synthetic
+2026-03-17,Walk-in customer,sales,in,50850.00,cash,SALE-260317,synthetic
+2026-03-17,Own bank account,transfer,out,85655.00,cash,SWEEP-CASH-260317,synthetic
+2026-03-18,Walk-in customer,sales,in,24226.00,cash,SALE-260318,synthetic
+2026-03-18,Walk-in customer,sales,in,44249.00,cash,SALE-260318,synthetic
+2026-03-18,Own bank account,transfer,out,68475.00,cash,SWEEP-CASH-260318,synthetic
+2026-03-19,Walk-in customer,sales,in,16263.00,cash,SALE-260319,synthetic
+2026-03-21,Bhai Bhai Enterprise,collection,in,22391.00,cash,FAB-INV-00854,synthetic
+2026-03-21,Own bank account,transfer,out,38654.00,cash,SWEEP-CASH-260321,synthetic
+2026-03-23,Shapla Enterprise,collection,in,28962.00,cash,FAB-INV-00898,synthetic
+2026-03-23,Own bank account,transfer,out,28962.00,cash,SWEEP-CASH-260323,synthetic
+2026-03-25,Bhai Bhai Enterprise,collection,in,46424.00,cash,FAB-INV-00845,synthetic
+2026-03-25,Janata Store,collection,in,40467.00,cash,FAB-INV-00904,synthetic
+2026-03-25,Walk-in customer,sales,in,21138.00,cash,SALE-260325,synthetic
+2026-03-25,Own bank account,transfer,out,108029.00,cash,SWEEP-CASH-260325,synthetic
+2026-03-28,Janata Bhandar,collection,in,12665.00,cash,FAB-INV-00873,synthetic
+2026-03-29,Shapla House,collection,in,24978.00,cash,FAB-INV-00856,synthetic
+2026-03-29,Walk-in customer,sales,in,38804.00,cash,SALE-260329,synthetic
+2026-03-29,Own bank account,transfer,out,76447.00,cash,SWEEP-CASH-260329,synthetic
+2026-03-31,Walk-in customer,sales,in,9620.00,cash,SALE-260331,synthetic
+2026-04-02,New House,collection,in,43242.00,cash,FAB-INV-00910,synthetic
+2026-04-02,Walk-in customer,sales,in,23989.00,cash,SALE-260402,synthetic
+2026-04-02,Own bank account,transfer,out,76851.00,cash,SWEEP-CASH-260402,synthetic
+2026-04-06,Bhai Bhai Bhandar,collection,in,16370.00,cash,FAB-INV-00945,synthetic
+2026-04-06,Dhaka Store,collection,in,36088.00,cash,FAB-INV-00949,synthetic
+2026-04-06,Walk-in customer,sales,in,21926.00,cash,SALE-260406,synthetic
+2026-04-06,Walk-in customer,sales,in,32475.00,cash,SALE-260406,synthetic
+2026-04-06,Own bank account,transfer,out,106859.00,cash,SWEEP-CASH-260406,synthetic
+2026-04-07,Shapla House,collection,in,39804.00,cash,FAB-INV-00891,synthetic
+2026-04-07,Own bank account,transfer,out,39804.00,cash,SWEEP-CASH-260407,synthetic
+2026-04-09,Walk-in customer,sales,in,30397.00,cash,SALE-260409,synthetic
+2026-04-09,Walk-in customer,sales,in,9735.00,cash,SALE-260409,synthetic
+2026-04-09,Own bank account,transfer,out,40132.00,cash,SWEEP-CASH-260409,synthetic
+2026-04-12,Walk-in customer,sales,in,37564.00,cash,SALE-260412,synthetic
+2026-04-12,Own bank account,transfer,out,37564.00,cash,SWEEP-CASH-260412,synthetic
+2026-04-13,Janata Bhandar,collection,in,24096.00,cash,FAB-INV-00895,synthetic
+2026-04-13,Own bank account,transfer,out,24096.00,cash,SWEEP-CASH-260413,synthetic
+2026-04-15,Walk-in customer,sales,in,25043.00,cash,SALE-260415,synthetic
+2026-04-15,Own bank account,transfer,out,25043.00,cash,SWEEP-CASH-260415,synthetic
+2026-04-16,Madina Bhandar,collection,in,58039.00,cash,FAB-INV-00937,synthetic
+2026-04-16,New Corporation,collection,in,58492.00,cash,FAB-INV-00943,synthetic
+2026-04-16,Own bank account,transfer,out,116531.00,cash,SWEEP-CASH-260416,synthetic
+2026-04-17,Bhai Bhai Enterprise,collection,in,60976.00,cash,FAB-INV-00897,synthetic
+2026-04-17,Bhai Bhai Enterprise,collection,in,31655.00,cash,FAB-INV-00923,synthetic
+2026-04-17,Own bank account,transfer,out,92631.00,cash,SWEEP-CASH-260417,synthetic
+2026-04-21,Bhai Bhai Bhandar,collection,in,16392.00,cash,FAB-INV-00976,synthetic
+2026-04-22,Walk-in customer,sales,in,24560.00,cash,SALE-260422,synthetic
+2026-04-22,Own bank account,transfer,out,40952.00,cash,SWEEP-CASH-260422,synthetic
+2026-04-23,Walk-in customer,sales,in,27863.00,cash,SALE-260423,synthetic
+2026-04-23,Own bank account,transfer,out,27863.00,cash,SWEEP-CASH-260423,synthetic
+2026-04-27,Walk-in customer,sales,in,15250.00,cash,SALE-260427,synthetic
+2026-04-29,Walk-in customer,sales,in,19061.00,cash,SALE-260429,synthetic
+2026-04-29,Walk-in customer,sales,in,45867.00,cash,SALE-260429,synthetic
+2026-04-29,Own bank account,transfer,out,80178.00,cash,SWEEP-CASH-260429,synthetic
+2026-04-30,Shapla Store,collection,in,28389.00,cash,FAB-INV-00977,synthetic
+2026-04-30,Own bank account,transfer,out,28389.00,cash,SWEEP-CASH-260430,synthetic
+2026-05-03,Madina Bhandar,collection,in,19798.00,cash,FAB-INV-00987,synthetic
+2026-05-04,Shapla Corporation,collection,in,21876.00,cash,FAB-INV-00985,synthetic
+2026-05-04,Walk-in customer,sales,in,17023.00,cash,SALE-260504,synthetic
+2026-05-04,Own bank account,transfer,out,58697.00,cash,SWEEP-CASH-260504,synthetic
+2026-05-06,Walk-in customer,sales,in,41134.00,cash,SALE-260506,synthetic
+2026-05-06,Own bank account,transfer,out,41134.00,cash,SWEEP-CASH-260506,synthetic
+2026-05-07,Bhai Bhai Enterprise,collection,in,31697.00,cash,FAB-INV-00925,synthetic
+2026-05-07,Dhaka Store,collection,in,16424.00,cash,FAB-INV-01015,synthetic
+2026-05-07,Dhaka Store,collection,in,48059.00,cash,FAB-INV-01018,synthetic
+2026-05-07,Own bank account,transfer,out,96180.00,cash,SWEEP-CASH-260507,synthetic
+2026-05-08,Walk-in customer,sales,in,18122.00,cash,SALE-260508,synthetic
+2026-05-09,Bhai Bhai Bhandar,collection,in,35435.00,cash,FAB-INV-01008,synthetic
+2026-05-09,Own bank account,transfer,out,53557.00,cash,SWEEP-CASH-260509,synthetic
+2026-05-11,Walk-in customer,sales,in,72235.00,cash,SALE-260511,synthetic
+2026-05-11,Own bank account,transfer,out,72235.00,cash,SWEEP-CASH-260511,synthetic
+2026-05-12,Rupali Corporation,collection,in,68152.00,cash,FAB-INV-01013,synthetic
+2026-05-12,Own bank account,transfer,out,68152.00,cash,SWEEP-CASH-260512,synthetic
+2026-05-13,Walk-in customer,sales,in,41149.00,cash,SALE-260513,synthetic
+2026-05-13,Own bank account,transfer,out,41149.00,cash,SWEEP-CASH-260513,synthetic
+2026-05-14,Janata Store,collection,in,36480.00,cash,FAB-INV-01024,synthetic
+2026-05-14,Own bank account,transfer,out,36480.00,cash,SWEEP-CASH-260514,synthetic
+2026-05-15,Walk-in customer,sales,in,12583.00,cash,SALE-260515,synthetic
+2026-05-18,Walk-in customer,sales,in,18212.00,cash,SALE-260518,synthetic
+2026-05-18,Walk-in customer,sales,in,32619.00,cash,SALE-260518,synthetic
+2026-05-18,Own bank account,transfer,out,63414.00,cash,SWEEP-CASH-260518,synthetic
+2026-05-20,Janata Bhandar,collection,in,10214.00,cash,FAB-INV-00974,synthetic
+2026-05-20,Walk-in customer,sales,in,44799.00,cash,SALE-260520,synthetic
+2026-05-20,Own bank account,transfer,out,55013.00,cash,SWEEP-CASH-260520,synthetic
+2026-05-21,New Corporation,collection,in,25465.00,cash,FAB-INV-01014,synthetic
+2026-05-21,Walk-in customer,sales,in,48654.00,cash,SALE-260521,synthetic
+2026-05-21,Own bank account,transfer,out,74119.00,cash,SWEEP-CASH-260521,synthetic
+2026-05-23,Sonali Traders,collection,in,23138.00,cash,FAB-INV-01038,synthetic
+2026-05-23,Shapla Store,collection,in,37145.00,cash,FAB-INV-01054,synthetic
+2026-05-23,Own bank account,transfer,out,60283.00,cash,SWEEP-CASH-260523,synthetic
+2026-05-24,Walk-in customer,sales,in,35764.00,cash,SALE-260524,synthetic
+2026-05-24,Own bank account,transfer,out,35764.00,cash,SWEEP-CASH-260524,synthetic
+2026-05-25,New House,collection,in,40697.00,cash,FAB-INV-01026,synthetic
+2026-05-25,Own bank account,transfer,out,40697.00,cash,SWEEP-CASH-260525,synthetic
+2026-05-27,Walk-in customer,sales,in,39142.00,cash,SALE-260527,synthetic
+2026-05-27,Own bank account,transfer,out,39142.00,cash,SWEEP-CASH-260527,synthetic
+2026-05-28,Mayer Doa Traders,collection,in,6916.00,cash,FAB-INV-01043,synthetic
+2026-05-28,Shapla Enterprise,collection,in,14892.00,cash,FAB-INV-01060,synthetic
+2026-05-28,Walk-in customer,sales,in,36860.00,cash,SALE-260528,synthetic
+2026-05-28,Own bank account,transfer,out,58668.00,cash,SWEEP-CASH-260528,synthetic
+2026-05-29,Madina Bhandar,collection,in,24065.00,cash,FAB-INV-01052,synthetic
+2026-05-29,Shapla Enterprise,collection,in,34323.00,cash,FAB-INV-01057,synthetic
+2026-05-29,Own bank account,transfer,out,58388.00,cash,SWEEP-CASH-260529,synthetic
+2026-05-31,Janata Bhandar,collection,in,9148.00,cash,FAB-INV-01047,synthetic
+2026-06-01,Janata Store,collection,in,16184.00,cash,FAB-INV-01061,synthetic
+2026-06-01,Dhaka Store,collection,in,32326.00,cash,FAB-INV-01064,synthetic
+2026-06-01,Own bank account,transfer,out,57658.00,cash,SWEEP-CASH-260601,synthetic
+2026-06-07,Mayer Doa Traders,collection,in,23928.00,cash,FAB-INV-01065,synthetic
+2026-06-07,Own bank account,transfer,out,23928.00,cash,SWEEP-CASH-260607,synthetic
+2026-06-08,Walk-in customer,sales,in,19304.00,cash,SALE-260608,synthetic
+2026-06-09,Mayer Doa Bhandar,collection,in,31996.00,cash,FAB-INV-01042,synthetic
+2026-06-09,Madina Bhandar,collection,in,43753.00,cash,FAB-INV-01071,synthetic
+2026-06-09,Own bank account,transfer,out,95053.00,cash,SWEEP-CASH-260609,synthetic
+2026-06-11,Walk-in customer,sales,in,55788.00,cash,SALE-260611,synthetic
+2026-06-11,Own bank account,transfer,out,55788.00,cash,SWEEP-CASH-260611,synthetic
+2026-06-12,Bhai Bhai Enterprise,collection,in,41689.00,cash,FAB-INV-01049,synthetic
+2026-06-12,Shapla Enterprise,collection,in,24436.00,cash,FAB-INV-01092,synthetic
+2026-06-12,Own bank account,transfer,out,66125.00,cash,SWEEP-CASH-260612,synthetic
+2026-06-13,Madina Bhandar,collection,in,35657.00,cash,FAB-INV-01087,synthetic
+2026-06-13,Own bank account,transfer,out,35657.00,cash,SWEEP-CASH-260613,synthetic
+2026-06-15,Bhai Bhai Enterprise,collection,in,17645.00,cash,FAB-INV-01041,synthetic
+2026-06-21,Walk-in customer,sales,in,17190.00,cash,SALE-260621,synthetic
+2026-06-21,Own bank account,transfer,out,34835.00,cash,SWEEP-CASH-260621,synthetic
+2026-06-22,Mayer Doa Bhandar,collection,in,24784.00,cash,FAB-INV-01080,synthetic
+2026-06-22,Own bank account,transfer,out,24784.00,cash,SWEEP-CASH-260622,synthetic
+2026-06-23,Walk-in customer,sales,in,54106.00,cash,SALE-260623,synthetic
+2026-06-23,Own bank account,transfer,out,54106.00,cash,SWEEP-CASH-260623,synthetic
+2026-06-24,Mayer Doa Bhandar,collection,in,22095.00,cash,FAB-INV-01101,synthetic
+2026-06-24,Own bank account,transfer,out,22095.00,cash,SWEEP-CASH-260624,synthetic
+2026-06-25,New House,collection,in,40343.00,cash,FAB-INV-01094,synthetic
+2026-06-25,Own bank account,transfer,out,40343.00,cash,SWEEP-CASH-260625,synthetic
+2026-06-28,Janata Store,collection,in,25281.00,cash,FAB-INV-01119,synthetic
+2026-06-28,Own bank account,transfer,out,25281.00,cash,SWEEP-CASH-260628,synthetic
+2026-06-29,Bhai Bhai Enterprise,collection,in,12376.00,cash,FAB-INV-01075,synthetic
+2026-07-01,Madina Traders,collection,in,46946.00,cash,FAB-INV-01122,synthetic
+2026-07-01,Own bank account,transfer,out,59322.00,cash,SWEEP-CASH-260701,synthetic
+2026-07-04,Walk-in customer,sales,in,14152.00,cash,SALE-260704,synthetic
+2026-07-07,Janata Store,collection,in,27706.00,cash,FAB-INV-01133,synthetic
+2026-07-07,Walk-in customer,sales,in,28651.00,cash,SALE-260707,synthetic
+2026-07-07,Own bank account,transfer,out,70509.00,cash,SWEEP-CASH-260707,synthetic
+2026-07-09,Shapla House,collection,in,45617.00,cash,FAB-INV-01096,synthetic
+2026-07-09,Sonali Traders,collection,in,19013.00,cash,FAB-INV-01138,synthetic
+2026-07-09,Own bank account,transfer,out,64630.00,cash,SWEEP-CASH-260709,synthetic
+2026-07-10,Mayer Doa Bhandar,collection,in,43955.00,cash,FAB-INV-01104,synthetic
+2026-07-10,Own bank account,transfer,out,43955.00,cash,SWEEP-CASH-260710,synthetic
+2026-07-11,Bhai Bhai Bhandar,collection,in,13917.00,cash,FAB-INV-01149,synthetic
+2026-07-11,Walk-in customer,sales,in,29041.00,cash,SALE-260711,synthetic
+2026-07-11,Own bank account,transfer,out,42958.00,cash,SWEEP-CASH-260711,synthetic
+2026-07-13,Walk-in customer,sales,in,49985.00,cash,SALE-260713,synthetic
+2026-07-13,Own bank account,transfer,out,49985.00,cash,SWEEP-CASH-260713,synthetic
+2026-07-14,Walk-in customer,sales,in,38667.00,cash,SALE-260714,synthetic
+2026-07-14,Own bank account,transfer,out,38667.00,cash,SWEEP-CASH-260714,synthetic
+2026-07-16,Mayer Doa Traders,collection,in,15820.00,cash,FAB-INV-01143,synthetic
+2026-07-16,Walk-in customer,sales,in,17380.00,cash,SALE-260716,synthetic
+2026-07-16,Own bank account,transfer,out,33200.00,cash,SWEEP-CASH-260716,synthetic
+2026-07-18,Mayer Doa Corporation,collection,in,20616.00,cash,FAB-INV-01141,synthetic
+2026-07-18,Walk-in customer,sales,in,16290.00,cash,SALE-260718,synthetic
+2026-07-18,Own bank account,transfer,out,36906.00,cash,SWEEP-CASH-260718,synthetic
+2026-07-19,Walk-in customer,sales,in,29676.00,cash,SALE-260719,synthetic
+2026-07-19,Own bank account,transfer,out,29676.00,cash,SWEEP-CASH-260719,synthetic
+2026-07-20,Walk-in customer,sales,in,14106.00,cash,SALE-260720,synthetic
+2026-07-21,Mayer Doa Corporation,collection,in,44770.00,cash,FAB-INV-01155,synthetic
+2026-07-21,New House,collection,in,19760.00,cash,FAB-INV-01157,synthetic
+2026-07-21,Own bank account,transfer,out,78636.00,cash,SWEEP-CASH-260721,synthetic
+2026-07-22,Bismillah Agency,collection,in,15457.00,cash,FAB-INV-01115,synthetic
+2026-07-25,Mayer Doa Bhandar,collection,in,30227.00,cash,FAB-INV-01165,synthetic
+2026-07-25,Madina Traders,collection,in,28802.00,cash,FAB-INV-01173,synthetic
+2026-07-25,Own bank account,transfer,out,74486.00,cash,SWEEP-CASH-260725,synthetic
+2026-07-26,Madina Traders,collection,in,44716.00,cash,FAB-INV-01183,synthetic
+2026-07-26,Own bank account,transfer,out,44716.00,cash,SWEEP-CASH-260726,synthetic
+2026-07-27,Janata Bhandar,collection,in,28969.00,cash,FAB-INV-01164,synthetic
+2026-07-27,Walk-in customer,sales,in,27256.00,cash,SALE-260727,synthetic
+2026-07-27,Own bank account,transfer,out,56225.00,cash,SWEEP-CASH-260727,synthetic
+2026-07-30,New Corporation,collection,in,29563.00,cash,FAB-INV-01186,synthetic
+2026-07-30,Walk-in customer,sales,in,31502.00,cash,SALE-260730,synthetic
+2026-07-30,Own bank account,transfer,out,61065.00,cash,SWEEP-CASH-260730,synthetic
+2026-07-31,Bhai Bhai Bhandar,collection,in,17200.00,cash,FAB-INV-01191,synthetic
+2026-08-01,Janata Store,collection,in,26762.00,cash,FAB-INV-01196,synthetic
+2026-08-01,Walk-in customer,sales,in,34725.00,cash,SALE-260801,synthetic
+2026-08-01,Own bank account,transfer,out,78687.00,cash,SWEEP-CASH-260801,synthetic
+2026-08-02,Rupali Corporation,collection,in,11621.00,cash,FAB-INV-01206,synthetic
+2026-08-04,Walk-in customer,sales,in,11929.00,cash,SALE-260804,synthetic
+2026-08-04,Own bank account,transfer,out,23550.00,cash,SWEEP-CASH-260804,synthetic
+2026-08-07,Bismillah Agency,collection,in,13296.00,cash,FAB-INV-01172,synthetic
+2026-08-07,New House,collection,in,30643.00,cash,FAB-INV-01195,synthetic
+2026-08-07,Shapla Store,collection,in,17837.00,cash,FAB-INV-01210,synthetic
+2026-08-07,Own bank account,transfer,out,61776.00,cash,SWEEP-CASH-260807,synthetic
+2026-08-08,New Corporation,collection,in,13071.00,cash,FAB-INV-01202,synthetic
+2026-08-09,Mayer Doa Traders,collection,in,13279.00,cash,FAB-INV-01197,synthetic
+2026-08-09,Own bank account,transfer,out,26350.00,cash,SWEEP-CASH-260809,synthetic
+2026-08-10,Janata Bhandar,collection,in,29590.00,cash,FAB-INV-01180,synthetic
+2026-08-10,Mayer Doa Corporation,collection,in,33713.00,cash,FAB-INV-01201,synthetic
+2026-08-10,Own bank account,transfer,out,63303.00,cash,SWEEP-CASH-260810,synthetic
+2026-08-11,Bismillah Agency,collection,in,16704.00,cash,FAB-INV-01161,synthetic
+2026-08-12,Janata Bhandar,collection,in,17379.00,cash,FAB-INV-01177,synthetic
+2026-08-12,Madina Bhandar,collection,in,28456.00,cash,FAB-INV-01199,synthetic
+2026-08-12,Walk-in customer,sales,in,35497.00,cash,SALE-260812,synthetic
+2026-08-12,Own bank account,transfer,out,98036.00,cash,SWEEP-CASH-260812,synthetic
+2026-08-14,Janata Bhandar,collection,in,30132.00,cash,FAB-INV-01184,synthetic
+2026-08-14,Sonali Agency,collection,in,29536.00,cash,FAB-INV-01214,synthetic
+2026-08-14,Own bank account,transfer,out,59668.00,cash,SWEEP-CASH-260814,synthetic
+2026-08-16,Walk-in customer,sales,in,13682.00,cash,SALE-260816,synthetic
+2026-08-16,Walk-in customer,sales,in,47823.00,cash,SALE-260816,synthetic
+2026-08-16,Own bank account,transfer,out,61505.00,cash,SWEEP-CASH-260816,synthetic
+2026-08-17,Walk-in customer,sales,in,15681.00,cash,SALE-260817,synthetic
+2026-08-17,Walk-in customer,sales,in,43285.00,cash,SALE-260817,synthetic
+2026-08-17,Own bank account,transfer,out,58966.00,cash,SWEEP-CASH-260817,synthetic
+2026-08-18,New Corporation,collection,in,25308.00,cash,FAB-INV-01218,synthetic
+2026-08-18,Own bank account,transfer,out,25308.00,cash,SWEEP-CASH-260818,synthetic
+2026-08-19,Mayer Doa Traders,collection,in,34332.00,cash,FAB-INV-01216,synthetic
+2026-08-19,Walk-in customer,sales,in,14078.00,cash,SALE-260819,synthetic
+2026-08-19,Own bank account,transfer,out,48410.00,cash,SWEEP-CASH-260819,synthetic
+2026-08-20,Walk-in customer,sales,in,32971.00,cash,SALE-260820,synthetic
+2026-08-20,Own bank account,transfer,out,32971.00,cash,SWEEP-CASH-260820,synthetic
+2026-08-22,Madina Traders,collection,in,44874.00,cash,FAB-INV-01238,synthetic
+2026-08-22,Walk-in customer,sales,in,38239.00,cash,SALE-260822,synthetic
+2026-08-22,Own bank account,transfer,out,83113.00,cash,SWEEP-CASH-260822,synthetic
+2026-08-23,Janata Store,collection,in,28837.00,cash,FAB-INV-01246,synthetic
+2026-08-23,Walk-in customer,sales,in,30159.00,cash,SALE-260823,synthetic
+2026-08-23,Own bank account,transfer,out,58996.00,cash,SWEEP-CASH-260823,synthetic
+2026-08-25,Walk-in customer,sales,in,15299.00,cash,SALE-260825,synthetic
+2026-08-27,Dhaka Store,collection,in,19760.00,cash,FAB-INV-01254,synthetic
+2026-08-27,Own bank account,transfer,out,35059.00,cash,SWEEP-CASH-260827,synthetic
+2026-08-28,Mayer Doa Bhandar,collection,in,34122.00,cash,FAB-INV-01244,synthetic
+2026-08-28,Own bank account,transfer,out,34122.00,cash,SWEEP-CASH-260828,synthetic
+2026-08-29,New House,collection,in,21156.00,cash,FAB-INV-01237,synthetic
+2026-08-29,Own bank account,transfer,out,21156.00,cash,SWEEP-CASH-260829,synthetic
+2026-08-31,Madina Bhandar,collection,in,20599.00,cash,FAB-INV-01252,synthetic
+2026-08-31,Own bank account,transfer,out,20599.00,cash,SWEEP-CASH-260831,synthetic
+2026-09-01,New House,collection,in,15322.00,cash,FAB-INV-01243,synthetic
+2026-09-01,Shapla Store,collection,in,12027.00,cash,FAB-INV-01248,synthetic
+2026-09-01,Own bank account,transfer,out,27349.00,cash,SWEEP-CASH-260901,synthetic
+2026-09-02,Walk-in customer,sales,in,32656.00,cash,SALE-260902,synthetic
+2026-09-02,Own bank account,transfer,out,32656.00,cash,SWEEP-CASH-260902,synthetic
+2026-09-03,Walk-in customer,sales,in,14215.00,cash,SALE-260903,synthetic
+2026-09-05,Walk-in customer,sales,in,15926.00,cash,SALE-260905,synthetic
+2026-09-05,Own bank account,transfer,out,30141.00,cash,SWEEP-CASH-260905,synthetic
+2026-09-06,Walk-in customer,sales,in,36590.00,cash,SALE-260906,synthetic
+2026-09-06,Own bank account,transfer,out,36590.00,cash,SWEEP-CASH-260906,synthetic
+2026-09-07,Janata Bhandar,collection,in,25850.00,cash,FAB-INV-01247,synthetic
+2026-09-07,Mayer Doa Traders,collection,in,14795.00,cash,FAB-INV-01260,synthetic
+2026-09-07,Walk-in customer,sales,in,20996.00,cash,SALE-260907,synthetic
+2026-09-07,Walk-in customer,sales,in,22129.00,cash,SALE-260907,synthetic
+2026-09-07,Own bank account,transfer,out,83770.00,cash,SWEEP-CASH-260907,synthetic
+2026-09-08,Walk-in customer,sales,in,7832.00,cash,SALE-260908,synthetic
+2026-09-09,Mayer Doa Bhandar,collection,in,12371.00,cash,FAB-INV-01249,synthetic
+2026-09-09,Walk-in customer,sales,in,28561.00,cash,SALE-260909,synthetic
+2026-09-09,Own bank account,transfer,out,48764.00,cash,SWEEP-CASH-260909,synthetic
+2026-09-13,Sonali Traders,collection,in,24202.00,cash,FAB-INV-01276,synthetic
+2026-09-13,Own bank account,transfer,out,24202.00,cash,SWEEP-CASH-260913,synthetic
+2026-09-15,Walk-in customer,sales,in,53584.00,cash,SALE-260915,synthetic
+2026-09-15,Own bank account,transfer,out,53584.00,cash,SWEEP-CASH-260915,synthetic
+2026-09-16,Madina Bhandar,collection,in,46704.00,cash,FAB-INV-01278,synthetic
+2026-09-16,Walk-in customer,sales,in,31347.00,cash,SALE-260916,synthetic
+2026-09-16,Own bank account,transfer,out,78051.00,cash,SWEEP-CASH-260916,synthetic
+2026-09-20,Walk-in customer,sales,in,24849.00,cash,SALE-260920,synthetic
+2026-09-20,Walk-in customer,sales,in,32249.00,cash,SALE-260920,synthetic
+2026-09-20,Own bank account,transfer,out,57098.00,cash,SWEEP-CASH-260920,synthetic
+2026-09-23,New House,collection,in,19225.00,cash,FAB-INV-01277,synthetic
+2026-09-23,Janata Store,collection,in,16934.00,cash,FAB-INV-01291,synthetic
+2026-09-23,Walk-in customer,sales,in,27523.00,cash,SALE-260923,synthetic
+2026-09-23,Own bank account,transfer,out,63682.00,cash,SWEEP-CASH-260923,synthetic
+2026-09-24,Shapla Enterprise,collection,in,44478.00,cash,FAB-INV-01303,synthetic
+2026-09-24,Own bank account,transfer,out,44478.00,cash,SWEEP-CASH-260924,synthetic
+2026-09-29,Shapla House,collection,in,45541.00,cash,FAB-INV-01258,synthetic
+2026-09-29,Bhai Bhai Enterprise,collection,in,20096.00,cash,FAB-INV-01273,synthetic
+2026-09-29,Madina Traders,collection,in,36247.00,cash,FAB-INV-01305,synthetic
+2026-09-29,Walk-in customer,sales,in,13749.00,cash,SALE-260929,synthetic
+2026-09-29,Walk-in customer,sales,in,39607.00,cash,SALE-260929,synthetic
+2026-09-29,Own bank account,transfer,out,155240.00,cash,SWEEP-CASH-260929,synthetic

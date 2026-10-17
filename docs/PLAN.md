@@ -200,7 +200,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 
 | WP | Status | Branch | Tests | Notes |
 | --- | --- | --- | --- | --- |
-| WP-00 | not started | — | 0 | |
+| WP-00 | done | main | 237 backend + 34 web + 4 e2e | contracts v1.0.0 (58 models), synthetic universe, CI |
 | WP-01 | not started | — | 0 | |
 | WP-02 | not started | — | 0 | |
 | WP-03 | not started | — | 0 | |

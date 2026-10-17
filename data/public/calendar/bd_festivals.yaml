@@ -1,0 +1,15 @@
+# Bangladesh festival calendar used by the cash forecaster (WP-04) and the synthetic generator.
+# Eid dates depend on moon sighting: treat them as +/- 1 day. Pohela Boishakh is fixed (14 April).
+# Sources: Bangladesh government holiday lists; Islamic calendar projections. Checked: 2026-10-18.
+data_mode: public
+approximate_days: 1
+festivals:
+  - {name: eid_ul_fitr, date: 2025-03-31}
+  - {name: pohela_boishakh, date: 2025-04-14}
+  - {name: eid_ul_adha, date: 2025-06-07}
+  - {name: eid_ul_fitr, date: 2026-03-21}
+  - {name: pohela_boishakh, date: 2026-04-14}
+  - {name: eid_ul_adha, date: 2026-05-27}
+  - {name: eid_ul_fitr, date: 2027-03-10}
+  - {name: pohela_boishakh, date: 2027-04-14}
+  - {name: eid_ul_adha, date: 2027-05-17}

@@ -1,0 +1,33 @@
+{
+  "app": {
+    "name": "Hishab",
+    "tagline": "您店铺的财务副驾驶"
+  },
+  "banner": {
+    "synthetic": "演示数据：此处显示的所有内容均为合成数据，并非真实企业。"
+  },
+  "language": {
+    "label": "语言",
+    "en": "English",
+    "bn": "বাংলা",
+    "zh": "中文"
+  },
+  "nav": {
+    "today": "今日",
+    "cash": "现金",
+    "receivables": "应收账款",
+    "financing": "融资",
+    "analysis": "分析",
+    "mesh": "流动性网络",
+    "market": "市场",
+    "messages": "消息",
+    "reports": "报告",
+    "trust": "信任与审计",
+    "settings": "设置"
+  },
+  "common": {
+    "loading": "加载中…",
+    "comingSoon": "此页面正在建设中。",
+    "error": "出错了，请重试。"
+  }
+}

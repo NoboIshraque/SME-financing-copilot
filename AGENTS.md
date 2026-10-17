@@ -30,6 +30,8 @@ write the request under "Questions" in your WP file and stop.
 
 ```
 backend/app/contracts/     WP-00   Pydantic schemas shared by everyone (facts, API, agents)
+backend/app/synthetic/     WP-00   load_universe(): the synthetic SMEs as typed contracts
+backend/app/main.py, db.py, settings.py, api/health.py, tests/conftest.py   WP-00
 backend/app/facts/         WP-01   Typed Fact Ledger, provenance graph
 backend/app/ingest/        WP-02   bKash/Nagad/bank CSV, Excel, OCR, Bangla/Banglish
 backend/app/privacy/       WP-03   detectors, token vault, anonymiser
@@ -66,12 +68,42 @@ npm run lint           # ruff + eslint + tsc
 npm run dev            # API on :8000, web on :5173, seeded synthetic data
 npm run eval           # offline evaluation harness
 npm run evidence       # writes docs/submission/evidence/
+npm run contracts      # after a contract change (orchestrator only): schema JSON + web types
+npm run synthetic      # regenerate data/synthetic/universe (deterministic, seed 20261020)
 ```
 
 Root `package.json` scripts are the task runner (Windows has no `make`); they work in
 PowerShell, CMD and Git Bash.
 
 Run a single backend test: `cd backend && uv run pytest tests/cash/test_forecast.py -q`.
+
+## How the scaffold works (read once)
+
+- **Contracts:** `from app.contracts import Money, Transaction, ForecastBand, ...` (58 models,
+  frozen, unknown fields rejected). Money is `Money.of("1250.50")`; floats are refused.
+  `app/contracts/examples.py` has one valid example of every contract: reuse it in tests.
+  The web gets the same types in `web/src/api/contracts.ts` (generated, never edit).
+- **Synthetic data:** in tests use the `universe` fixture (`universe.smes["sme_grocery"]` has
+  `.transactions .invoices .bills .obligations .parties .balance_on(day)`;
+  `universe.mesh_obligations` is the open debt ring fabric -> garment -> hardware). As-of date
+  2026-09-30. Raw export-format files (bKash, Nagad, bank, cash book, baki register) are in
+  `data/synthetic/universe/<sme>/`; `transactions_truth.csv` is the typed ground truth.
+- **Your API:** create `backend/app/api/<wp_name>.py` with a module-level `router = APIRouter(...)`.
+  It is mounted under `/api` automatically. Do not edit `main.py`.
+- **Your tables:** create `backend/app/<area>/models.py` subclassing `app.db.Base`. Tables are
+  created automatically. Get a session in routes with `Depends(get_session)` from `app.main`.
+- **Tests:** `client` fixture = app on in-memory SQLite. Any non-localhost network call fails
+  the test on purpose. Hypothesis runs derandomised in CI (`HYPOTHESIS_PROFILE=ci`).
+- **Festival calendar:** `data/public/calendar/bd_festivals.yaml` (Eid dates are +/- 1 day).
+- **Dependencies** for every WP are already in `backend/pyproject.toml` and `web/package.json`
+  (numpy, networkx, sympy, cryptography, argon2, pyotp, openpyxl, pytesseract, reportlab,
+  openai, web3, apscheduler; react-router, react-query, recharts, i18next, Playwright, axe).
+  Avoid adding more. If you must, expect a lockfile conflict: keep either side, re-run
+  `uv lock` (backend) or `npm install` (web), and commit.
+- **Web:** screens go in `web/src/routes.tsx` (replace the Placeholder for your screen). Strings
+  go in all three of `web/src/i18n/locales/{en,bn,zh}.json` (a test checks they match). Format
+  money with `formatTaka()` from `web/src/api/format.ts` (exact, lakh/crore grouping, Bangla
+  digits). Call the API only with `apiGet`/`apiPost` from `web/src/api/client.ts`.
 
 ## Conventions
 

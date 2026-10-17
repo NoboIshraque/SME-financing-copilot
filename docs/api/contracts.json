@@ -1,0 +1,3638 @@
+{
+  "$defs": {
+    "Abstention": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "message_key": {
+          "title": "Message Key",
+          "type": "string"
+        },
+        "missing": {
+          "default": [],
+          "description": "Exactly what is missing, e.g. 'at least 90 days of sales'",
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing",
+          "type": "array"
+        },
+        "reason": {
+          "$ref": "#/$defs/AbstentionReason"
+        }
+      },
+      "required": [
+        "reason",
+        "message_key"
+      ],
+      "title": "Abstention",
+      "type": "object"
+    },
+    "AbstentionReason": {
+      "enum": [
+        "insufficient_data",
+        "low_agreement",
+        "unverifiable",
+        "out_of_scope",
+        "policy",
+        "budget_exhausted"
+      ],
+      "title": "AbstentionReason",
+      "type": "string"
+    },
+    "ActionCard": {
+      "additionalProperties": false,
+      "properties": {
+        "action_type": {
+          "$ref": "#/$defs/ActionType"
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Figure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At"
+        },
+        "figures": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Figure"
+          },
+          "title": "Figures",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "impact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Figure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Effect, e.g. gap reduced by Tk X"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "title": "Payload",
+          "type": "object"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "title_key": {
+          "title": "Title Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title_key",
+        "action_type",
+        "tier"
+      ],
+      "title": "ActionCard",
+      "type": "object"
+    },
+    "ActionType": {
+      "enum": [
+        "view",
+        "send_reminder",
+        "send_message",
+        "draft_loan_application",
+        "retime_payable",
+        "request_advance",
+        "offer_early_pay_discount",
+        "propose_netting_round",
+        "approve_netting_round",
+        "share_passport",
+        "set_credit_limit",
+        "record_dispute",
+        "change_bank_details",
+        "add_payee",
+        "disable_audit",
+        "export_raw_pii",
+        "move_money"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "AgreementReport": {
+      "additionalProperties": false,
+      "properties": {
+        "agreement_rate": {
+          "title": "Agreement Rate",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "stakes": {
+          "description": "low | medium | high",
+          "title": "Stakes",
+          "type": "string"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "string"
+        },
+        "votes": {
+          "items": {
+            "$ref": "#/$defs/Vote"
+          },
+          "minItems": 1,
+          "title": "Votes",
+          "type": "array"
+        },
+        "winning_choice": {
+          "title": "Winning Choice",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question",
+        "votes",
+        "winning_choice",
+        "agreement_rate",
+        "threshold",
+        "stakes"
+      ],
+      "title": "AgreementReport",
+      "type": "object"
+    },
+    "Alert": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "dedupe_key": {
+          "title": "Dedupe Key",
+          "type": "string"
+        },
+        "fixes": {
+          "default": [],
+          "description": "Ranked fixes, cheapest first",
+          "items": {
+            "$ref": "#/$defs/ActionCard"
+          },
+          "title": "Fixes",
+          "type": "array"
+        },
+        "gap": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CashGap"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "indicators": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/LeadingIndicator"
+          },
+          "title": "Indicators",
+          "type": "array"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/AlertTier"
+        },
+        "title_key": {
+          "title": "Title Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "tier",
+        "title_key",
+        "dedupe_key",
+        "created_at",
+        "data_mode"
+      ],
+      "title": "Alert",
+      "type": "object"
+    },
+    "AlertTier": {
+      "enum": [
+        "watch",
+        "warning",
+        "critical"
+      ],
+      "title": "AlertTier",
+      "type": "string"
+    },
+    "AnchorChain": {
+      "enum": [
+        "offline",
+        "sepolia"
+      ],
+      "title": "AnchorChain",
+      "type": "string"
+    },
+    "AnchorReceipt": {
+      "additionalProperties": false,
+      "description": "Proof that a digest was anchored. Only a SHA-256 hex digest ever goes on chain.",
+      "properties": {
+        "anchored_at": {
+          "format": "date-time",
+          "title": "Anchored At",
+          "type": "string"
+        },
+        "block_number": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Number"
+        },
+        "chain": {
+          "$ref": "#/$defs/AnchorChain"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "explorer_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explorer Url"
+        },
+        "tx_hash": {
+          "anyOf": [
+            {
+              "pattern": "^0x[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tx Hash"
+        }
+      },
+      "required": [
+        "chain",
+        "digest",
+        "anchored_at"
+      ],
+      "title": "AnchorReceipt",
+      "type": "object"
+    },
+    "ApiError": {
+      "additionalProperties": false,
+      "description": "Error body returned by every endpoint. `message_key` is an i18n key.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "detail": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Detail",
+          "type": "object"
+        },
+        "message_key": {
+          "title": "Message Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message_key"
+      ],
+      "title": "ApiError",
+      "type": "object"
+    },
+    "Approval": {
+      "additionalProperties": false,
+      "properties": {
+        "action_card_id": {
+          "title": "Action Card Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "decided_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided By"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "minLength": 8,
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "requested_by": {
+          "title": "Requested By",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ApprovalStatus"
+        },
+        "step_up_verified": {
+          "default": false,
+          "title": "Step Up Verified",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "action_card_id",
+        "tier",
+        "requested_by",
+        "status",
+        "idempotency_key",
+        "created_at",
+        "expires_at"
+      ],
+      "title": "Approval",
+      "type": "object"
+    },
+    "ApprovalStatus": {
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired",
+        "executed"
+      ],
+      "title": "ApprovalStatus",
+      "type": "string"
+    },
+    "Attestation": {
+      "additionalProperties": false,
+      "properties": {
+        "attester_tenant": {
+          "title": "Attester Tenant",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "digest": {
+          "description": "SHA-256 of the attested record",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/AttestationKind"
+        },
+        "obligation_id": {
+          "title": "Obligation Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "obligation_id",
+        "attester_tenant",
+        "kind",
+        "digest",
+        "created_at"
+      ],
+      "title": "Attestation",
+      "type": "object"
+    },
+    "AttestationKind": {
+      "enum": [
+        "confirm",
+        "dispute"
+      ],
+      "title": "AttestationKind",
+      "type": "string"
+    },
+    "AuditEvent": {
+      "additionalProperties": false,
+      "description": "One link of the append-only, SHA-256 hash-chained audit log.",
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "actor": {
+          "title": "Actor",
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "details_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Details Digest",
+          "type": "string"
+        },
+        "hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Hash",
+          "type": "string"
+        },
+        "prev_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Prev Hash",
+          "type": "string"
+        },
+        "seq": {
+          "minimum": 0,
+          "title": "Seq",
+          "type": "integer"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tier": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Tier"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "seq",
+        "tenant_id",
+        "at",
+        "actor",
+        "action",
+        "details_digest",
+        "prev_hash",
+        "hash"
+      ],
+      "title": "AuditEvent",
+      "type": "object"
+    },
+    "Bill": {
+      "additionalProperties": false,
+      "description": "Money the business owes a supplier.",
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "amount_paid": {
+          "$ref": "#/$defs/Money"
+        },
+        "counterparty_token": {
+          "title": "Counterparty Token",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "due_date": {
+          "format": "date",
+          "title": "Due Date",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issue_date": {
+          "format": "date",
+          "title": "Issue Date",
+          "type": "string"
+        },
+        "paid_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paid Date"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/DocumentStatus"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "counterparty_token",
+        "issue_date",
+        "due_date",
+        "amount",
+        "amount_paid",
+        "status",
+        "source_ref",
+        "data_mode"
+      ],
+      "title": "Bill",
+      "type": "object"
+    },
+    "CashGap": {
+      "additionalProperties": false,
+      "properties": {
+        "drivers": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GapDriver"
+          },
+          "maxItems": 3,
+          "title": "Drivers",
+          "type": "array"
+        },
+        "expected_shortfall": {
+          "$ref": "#/$defs/Money"
+        },
+        "figures": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Figure"
+          },
+          "title": "Figures",
+          "type": "array"
+        },
+        "first_breach_day": {
+          "format": "date",
+          "title": "First Breach Day",
+          "type": "string"
+        },
+        "lead_time_days": {
+          "minimum": 0,
+          "title": "Lead Time Days",
+          "type": "integer"
+        },
+        "probability": {
+          "title": "Probability",
+          "type": "string"
+        },
+        "worst_day": {
+          "format": "date",
+          "title": "Worst Day",
+          "type": "string"
+        }
+      },
+      "required": [
+        "first_breach_day",
+        "lead_time_days",
+        "probability",
+        "expected_shortfall",
+        "worst_day"
+      ],
+      "title": "CashGap",
+      "type": "object"
+    },
+    "Channel": {
+      "enum": [
+        "bkash",
+        "nagad",
+        "rocket",
+        "bank",
+        "cash",
+        "card",
+        "other"
+      ],
+      "title": "Channel",
+      "type": "string"
+    },
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_id": {
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "recomputed_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recomputed Value"
+        },
+        "status": {
+          "$ref": "#/$defs/CheckStatus"
+        }
+      },
+      "required": [
+        "claim_id",
+        "status"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "CheckStatus": {
+      "enum": [
+        "verified",
+        "rejected",
+        "unverifiable"
+      ],
+      "title": "CheckStatus",
+      "type": "string"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "formula_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Formula Id"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "input_fact_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Input Fact Ids",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Unit"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Currency": {
+      "enum": [
+        "BDT",
+        "USD",
+        "CNY"
+      ],
+      "title": "Currency",
+      "type": "string"
+    },
+    "DataMode": {
+      "description": "Where data came from. Shown to users; synthetic data is always labelled.",
+      "enum": [
+        "synthetic",
+        "real_anonymised",
+        "public",
+        "live"
+      ],
+      "title": "DataMode",
+      "type": "string"
+    },
+    "Direction": {
+      "enum": [
+        "inflow",
+        "outflow"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "DocumentStatus": {
+      "enum": [
+        "open",
+        "partially_paid",
+        "paid",
+        "disputed",
+        "written_off"
+      ],
+      "title": "DocumentStatus",
+      "type": "string"
+    },
+    "DraftRow": {
+      "additionalProperties": false,
+      "description": "An OCR'd or uncertain row the owner must confirm before it is committed.",
+      "properties": {
+        "confidence": {
+          "title": "Confidence",
+          "type": "string"
+        },
+        "flagged": {
+          "title": "Flagged",
+          "type": "boolean"
+        },
+        "invoice": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Invoice"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "row_ref": {
+          "title": "Row Ref",
+          "type": "string"
+        },
+        "transaction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Transaction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "row_ref",
+        "confidence",
+        "flagged"
+      ],
+      "title": "DraftRow",
+      "type": "object"
+    },
+    "DraftStatus": {
+      "enum": [
+        "draft",
+        "approved",
+        "sent",
+        "rejected"
+      ],
+      "title": "DraftStatus",
+      "type": "string"
+    },
+    "DriverKind": {
+      "enum": [
+        "late_customer",
+        "bill_due",
+        "obligation",
+        "seasonal_dip",
+        "stock_build",
+        "cost_shock"
+      ],
+      "title": "DriverKind",
+      "type": "string"
+    },
+    "Eligibility": {
+      "additionalProperties": false,
+      "properties": {
+        "product_id": {
+          "title": "Product Id",
+          "type": "string"
+        },
+        "reasons": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EligibilityReason"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/EligibilityStatus"
+        }
+      },
+      "required": [
+        "product_id",
+        "status"
+      ],
+      "title": "Eligibility",
+      "type": "object"
+    },
+    "EligibilityReason": {
+      "additionalProperties": false,
+      "properties": {
+        "message_key": {
+          "title": "Message Key",
+          "type": "string"
+        },
+        "observed_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Value"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/EligibilityStatus"
+        }
+      },
+      "required": [
+        "rule_id",
+        "status",
+        "message_key"
+      ],
+      "title": "EligibilityReason",
+      "type": "object"
+    },
+    "EligibilityRule": {
+      "additionalProperties": false,
+      "properties": {
+        "description_key": {
+          "title": "Description Key",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "metric": {
+          "description": "Fact metric name, e.g. 'business_age_months'",
+          "title": "Metric",
+          "type": "string"
+        },
+        "op": {
+          "$ref": "#/$defs/RuleOp"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Threshold"
+        }
+      },
+      "required": [
+        "id",
+        "metric",
+        "op",
+        "description_key"
+      ],
+      "title": "EligibilityRule",
+      "type": "object"
+    },
+    "EligibilityStatus": {
+      "enum": [
+        "pass",
+        "fail",
+        "not_on_record"
+      ],
+      "title": "EligibilityStatus",
+      "type": "string"
+    },
+    "EvidenceItem": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "period": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Period"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "verified": {
+          "description": "True when checked against its source, not self-declared",
+          "title": "Verified",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "digest",
+        "verified"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "mobile_money_statement",
+        "bank_statement",
+        "trade_licence",
+        "etin",
+        "bin_vat",
+        "utility_bill",
+        "lender_report"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "ExplainedInput": {
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fact_id",
+        "metric",
+        "value",
+        "unit"
+      ],
+      "title": "ExplainedInput",
+      "type": "object"
+    },
+    "Explanation": {
+      "additionalProperties": false,
+      "description": "Answer of `GET /explain/{figure_id}`.",
+      "properties": {
+        "figure_id": {
+          "title": "Figure Id",
+          "type": "string"
+        },
+        "formula": {
+          "$ref": "#/$defs/FormulaRef"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/ExplainedInput"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "masked": {
+          "description": "True if source rows were masked for the caller's role",
+          "title": "Masked",
+          "type": "boolean"
+        },
+        "source_rows": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Rows",
+          "type": "array"
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "figure_id",
+        "formula",
+        "value",
+        "unit",
+        "inputs",
+        "source_rows",
+        "masked"
+      ],
+      "title": "Explanation",
+      "type": "object"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "computed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Computed At"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "entity_token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entity Token"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "metric": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Metric",
+          "type": "string"
+        },
+        "period": {
+          "$ref": "#/$defs/Period"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Provenance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "None only for raw facts read straight from a source row"
+        },
+        "source_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "metric",
+        "value",
+        "unit",
+        "period",
+        "data_mode"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "Fee": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/FeeKind"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "timing": {
+          "$ref": "#/$defs/FeeTiming",
+          "default": "upfront"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "value"
+      ],
+      "title": "Fee",
+      "type": "object"
+    },
+    "FeeKind": {
+      "enum": [
+        "fixed",
+        "percent_of_principal",
+        "compulsory_deposit_percent"
+      ],
+      "title": "FeeKind",
+      "type": "string"
+    },
+    "FeeTiming": {
+      "enum": [
+        "upfront",
+        "periodic",
+        "at_maturity"
+      ],
+      "title": "FeeTiming",
+      "type": "string"
+    },
+    "Figure": {
+      "additionalProperties": false,
+      "description": "A number shown to a user. Always computed by code, always explainable.",
+      "properties": {
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label_key": {
+          "description": "i18n key for the label",
+          "title": "Label Key",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label_key",
+        "value",
+        "unit",
+        "provenance",
+        "data_mode"
+      ],
+      "title": "Figure",
+      "type": "object"
+    },
+    "FinancingNeed": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "needed_by": {
+          "format": "date",
+          "title": "Needed By",
+          "type": "string"
+        },
+        "purpose_key": {
+          "default": "working_capital",
+          "title": "Purpose Key",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tenor_days": {
+          "maximum": 3650,
+          "minimum": 1,
+          "title": "Tenor Days",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "amount",
+        "needed_by",
+        "tenor_days"
+      ],
+      "title": "FinancingNeed",
+      "type": "object"
+    },
+    "FinancingOption": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_likelihood": {
+          "title": "Approval Likelihood",
+          "type": "string"
+        },
+        "effective_apr": {
+          "description": "True annual cost in percent, fees included",
+          "title": "Effective Apr",
+          "type": "string"
+        },
+        "eligibility": {
+          "$ref": "#/$defs/Eligibility"
+        },
+        "figures": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Figure"
+          },
+          "title": "Figures",
+          "type": "array"
+        },
+        "p_buffer_breach": {
+          "title": "P Buffer Breach",
+          "type": "string"
+        },
+        "product": {
+          "$ref": "#/$defs/FinancingProduct"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "reason_keys": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Reason Keys",
+          "type": "array"
+        },
+        "score": {
+          "title": "Score",
+          "type": "string"
+        },
+        "speed_days": {
+          "minimum": 0,
+          "title": "Speed Days",
+          "type": "integer"
+        },
+        "total_cost": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "product",
+        "eligibility",
+        "effective_apr",
+        "total_cost",
+        "p_buffer_breach",
+        "speed_days",
+        "approval_likelihood",
+        "score",
+        "rank"
+      ],
+      "title": "FinancingOption",
+      "type": "object"
+    },
+    "FinancingProduct": {
+      "additionalProperties": false,
+      "properties": {
+        "checked_on": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checked On"
+        },
+        "collateral_required": {
+          "default": false,
+          "title": "Collateral Required",
+          "type": "boolean"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "fees": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Fee"
+          },
+          "title": "Fees",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "is_modelled": {
+          "default": false,
+          "description": "True for illustrative products (e.g. the P14 China pack)",
+          "title": "Is Modelled",
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/ProductKind"
+        },
+        "max_amount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "max_tenor_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Tenor Days"
+        },
+        "min_amount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "min_tenor_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Tenor Days"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "nominal_rate_pa": {
+          "description": "Percent per year as published, e.g. 9",
+          "title": "Nominal Rate Pa",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "rate_type": {
+          "$ref": "#/$defs/RateType"
+        },
+        "rules": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EligibilityRule"
+          },
+          "title": "Rules",
+          "type": "array"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Url"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "name",
+        "kind",
+        "rate_type",
+        "nominal_rate_pa",
+        "data_mode"
+      ],
+      "title": "FinancingProduct",
+      "type": "object"
+    },
+    "ForecastBand": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "format": "date",
+          "title": "As Of",
+          "type": "string"
+        },
+        "buffer": {
+          "$ref": "#/$defs/Money"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "horizon_days": {
+          "maximum": 366,
+          "minimum": 1,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "opening_balance": {
+          "$ref": "#/$defs/Money"
+        },
+        "paths": {
+          "minimum": 1,
+          "title": "Paths",
+          "type": "integer"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/ForecastPoint"
+          },
+          "title": "Points",
+          "type": "array"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "as_of",
+        "horizon_days",
+        "paths",
+        "seed",
+        "opening_balance",
+        "buffer",
+        "points",
+        "data_mode",
+        "generated_at"
+      ],
+      "title": "ForecastBand",
+      "type": "object"
+    },
+    "ForecastPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "format": "date",
+          "title": "Day",
+          "type": "string"
+        },
+        "p10": {
+          "$ref": "#/$defs/Money",
+          "description": "Worst-case band (10th percentile balance)"
+        },
+        "p50": {
+          "$ref": "#/$defs/Money",
+          "description": "Likely balance (median)"
+        },
+        "p90": {
+          "$ref": "#/$defs/Money",
+          "description": "Best-case band (90th percentile balance)"
+        },
+        "p_below_buffer": {
+          "title": "P Below Buffer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "day",
+        "p10",
+        "p50",
+        "p90",
+        "p_below_buffer"
+      ],
+      "title": "ForecastPoint",
+      "type": "object"
+    },
+    "FormulaRef": {
+      "additionalProperties": false,
+      "properties": {
+        "expression": {
+          "description": "Human-readable formula, e.g. 'receivables / sales * days'",
+          "title": "Expression",
+          "type": "string"
+        },
+        "formula_id": {
+          "description": "e.g. 'cash.dso'",
+          "pattern": "^[a-z][a-z0-9_.]*$",
+          "title": "Formula Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "formula_id",
+        "version",
+        "expression"
+      ],
+      "title": "FormulaRef",
+      "type": "object"
+    },
+    "Frequency": {
+      "enum": [
+        "weekly",
+        "monthly",
+        "quarterly",
+        "yearly"
+      ],
+      "title": "Frequency",
+      "type": "string"
+    },
+    "GapDriver": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "counterparty_token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Counterparty Token"
+        },
+        "kind": {
+          "$ref": "#/$defs/DriverKind"
+        },
+        "label_key": {
+          "title": "Label Key",
+          "type": "string"
+        },
+        "reference_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Invoice/bill/obligation id",
+          "title": "Reference Id"
+        }
+      },
+      "required": [
+        "kind",
+        "label_key",
+        "amount"
+      ],
+      "title": "GapDriver",
+      "type": "object"
+    },
+    "Granularity": {
+      "enum": [
+        "day",
+        "week",
+        "month",
+        "quarter",
+        "year"
+      ],
+      "title": "Granularity",
+      "type": "string"
+    },
+    "IngestPreview": {
+      "additionalProperties": false,
+      "properties": {
+        "bills": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Bill"
+          },
+          "title": "Bills",
+          "type": "array"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "drafts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DraftRow"
+          },
+          "title": "Drafts",
+          "type": "array"
+        },
+        "duplicates_skipped": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Duplicates Skipped",
+          "type": "integer"
+        },
+        "file_digest": {
+          "description": "Keyed digest of the file",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "File Digest",
+          "type": "string"
+        },
+        "invoices": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Invoice"
+          },
+          "title": "Invoices",
+          "type": "array"
+        },
+        "preview_id": {
+          "title": "Preview Id",
+          "type": "string"
+        },
+        "source_format": {
+          "$ref": "#/$defs/SourceFormat"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "transactions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Transaction"
+          },
+          "title": "Transactions",
+          "type": "array"
+        },
+        "unparsed": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UnparsedRow"
+          },
+          "title": "Unparsed",
+          "type": "array"
+        }
+      },
+      "required": [
+        "preview_id",
+        "tenant_id",
+        "source_format",
+        "file_digest",
+        "data_mode"
+      ],
+      "title": "IngestPreview",
+      "type": "object"
+    },
+    "Invoice": {
+      "additionalProperties": false,
+      "description": "Money a customer owes the business (includes baki / credit sales).",
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "amount_paid": {
+          "$ref": "#/$defs/Money"
+        },
+        "counterparty_token": {
+          "title": "Counterparty Token",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "due_date": {
+          "format": "date",
+          "title": "Due Date",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issue_date": {
+          "format": "date",
+          "title": "Issue Date",
+          "type": "string"
+        },
+        "paid_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paid Date"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/DocumentStatus"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "counterparty_token",
+        "issue_date",
+        "due_date",
+        "amount",
+        "amount_paid",
+        "status",
+        "source_ref",
+        "data_mode"
+      ],
+      "title": "Invoice",
+      "type": "object"
+    },
+    "Language": {
+      "enum": [
+        "en",
+        "bn",
+        "zh"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "LeadingIndicator": {
+      "enum": [
+        "dso_rising",
+        "top_customer_slowing",
+        "stock_building",
+        "sales_below_seasonal_norm",
+        "payroll_or_emi_at_risk"
+      ],
+      "title": "LeadingIndicator",
+      "type": "string"
+    },
+    "LenderProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "disputes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Disputes",
+          "type": "integer"
+        },
+        "events_count": {
+          "minimum": 0,
+          "title": "Events Count",
+          "type": "integer"
+        },
+        "hidden_fee_incidents": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Hidden Fee Incidents",
+          "type": "integer"
+        },
+        "lender_id": {
+          "title": "Lender Id",
+          "type": "string"
+        },
+        "licence_status": {
+          "$ref": "#/$defs/LicenceStatus"
+        },
+        "median_disbursal_days": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Median Disbursal Days"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "quoted_vs_realised_apr_gap": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Average realised minus quoted APR, percentage points",
+          "title": "Quoted Vs Realised Apr Gap"
+        },
+        "regulator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. 'Bangladesh Bank', 'MRA'",
+          "title": "Regulator"
+        }
+      },
+      "required": [
+        "lender_id",
+        "name",
+        "licence_status",
+        "events_count",
+        "data_mode"
+      ],
+      "title": "LenderProfile",
+      "type": "object"
+    },
+    "LeverKind": {
+      "enum": [
+        "retime_payable",
+        "stagger_purchase",
+        "request_advance",
+        "early_pay_discount",
+        "netting",
+        "standby_facility",
+        "surplus_sweep"
+      ],
+      "title": "LeverKind",
+      "type": "string"
+    },
+    "LicenceStatus": {
+      "enum": [
+        "licensed",
+        "not_found",
+        "revoked",
+        "unknown"
+      ],
+      "title": "LicenceStatus",
+      "type": "string"
+    },
+    "MeshObligation": {
+      "additionalProperties": false,
+      "description": "`debtor_tenant` owes `creditor_tenant`. Both are Hishab tenants that opted in.",
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "attested": {
+          "default": false,
+          "title": "Attested",
+          "type": "boolean"
+        },
+        "creditor_tenant": {
+          "title": "Creditor Tenant",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "debtor_tenant": {
+          "title": "Debtor Tenant",
+          "type": "string"
+        },
+        "due_date": {
+          "format": "date",
+          "title": "Due Date",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "invoice_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Invoice Ref"
+        },
+        "status": {
+          "$ref": "#/$defs/ObligationStatus",
+          "default": "open"
+        }
+      },
+      "required": [
+        "id",
+        "debtor_tenant",
+        "creditor_tenant",
+        "amount",
+        "due_date",
+        "data_mode"
+      ],
+      "title": "MeshObligation",
+      "type": "object"
+    },
+    "MessageChannel": {
+      "enum": [
+        "in_app",
+        "email",
+        "copy"
+      ],
+      "title": "MessageChannel",
+      "type": "string"
+    },
+    "MessageDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "maxLength": 2000,
+          "title": "Body",
+          "type": "string"
+        },
+        "channel": {
+          "$ref": "#/$defs/MessageChannel"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "language": {
+          "$ref": "#/$defs/Language"
+        },
+        "purpose": {
+          "$ref": "#/$defs/MessagePurpose"
+        },
+        "recipient_token": {
+          "title": "Recipient Token",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/DraftStatus",
+          "default": "draft"
+        },
+        "template_id": {
+          "title": "Template Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "variables": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Filled from typed facts only",
+          "title": "Variables",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "template_id",
+        "purpose",
+        "language",
+        "channel",
+        "recipient_token",
+        "body",
+        "tier",
+        "created_at",
+        "data_mode"
+      ],
+      "title": "MessageDraft",
+      "type": "object"
+    },
+    "MessagePurpose": {
+      "enum": [
+        "pre_due_reminder",
+        "overdue_reminder",
+        "payment_plan_offer",
+        "supplier_term_extension",
+        "lender_update",
+        "netting_invitation",
+        "sale_memo"
+      ],
+      "title": "MessagePurpose",
+      "type": "string"
+    },
+    "Money": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "title": "Amount",
+          "type": "string"
+        },
+        "currency": {
+          "$ref": "#/$defs/Currency",
+          "default": "BDT"
+        }
+      },
+      "required": [
+        "amount"
+      ],
+      "title": "Money",
+      "type": "object"
+    },
+    "NettingRound": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnchorReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "approvals": {
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "description": "tenant -> approved?; missing = not answered yet",
+          "title": "Approvals",
+          "type": "object"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "gross_total": {
+          "$ref": "#/$defs/Money"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "net_total": {
+          "$ref": "#/$defs/Money"
+        },
+        "obligation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Obligation Ids",
+          "type": "array"
+        },
+        "participants": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Participants",
+          "type": "array"
+        },
+        "settlements": {
+          "items": {
+            "$ref": "#/$defs/Settlement"
+          },
+          "title": "Settlements",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/RoundStatus"
+        }
+      },
+      "required": [
+        "id",
+        "obligation_ids",
+        "participants",
+        "settlements",
+        "gross_total",
+        "net_total",
+        "status",
+        "created_at",
+        "expires_at",
+        "data_mode"
+      ],
+      "title": "NettingRound",
+      "type": "object"
+    },
+    "ObligationKind": {
+      "enum": [
+        "rent",
+        "salary",
+        "emi",
+        "utility",
+        "tax",
+        "subscription",
+        "other"
+      ],
+      "title": "ObligationKind",
+      "type": "string"
+    },
+    "ObligationStatus": {
+      "enum": [
+        "open",
+        "in_round",
+        "settled",
+        "disputed"
+      ],
+      "title": "ObligationStatus",
+      "type": "string"
+    },
+    "Party": {
+      "additionalProperties": false,
+      "properties": {
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "display_label": {
+          "description": "Neutral label safe to show anywhere, e.g. 'Customer 3'",
+          "maxLength": 64,
+          "title": "Display Label",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "is_tenant": {
+          "default": false,
+          "description": "True if this party is itself a Hishab tenant (mesh peer)",
+          "title": "Is Tenant",
+          "type": "boolean"
+        },
+        "role": {
+          "$ref": "#/$defs/PartyRole"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "token": {
+          "pattern": "^(PERSON|SHOP|PHONE|ACCOUNT|EMAIL|ADDRESS|ORG|PARTY)_[0-9a-z]{5,16}$",
+          "title": "Token",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "token",
+        "role",
+        "display_label",
+        "data_mode"
+      ],
+      "title": "Party",
+      "type": "object"
+    },
+    "PartyRole": {
+      "enum": [
+        "self",
+        "customer",
+        "supplier",
+        "lender",
+        "employee",
+        "landlord",
+        "government",
+        "utility",
+        "other"
+      ],
+      "title": "PartyRole",
+      "type": "string"
+    },
+    "PassportVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "abstention_rate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Abstention Rate"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnchorReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "attestations_confirmed": {
+          "minimum": 0,
+          "title": "Attestations Confirmed",
+          "type": "integer"
+        },
+        "attestations_disputed": {
+          "minimum": 0,
+          "title": "Attestations Disputed",
+          "type": "integer"
+        },
+        "audit_drill_catch_rate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audit Drill Catch Rate"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceItem"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issued_at": {
+          "format": "date-time",
+          "title": "Issued At",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "version",
+        "issued_at",
+        "evidence",
+        "attestations_confirmed",
+        "attestations_disputed",
+        "digest",
+        "data_mode"
+      ],
+      "title": "PassportVersion",
+      "type": "object"
+    },
+    "Period": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "format": "date",
+          "title": "End",
+          "type": "string"
+        },
+        "granularity": {
+          "$ref": "#/$defs/Granularity",
+          "default": "month"
+        },
+        "start": {
+          "format": "date",
+          "title": "Start",
+          "type": "string"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "title": "Period",
+      "type": "object"
+    },
+    "PricePoint": {
+      "additionalProperties": false,
+      "properties": {
+        "commodity": {
+          "description": "e.g. 'rice_coarse'",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Commodity",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "high": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "low": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "market": {
+          "description": "e.g. 'Dhaka' or 'World'",
+          "title": "Market",
+          "type": "string"
+        },
+        "observed_on": {
+          "format": "date",
+          "title": "Observed On",
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/$defs/Money",
+          "description": "Mid price; low/high when the source gives a range"
+        },
+        "source": {
+          "$ref": "#/$defs/PriceSource"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Url"
+        },
+        "unit": {
+          "description": "e.g. 'kg', 'litre', 'metric_ton'",
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commodity",
+        "unit",
+        "price",
+        "market",
+        "source",
+        "observed_on",
+        "data_mode"
+      ],
+      "title": "PricePoint",
+      "type": "object"
+    },
+    "PriceSource": {
+      "enum": [
+        "tcb",
+        "agripricebd",
+        "worldbank_pinksheet",
+        "vendor",
+        "manual"
+      ],
+      "title": "PriceSource",
+      "type": "string"
+    },
+    "Principal": {
+      "additionalProperties": false,
+      "properties": {
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required for lender_viewer (consented, expiring access)",
+          "title": "Expires At"
+        },
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "scopes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Scopes",
+          "type": "array"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id",
+        "tenant_id",
+        "role"
+      ],
+      "title": "Principal",
+      "type": "object"
+    },
+    "ProductKind": {
+      "enum": [
+        "term_loan",
+        "working_capital",
+        "nano_loan",
+        "refinance_scheme",
+        "factoring",
+        "invoice_discounting",
+        "leasing",
+        "mfi_loan",
+        "buyer_early_pay",
+        "supplier_term_extension",
+        "mesh_netting",
+        "owner_topup",
+        "grant",
+        "digital_credit_modelled"
+      ],
+      "title": "ProductKind",
+      "type": "string"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "formula_id": {
+          "title": "Formula Id",
+          "type": "string"
+        },
+        "formula_version": {
+          "minimum": 1,
+          "title": "Formula Version",
+          "type": "integer"
+        },
+        "input_fact_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Input Fact Ids",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Non-fact inputs such as seed or horizon, as strings",
+          "title": "Parameters",
+          "type": "object"
+        },
+        "source_row_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Row Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "formula_id",
+        "formula_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "RateType": {
+      "enum": [
+        "reducing_balance",
+        "flat",
+        "daily_debit",
+        "discount",
+        "none"
+      ],
+      "title": "RateType",
+      "type": "string"
+    },
+    "Ratio": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark"
+        },
+        "interpretation_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interpretation Key"
+        },
+        "name": {
+          "description": "e.g. 'current_ratio'",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "period": {
+          "$ref": "#/$defs/Period"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "None when the denominator is zero or missing",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "unit",
+        "period",
+        "provenance"
+      ],
+      "title": "Ratio",
+      "type": "object"
+    },
+    "Recommendation": {
+      "additionalProperties": false,
+      "properties": {
+        "abstention": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Abstention"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action_cards": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ActionCard"
+          },
+          "maxItems": 3,
+          "title": "Action Cards",
+          "type": "array"
+        },
+        "agreement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgreementReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "answer_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer Text"
+        },
+        "checks": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CheckResult"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "claims": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "title": "Claims",
+          "type": "array"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "critic_objection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Critic Objection"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "figures": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Figure"
+          },
+          "title": "Figures",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "stability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StabilityReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tools_used": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Tools Used",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "question",
+        "data_mode",
+        "created_at"
+      ],
+      "title": "Recommendation",
+      "type": "object"
+    },
+    "RecurringObligation": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "counterparty_token": {
+          "title": "Counterparty Token",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "day_of_period": {
+          "description": "Day of month (or weekday 1-7)",
+          "maximum": 31,
+          "minimum": 1,
+          "title": "Day Of Period",
+          "type": "integer"
+        },
+        "end_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Date"
+        },
+        "frequency": {
+          "$ref": "#/$defs/Frequency"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ObligationKind"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "start_date": {
+          "format": "date",
+          "title": "Start Date",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "kind",
+        "counterparty_token",
+        "amount",
+        "frequency",
+        "day_of_period",
+        "start_date",
+        "source_ref",
+        "data_mode"
+      ],
+      "title": "RecurringObligation",
+      "type": "object"
+    },
+    "Role": {
+      "enum": [
+        "owner",
+        "accountant",
+        "staff",
+        "lender_viewer",
+        "compliance"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "RoundStatus": {
+      "enum": [
+        "proposed",
+        "approved",
+        "rejected",
+        "expired",
+        "settled"
+      ],
+      "title": "RoundStatus",
+      "type": "string"
+    },
+    "RuleOp": {
+      "enum": [
+        ">=",
+        "<=",
+        "==",
+        "exists"
+      ],
+      "title": "RuleOp",
+      "type": "string"
+    },
+    "Scenario": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Shock name -> size, e.g. {'sales_change_pct': -20}",
+          "title": "Assumptions",
+          "type": "object"
+        },
+        "expected_outcome": {
+          "$ref": "#/$defs/Money"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name_key": {
+          "title": "Name Key",
+          "type": "string"
+        },
+        "p_buffer_breach": {
+          "title": "P Buffer Breach",
+          "type": "string"
+        },
+        "paths": {
+          "minimum": 1,
+          "title": "Paths",
+          "type": "integer"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        },
+        "worst_5pct_outcome": {
+          "$ref": "#/$defs/Money"
+        }
+      },
+      "required": [
+        "id",
+        "name_key",
+        "assumptions",
+        "expected_outcome",
+        "worst_5pct_outcome",
+        "p_buffer_breach",
+        "paths",
+        "seed"
+      ],
+      "title": "Scenario",
+      "type": "object"
+    },
+    "Settlement": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "payee_tenant": {
+          "title": "Payee Tenant",
+          "type": "string"
+        },
+        "payer_tenant": {
+          "title": "Payer Tenant",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payer_tenant",
+        "payee_tenant",
+        "amount"
+      ],
+      "title": "Settlement",
+      "type": "object"
+    },
+    "ShareGrant": {
+      "additionalProperties": false,
+      "description": "Consented, scoped, expiring access for one lender.",
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "lender_label": {
+          "title": "Lender Label",
+          "type": "string"
+        },
+        "passport_id": {
+          "title": "Passport Id",
+          "type": "string"
+        },
+        "revoked": {
+          "default": false,
+          "title": "Revoked",
+          "type": "boolean"
+        },
+        "scopes": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Scopes",
+          "type": "array"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "passport_id",
+        "lender_label",
+        "scopes",
+        "created_at",
+        "expires_at"
+      ],
+      "title": "ShareGrant",
+      "type": "object"
+    },
+    "SmoothingLever": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionCard"
+        },
+        "cost": {
+          "$ref": "#/$defs/Money"
+        },
+        "gap_reduction": {
+          "$ref": "#/$defs/Money"
+        },
+        "kind": {
+          "$ref": "#/$defs/LeverKind"
+        }
+      },
+      "required": [
+        "kind",
+        "gap_reduction",
+        "cost",
+        "action"
+      ],
+      "title": "SmoothingLever",
+      "type": "object"
+    },
+    "SourceFormat": {
+      "enum": [
+        "bkash_statement",
+        "nagad_statement",
+        "bank_csv",
+        "ledger_csv",
+        "ledger_xlsx",
+        "ledger_photo",
+        "unknown"
+      ],
+      "title": "SourceFormat",
+      "type": "string"
+    },
+    "StabilityReport": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_choice": {
+          "title": "Baseline Choice",
+          "type": "string"
+        },
+        "recommendation_id": {
+          "title": "Recommendation Id",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/VariationResult"
+          },
+          "minItems": 1,
+          "title": "Results",
+          "type": "array"
+        },
+        "score": {
+          "description": "Share of variations where the choice held",
+          "title": "Score",
+          "type": "string"
+        },
+        "what_would_flip": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "What Would Flip",
+          "type": "array"
+        }
+      },
+      "required": [
+        "recommendation_id",
+        "baseline_choice",
+        "results",
+        "score"
+      ],
+      "title": "StabilityReport",
+      "type": "object"
+    },
+    "Tier": {
+      "description": "Permission tier of an action (FEATURES P2).",
+      "enum": [
+        "READ",
+        "SUGGEST",
+        "DRAFT",
+        "EXECUTE",
+        "DENY"
+      ],
+      "title": "Tier",
+      "type": "string"
+    },
+    "Transaction": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Money",
+          "description": "Always positive; `direction` gives the sign"
+        },
+        "category": {
+          "$ref": "#/$defs/TxCategory",
+          "default": "other"
+        },
+        "channel": {
+          "$ref": "#/$defs/Channel"
+        },
+        "counterparty_token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Counterparty Token"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "invoice_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Invoice Id"
+        },
+        "occurred_at": {
+          "format": "date-time",
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference"
+        },
+        "source_ref": {
+          "description": "Source file + row, e.g. 'bkash.csv#L42'",
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "occurred_at",
+        "amount",
+        "direction",
+        "channel",
+        "source_ref",
+        "data_mode"
+      ],
+      "title": "Transaction",
+      "type": "object"
+    },
+    "TxCategory": {
+      "enum": [
+        "sales",
+        "collection",
+        "purchase",
+        "supplier_payment",
+        "rent",
+        "salary",
+        "loan_repayment",
+        "loan_disbursement",
+        "utility",
+        "tax",
+        "owner_draw",
+        "owner_topup",
+        "transfer",
+        "fee",
+        "other"
+      ],
+      "title": "TxCategory",
+      "type": "string"
+    },
+    "Unit": {
+      "enum": [
+        "BDT",
+        "USD",
+        "CNY",
+        "ratio",
+        "percent",
+        "days",
+        "count",
+        "probability",
+        "score"
+      ],
+      "title": "Unit",
+      "type": "string"
+    },
+    "UnparsedRow": {
+      "additionalProperties": false,
+      "properties": {
+        "raw_excerpt": {
+          "description": "Masked by WP-03 before storage",
+          "maxLength": 200,
+          "title": "Raw Excerpt",
+          "type": "string"
+        },
+        "reason_key": {
+          "title": "Reason Key",
+          "type": "string"
+        },
+        "row_ref": {
+          "title": "Row Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "row_ref",
+        "reason_key",
+        "raw_excerpt"
+      ],
+      "title": "UnparsedRow",
+      "type": "object"
+    },
+    "Variance": {
+      "additionalProperties": false,
+      "properties": {
+        "actual": {
+          "title": "Actual",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "string"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "period": {
+          "$ref": "#/$defs/Period"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        }
+      },
+      "required": [
+        "metric",
+        "period",
+        "expected",
+        "actual",
+        "unit",
+        "rank"
+      ],
+      "title": "Variance",
+      "type": "object"
+    },
+    "VariationKind": {
+      "enum": [
+        "stress",
+        "noise"
+      ],
+      "title": "VariationKind",
+      "type": "string"
+    },
+    "VariationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "choice": {
+          "title": "Choice",
+          "type": "string"
+        },
+        "held": {
+          "title": "Held",
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/VariationKind"
+        },
+        "name": {
+          "description": "e.g. 'sales_minus_20' or 'rows_shuffled'",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "choice",
+        "held"
+      ],
+      "title": "VariationResult",
+      "type": "object"
+    },
+    "VendorQuote": {
+      "additionalProperties": false,
+      "properties": {
+        "commodity": {
+          "title": "Commodity",
+          "type": "string"
+        },
+        "data_mode": {
+          "$ref": "#/$defs/DataMode"
+        },
+        "delivery_cost": {
+          "$ref": "#/$defs/Money"
+        },
+        "lead_time_days": {
+          "minimum": 0,
+          "title": "Lead Time Days",
+          "type": "integer"
+        },
+        "on_time_rate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Share of past orders delivered on time (SME's own history)",
+          "title": "On Time Rate"
+        },
+        "quoted_on": {
+          "format": "date",
+          "title": "Quoted On",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "unit_price": {
+          "$ref": "#/$defs/Money"
+        },
+        "vendor_token": {
+          "title": "Vendor Token",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendor_token",
+        "commodity",
+        "unit",
+        "unit_price",
+        "delivery_cost",
+        "lead_time_days",
+        "quoted_on",
+        "data_mode"
+      ],
+      "title": "VendorQuote",
+      "type": "object"
+    },
+    "VerifyResult": {
+      "additionalProperties": false,
+      "properties": {
+        "anchored_digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchored Digest"
+        },
+        "checked_on": {
+          "format": "date",
+          "title": "Checked On",
+          "type": "string"
+        },
+        "passport_id": {
+          "title": "Passport Id",
+          "type": "string"
+        },
+        "recomputed_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Recomputed Digest",
+          "type": "string"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "passport_id",
+        "recomputed_digest",
+        "valid",
+        "checked_on"
+      ],
+      "title": "VerifyResult",
+      "type": "object"
+    },
+    "Vote": {
+      "additionalProperties": false,
+      "properties": {
+        "choice": {
+          "title": "Choice",
+          "type": "string"
+        },
+        "model": {
+          "description": "Provider/model id, e.g. 'groq:gpt-oss-120b'",
+          "title": "Model",
+          "type": "string"
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        }
+      },
+      "required": [
+        "model",
+        "choice"
+      ],
+      "title": "Vote",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hishab contracts",
+  "version": "1.0.0"
+}

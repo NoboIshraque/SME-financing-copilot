@@ -1,0 +1,22 @@
+{
+  "area": "Nawabpur",
+  "business_age_months": 96,
+  "data_mode": "synthetic",
+  "display_name": "Nawabpur Hardware Traders",
+  "etin": true,
+  "id": "sme_hardware",
+  "opening_balances": {
+    "bank": "608389.00",
+    "bkash": "84604.00",
+    "card": "0.00",
+    "cash": "15000.00",
+    "nagad": "15000.00"
+  },
+  "period": {
+    "end": "2026-09-30",
+    "start": "2025-04-01"
+  },
+  "sector": "hardware",
+  "staff": 5,
+  "trade_licence": true
+}

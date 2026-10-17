@@ -31,3 +31,11 @@ ml/artifacts/*.pt
 .claude/settings.local.json
 .DS_Store
 Thumbs.db
+
+# Generated / local
+web/.vitest/
+web/node_modules/.tmp/
+requirements-audit.txt
+pytest-report.xml
+vitest-report.json
+docs/submission/evidence/vitest-report.json

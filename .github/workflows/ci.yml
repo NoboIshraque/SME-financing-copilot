@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (ruff, pytest, pip-audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HYPOTHESIS_PROFILE: ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install
+        run: uv --directory backend sync --frozen
+      - name: Ruff
+        run: uv --directory backend run ruff check . ../data/synthetic
+      - name: Pytest
+        run: uv --directory backend run pytest -q --junitxml=../pytest-report.xml
+      - name: Dependency audit (pip-audit)
+        run: |
+          uv --directory backend export --frozen --no-hashes --no-emit-project --format requirements-txt > requirements-audit.txt
+          uv --directory backend run pip-audit --strict --disable-pip --no-deps -r ../requirements-audit.txt
+      - name: Test counts
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import xml.etree.ElementTree as ET
+          root = ET.parse("pytest-report.xml").getroot()
+          suite = root if root.tag == "testsuite" else root[0]
+          counts = {}
+          for case in suite.iter("testcase"):
+              area = case.get("classname", "").split(".")[1] if "." in case.get("classname", "") else "other"
+              counts[area] = counts.get(area, 0) + 1
+          print("### Backend tests by area")
+          print("| Area | Tests |\n| --- | --- |")
+          for area, n in sorted(counts.items()):
+              print(f"| {area} | {n} |")
+          print(f"| **Total** | **{sum(counts.values())}** (failures {suite.get('failures')}, errors {suite.get('errors')}) |")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-report
+          path: pytest-report.xml
+
+  web:
+    name: Web (eslint, tsc, vitest, npm audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: ESLint + TypeScript
+        run: npm run lint
+      - name: Contracts are in sync with the backend schema
+        run: |
+          npm run gen:contracts
+          git diff --exit-code src/api/contracts.ts
+      - name: Vitest
+        run: npx vitest run --reporter=default --reporter=json --outputFile.json=vitest-report.json
+      - name: Test counts
+        if: always()
+        run: |
+          node -e 'const r=require("./vitest-report.json");console.log(`### Web unit tests\n| Total | Passed | Failed |\n| --- | --- | --- |\n| ${r.numTotalTests} | ${r.numPassedTests} | ${r.numFailedTests} |`)' >> "$GITHUB_STEP_SUMMARY"
+      - name: Dependency audit (high and critical)
+        run: npm audit --audit-level=high
+      - name: Build
+        run: npm run build
+
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks (full history)
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz | tar -xz gitleaks
+          ./gitleaks git --redact --verbose --exit-code 1 .

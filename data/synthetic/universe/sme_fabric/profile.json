@@ -1,0 +1,22 @@
+{
+  "area": "Islampur",
+  "business_age_months": 132,
+  "data_mode": "synthetic",
+  "display_name": "Islampur Fabric House",
+  "etin": true,
+  "id": "sme_fabric",
+  "opening_balances": {
+    "bank": "65268.00",
+    "bkash": "162733.00",
+    "card": "0.00",
+    "cash": "37652.00",
+    "nagad": "0.00"
+  },
+  "period": {
+    "end": "2026-09-30",
+    "start": "2025-04-01"
+  },
+  "sector": "fabric_wholesale",
+  "staff": 6,
+  "trade_licence": true
+}

@@ -1,0 +1,69 @@
+[project]
+name = "hishab"
+version = "0.1.0"
+description = "Hishab - SME Finance Copilot (FinTechathon 2026, Topic E)"
+requires-python = ">=3.12"
+# Dependencies for every work package are pinned here up front so parallel branches
+# rarely touch uv.lock. If you must add one: `uv add <pkg>`, and on a rebase conflict in
+# uv.lock take either side and run `uv lock`.
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.8",
+    "pydantic-settings>=2.4",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "httpx>=0.27",
+    "python-multipart>=0.0.9",
+    "pyyaml>=6.0",
+    "numpy>=1.26",
+    "networkx>=3.3",
+    "sympy>=1.13",
+    "cryptography>=43",
+    "argon2-cffi>=23.1",
+    "pyotp>=2.9",
+    "openpyxl>=3.1",
+    "pillow>=10.4",
+    "pytesseract>=0.3.13",
+    "jinja2>=3.1",
+    "reportlab>=4.2",
+    "openai>=1.40",
+    "web3>=7.0",
+    "apscheduler>=3.10",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=5.0",
+    "hypothesis>=6.112",
+    "ruff>=0.6",
+    "pip-audit>=2.7",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+markers = [
+    "property: Hypothesis property-based test",
+    "scenario: parametrised scenario table",
+    "slow: takes more than a few seconds",
+]
+filterwarnings = ["error::pytest.PytestUnraisableExceptionWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["eval/fixtures"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM", "DTZ"]
+# S105/S106: "token" here means a privacy token, not a credential (gitleaks scans secrets).
+ignore = ["S101", "S311", "B008", "S105", "S106", "SIM102"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "DTZ"]

@@ -1,0 +1,22 @@
+{
+  "area": "Mirpur",
+  "business_age_months": 74,
+  "data_mode": "synthetic",
+  "display_name": "Mirpur Mudi Store",
+  "etin": true,
+  "id": "sme_grocery",
+  "opening_balances": {
+    "bank": "221319.00",
+    "bkash": "79310.00",
+    "card": "0.00",
+    "cash": "15843.00",
+    "nagad": "42615.00"
+  },
+  "period": {
+    "end": "2026-09-30",
+    "start": "2025-04-01"
+  },
+  "sector": "grocery",
+  "staff": 4,
+  "trade_licence": true
+}

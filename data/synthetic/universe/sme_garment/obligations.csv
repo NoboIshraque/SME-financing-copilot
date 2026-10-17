@@ -1,0 +1,5 @@
+kind,counterparty,amount,frequency,day_of_period,start_date,data_mode
+rent,Mizan Molla,120000.00,monthly,5,2025-04-01,synthetic
+salary,Staff payroll,620000.00,monthly,31,2025-04-01,synthetic
+utility,DESCO / Titas utilities,55000.00,monthly,15,2025-04-01,synthetic
+emi,Sonali Commerce Bank PLC (synthetic),85000.00,monthly,10,2025-04-01,synthetic

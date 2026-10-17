@@ -1,0 +1,4 @@
+ref,creditor,debtor,amount,issue_date,due_date,data_mode
+RING-FG-001,sme_fabric,sme_garment,450000.00,2026-08-28,2026-10-12,synthetic
+RING-GH-001,sme_garment,sme_hardware,320000.00,2026-09-02,2026-10-15,synthetic
+RING-HF-001,sme_hardware,sme_fabric,380000.00,2026-09-05,2026-10-10,synthetic

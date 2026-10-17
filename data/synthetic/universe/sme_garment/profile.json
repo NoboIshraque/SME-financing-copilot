@@ -1,0 +1,22 @@
+{
+  "area": "Ashulia",
+  "business_age_months": 58,
+  "data_mode": "synthetic",
+  "display_name": "Ashulia Stitch Works",
+  "etin": true,
+  "id": "sme_garment",
+  "opening_balances": {
+    "bank": "539712.00",
+    "bkash": "5000.00",
+    "card": "0.00",
+    "cash": "30000.00",
+    "nagad": "0.00"
+  },
+  "period": {
+    "end": "2026-09-30",
+    "start": "2025-04-01"
+  },
+  "sector": "garment_subcontract",
+  "staff": 38,
+  "trade_licence": true
+}

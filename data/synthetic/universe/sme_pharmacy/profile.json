@@ -1,0 +1,22 @@
+{
+  "area": "Dhanmondi",
+  "business_age_months": 41,
+  "data_mode": "synthetic",
+  "display_name": "Dhanmondi Care Pharmacy",
+  "etin": false,
+  "id": "sme_pharmacy",
+  "opening_balances": {
+    "bank": "284974.00",
+    "bkash": "81591.00",
+    "card": "0.00",
+    "cash": "15000.00",
+    "nagad": "29030.00"
+  },
+  "period": {
+    "end": "2026-09-30",
+    "start": "2025-04-01"
+  },
+  "sector": "pharmacy",
+  "staff": 3,
+  "trade_licence": true
+}
