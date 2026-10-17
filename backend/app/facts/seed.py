@@ -7,10 +7,13 @@ balances in its profile, dated the first day of the ledger.
 from __future__ import annotations
 
 from datetime import date
+from typing import TYPE_CHECKING
 
 from app.contracts import DataMode, Fact, Granularity, Period, Unit
 from app.facts.store import FactStore, fact_id
-from app.synthetic import SME
+
+if TYPE_CHECKING:
+    from app.synthetic import SME
 
 INITIAL_BALANCE = "initial_balance"
 PROFILE_REF = "profile.json#opening_balances"
