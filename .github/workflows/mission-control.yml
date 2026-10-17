@@ -1,0 +1,39 @@
+name: Mission control
+
+# Rebuilds the pinned "Mission control" issue: who does what next (docs/NOW.md), the status
+# board (docs/PLAN.md §8), open PRs, CI/deploy state and site health. @mentions only people
+# whose next steps changed, so GitHub Mobile pushes it to their phone.
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["CI", "Deploy"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: mission-control
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+  actions: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Rebuild the issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_DOMAIN: ${{ secrets.DEPLOY_DOMAIN }}
+        run: python3 scripts/mission_control.py

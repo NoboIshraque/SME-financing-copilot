@@ -1,0 +1,5 @@
+# Byte-exact data: hashes in manifest.json must match on Windows too (no CRLF conversion).
+data/synthetic/universe/** -text
+ml/artifacts/** -text
+# Scripts that run on Linux servers keep LF.
+*.sh text eol=lf
