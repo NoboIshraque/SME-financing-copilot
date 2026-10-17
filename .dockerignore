@@ -1,0 +1,13 @@
+**/node_modules
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/*.db
+**/.env
+web/dist
+web/test-results
+web/playwright-report
+.git
+data/raw
+ml

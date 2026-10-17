@@ -52,9 +52,13 @@ def test_cors_origins_accept_comma_separated_env(monkeypatch):
     assert settings.cors_origins == ["https://hishab.quadbits.net", "http://localhost:5173"]
 
 
+PG = "postgresql+psycopg://hishab:pw@db:5432/hishab"
+
+
 @pytest.mark.parametrize(
     ("overrides", "message"),
     [
+        ({"database_url": "sqlite:///./x.db"}, "PostgreSQL"),
         ({"secret_key": "change-me"}, "secret_key"),
         ({"vault_key": "short"}, "vault_key"),
         ({"demo_mode": True}, "demo_mode"),
@@ -63,7 +67,7 @@ def test_cors_origins_accept_comma_separated_env(monkeypatch):
 )
 def test_production_refuses_unsafe_configuration(overrides, message):
     base = {"app_env": "production", "secret_key": STRONG, "vault_key": STRONG,
-            "demo_mode": False, "llm_mode": "live"}
+            "demo_mode": False, "llm_mode": "live", "database_url": PG}
     base.update(overrides)
     with pytest.raises(ValidationError, match=message):
         Settings(_env_file=None, **base)
@@ -71,8 +75,16 @@ def test_production_refuses_unsafe_configuration(overrides, message):
 
 def test_production_accepts_safe_configuration():
     settings = Settings(_env_file=None, app_env="production", secret_key=STRONG,
-                        vault_key=STRONG, demo_mode=False, llm_mode="live")
+                        vault_key=STRONG, demo_mode=False, llm_mode="live", database_url=PG)
     assert settings.app_env is AppEnv.production
+
+
+def test_hosted_demo_allows_synthetic_data_but_still_needs_real_secrets():
+    demo = Settings(_env_file=None, app_env="demo", secret_key=STRONG, vault_key=STRONG,
+                    demo_mode=True, llm_mode="fixtures", database_url=PG)
+    assert demo.demo_mode
+    with pytest.raises(ValidationError, match="secret_key"):
+        Settings(_env_file=None, app_env="demo", vault_key=STRONG, database_url=PG)
 
 
 def test_public_view_never_contains_secret_values():

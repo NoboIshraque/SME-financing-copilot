@@ -1,0 +1,89 @@
+# Hishab on one server (Singapore). Start from the repo root:
+#   docker compose --env-file ~/hishab/shared/.env -f infra/docker-compose.yml -p hishab up -d --build
+# The env file holds secrets and lives only on the server (template: infra/.env.example).
+name: hishab
+
+x-app-env: &app-env
+  APP_ENV: ${APP_ENV:-demo}
+  DEMO_MODE: ${DEMO_MODE:-true}
+  DATABASE_URL: postgresql+psycopg://hishab:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/hishab
+  SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY}
+  VAULT_KEY: ${VAULT_KEY:?set VAULT_KEY}
+  CORS_ORIGINS: https://${DEPLOY_DOMAIN:-localhost}
+  LLM_MODE: ${LLM_MODE:-live}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  GROQ_API_KEY: ${GROQ_API_KEY:-}
+  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+  CHAIN_MODE: ${CHAIN_MODE:-offline}
+  SEPOLIA_RPC_URL: ${SEPOLIA_RPC_URL:-}
+  SEPOLIA_PRIVATE_KEY: ${SEPOLIA_PRIVATE_KEY:-}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hishab
+      POSTGRES_USER: hishab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hishab -d hishab"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    restart: unless-stopped
+    environment: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+    expose: ["8000"]
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    environment: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import app.worker"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.web
+    restart: unless-stopped
+    environment:
+      DEPLOY_DOMAIN: ${DEPLOY_DOMAIN:-localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@quadbits.net}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

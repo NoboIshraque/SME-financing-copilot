@@ -18,6 +18,7 @@ _PLACEHOLDER = "change-me"
 class AppEnv(StrEnum):
     development = "development"
     test = "test"
+    demo = "demo"  # the hosted competition demo: real secrets, synthetic data, demo accounts
     production = "production"
 
 
@@ -70,11 +71,14 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _production_guards(self) -> Settings:
-        if self.app_env is AppEnv.production:
+        if self.app_env in (AppEnv.demo, AppEnv.production):
             for name in ("secret_key", "vault_key"):
                 secret = getattr(self, name).get_secret_value()
                 if secret in ("", _PLACEHOLDER) or len(secret) < 32:
-                    raise ValueError(f"{name} must be set to 32+ characters in production")
+                    raise ValueError(f"{name} must be set to 32+ characters when deployed")
+            if self.is_sqlite:
+                raise ValueError("deployed environments use PostgreSQL, not SQLite")
+        if self.app_env is AppEnv.production:
             if self.demo_mode:
                 raise ValueError("demo_mode must be false in production")
             if self.llm_mode is LLMMode.fixtures:
