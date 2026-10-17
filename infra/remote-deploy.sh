@@ -18,3 +18,7 @@ cd "$REL"
 docker compose --env-file "$ENV_FILE" -f infra/docker-compose.yml up -d --build --remove-orphans
 docker image prune -f >/dev/null
 docker compose --env-file "$ENV_FILE" -f infra/docker-compose.yml ps
+
+# Hourly backups (idempotent: replaces any older Hishab line in the crontab).
+( crontab -l 2>/dev/null | grep -v 'hishab-backup' ; \
+  echo "17 * * * * $BASE/current/infra/backup.sh >> $BASE/backups.log 2>&1 # hishab-backup" ) | crontab -
