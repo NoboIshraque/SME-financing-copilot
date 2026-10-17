@@ -77,3 +77,14 @@ def test_missing_facts_lists_what_the_owner_can_add():
     result = evaluate(p, {"business_age_months": Decimal(30)}, Money.of(1000), 30)
     assert result.status is MISSING
     assert missing_facts(result, p) == ["trade_licence"]
+
+
+@pytest.mark.parametrize(("purpose", "expected"), [
+    ("working_capital", FAIL), ("equipment", PASS), ("vehicle", PASS)])
+def test_leasing_only_funds_equipment_or_vehicles(purpose, expected):
+    result = evaluate(product(kind="leasing"), {}, Money.of(1000), 30, purpose)
+    assert result.status is expected
+
+
+def test_other_kinds_fund_any_purpose():
+    assert evaluate(product(kind="term_loan"), {}, Money.of(1000), 30, "equipment").status is PASS

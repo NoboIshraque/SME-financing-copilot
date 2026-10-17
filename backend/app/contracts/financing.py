@@ -48,6 +48,17 @@ class RateType(StrEnum):
     none = "none"  # e.g. owner top-up, netting, grants
 
 
+class RateBasis(StrEnum):
+    """How we know the rate. Shown next to every rate in the UI."""
+
+    published = "published"  # the provider's own product page states it
+    rate_sheet_upper = "rate_sheet_upper"  # upper bound of the bank's published rate sheet range
+    regulatory_cap = "regulatory_cap"  # the maximum a regulator allows for this scheme
+    last_published = "last_published"  # older published figure; the provider no longer shows one
+    modelled = "modelled"  # illustrative assumption (P14 China pack)
+    own_terms = "own_terms"  # options built from the SME's own data (top-up, early pay, ...)
+
+
 class FeeKind(StrEnum):
     fixed = "fixed"
     percent_of_principal = "percent_of_principal"
@@ -95,6 +106,8 @@ class FinancingProduct(Contract):
     kind: ProductKind
     rate_type: RateType
     nominal_rate_pa: Decimal = Field(ge=0, description="Percent per year as published, e.g. 9")
+    rate_basis: RateBasis = RateBasis.published
+    notes: str | None = Field(default=None, max_length=600)
     fees: tuple[Fee, ...] = ()
     min_amount: Money | None = None
     max_amount: Money | None = None
@@ -111,6 +124,8 @@ class FinancingProduct(Contract):
 
     @model_validator(mode="after")
     def _sourced(self) -> FinancingProduct:
+        if (self.rate_basis is RateBasis.modelled) != self.is_modelled:
+            raise ValueError("modelled products must say so: is_modelled and rate_basis=modelled")
         if self.kind.is_loan and not self.is_modelled:
             if not self.source_url or self.checked_on is None:
                 raise ValueError("a real loan product needs source_url and checked_on")

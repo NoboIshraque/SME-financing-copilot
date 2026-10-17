@@ -1557,9 +1557,26 @@
           "title": "Nominal Rate Pa",
           "type": "string"
         },
+        "notes": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
         "provider": {
           "title": "Provider",
           "type": "string"
+        },
+        "rate_basis": {
+          "$ref": "#/$defs/RateBasis",
+          "default": "published"
         },
         "rate_type": {
           "$ref": "#/$defs/RateType"
@@ -2735,6 +2752,19 @@
       "title": "Provenance",
       "type": "object"
     },
+    "RateBasis": {
+      "description": "How we know the rate. Shown next to every rate in the UI.",
+      "enum": [
+        "published",
+        "rate_sheet_upper",
+        "regulatory_cap",
+        "last_published",
+        "modelled",
+        "own_terms"
+      ],
+      "title": "RateBasis",
+      "type": "string"
+    },
     "RateType": {
       "enum": [
         "reducing_balance",
@@ -3634,5 +3664,5 @@
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Hishab contracts",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

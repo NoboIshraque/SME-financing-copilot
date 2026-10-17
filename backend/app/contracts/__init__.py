@@ -40,7 +40,7 @@ from app.contracts.party import *  # noqa: F403
 from app.contracts.reports import *  # noqa: F403
 from app.contracts.security import *  # noqa: F403
 
-CONTRACTS_VERSION = "1.0.0"
+CONTRACTS_VERSION = "1.1.0"  # 1.1: FinancingProduct.rate_basis + notes
 
 MODULES = (
     common,

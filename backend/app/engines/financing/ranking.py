@@ -1,7 +1,8 @@
 """Rank every option for one financing need (WP-06 milestone 5; FEATURES P1).
 
-score (0-100) = 40% cost + 30% fit + 15% approval likelihood + 10% speed + 5% lender record
-  cost      100 - EAR%            (an option costing 12.68% a year scores 87.32)
+score (0-100) = 45% cost + 25% fit + 15% approval likelihood + 10% speed + 5% lender record
+  cost      100 - 2.5 x EAR%      (4% a year scores 90, 13% scores 67.5, 27% scores 32.5;
+                                   anything at 40% a year or more scores 0)
   fit       100 x (1 - P(balance < buffer)) from the cash forecast
   approval  heuristic per product kind, reduced for missing facts or collateral
   speed     100 - 3 x days to cash
@@ -33,7 +34,7 @@ from app.engines.financing import fit as fit_mod
 from app.engines.financing.eligibility import evaluate
 from app.engines.financing.lenders import COLD_START_SCORE, lender_score
 
-WEIGHTS = {"cost": Decimal("0.40"), "fit": Decimal("0.30"), "approval": Decimal("0.15"),
+WEIGHTS = {"cost": Decimal("0.45"), "fit": Decimal("0.25"), "approval": Decimal("0.15"),
            "speed": Decimal("0.10"), "lender": Decimal("0.05")}
 
 # Typical days from application to cash, by kind (documented assumptions, shown to users).
@@ -85,7 +86,7 @@ def approval_likelihood(product: FinancingProduct, status: EligibilityStatus,
 def score_option(ear_percent: Decimal, p_breach: Decimal, approval: Decimal, speed_days: int,
                  lender: Decimal) -> Decimal:
     parts = {
-        "cost": max(Decimal(0), Decimal(100) - ear_percent),
+        "cost": max(Decimal(0), Decimal(100) - Decimal("2.5") * ear_percent),
         "fit": Decimal(100) * (1 - p_breach),
         "approval": Decimal(100) * approval,
         "speed": max(Decimal(0), Decimal(100) - 3 * speed_days),
@@ -113,7 +114,7 @@ def match(
     lenders = lenders or {}
     scored: list[tuple[tuple, Candidate]] = []
     for product in products:
-        eligibility = evaluate(product, facts, need.amount, need.tenor_days)
+        eligibility = evaluate(product, facts, need.amount, need.tenor_days, need.purpose_key)
         result = cost_mod.true_cost(product, need.amount, need.tenor_days)
         reasons: list[str] = []
         if band is not None:

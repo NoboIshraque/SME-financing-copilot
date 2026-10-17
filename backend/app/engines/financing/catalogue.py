@@ -6,6 +6,7 @@ Modelled rows (e.g. the P14 China pack) are labelled `is_modelled: true` and sho
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 from functools import lru_cache
@@ -32,7 +33,7 @@ def parse_product(row: dict[str, Any], default_mode: DataMode) -> FinancingProdu
     known = {"id", "provider", "name", "kind", "rate_type", "nominal_rate_pa", "fees",
              "min_amount", "max_amount", "min_tenor_days", "max_tenor_days",
              "collateral_required", "rules", "source_url", "checked_on", "is_modelled",
-             "data_mode", "evidence_quote", "notes", "eligibility_text"}
+             "data_mode", "evidence_quote", "notes", "eligibility_text", "rate_basis"}
     unknown = set(row) - known
     if unknown:
         raise CatalogueError(f"{row.get('id')}: unknown fields {sorted(unknown)}")
@@ -59,7 +60,34 @@ def parse_product(row: dict[str, Any], default_mode: DataMode) -> FinancingProdu
         checked_on=checked if isinstance(checked, date) or checked is None
         else date.fromisoformat(checked),
         is_modelled=bool(row.get("is_modelled", False)),
+        rate_basis=row.get("rate_basis", "modelled" if row.get("is_modelled") else "published"),
+        notes=row.get("notes"),
         data_mode=row.get("data_mode", default_mode),
+    )
+
+
+@dataclass(frozen=True)
+class UnpricedProduct:
+    """A real product whose provider publishes no rate. Listed as "ask the lender", never
+    ranked on a guessed cost."""
+
+    id: str
+    provider: str
+    name: str
+    kind: str
+    source_url: str
+    checked_on: date
+    max_amount: Money | None
+    notes: str
+
+
+def parse_unpriced(row: dict[str, Any]) -> UnpricedProduct:
+    checked = row["checked_on"]
+    return UnpricedProduct(
+        id=row["id"], provider=row["provider"], name=row["name"], kind=row["kind"],
+        source_url=row["source_url"],
+        checked_on=checked if isinstance(checked, date) else date.fromisoformat(checked),
+        max_amount=_money(row.get("max_amount")), notes=row.get("notes", ""),
     )
 
 
@@ -73,9 +101,19 @@ def load_file(path: Path) -> list[FinancingProduct]:
     return products
 
 
-@lru_cache(maxsize=4)
-def load_catalogue(directory: Path = CATALOGUE_DIR, jurisdiction: str = "bd") -> tuple:
+def _path(directory: Path, jurisdiction: str) -> Path:
     path = directory / f"{jurisdiction}.yaml"
     if not path.exists():
         raise CatalogueError(f"no catalogue for {jurisdiction!r}")
-    return tuple(load_file(path))
+    return path
+
+
+@lru_cache(maxsize=4)
+def load_catalogue(directory: Path = CATALOGUE_DIR, jurisdiction: str = "bd") -> tuple:
+    return tuple(load_file(_path(directory, jurisdiction)))
+
+
+@lru_cache(maxsize=4)
+def load_unpriced(directory: Path = CATALOGUE_DIR, jurisdiction: str = "bd") -> tuple:
+    data = yaml.safe_load(_path(directory, jurisdiction).read_text(encoding="utf-8"))
+    return tuple(parse_unpriced(row) for row in data.get("unpriced", []))

@@ -25,10 +25,16 @@ def ranked_ids(candidates):
 
 
 def test_score_formula_hand_case():
-    # cost 100-12=88 (x.40) + fit 90 (x.30) + approval 50 (x.15) + speed 100-30=70 (x.10)
-    # + lender 60 (x.05) = 35.2 + 27 + 7.5 + 7 + 3 = 79.7
+    # cost 100-2.5x12=70 (x.45) + fit 90 (x.25) + approval 50 (x.15) + speed 100-30=70 (x.10)
+    # + lender 60 (x.05) = 31.5 + 22.5 + 7.5 + 7 + 3 = 71.5
     assert score_option(Decimal(12), Decimal("0.1"), Decimal("0.5"), 10, Decimal(60)) == Decimal(
-        "79.70")
+        "71.50")
+
+
+def test_very_expensive_money_scores_zero_on_cost():
+    cheap = score_option(Decimal(40), Decimal(0), Decimal(1), 0, Decimal(100))
+    dearer = score_option(Decimal(90), Decimal(0), Decimal(1), 0, Decimal(100))
+    assert cheap == dearer == Decimal("55.00")  # cost part is 0 from 40% a year up
 
 
 def test_cheaper_option_ranks_first_when_all_else_is_equal():

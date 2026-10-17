@@ -16,6 +16,7 @@ from app.contracts import (
     EligibilityStatus,
     FinancingProduct,
     Money,
+    ProductKind,
     RuleOp,
 )
 
@@ -43,6 +44,20 @@ def check_rule(rule: EligibilityRule, facts: Mapping[str, Decimal | None]) -> El
                              message_key=rule.description_key)
 
 
+# Products that only fund a specific purpose. Anything not listed funds any purpose.
+PURPOSES: dict[ProductKind, frozenset[str]] = {
+    ProductKind.leasing: frozenset({"equipment", "vehicle"}),
+}
+
+
+def purpose_reason(product: FinancingProduct, purpose: str) -> EligibilityReason | None:
+    allowed = PURPOSES.get(product.kind)
+    if allowed is None or purpose in allowed:
+        return None
+    return EligibilityReason(rule_id="limit.purpose", status=FAIL,
+                             message_key="rule.purpose_mismatch")
+
+
 def _limit_reasons(product: FinancingProduct, amount: Money, tenor_days: int):
     if product.min_amount is not None and amount < product.min_amount:
         yield EligibilityReason(rule_id="limit.amount_min", status=FAIL,
@@ -65,9 +80,13 @@ def evaluate(
     facts: Mapping[str, Decimal | None],
     amount: Money,
     tenor_days: int,
+    purpose: str = "working_capital",
 ) -> Eligibility:
     reasons = [check_rule(rule, facts) for rule in product.rules]
     reasons += list(_limit_reasons(product, amount, tenor_days))
+    mismatch = purpose_reason(product, purpose)
+    if mismatch is not None:
+        reasons.append(mismatch)
     statuses = {r.status for r in reasons}
     if FAIL in statuses:
         overall = FAIL

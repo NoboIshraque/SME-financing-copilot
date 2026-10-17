@@ -20,7 +20,7 @@ def product(pid="p", kind="working_capital", rate_type="reducing_balance", rate=
         id=pid, provider=extra.pop("provider", f"prov-{pid}"), name=pid, kind=kind,
         rate_type=rate_type, nominal_rate_pa=Decimal(rate),
         fees=tuple(Fee(**f) if isinstance(f, dict) else f for f in fees), rules=rules,
-        is_modelled=True, data_mode=DataMode.synthetic, **extra,
+        is_modelled=True, rate_basis="modelled", data_mode=DataMode.synthetic, **extra,
     )
 
 
