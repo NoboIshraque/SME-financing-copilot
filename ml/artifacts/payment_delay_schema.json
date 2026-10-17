@@ -1,0 +1,26 @@
+{
+  "features": [
+    "hist_n",
+    "hist_mean_late",
+    "hist_median_late",
+    "hist_std_late",
+    "hist_share_late7",
+    "amount_ratio",
+    "log_amount",
+    "terms_days",
+    "due_weekday",
+    "days_due_to_eid",
+    "sector"
+  ],
+  "categorical": {
+    "sector": [
+      "fabric_wholesale",
+      "garment_subcontract",
+      "grocery",
+      "hardware",
+      "pharmacy"
+    ]
+  },
+  "target_days": "paid_date - due_date",
+  "late_threshold_days": 7
+}
