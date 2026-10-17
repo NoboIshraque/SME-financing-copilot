@@ -208,7 +208,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-05 | not started | — | 0 | |
 | WP-06 | not started | — | 0 | |
 | WP-07 | not started | — | 0 | |
-| WP-08 | not started | — | 0 | |
+| WP-08 | in progress (5/8) | wp-08-mesh | 83 | engine, consent, attestations, anchor done; API waits for WP-01/11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |
 | WP-11 | not started | — | 0 | |
