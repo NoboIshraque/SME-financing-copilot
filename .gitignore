@@ -1,0 +1,33 @@
+# Secrets
+.env
+*.env
+!.env.example
+!backend/.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mutmut-cache
+*.db
+*.sqlite3
+
+# Node / web
+node_modules/
+web/dist/
+web/test-results/
+web/playwright-report/
+
+# Data and models
+data/raw/
+ml/artifacts/*.ckpt
+ml/artifacts/*.pt
+*.onnx.tmp
+
+# Local
+.autosave.log
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
