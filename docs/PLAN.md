@@ -213,7 +213,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-10 | not started | — | 0 | |
 | WP-11 | not started | — | 0 | |
 | WP-12 | not started | — | 0 | |
-| WP-13 | not started | — | 0 | |
+| WP-13 | in progress (3/5) | wp-13-reports | 26 | passport, sharing, verify logic, state adapter; report waits for WP-07 |
 | WP-14 | not started | — | 0 | |
 | WP-15 | not started | — | 0 | |
 | WP-16 | not started | — | 0 | needs P3 approval |
