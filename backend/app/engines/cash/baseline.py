@@ -107,6 +107,7 @@ class Baseline:
     bill_delays: DelayTable = DelayTable({}, (), ())
     open_bills: tuple[OpenBill, ...] = ()
     obligations: tuple[RecurringObligation, ...] = ()
+    disputed_invoices: tuple[tuple[Invoice, Decimal], ...] = ()  # owed, not expected
     # Day-by-day totals over the run-rate window (oldest first) behind each run-rate flow:
     # new_invoices / new_bills = documents issued that day, purchases / running_cost = spent.
     daily_history: Mapping[FlowKind, tuple[Decimal, ...]] | None = None
@@ -235,10 +236,13 @@ def forecast_baseline(
             flows.append(Flow(day, amount, INFLOW, FlowKind.sales))
 
     invoice_delays = DelayTable.from_documents(known_invoices, as_of)
-    open_invoices = []
+    open_invoices, disputed = [], []
     for inv in known_invoices:
         owed = outstanding_on(inv, as_of)
-        if owed <= 0 or inv.status is DocumentStatus.disputed:
+        if owed <= 0:
+            continue
+        if inv.status is DocumentStatus.disputed:
+            disputed.append((inv, owed))
             continue
         open_invoices.append((inv, owed))
         for day, probability in invoice_delays.payment_days(inv, as_of):
@@ -298,6 +302,7 @@ def forecast_baseline(
         open_invoices=tuple(open_invoices),
         data_mode=_modes(known_txns, known_invoices, known_bills, own_obligations),
         bill_delays=bill_delays, open_bills=tuple(open_bills), obligations=own_obligations,
+        disputed_invoices=tuple(disputed),
         daily_history=history,
         history_days=(as_of - first_day).days + 1 if first_day else 0,
     )

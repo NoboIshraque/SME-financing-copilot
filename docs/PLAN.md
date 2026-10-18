@@ -204,7 +204,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-01 | done | merged | 143 | fact store, registry, provenance, API; fixes merged 18 Oct: ledger revisions (no stale figures), caller-scoped + masked explain/facts, race-safe inserts, rows endpoint, record_computed, profile facts + snapshot |
 | WP-02 | done | merged | 294 | parsers (bKash/Nagad/bank/ledger/registers, CSV+XLSX), Bangla/Banglish normaliser + Bengali calendar, dedupe, party clustering, OCR drafts (Tesseract ben+eng), preview/commit with keyed digest, API |
 | WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
-| WP-04 | in progress (2/8) | wp-04-cash | 56 | baseline forecaster (sales seasonality incl. festivals, per-customer delays, obligations, bills); Monte Carlo (1,000 seeded paths in integer paisa, block bootstrap, common random numbers for what-ifs) |
+| WP-04 | in progress (3/8) | wp-04-cash | 89 | baseline forecaster (sales seasonality incl. festivals, per-customer delays, obligations, bills); Monte Carlo (1,000 seeded paths in integer paisa, block bootstrap, common random numbers for what-ifs); gaps (breach day, expected shortfall, lead time, top-3 drivers) + 5 leading indicators |
 | WP-05 | not started | — | 0 | |
 | WP-06 | in progress (7/8) | merged | 123 | engine + real BD catalogue done; API (milestone 8) waits for WP-11 principal + step-up |
 | WP-07 | not started | — | 0 | |
