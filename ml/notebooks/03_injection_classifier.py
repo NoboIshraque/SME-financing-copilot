@@ -18,6 +18,9 @@
 # - Hishab corpus `data/public/injection/injection_corpus.jsonl`: 12 attack and 12 benign
 #   families × 4 languages, including hard negatives ("ignore the disputed invoice"). The
 #   split holds out whole families, so test scores measure generalisation to unseen phrasings.
+#   Two more attack and two more benign families are held out of *training* as a validation
+#   set: the best checkpoint and the decision threshold are chosen there, and the test split
+#   is scored exactly once (choosing either on test would inflate every test number).
 # - Public English sets from Hugging Face (internet must be on in Kaggle settings):
 #   `deepset/prompt-injections` (Apache-2.0) and, if reachable,
 #   `xTRam1/safe-guard-prompt-injection`.
@@ -92,10 +95,21 @@ def find_corpus() -> Path:
 
 
 ours = [json.loads(line) for line in find_corpus().read_text(encoding="utf-8").splitlines()]
-train_rows = [{"text": r["text"], "label": int(r["label"] == "attack"), "lang": r["lang"],
-               "source": "hishab"} for r in ours if r["split"] == "train"]
-test_rows = [{"text": r["text"], "label": int(r["label"] == "attack"), "lang": r["lang"],
-              "family": r["family"], "source": "hishab"} for r in ours if r["split"] == "test"]
+
+
+def as_row(r):
+    return {"text": r["text"], "label": int(r["label"] == "attack"), "lang": r["lang"],
+            "family": r["family"], "source": "hishab"}
+
+
+# Validation = whole families held out of training (2 attack + 2 benign, fixed by the seed).
+VAL_FAMILIES = []
+for kind in ("attack", "benign"):
+    fams = sorted({r["family"] for r in ours if r["split"] == "train" and r["label"] == kind})
+    VAL_FAMILIES += random.Random(SEED).sample(fams, 2)
+train_rows = [as_row(r) for r in ours if r["split"] == "train" and r["family"] not in VAL_FAMILIES]
+val_rows = [as_row(r) for r in ours if r["split"] == "train" and r["family"] in VAL_FAMILIES]
+test_rows = [as_row(r) for r in ours if r["split"] == "test"]
 
 public_test = []
 for name, text_col, label_col in (("deepset/prompt-injections", "text", "label"),
@@ -124,7 +138,8 @@ for r in [r for r in train_rows if r["source"] == "hishab"]:
     aug.append({**r, "text": "  ".join(r["text"].split())})
 train_rows += aug
 random.shuffle(train_rows)
-print(f"train {len(train_rows)} | hishab test {len(test_rows)} | public test {len(public_test)}")
+print(f"train {len(train_rows)} | val {len(val_rows)} ({', '.join(VAL_FAMILIES)}) | "
+      f"hishab test {len(test_rows)} | public test {len(public_test)}")
 
 # %% [markdown]
 # ## 2. Fine-tune (checkpoint every epoch, resume if present)
@@ -140,7 +155,7 @@ def encode(rows):
 
 
 train_ds = encode(train_rows)
-eval_ds = encode(test_rows)
+eval_ds = encode(val_rows)  # checkpoint selection on validation, never on test
 args = TrainingArguments(
     output_dir=str(CKPT), num_train_epochs=EPOCHS, learning_rate=2e-5,
     per_device_train_batch_size=16, per_device_eval_batch_size=32, warmup_ratio=0.1,
@@ -174,13 +189,17 @@ def report(rows, probs, threshold):
     return out
 
 
-test_probs = scores(test_rows)
-attack_probs = np.sort(test_probs[np.array([r["label"] for r in test_rows]) == 1])
+val_probs = scores(val_rows)
+attack_probs = np.sort(val_probs[np.array([r["label"] for r in val_rows]) == 1])
 threshold = float(attack_probs[int((1 - THRESHOLD_TARGET_RECALL) * len(attack_probs))])
+test_probs = scores(test_rows)  # the only time the test split is scored
 metrics = {
     "model": MODEL_NAME, "seed": SEED, "epochs": EPOCHS, "threshold": round(threshold, 4),
     "public_rows_cap": PUBLIC_CAP or "all",
-    "threshold_rule": f"lowest score that keeps recall >= {THRESHOLD_TARGET_RECALL} on attacks",
+    "threshold_rule": (f"lowest score that keeps recall >= {THRESHOLD_TARGET_RECALL} on "
+                       "validation attacks (held-out training families); test scored once"),
+    "validation_families": sorted(VAL_FAMILIES),
+    "validation": report(val_rows, val_probs, threshold),
     "hishab_unseen_families": report(test_rows, test_probs, threshold),
     "by_language": {}, "by_family": {},
     "test_families": sorted({r["family"] for r in test_rows}),
