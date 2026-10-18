@@ -23,9 +23,8 @@ function SignOutButton() {
     } catch {
       // the session is dropped locally either way
     }
+    // The sign-in screen then drops every cached query of this tenant.
     queryClient.setQueryData(SESSION_KEY, null);
-    // Nothing of this tenant's data may stay in memory for the next person on the device.
-    queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== SESSION_KEY[0] });
     navigate("/login", { replace: true });
   };
   return (

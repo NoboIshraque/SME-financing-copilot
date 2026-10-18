@@ -1,7 +1,7 @@
 // Sign-in (WP-11): email + password, then a TOTP code when the account has one. In demo mode the
 // server lists public demo accounts, signed in with one tap.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -16,6 +16,8 @@ import { CodeField } from "./CodeField";
 import { SESSION_KEY, safeNext, useSession } from "./session";
 
 type ErrorText = { key: string; values: Record<string, string> };
+
+const PUBLIC_QUERIES = new Set(["session", "health", "demo-accounts"]);
 
 const INPUT =
   "w-full rounded-xl border border-slate-300 bg-white px-3 py-3 dark:border-slate-600 dark:bg-slate-800";
@@ -40,6 +42,12 @@ export function LoginScreen() {
   const [error, setError] = useState<ErrorText | null>(null);
 
   const demo = useQuery({ queryKey: ["demo-accounts"], queryFn: api.auth.demoAccounts, retry: false });
+
+  // Whatever ended the last session (sign-out, expiry, a 401), no business data from it stays in
+  // memory once the sign-in screen is up.
+  useEffect(() => {
+    queryClient.removeQueries({ predicate: (query) => !PUBLIC_QUERIES.has(String(query.queryKey[0])) });
+  }, [queryClient]);
 
   const finish = (signedIn: Session) => {
     queryClient.setQueryData(SESSION_KEY, signedIn);

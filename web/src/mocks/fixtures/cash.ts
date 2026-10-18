@@ -179,3 +179,42 @@ export function alerts(): Alert[] {
     },
   ];
 }
+
+export function gaps() {
+  return alerts().flatMap((alert) => (alert.gap ? [alert.gap] : []));
+}
+
+function pct(value: unknown): number {
+  const parsed = typeof value === "string" ? Number(value) : 0;
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Mock what-if: shocks shift the band day by day (illustrative, labelled synthetic). */
+export function whatIf(body: unknown): CashForecast {
+  const input = (body ?? {}) as Record<string, unknown>;
+  const sales = pct(input.sales_change_pct);
+  const costs = pct(input.cost_change_pct);
+  const delay = typeof input.collection_delay_days === "number" ? input.collection_delay_days : 0;
+  const oneOff = pct((input.one_off_cost as { amount?: string } | undefined)?.amount);
+  const base = forecastBand();
+  const shift = (day: number) =>
+    Math.round((sales / 100) * 9000 * day - (costs / 100) * 7000 * day - Math.min(day, delay) * 1500 - (day >= 7 ? oneOff : 0));
+  const points = base.points.map((point, i) => {
+    const day = i + 1;
+    const p50 = Number(point.p50.amount) + shift(day);
+    const p10 = Number(point.p10.amount) + shift(day);
+    const p90 = Number(point.p90.amount) + shift(day);
+    return { ...point, p10: money(p10), p50: money(p50), p90: money(p90), p_below_buffer: belowBuffer(p10, p50, p90) };
+  });
+  const firstBelow = points.findIndex((point) => Number(point.p50.amount) < BUFFER);
+  const lowest = Math.min(...points.map((point) => Number(point.p50.amount)));
+  const runway = firstBelow === -1 ? HORIZON_DAYS : firstBelow + 1;
+  const params = { ...MC, sales_change_pct: String(sales), cost_change_pct: String(costs), collection_delay_days: String(delay) };
+  return {
+    band: { ...base, points },
+    figures: [
+      figure("fig-whatif-runway", "cash.runway_days", String(runway), "days", { formula_id: "cash.runway_days", parameters: params }),
+      figure("fig-whatif-lowest", "cash.lowest_likely_balance", `${lowest}.00`, "BDT", { formula_id: "cash.forecast_p50_min", parameters: params }),
+    ],
+  };
+}
