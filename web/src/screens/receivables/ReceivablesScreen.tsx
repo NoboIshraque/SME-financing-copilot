@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { compareDecimal } from "../../api/decimal";
+import { compareDecimal, toChartNumber } from "../../api/decimal";
 import { api } from "../../api/endpoints";
 import type { ReceivableRow, ReceivablesOverview } from "../../api/types";
 import { ActionCardView } from "../../components/ActionCardView";
@@ -148,7 +148,7 @@ function Overview({ data }: { data: ReceivablesOverview }) {
         <h3 id="h-aging" className="text-lg font-semibold">{t("receivables.agingTitle")}</h3>
         <ul className="space-y-2">
           {data.aging.map((bucket) => {
-            const share = compareDecimal(largest, "0") > 0 ? Math.round((Number(bucket.amount.amount) / Number(largest)) * 100) : 0;
+            const share = compareDecimal(largest, "0") > 0 ? Math.round((toChartNumber(bucket.amount.amount) / toChartNumber(largest)) * 100) : 0;
             return (
               <li key={bucket.bucket} className="grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 text-sm">
                 <span>{t(`receivables.bucket.${bucket.bucket}`)}</span>

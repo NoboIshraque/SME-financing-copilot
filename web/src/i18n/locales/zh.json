@@ -98,7 +98,9 @@
     "action_denied": "无论谁要求，Hishab 都不会执行。",
     "nothing_to_approve": "这里没有需要批准的内容。",
     "already_decided": "此事项已经决定。",
-    "owner_only": "只有店主可以批准此操作。"
+    "owner_only": "只有店主可以批准此操作。",
+    "reason_required": "请选择问题类型。",
+    "not_disputed": "此发票没有争议。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -183,7 +185,8 @@
     "compare_financing": "比较备用融资方案",
     "expected_collection": "预计可收回",
     "gap_reduced": "可填补缺口",
-    "cost": "成本"
+    "cost": "成本",
+    "send_pre_due_reminder": "到期前发送友好提醒"
   },
   "alert": {
     "gap_ahead": "即将出现现金缺口",
@@ -255,5 +258,58 @@
   "unit": {
     "days_one": "{{value}} 天",
     "days_other": "{{value}} 天"
+  },
+  "receivables": {
+    "remindersTitle": "待发送的提醒",
+    "noReminders": "目前没有需要发送的提醒。",
+    "agingTitle": "应收账款账龄",
+    "bucket": {
+      "0_30": "0–30 天",
+      "31_60": "31–60 天",
+      "61_90": "61–90 天",
+      "90_plus": "90 天以上"
+    },
+    "invoiceCount_one": "{{count}} 张发票",
+    "invoiceCount_other": "{{count}} 张发票",
+    "invoicesTitle": "未结发票（按风险排序）",
+    "none": "目前没有人欠您钱。",
+    "due": "到期 {{date}}",
+    "late": "逾期 {{days}}",
+    "risk": {
+      "high": "高风险",
+      "medium": "中风险",
+      "low": "低风险"
+    },
+    "disputed": "有争议",
+    "excluded": "解决前不计入预计现金。",
+    "resolve": "标记为已解决",
+    "recordDispute": "登记争议",
+    "disputeTitle": "登记争议",
+    "disputeHelp": "有争议的发票会保留记录，但在解决前不计入预计现金。",
+    "reason": "问题是什么？",
+    "reasons": {
+      "quality": "质量投诉",
+      "quantity": "数量不符",
+      "price": "价格分歧",
+      "not_received": "未收到货物",
+      "other": "其他"
+    },
+    "creditTitle": "客户与赊销额度",
+    "owes": "欠款 {{amount}}",
+    "avgLate": "平均逾期 {{days}}",
+    "limit": "赊销额度",
+    "stopCredit": "停止赊销",
+    "open": "应收总额",
+    "overdue": "已逾期",
+    "dso": "回款天数 (DSO)",
+    "credit_limit": "赊销额度"
+  },
+  "risk": {
+    "days_late": "已逾期",
+    "history_slow": "一向付款慢",
+    "amount_above_usual": "金额高于平常",
+    "many_open": "未付发票多",
+    "recent_payment": "最近已付款",
+    "disputed": "有争议"
   }
 }

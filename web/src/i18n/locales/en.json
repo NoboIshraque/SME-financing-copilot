@@ -98,7 +98,9 @@
     "action_denied": "Hishab never does this, whoever asks.",
     "nothing_to_approve": "There is nothing to approve here.",
     "already_decided": "This was already decided.",
-    "owner_only": "Only the owner can approve this."
+    "owner_only": "Only the owner can approve this.",
+    "reason_required": "Choose what the problem is.",
+    "not_disputed": "This invoice is not disputed."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -183,7 +185,8 @@
     "compare_financing": "Compare standby financing",
     "expected_collection": "Expected to collect",
     "gap_reduced": "Gap closed",
-    "cost": "Cost"
+    "cost": "Cost",
+    "send_pre_due_reminder": "Send a friendly reminder before the due date"
   },
   "alert": {
     "gap_ahead": "Cash gap ahead",
@@ -255,5 +258,58 @@
   "unit": {
     "days_one": "{{value}} day",
     "days_other": "{{value}} days"
+  },
+  "receivables": {
+    "remindersTitle": "Reminders to send",
+    "noReminders": "No reminders due.",
+    "agingTitle": "How old the money owed is",
+    "bucket": {
+      "0_30": "0–30 days",
+      "31_60": "31–60 days",
+      "61_90": "61–90 days",
+      "90_plus": "Over 90 days"
+    },
+    "invoiceCount_one": "{{count}} invoice",
+    "invoiceCount_other": "{{count}} invoices",
+    "invoicesTitle": "Open invoices, riskiest first",
+    "none": "Nobody owes you money right now.",
+    "due": "due {{date}}",
+    "late": "{{days}} late",
+    "risk": {
+      "high": "High risk",
+      "medium": "Medium risk",
+      "low": "Low risk"
+    },
+    "disputed": "Disputed",
+    "excluded": "Left out of the likely forecast until it is resolved.",
+    "resolve": "Mark resolved",
+    "recordDispute": "Record a dispute",
+    "disputeTitle": "Record a dispute",
+    "disputeHelp": "A disputed invoice stays on record but is not counted as likely cash until you resolve it.",
+    "reason": "What is the problem?",
+    "reasons": {
+      "quality": "Quality complaint",
+      "quantity": "Wrong quantity",
+      "price": "Price disagreement",
+      "not_received": "Goods not received",
+      "other": "Other"
+    },
+    "creditTitle": "Customers and credit limits",
+    "owes": "owes {{amount}}",
+    "avgLate": "pays {{days}} late on average",
+    "limit": "Credit limit",
+    "stopCredit": "Stop credit",
+    "open": "Owed to you",
+    "overdue": "Overdue",
+    "dso": "Days to get paid (DSO)",
+    "credit_limit": "Credit limit"
+  },
+  "risk": {
+    "days_late": "Already late",
+    "history_slow": "Usually pays slowly",
+    "amount_above_usual": "Bigger than usual",
+    "many_open": "Many unpaid invoices",
+    "recent_payment": "Paid recently",
+    "disputed": "Disputed"
   }
 }

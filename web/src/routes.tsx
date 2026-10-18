@@ -8,13 +8,14 @@ import { NotFound } from "./components/NotFound";
 import { Placeholder } from "./components/Placeholder";
 import { SCREENS, type Screen } from "./navigation";
 import { CashScreen } from "./screens/cash/CashScreen";
+import { ReceivablesScreen } from "./screens/receivables/ReceivablesScreen";
 import { TodayScreen } from "./screens/today/TodayScreen";
 
 // WP-14 replaces each Placeholder with the real screen, milestone by milestone.
 const SCREEN_ELEMENTS: Record<Screen, ReactNode> = {
   today: <TodayScreen />,
   cash: <CashScreen />,
-  receivables: <Placeholder screen="receivables" />,
+  receivables: <ReceivablesScreen />,
   financing: <Placeholder screen="financing" />,
   analysis: <Placeholder screen="analysis" />,
   mesh: <Placeholder screen="mesh" />,
