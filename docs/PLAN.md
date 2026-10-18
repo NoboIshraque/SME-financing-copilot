@@ -60,7 +60,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | --- | --- | --- | --- | --- |
 | WP-00 | Foundation: scaffold, contracts, CI, seed data, autosave | Orchestrator | 0 | 40 |
 | WP-01 | Typed Fact Ledger + provenance (N5, N13 backend) | A1 | 1 | 60 |
-| WP-02 | Ingestion: bKash/Nagad/bank CSV, Excel, OCR, Bangla/Banglish (P4) | A1 | 1 | 80 |
+| WP-02 | in progress (4/5) | wp-02-ingest | 281 | parsers, normaliser, OCR drafts, preview/commit (keyed digest, confirmed drafts, dedupe at commit, party aliases) |
 | WP-03 | Privacy vault, detectors, anonymiser, amount scaling (N6, N18, P11) | Orchestrator | 1 | 70 |
 | WP-04 | Cash engine: forecast, Monte Carlo, gaps, alerts, smoothing (Q1, Q3) | A1 | 1–2 | 120 |
 | WP-05 | Receivables & collections: aging, risk, limits, ladder, disputes (Q2) | A1 | 2 | 60 |
