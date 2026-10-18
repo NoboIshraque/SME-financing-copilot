@@ -93,6 +93,138 @@
     "fact_not_found": "该数字尚无记录。",
     "unknown_metric": "未知指标。",
     "not_computable": "无法根据现有记录计算该数字。",
-    "figure_not_found": "未找到该数字的说明。"
+    "figure_not_found": "未找到该数字的说明。",
+    "idempotency_required": "请求缺少安全密钥，请重试。",
+    "action_denied": "无论谁要求，Hishab 都不会执行。",
+    "nothing_to_approve": "这里没有需要批准的内容。",
+    "already_decided": "此事项已经决定。",
+    "owner_only": "只有店主可以批准此操作。"
+  },
+  "today": {
+    "asOf": "截至 {{date}}",
+    "cashNow": "当前现金",
+    "runway": "现金可支撑",
+    "runwayHelp": "之后预计余额将低于安全缓冲",
+    "runwayClear": "在整个预测期内，预计余额都高于安全缓冲。",
+    "buffer": "安全缓冲",
+    "lowest": "最低预计余额",
+    "seeForecast": "查看 13 周预测",
+    "actionsTitle": "今日待办",
+    "caseAgainst": "反方意见",
+    "noActions": "目前没有需要您批准的事项。",
+    "abstainTitle": "数据不足，暂不建议",
+    "missing": "补充以下信息会有帮助：",
+    "alertsTitle": "预警",
+    "noAlerts": "没有预警。未来 13 周现金看起来平稳。",
+    "onlyCritical": "只有上方的紧急预警。",
+    "chance": "跌破缓冲的概率",
+    "shortfall": "预计缺口",
+    "firstDay": "首个风险日",
+    "inDays": "{{days}}后",
+    "worstDay": "最低点",
+    "why": "原因",
+    "signs": "早期预警信号",
+    "seeFixes_one": "查看 {{count}} 个排序后的解决办法",
+    "seeFixes_other": "查看 {{count}} 个排序后的解决办法"
+  },
+  "alertTier": {
+    "critical": "紧急",
+    "warning": "警告",
+    "watch": "关注"
+  },
+  "tier": {
+    "READ": "查看",
+    "SUGGEST": "建议",
+    "DRAFT": "草稿",
+    "EXECUTE": "涉及资金",
+    "DENY": "禁止"
+  },
+  "tierHelp": {
+    "READ": "仅供参考。",
+    "SUGGEST": "由您自己执行，Hishab 只提出建议。",
+    "DRAFT": "Hishab 起草，经您批准后才会发送。",
+    "EXECUTE": "涉及资金或承诺，需店主输入验证码批准。",
+    "DENY": "无论谁要求，Hishab 都不会执行。"
+  },
+  "actionCard": {
+    "open": "打开",
+    "markDone": "标记为已完成",
+    "approveDraft": "批准草稿",
+    "approveWithCode": "输入验证码批准",
+    "approved": "已批准，并已记入审计日志。",
+    "ownerOnly": "只有店主可以批准此操作。",
+    "roleCannot": "您的角色无法批准此操作。",
+    "never": "已阻止：Hishab 从不执行此操作。",
+    "expires": "{{when}} 到期",
+    "cost": "成本",
+    "dueDate": "到期日 {{date}}",
+    "newDate": "新日期 {{date}}",
+    "invoices_one": "{{count}} 张发票",
+    "invoices_other": "{{count}} 张发票"
+  },
+  "action": {
+    "view": "打开",
+    "send_reminder": "发送付款提醒",
+    "send_message": "发送消息",
+    "draft_loan_application": "起草贷款申请",
+    "retime_payable": "在账期内延后支付供应商",
+    "request_advance": "向买方申请预付款",
+    "offer_early_pay_discount": "提供提前付款折扣",
+    "propose_netting_round": "发起轧差结算",
+    "approve_netting_round": "批准轧差结算",
+    "share_passport": "分享您的信任护照",
+    "set_credit_limit": "设置赊销额度",
+    "record_dispute": "登记争议",
+    "change_bank_details": "更改银行信息",
+    "add_payee": "添加新收款人",
+    "disable_audit": "关闭审计日志",
+    "export_raw_pii": "导出原始个人数据",
+    "move_money": "转账",
+    "compare_financing": "比较备用融资方案",
+    "expected_collection": "预计可收回",
+    "gap_reduced": "可填补缺口",
+    "cost": "成本"
+  },
+  "alert": {
+    "gap_ahead": "即将出现现金缺口",
+    "sales_below_norm": "销售低于本季正常水平",
+    "payroll_at_risk": "工资发放有风险"
+  },
+  "driver": {
+    "salary": "工资",
+    "rent": "租金",
+    "emi": "贷款分期 (EMI)",
+    "supplier_bill": "供应商账单",
+    "late_customer": "客户逾期付款",
+    "seasonal_dip": "季节性销售下滑",
+    "stock_build": "库存积压",
+    "cost_shock": "意外支出"
+  },
+  "indicator": {
+    "dso_rising": "客户付款变慢",
+    "top_customer_slowing": "最大客户付款延后",
+    "stock_building": "库存增长快于销售",
+    "sales_below_seasonal_norm": "销售低于季节性常态",
+    "payroll_or_emi_at_risk": "工资或分期还款有风险"
+  },
+  "cash": {
+    "closing_balance": "当前现金",
+    "buffer_target": "安全缓冲",
+    "runway_days": "现金可支撑",
+    "lowest_likely_balance": "最低预计余额",
+    "expected_shortfall": "预计缺口",
+    "breach_probability": "跌破缓冲的概率"
+  },
+  "abstain": {
+    "insufficient_data": "我没有足够的数据来稳妥地给出建议。",
+    "low_agreement": "各模型意见不一致，所以我不做猜测。",
+    "unverifiable": "我无法核实这些数字，所以不给出建议。",
+    "out_of_scope": "这超出了我能帮助的范围。",
+    "policy": "这需要由人来处理，我无法执行。",
+    "budget_exhausted": "这个问题已达到我的工作上限，请换一个更具体的问题。"
+  },
+  "unit": {
+    "days_one": "{{value}} 天",
+    "days_other": "{{value}} 天"
   }
 }

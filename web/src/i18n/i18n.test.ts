@@ -37,13 +37,28 @@ describe("locales", () => {
     expect(resources.zh.translation.nav.cash).toMatch(/[一-鿿]/);
   });
 
-  it("every key the source code passes to t() exists", () => {
+  it("every key the source code passes to t() exists (plural keys as _one/_other)", () => {
     const used = new Set<string>();
     for (const text of Object.values(sources)) {
       for (const match of text.matchAll(/\bt\(\s*"([a-zA-Z0-9_.]+)"/g)) used.add(match[1] ?? "");
     }
     expect(used.size).toBeGreaterThan(30);
-    expect([...used].filter((key) => !english.has(key))).toEqual([]);
+    const missing = [...used].filter(
+      (key) => !english.has(key) && !(english.has(`${key}_one`) && english.has(`${key}_other`)),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("labels every permission tier, alert tier and leading indicator", () => {
+    const tiers = ["READ", "SUGGEST", "DRAFT", "EXECUTE", "DENY"];
+    const alertTiers = ["critical", "warning", "watch"];
+    const indicators = ["dso_rising", "top_customer_slowing", "stock_building", "sales_below_seasonal_norm", "payroll_or_emi_at_risk"];
+    const expected = [
+      ...tiers.flatMap((tier) => [`tier.${tier}`, `tierHelp.${tier}`]),
+      ...alertTiers.map((tier) => `alertTier.${tier}`),
+      ...indicators.map((name) => `indicator.${name}`),
+    ];
+    expect(expected.filter((key) => !english.has(key))).toEqual([]);
   });
 
   it("writes digits inside Bangla sentences in Bangla script", () => {

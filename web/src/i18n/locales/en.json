@@ -93,6 +93,138 @@
     "fact_not_found": "This figure isn't on record yet.",
     "unknown_metric": "Unknown figure.",
     "not_computable": "This figure can't be computed from the data on record.",
-    "figure_not_found": "This figure's explanation was not found."
+    "figure_not_found": "This figure's explanation was not found.",
+    "idempotency_required": "The request was missing its safety key. Please try again.",
+    "action_denied": "Hishab never does this, whoever asks.",
+    "nothing_to_approve": "There is nothing to approve here.",
+    "already_decided": "This was already decided.",
+    "owner_only": "Only the owner can approve this."
+  },
+  "today": {
+    "asOf": "As of {{date}}",
+    "cashNow": "Cash now",
+    "runway": "Runway",
+    "runwayHelp": "until your likely balance falls below your safety buffer",
+    "runwayClear": "Your likely balance stays above your safety buffer for the whole forecast.",
+    "buffer": "Safety buffer",
+    "lowest": "Lowest likely balance",
+    "seeForecast": "See the 13-week forecast",
+    "actionsTitle": "Do these today",
+    "caseAgainst": "Case against",
+    "noActions": "Nothing needs your approval right now.",
+    "abstainTitle": "Not enough to advise yet",
+    "missing": "What would help:",
+    "alertsTitle": "Alerts",
+    "noAlerts": "No alerts. Your cash looks steady for the next 13 weeks.",
+    "onlyCritical": "Only the critical alerts above.",
+    "chance": "Chance of dipping below the buffer",
+    "shortfall": "Expected shortfall",
+    "firstDay": "First day at risk",
+    "inDays": "in {{days}}",
+    "worstDay": "Lowest point",
+    "why": "Why",
+    "signs": "Early warning signs",
+    "seeFixes_one": "See {{count}} ranked fix",
+    "seeFixes_other": "See {{count}} ranked fixes"
+  },
+  "alertTier": {
+    "critical": "Critical",
+    "warning": "Warning",
+    "watch": "Watch"
+  },
+  "tier": {
+    "READ": "View",
+    "SUGGEST": "Suggestion",
+    "DRAFT": "Draft",
+    "EXECUTE": "Moves money",
+    "DENY": "Never allowed"
+  },
+  "tierHelp": {
+    "READ": "Information only.",
+    "SUGGEST": "You do this yourself; Hishab only suggests it.",
+    "DRAFT": "Hishab prepares it; nothing is sent until you approve.",
+    "EXECUTE": "Moves money or makes a commitment, so the owner approves it with a code.",
+    "DENY": "Hishab never does this, whoever asks."
+  },
+  "actionCard": {
+    "open": "Open",
+    "markDone": "Mark as done",
+    "approveDraft": "Approve draft",
+    "approveWithCode": "Approve with code",
+    "approved": "Approved. It is recorded in the audit log.",
+    "ownerOnly": "Only the owner can approve this.",
+    "roleCannot": "Your role can't approve this.",
+    "never": "Blocked: Hishab never does this.",
+    "expires": "Expires {{when}}",
+    "cost": "Cost",
+    "dueDate": "due {{date}}",
+    "newDate": "new date {{date}}",
+    "invoices_one": "{{count}} invoice",
+    "invoices_other": "{{count}} invoices"
+  },
+  "action": {
+    "view": "Open",
+    "send_reminder": "Send a payment reminder",
+    "send_message": "Send a message",
+    "draft_loan_application": "Draft a loan application",
+    "retime_payable": "Pay a supplier later, within terms",
+    "request_advance": "Ask a buyer for an advance",
+    "offer_early_pay_discount": "Offer an early-payment discount",
+    "propose_netting_round": "Propose a netting round",
+    "approve_netting_round": "Approve the netting round",
+    "share_passport": "Share your Trust Passport",
+    "set_credit_limit": "Set a credit limit",
+    "record_dispute": "Record a dispute",
+    "change_bank_details": "Change bank details",
+    "add_payee": "Add a new payee",
+    "disable_audit": "Turn off the audit log",
+    "export_raw_pii": "Export raw personal data",
+    "move_money": "Move money",
+    "compare_financing": "Compare standby financing",
+    "expected_collection": "Expected to collect",
+    "gap_reduced": "Gap closed",
+    "cost": "Cost"
+  },
+  "alert": {
+    "gap_ahead": "Cash gap ahead",
+    "sales_below_norm": "Sales below the usual for this season",
+    "payroll_at_risk": "Payroll at risk"
+  },
+  "driver": {
+    "salary": "Salaries",
+    "rent": "Rent",
+    "emi": "Loan instalment (EMI)",
+    "supplier_bill": "Supplier bill",
+    "late_customer": "Late customer payments",
+    "seasonal_dip": "Seasonal dip in sales",
+    "stock_build": "Stock building up",
+    "cost_shock": "Unexpected cost"
+  },
+  "indicator": {
+    "dso_rising": "Customers paying more slowly",
+    "top_customer_slowing": "Top customer paying later",
+    "stock_building": "Stock building faster than sales",
+    "sales_below_seasonal_norm": "Sales below the seasonal norm",
+    "payroll_or_emi_at_risk": "Payroll or EMI at risk"
+  },
+  "cash": {
+    "closing_balance": "Cash now",
+    "buffer_target": "Safety buffer",
+    "runway_days": "Runway",
+    "lowest_likely_balance": "Lowest likely balance",
+    "expected_shortfall": "Expected shortfall",
+    "breach_probability": "Chance of dipping below the buffer"
+  },
+  "abstain": {
+    "insufficient_data": "I don't have enough data to advise on this safely.",
+    "low_agreement": "The models disagreed, so I won't guess.",
+    "unverifiable": "I couldn't verify the numbers, so I won't give advice.",
+    "out_of_scope": "This is outside what I can help with.",
+    "policy": "This needs a person. I can't do it.",
+    "budget_exhausted": "I reached my work limit for this question. Try a narrower one."
+  },
+  "unit": {
+    "days_one": "{{value}} day",
+    "days_other": "{{value}} days"
   }
 }
