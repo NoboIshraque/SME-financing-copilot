@@ -403,5 +403,111 @@
     "woman_entrepreneur": "নারী-মালিকানাধীন ব্যবসা",
     "bkash_account": "সক্রিয় বিকাশ অ্যাকাউন্ট",
     "supplier_relationship": "সরবরাহকারীর সাথে সম্পর্ক"
+  },
+  "analysis": {
+    "statementsTitle": "হিসাব বিবরণী",
+    "statementChoice": "একটি বিবরণী বেছে নিন",
+    "statement": {
+      "pnl": "লাভ-ক্ষতি",
+      "balance_sheet": "স্থিতিপত্র (সংক্ষিপ্ত)",
+      "cash_flow": "নগদ প্রবাহ"
+    },
+    "ratiosTitle": "মূল অনুপাত",
+    "notApplicable": "প্রযোজ্য নয়",
+    "benchmark": "সাধারণত: {{value}}",
+    "varianceTitle": "প্রত্যাশা বনাম বাস্তব",
+    "accuracy": "গত মাসের পূর্বাভাসের নির্ভুলতা",
+    "metric": "বিষয়",
+    "expected": "প্রত্যাশিত",
+    "actual": "বাস্তব",
+    "below": "প্রত্যাশার চেয়ে কম",
+    "above": "প্রত্যাশার চেয়ে বেশি",
+    "onTarget": "প্রত্যাশামতো",
+    "scenariosTitle": "সিদ্ধান্ত তুলনা",
+    "scenariosHelp": "প্রতিটি সিদ্ধান্ত একই ১,০০০টি পথে সিমুলেট করা হয়। ঝুঁকি বিবেচনায় সেরাটি চিহ্নিত।",
+    "decisions": "তুলনার জন্য সিদ্ধান্ত",
+    "compare": "তুলনা করুন",
+    "decision": "সিদ্ধান্ত",
+    "expectedOutcome": "প্রত্যাশিত ব্যালান্স",
+    "worst5": "সবচেয়ে খারাপ ৫%",
+    "breach": "বাফারের নিচে নামার সম্ভাবনা",
+    "recommended": "সুপারিশকৃত",
+    "stabilityTitle": "আজকের পরামর্শ কতটা স্থির?",
+    "stabilityOf": "পরামর্শ: {{question}}",
+    "forecast_accuracy": "পূর্বাভাসের নির্ভুলতা"
+  },
+  "statement": {
+    "cash_sales": "নগদ বিক্রি",
+    "credit_sales": "বাকিতে বিক্রি",
+    "net_sales": "নিট বিক্রি",
+    "purchases": "ক্রয়",
+    "gross_profit": "মোট লাভ",
+    "rent": "ভাড়া",
+    "salaries": "বেতন",
+    "utilities": "বিদ্যুৎ-গ্যাস-পানি",
+    "fees": "ফি ও চার্জ",
+    "net_profit": "নিট লাভ",
+    "cash": "নগদ ও মোবাইল ব্যাংকিং",
+    "receivables": "ক্রেতাদের কাছে পাওনা",
+    "payables": "সরবরাহকারীদের দেনা",
+    "loans": "ঋণ",
+    "net_position": "নিট অবস্থান",
+    "opening_cash": "শুরুর নগদ",
+    "cash_in": "টাকা এসেছে",
+    "cash_out": "টাকা গেছে",
+    "closing_cash": "শেষের নগদ"
+  },
+  "ratio": {
+    "gross_margin": "মোট মার্জিন",
+    "net_margin": "নিট মার্জিন",
+    "current_ratio": "চলতি অনুপাত",
+    "dso": "টাকা পেতে কত দিন",
+    "dpo": "সরবরাহকারীকে দিতে কত দিন",
+    "top_customer_share": "সবচেয়ে বড় ক্রেতার অংশ",
+    "dscr": "ঋণ পরিশোধ সক্ষমতা"
+  },
+  "interpretation": {
+    "typical_grocery": "মুদি দোকানের স্বাভাবিক সীমার মধ্যে।",
+    "healthy": "ভালো অবস্থা।",
+    "pays_fast": "আপনি সরবরাহকারীকে দ্রুত দেন; লম্বা মেয়াদ চাইতে পারেন।",
+    "concentrated": "বিক্রির বড় অংশ একজন ক্রেতার।",
+    "no_debt": "ঋণ নেই, তাই পরিশোধের প্রশ্ন নেই।"
+  },
+  "metric": {
+    "net_sales": "নিট বিক্রি",
+    "collections": "আদায়",
+    "purchases": "ক্রয়",
+    "closing_balance": "মাস শেষে নগদ"
+  },
+  "decision": {
+    "retime_supplier": "বেতনের দিনের পরে সরবরাহকারীকে দিন",
+    "take_loan": "রিফাইন্যান্স ঋণ নিন",
+    "offer_discount": "আগাম পরিশোধে ছাড় দিন",
+    "do_nothing": "কিছু করবেন না"
+  },
+  "variation": {
+    "sales_minus_10": "বিক্রি ১০% কম",
+    "sales_minus_20": "বিক্রি ২০% কম",
+    "late_payer": "বড় ক্রেতা দেরিতে দেন",
+    "inputs_plus_8": "কাঁচামালের দাম ৮% বেশি",
+    "rates_plus_2pp": "সুদের হার ২ পয়েন্ট বেশি",
+    "surprise_bill": "হঠাৎ একটি বিল",
+    "rows_shuffled": "সারির ক্রম ভিন্ন",
+    "parties_renamed": "পক্ষগুলোর নাম বদল",
+    "question_reworded": "প্রশ্ন অন্যভাবে লেখা",
+    "dates_shifted_format": "তারিখ অন্যভাবে লেখা"
+  },
+  "stability": {
+    "label": "সিদ্ধান্তের স্থিরতা",
+    "holds": "{{total}}টির মধ্যে {{held}}টি পরিস্থিতিতে টিকে থাকে",
+    "unreliable": "অনির্ভরযোগ্য: অপ্রাসঙ্গিক পরিবর্তনে পরামর্শ বদলেছে ({{names}})।",
+    "wouldFlip": "যা হলে পরামর্শ বদলাবে:",
+    "allVariations": "সব পরিস্থিতি দেখুন",
+    "held": "টিকে আছে",
+    "flipped": "বদলেছে",
+    "kind": {
+      "stress": "অর্থনৈতিক চাপ",
+      "noise": "অপ্রাসঙ্গিক পরিবর্তন"
+    }
   }
 }

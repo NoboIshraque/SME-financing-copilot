@@ -403,5 +403,111 @@
     "woman_entrepreneur": "女性创业企业",
     "bkash_account": "有效的 bKash 账户",
     "supplier_relationship": "供应商合作关系"
+  },
+  "analysis": {
+    "statementsTitle": "财务报表",
+    "statementChoice": "选择报表",
+    "statement": {
+      "pnl": "损益表",
+      "balance_sheet": "简易资产负债表",
+      "cash_flow": "现金流量表"
+    },
+    "ratiosTitle": "关键比率",
+    "notApplicable": "不适用",
+    "benchmark": "常见水平：{{value}}",
+    "varianceTitle": "预期与实际",
+    "accuracy": "上月预测准确度",
+    "metric": "项目",
+    "expected": "预期",
+    "actual": "实际",
+    "below": "低于预期",
+    "above": "高于预期",
+    "onTarget": "符合预期",
+    "scenariosTitle": "比较决策",
+    "scenariosHelp": "每个决策都在同样的 1,000 条路径上模拟，并标出风险调整后最佳的一个。",
+    "decisions": "要比较的决策",
+    "compare": "比较",
+    "decision": "决策",
+    "expectedOutcome": "预计余额",
+    "worst5": "最差 5%",
+    "breach": "低于缓冲的概率",
+    "recommended": "推荐",
+    "stabilityTitle": "今天的建议有多稳定？",
+    "stabilityOf": "建议针对：{{question}}",
+    "forecast_accuracy": "预测准确度"
+  },
+  "statement": {
+    "cash_sales": "现金销售",
+    "credit_sales": "赊销",
+    "net_sales": "净销售额",
+    "purchases": "采购",
+    "gross_profit": "毛利",
+    "rent": "租金",
+    "salaries": "工资",
+    "utilities": "水电燃气",
+    "fees": "手续费",
+    "net_profit": "净利润",
+    "cash": "现金与移动钱包",
+    "receivables": "客户欠款",
+    "payables": "欠供应商款",
+    "loans": "贷款",
+    "net_position": "净头寸",
+    "opening_cash": "期初现金",
+    "cash_in": "现金流入",
+    "cash_out": "现金流出",
+    "closing_cash": "期末现金"
+  },
+  "ratio": {
+    "gross_margin": "毛利率",
+    "net_margin": "净利率",
+    "current_ratio": "流动比率",
+    "dso": "回款天数",
+    "dpo": "付款天数",
+    "top_customer_share": "最大客户占比",
+    "dscr": "偿债覆盖率"
+  },
+  "interpretation": {
+    "typical_grocery": "在杂货店的常见范围内。",
+    "healthy": "状况良好。",
+    "pays_fast": "您付款给供应商很快，可以争取更长账期。",
+    "concentrated": "单一客户占销售比重较大。",
+    "no_debt": "没有贷款，无需覆盖。"
+  },
+  "metric": {
+    "net_sales": "净销售额",
+    "collections": "回款",
+    "purchases": "采购",
+    "closing_balance": "月末现金"
+  },
+  "decision": {
+    "retime_supplier": "发薪日后再付供应商",
+    "take_loan": "申请再融资贷款",
+    "offer_discount": "提供提前付款折扣",
+    "do_nothing": "不采取行动"
+  },
+  "variation": {
+    "sales_minus_10": "销售下降 10%",
+    "sales_minus_20": "销售下降 20%",
+    "late_payer": "大客户延迟付款",
+    "inputs_plus_8": "原料价格上涨 8%",
+    "rates_plus_2pp": "利率上升 2 个百分点",
+    "surprise_bill": "意外账单",
+    "rows_shuffled": "数据行顺序打乱",
+    "parties_renamed": "交易方改名",
+    "question_reworded": "问题换种说法",
+    "dates_shifted_format": "日期写法不同"
+  },
+  "stability": {
+    "label": "决策稳定性",
+    "holds": "在 {{total}} 种情形中有 {{held}} 种保持不变",
+    "unreliable": "不可靠：建议在无关干扰下发生了变化（{{names}}）。",
+    "wouldFlip": "以下情况会改变建议：",
+    "allVariations": "查看所有情形",
+    "held": "保持",
+    "flipped": "改变",
+    "kind": {
+      "stress": "经济压力",
+      "noise": "无关干扰"
+    }
   }
 }

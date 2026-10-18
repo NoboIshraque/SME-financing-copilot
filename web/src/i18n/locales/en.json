@@ -403,5 +403,111 @@
     "woman_entrepreneur": "Woman-owned business",
     "bkash_account": "Active bKash account",
     "supplier_relationship": "Supplier relationship"
+  },
+  "analysis": {
+    "statementsTitle": "Statements",
+    "statementChoice": "Choose a statement",
+    "statement": {
+      "pnl": "Profit and loss",
+      "balance_sheet": "Balance sheet (lite)",
+      "cash_flow": "Cash flow"
+    },
+    "ratiosTitle": "Key ratios",
+    "notApplicable": "Not applicable",
+    "benchmark": "Typical: {{value}}",
+    "varianceTitle": "Expected vs reality",
+    "accuracy": "Forecast accuracy last month",
+    "metric": "Item",
+    "expected": "Expected",
+    "actual": "Actual",
+    "below": "below expected",
+    "above": "above expected",
+    "onTarget": "as expected",
+    "scenariosTitle": "Compare decisions",
+    "scenariosHelp": "Each decision is simulated over the same 1,000 paths. The best risk-adjusted one is marked.",
+    "decisions": "Decisions to compare",
+    "compare": "Compare",
+    "decision": "Decision",
+    "expectedOutcome": "Expected balance",
+    "worst5": "Worst 5%",
+    "breach": "Chance below buffer",
+    "recommended": "Recommended",
+    "stabilityTitle": "How stable is today's advice?",
+    "stabilityOf": "Advice for: {{question}}",
+    "forecast_accuracy": "Forecast accuracy"
+  },
+  "statement": {
+    "cash_sales": "Cash sales",
+    "credit_sales": "Credit sales (baki)",
+    "net_sales": "Net sales",
+    "purchases": "Purchases",
+    "gross_profit": "Gross profit",
+    "rent": "Rent",
+    "salaries": "Salaries",
+    "utilities": "Utilities",
+    "fees": "Fees and charges",
+    "net_profit": "Net profit",
+    "cash": "Cash and mobile money",
+    "receivables": "Owed by customers",
+    "payables": "Owed to suppliers",
+    "loans": "Loans",
+    "net_position": "Net position",
+    "opening_cash": "Cash at start",
+    "cash_in": "Money in",
+    "cash_out": "Money out",
+    "closing_cash": "Cash at end"
+  },
+  "ratio": {
+    "gross_margin": "Gross margin",
+    "net_margin": "Net margin",
+    "current_ratio": "Current ratio",
+    "dso": "Days to get paid",
+    "dpo": "Days to pay suppliers",
+    "top_customer_share": "Biggest customer's share",
+    "dscr": "Debt service cover"
+  },
+  "interpretation": {
+    "typical_grocery": "In the usual range for a grocery.",
+    "healthy": "Healthy.",
+    "pays_fast": "You pay suppliers fast; ask for longer terms.",
+    "concentrated": "One customer is a large share of sales.",
+    "no_debt": "No loans, so nothing to cover."
+  },
+  "metric": {
+    "net_sales": "Net sales",
+    "collections": "Collections",
+    "purchases": "Purchases",
+    "closing_balance": "Cash at month end"
+  },
+  "decision": {
+    "retime_supplier": "Pay the supplier after salary day",
+    "take_loan": "Take the refinance loan",
+    "offer_discount": "Offer an early-payment discount",
+    "do_nothing": "Do nothing"
+  },
+  "variation": {
+    "sales_minus_10": "Sales 10% lower",
+    "sales_minus_20": "Sales 20% lower",
+    "late_payer": "A big customer pays late",
+    "inputs_plus_8": "Input prices up 8%",
+    "rates_plus_2pp": "Interest rates up 2 points",
+    "surprise_bill": "A surprise bill",
+    "rows_shuffled": "Rows in a different order",
+    "parties_renamed": "Parties renamed",
+    "question_reworded": "Question reworded",
+    "dates_shifted_format": "Dates written differently"
+  },
+  "stability": {
+    "label": "Decision stability",
+    "holds": "Holds in {{held}} of {{total}} variations",
+    "unreliable": "Unreliable: the advice changed on irrelevant noise ({{names}}).",
+    "wouldFlip": "What would flip this:",
+    "allVariations": "See every variation",
+    "held": "held",
+    "flipped": "flipped",
+    "kind": {
+      "stress": "economic stress",
+      "noise": "irrelevant noise"
+    }
   }
 }
