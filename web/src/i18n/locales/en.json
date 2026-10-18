@@ -101,7 +101,10 @@
     "owner_only": "Only the owner can approve this.",
     "reason_required": "Choose what the problem is.",
     "not_disputed": "This invoice is not disputed.",
-    "invalid_need": "Check the amount and dates."
+    "invalid_need": "Check the amount and dates.",
+    "nothing_to_net": "There is no circular debt to net right now.",
+    "not_a_participant": "Your business is not part of this round.",
+    "not_anchored": "This round has not been anchored yet."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -509,5 +512,36 @@
       "stress": "economic stress",
       "noise": "irrelevant noise"
     }
+  },
+  "mesh": {
+    "empty": "You are not in any debt ring yet. When your buyers and suppliers join Hishab, circular debts can be cleared here with little cash.",
+    "graphTitle": "Who owes whom",
+    "owes": "{{debtor}} owes {{creditor}}",
+    "due": "due {{date}}",
+    "attested": "confirmed by both sides",
+    "roundsTitle": "Netting rounds",
+    "noRounds": "No netting rounds yet.",
+    "proposedTitle": "Proposed netting round",
+    "settledTitle": "Settled round of {{date}}",
+    "clears": "Clears",
+    "withCash": "of debt with only",
+    "pays": "{{payer}} pays {{payee}}",
+    "approvals": "Approvals",
+    "you": "you",
+    "approved": "approved",
+    "waiting": "waiting",
+    "expires": "Expires {{when}} unless everyone approves",
+    "approve": "Approve the round with code",
+    "waitingFor": "You approved. Waiting for {{names}}.",
+    "chain": {
+      "sepolia": "Anchored on Ethereum Sepolia (testnet)",
+      "offline": "Anchored offline (test mode)"
+    },
+    "tx": "Transaction {{hash}}",
+    "hashOnly": "Only a salted hash is on chain: no names, tokens or amounts.",
+    "verify": "Verify against the chain",
+    "valid": "Verified: the record matches the anchored hash.",
+    "invalid": "Does not match the anchored hash. Do not trust this record.",
+    "stepUpSummary": "Clear {{gross}} of debt by paying {{net}} in total"
   }
 }

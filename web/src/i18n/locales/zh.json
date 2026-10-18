@@ -101,7 +101,10 @@
     "owner_only": "只有店主可以批准此操作。",
     "reason_required": "请选择问题类型。",
     "not_disputed": "此发票没有争议。",
-    "invalid_need": "请检查金额和日期。"
+    "invalid_need": "请检查金额和日期。",
+    "nothing_to_net": "目前没有可轧差的循环债务。",
+    "not_a_participant": "您的企业不在本轮之中。",
+    "not_anchored": "本轮尚未锚定。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -509,5 +512,36 @@
       "stress": "经济压力",
       "noise": "无关干扰"
     }
+  },
+  "mesh": {
+    "empty": "您目前不在任何债务环中。当您的买方和供应商加入 Hishab 后，可以在这里用少量现金清偿循环债务。",
+    "graphTitle": "谁欠谁",
+    "owes": "{{debtor}} 欠 {{creditor}}",
+    "due": "到期 {{date}}",
+    "attested": "双方已确认",
+    "roundsTitle": "轧差结算轮次",
+    "noRounds": "还没有轧差结算。",
+    "proposedTitle": "拟议的轧差结算",
+    "settledTitle": "{{date}} 已结算的轮次",
+    "clears": "清偿",
+    "withCash": "债务，仅需现金",
+    "pays": "{{payer}} 支付给 {{payee}}",
+    "approvals": "批准情况",
+    "you": "您",
+    "approved": "已批准",
+    "waiting": "等待中",
+    "expires": "若非全员批准，将于 {{when}} 失效",
+    "approve": "输入验证码批准此轮",
+    "waitingFor": "您已批准，正在等待：{{names}}。",
+    "chain": {
+      "sepolia": "已锚定在以太坊 Sepolia 测试网",
+      "offline": "离线锚定（测试模式）"
+    },
+    "tx": "交易 {{hash}}",
+    "hashOnly": "链上只有加盐哈希：没有名称、令牌或金额。",
+    "verify": "与链上记录核对",
+    "valid": "已核实：记录与锚定哈希一致。",
+    "invalid": "与锚定哈希不一致，请勿信任此记录。",
+    "stepUpSummary": "共支付 {{net}}，清偿 {{gross}} 债务"
   }
 }
