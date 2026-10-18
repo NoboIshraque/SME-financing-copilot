@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import type { FinancingNeed, FinancingOption, LenderProfile } from "../../api/contracts";
 import { api } from "../../api/endpoints";
 import { findFigure } from "../../api/figures";
-import { toAsciiDigits } from "../../api/format";
 import type { FinancingMatch } from "../../api/types";
 import { useRequiredSession } from "../../auth/session";
 import { ActionCardView } from "../../components/ActionCardView";
@@ -16,6 +15,7 @@ import { ErrorState } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
 import { useServerText } from "../../i18n/serverText";
 import { useFormat } from "../../i18n/useFormat";
+import { parseAmount } from "./amount";
 
 const TENORS = [90, 180, 365] as const;
 const PURPOSES = ["working_capital", "stock", "equipment", "other"] as const;
@@ -25,14 +25,6 @@ const ELIGIBILITY_STYLE = {
   fail: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-100",
   not_on_record: "bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-100",
 };
-
-/** "2,00,000" or "২০০০০০" -> "200000.00"; null when it is not a positive amount. */
-export function parseAmount(raw: string): string | null {
-  const cleaned = toAsciiDigits(raw).replace(/[,\s৳]/g, "");
-  if (!/^\d+(\.\d{1,2})?$/.test(cleaned) || !/[1-9]/.test(cleaned)) return null;
-  const [int = "0", frac = ""] = cleaned.split(".");
-  return `${int.replace(/^0+(?=\d)/, "")}.${frac.padEnd(2, "0")}`;
-}
 
 function LenderCheck({ lender }: { lender: LenderProfile }) {
   const { t } = useTranslation();

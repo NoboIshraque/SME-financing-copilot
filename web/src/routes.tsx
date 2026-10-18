@@ -8,6 +8,7 @@ import { NotFound } from "./components/NotFound";
 import { Placeholder } from "./components/Placeholder";
 import { SCREENS, type Screen } from "./navigation";
 import { CashScreen } from "./screens/cash/CashScreen";
+import { FinancingScreen } from "./screens/financing/FinancingScreen";
 import { ReceivablesScreen } from "./screens/receivables/ReceivablesScreen";
 import { TodayScreen } from "./screens/today/TodayScreen";
 
@@ -16,7 +17,7 @@ const SCREEN_ELEMENTS: Record<Screen, ReactNode> = {
   today: <TodayScreen />,
   cash: <CashScreen />,
   receivables: <ReceivablesScreen />,
-  financing: <Placeholder screen="financing" />,
+  financing: <FinancingScreen />,
   analysis: <Placeholder screen="analysis" />,
   mesh: <Placeholder screen="mesh" />,
   market: <Placeholder screen="market" />,

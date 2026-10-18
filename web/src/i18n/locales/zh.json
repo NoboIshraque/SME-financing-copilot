@@ -100,7 +100,8 @@
     "already_decided": "此事项已经决定。",
     "owner_only": "只有店主可以批准此操作。",
     "reason_required": "请选择问题类型。",
-    "not_disputed": "此发票没有争议。"
+    "not_disputed": "此发票没有争议。",
+    "invalid_need": "请检查金额和日期。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -311,5 +312,96 @@
     "many_open": "未付发票多",
     "recent_payment": "最近已付款",
     "disputed": "有争议"
+  },
+  "financing": {
+    "needTitle": "您需要什么？",
+    "amount": "金额 (৳)",
+    "neededBy": "需要日期",
+    "tenor": "期限",
+    "months_one": "{{count}} 个月",
+    "months_other": "{{count}} 个月",
+    "purpose": "用途",
+    "amountInvalid": "请输入塔卡金额，例如 200000。",
+    "find": "查找方案",
+    "matching": "正在比较方案…",
+    "optionsTitle": "您的方案（最优在前）",
+    "applicationHelp": "Hishab 已为您符合条件的最佳方案预填申请。在您批准前不会发送任何内容。",
+    "rank": "排名 {{rank}}",
+    "eligibility": {
+      "pass": "符合条件",
+      "fail": "不符合条件",
+      "not_on_record": "无记录"
+    },
+    "trueCost": "真实年化成本",
+    "totalCost": "总成本",
+    "speed": "放款时间",
+    "fit": "与现金流匹配",
+    "breach": "跌破缓冲的概率 {{chance}}",
+    "nominal": "公布年利率 {{rate}}",
+    "rateBasis": {
+      "published": "公布利率",
+      "rate_sheet_upper": "银行利率表上限",
+      "regulatory_cap": "监管上限",
+      "last_published": "最近公布利率",
+      "modelled": "模拟",
+      "own_terms": "您自己的条款"
+    },
+    "modelled": "示例产品",
+    "likelihood": "批准可能性 {{chance}}",
+    "why": "符合或不符合的原因",
+    "ruleStatus": {
+      "pass": "是",
+      "fail": "否",
+      "not_on_record": "无记录，不计入"
+    },
+    "source": "来源",
+    "checkedOn": "核对于 {{date}}",
+    "lenderCheck": "贷款方核查",
+    "licence": "牌照",
+    "licenceStatus": {
+      "licensed": "持牌",
+      "not_found": "未找到",
+      "revoked": "已吊销",
+      "unknown": "未知"
+    },
+    "aprGap": "实际与公布成本之差",
+    "points": "{{value}} 个百分点",
+    "disbursal": "通常放款时间",
+    "hiddenFees": "隐藏费用投诉",
+    "disputes": "争议",
+    "trackRecord_one": "网络中 {{count}} 笔历史贷款",
+    "trackRecord_other": "网络中 {{count}} 笔历史贷款",
+    "reason": {
+      "cheapest": "最便宜",
+      "partial": "覆盖部分需求",
+      "low_cost": "成本低",
+      "fits_forecast": "还款与预测匹配",
+      "fast": "速度快"
+    },
+    "effective_apr": "真实年化成本",
+    "total_cost": "总成本"
+  },
+  "purpose": {
+    "working_capital": "流动资金",
+    "stock": "库存",
+    "equipment": "设备",
+    "other": "其他"
+  },
+  "dataMode": {
+    "synthetic": "合成演示数据",
+    "real_anonymised": "真实数据（已匿名）",
+    "public": "公开数据",
+    "live": "实时数据"
+  },
+  "rule": {
+    "business_age": "经营年限足够",
+    "trade_licence": "营业执照",
+    "trade_licence_typical": "营业执照（常规要求）",
+    "max_amount": "金额在产品额度内",
+    "collateral": "有抵押物",
+    "no_default": "无违约记录",
+    "woman_entrepreneur": "女性创业企业",
+    "bkash_account": "有效的 bKash 账户",
+    "supplier_relationship": "供应商合作关系"
   }
 }

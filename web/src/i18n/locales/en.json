@@ -100,7 +100,8 @@
     "already_decided": "This was already decided.",
     "owner_only": "Only the owner can approve this.",
     "reason_required": "Choose what the problem is.",
-    "not_disputed": "This invoice is not disputed."
+    "not_disputed": "This invoice is not disputed.",
+    "invalid_need": "Check the amount and dates."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -311,5 +312,96 @@
     "many_open": "Many unpaid invoices",
     "recent_payment": "Paid recently",
     "disputed": "Disputed"
+  },
+  "financing": {
+    "needTitle": "What do you need?",
+    "amount": "Amount (৳)",
+    "neededBy": "Needed by",
+    "tenor": "For how long",
+    "months_one": "{{count}} month",
+    "months_other": "{{count}} months",
+    "purpose": "Purpose",
+    "amountInvalid": "Enter an amount in taka, for example 200000.",
+    "find": "Find options",
+    "matching": "Comparing options…",
+    "optionsTitle": "Your options, best first",
+    "applicationHelp": "Hishab pre-filled an application for the best option you qualify for. Nothing is sent until you approve it.",
+    "rank": "Rank {{rank}}",
+    "eligibility": {
+      "pass": "You qualify",
+      "fail": "Not eligible",
+      "not_on_record": "Not on record"
+    },
+    "trueCost": "True yearly cost",
+    "totalCost": "Total cost",
+    "speed": "Money in",
+    "fit": "Fit with your cash",
+    "breach": "{{chance}} chance of dipping below the buffer",
+    "nominal": "Advertised {{rate}} a year",
+    "rateBasis": {
+      "published": "published rate",
+      "rate_sheet_upper": "top of the bank's rate sheet",
+      "regulatory_cap": "regulatory cap",
+      "last_published": "last published rate",
+      "modelled": "modelled",
+      "own_terms": "your own terms"
+    },
+    "modelled": "illustrative product",
+    "likelihood": "approval likelihood {{chance}}",
+    "why": "Why you qualify or not",
+    "ruleStatus": {
+      "pass": "yes",
+      "fail": "no",
+      "not_on_record": "not on record, so not counted"
+    },
+    "source": "Source",
+    "checkedOn": "checked {{date}}",
+    "lenderCheck": "Lender check",
+    "licence": "Licence",
+    "licenceStatus": {
+      "licensed": "Licensed",
+      "not_found": "Not found",
+      "revoked": "Revoked",
+      "unknown": "Unknown"
+    },
+    "aprGap": "Realised minus quoted cost",
+    "points": "{{value}} percentage points",
+    "disbursal": "Typical time to disburse",
+    "hiddenFees": "Hidden-fee reports",
+    "disputes": "Disputes",
+    "trackRecord_one": "{{count}} past loan in the mesh",
+    "trackRecord_other": "{{count}} past loans in the mesh",
+    "reason": {
+      "cheapest": "Cheapest",
+      "partial": "Covers part of the need",
+      "low_cost": "Low cost",
+      "fits_forecast": "Repayments fit your forecast",
+      "fast": "Fast"
+    },
+    "effective_apr": "True yearly cost",
+    "total_cost": "Total cost"
+  },
+  "purpose": {
+    "working_capital": "Working capital",
+    "stock": "Stock",
+    "equipment": "Equipment",
+    "other": "Other"
+  },
+  "dataMode": {
+    "synthetic": "Synthetic demo data",
+    "real_anonymised": "Real data, anonymised",
+    "public": "Public data",
+    "live": "Live data"
+  },
+  "rule": {
+    "business_age": "Business is old enough",
+    "trade_licence": "Trade licence",
+    "trade_licence_typical": "Trade licence (typical requirement)",
+    "max_amount": "Amount within the product's limit",
+    "collateral": "Collateral available",
+    "no_default": "No loan default on record",
+    "woman_entrepreneur": "Woman-owned business",
+    "bkash_account": "Active bKash account",
+    "supplier_relationship": "Supplier relationship"
   }
 }

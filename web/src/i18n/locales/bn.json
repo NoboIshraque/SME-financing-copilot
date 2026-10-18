@@ -100,7 +100,8 @@
     "already_decided": "এটির সিদ্ধান্ত আগেই হয়ে গেছে।",
     "owner_only": "শুধু মালিক এটি অনুমোদন দিতে পারেন।",
     "reason_required": "সমস্যাটি বেছে নিন।",
-    "not_disputed": "এই ইনভয়েসে কোনো বিরোধ নেই।"
+    "not_disputed": "এই ইনভয়েসে কোনো বিরোধ নেই।",
+    "invalid_need": "পরিমাণ ও তারিখ দেখে নিন।"
   },
   "today": {
     "asOf": "{{date}} পর্যন্ত",
@@ -311,5 +312,96 @@
     "many_open": "অনেক বাকি ইনভয়েস",
     "recent_payment": "সম্প্রতি পরিশোধ করেছেন",
     "disputed": "বিরোধপূর্ণ"
+  },
+  "financing": {
+    "needTitle": "আপনার কী দরকার?",
+    "amount": "পরিমাণ (৳)",
+    "neededBy": "কবে দরকার",
+    "tenor": "কত দিনের জন্য",
+    "months_one": "{{count}} মাস",
+    "months_other": "{{count}} মাস",
+    "purpose": "উদ্দেশ্য",
+    "amountInvalid": "টাকার পরিমাণ লিখুন, যেমন ২০০০০০।",
+    "find": "বিকল্প খুঁজুন",
+    "matching": "বিকল্প তুলনা হচ্ছে…",
+    "optionsTitle": "আপনার বিকল্প, সেরাটি আগে",
+    "applicationHelp": "আপনি যোগ্য এমন সেরা বিকল্পের জন্য হিসাব একটি আবেদন আগে থেকে পূরণ করেছে। আপনি অনুমোদন না দেওয়া পর্যন্ত কিছুই পাঠানো হবে না।",
+    "rank": "ক্রম {{rank}}",
+    "eligibility": {
+      "pass": "আপনি যোগ্য",
+      "fail": "যোগ্য নন",
+      "not_on_record": "রেকর্ডে নেই"
+    },
+    "trueCost": "প্রকৃত বার্ষিক খরচ",
+    "totalCost": "মোট খরচ",
+    "speed": "টাকা পাবেন",
+    "fit": "নগদের সাথে মিল",
+    "breach": "বাফারের নিচে নামার সম্ভাবনা {{chance}}",
+    "nominal": "বিজ্ঞাপিত হার বছরে {{rate}}",
+    "rateBasis": {
+      "published": "প্রকাশিত হার",
+      "rate_sheet_upper": "ব্যাংকের হার তালিকার সর্বোচ্চ",
+      "regulatory_cap": "নিয়ন্ত্রক সীমা",
+      "last_published": "সর্বশেষ প্রকাশিত হার",
+      "modelled": "মডেলভিত্তিক",
+      "own_terms": "আপনার নিজস্ব শর্ত"
+    },
+    "modelled": "দৃষ্টান্তমূলক পণ্য",
+    "likelihood": "অনুমোদনের সম্ভাবনা {{chance}}",
+    "why": "কেন যোগ্য বা অযোগ্য",
+    "ruleStatus": {
+      "pass": "হ্যাঁ",
+      "fail": "না",
+      "not_on_record": "রেকর্ডে নেই, তাই ধরা হয়নি"
+    },
+    "source": "উৎস",
+    "checkedOn": "যাচাই {{date}}",
+    "lenderCheck": "ঋণদাতা যাচাই",
+    "licence": "লাইসেন্স",
+    "licenceStatus": {
+      "licensed": "লাইসেন্সপ্রাপ্ত",
+      "not_found": "পাওয়া যায়নি",
+      "revoked": "বাতিল",
+      "unknown": "অজানা"
+    },
+    "aprGap": "প্রকৃত বনাম ঘোষিত খরচের পার্থক্য",
+    "points": "{{value}} শতাংশ পয়েন্ট",
+    "disbursal": "টাকা ছাড়ের সাধারণ সময়",
+    "hiddenFees": "লুকানো ফি-এর অভিযোগ",
+    "disputes": "বিরোধ",
+    "trackRecord_one": "মেশে {{count}}টি আগের ঋণ",
+    "trackRecord_other": "মেশে {{count}}টি আগের ঋণ",
+    "reason": {
+      "cheapest": "সবচেয়ে সস্তা",
+      "partial": "প্রয়োজনের একাংশ মেটায়",
+      "low_cost": "কম খরচ",
+      "fits_forecast": "কিস্তি পূর্বাভাসের সাথে মেলে",
+      "fast": "দ্রুত"
+    },
+    "effective_apr": "প্রকৃত বার্ষিক খরচ",
+    "total_cost": "মোট খরচ"
+  },
+  "purpose": {
+    "working_capital": "চলতি মূলধন",
+    "stock": "মজুদ",
+    "equipment": "যন্ত্রপাতি",
+    "other": "অন্যান্য"
+  },
+  "dataMode": {
+    "synthetic": "কৃত্রিম ডেমো ডেটা",
+    "real_anonymised": "আসল ডেটা, পরিচয় গোপন",
+    "public": "প্রকাশ্য ডেটা",
+    "live": "সরাসরি ডেটা"
+  },
+  "rule": {
+    "business_age": "ব্যবসার যথেষ্ট বয়স",
+    "trade_licence": "ট্রেড লাইসেন্স",
+    "trade_licence_typical": "ট্রেড লাইসেন্স (সাধারণ শর্ত)",
+    "max_amount": "পণ্যের সীমার মধ্যে পরিমাণ",
+    "collateral": "জামানত আছে",
+    "no_default": "ঋণখেলাপির রেকর্ড নেই",
+    "woman_entrepreneur": "নারী-মালিকানাধীন ব্যবসা",
+    "bkash_account": "সক্রিয় বিকাশ অ্যাকাউন্ট",
+    "supplier_relationship": "সরবরাহকারীর সাথে সম্পর্ক"
   }
 }
