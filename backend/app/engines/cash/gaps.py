@@ -253,6 +253,7 @@ class Signal:
     figures: tuple[Figure, ...]
     reference_id: str | None = None
     counterparty_token: str | None = None
+    day: date | None = None  # the day it is about (a salary or EMI due day)
 
 
 def _median(values: Sequence[int]) -> int:
@@ -397,7 +398,7 @@ def _payroll_at_risk(sim: Simulation, evidence: Evidence) -> list[Signal]:
             figure = make_figure(sim, "cash.p50_on_due_day", f"cash.p50_on_{ob.kind.value}_day",
                                  likely, Unit.BDT, evidence, [f"obl:{ob.id}"], {"due_day": day})
             return [Signal(LeadingIndicator.payroll_or_emi_at_risk, (figure,), ob.id,
-                           ob.counterparty_token)]
+                           ob.counterparty_token, day)]
     return []
 
 
