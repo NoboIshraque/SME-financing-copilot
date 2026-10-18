@@ -6,7 +6,8 @@ Every part is estimated from the tenant's own sales history up to `as_of`, never
 the weekday and month-end factors from the last 26 weeks, the level from the last 8 weeks
 (de-seasonalised, so it follows the trend), and festival factors from every earlier occurrence
 of the same festival. A factor without evidence stays at 1: no effect is assumed rather than
-guessed. The observed/expected ratios on past days are kept for the Monte Carlo noise.
+guessed. The observed/expected ratios on past plain days (oldest first, weekday and month-end
+included) are kept for the Monte Carlo noise.
 """
 
 from __future__ import annotations
@@ -140,7 +141,11 @@ def fit_sales(transactions: Sequence[Transaction], as_of: date,
     family_factors = {key: (sum(vals, ZERO) / len(vals)).quantize(FACTOR)
                       for key, vals in by_family.items()}
 
-    residuals = tuple(r for d in plain if (r := ratio(d, mean)) is not None)
+    def residual(day: date) -> Decimal | None:
+        expected = mean * weekday[day.weekday()] * (month_end if is_month_end(day) else ONE)
+        return totals[day] / expected if expected > 0 else None
+
+    residuals = tuple(r for d in plain if (r := residual(d)) is not None)
     return SalesModel(level=level.quantize(Decimal("0.01")), weekday=tuple(weekday),
                       month_end=month_end, festival=festival_factors, residuals=residuals,
                       festivals=tuple(festivals), history_days=len(totals),

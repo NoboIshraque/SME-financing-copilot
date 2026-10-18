@@ -63,6 +63,36 @@ def test_obligations_are_known_outflows_on_their_days():
         (date(2026, 12, 5), D("35000.00"))]
 
 
+def _settled_bill(number, due, delay, party):
+    return bill(number, due - timedelta(days=20), due, 500, paid=500,
+                paid_date=due + timedelta(days=delay), party=party)
+
+
+def test_an_open_bill_is_paid_when_the_business_usually_pays_that_supplier_never_later():
+    early = [_settled_bill(f"E{n}", date(2026, 8, 25) + timedelta(days=n), -5, "PARTY_supp_early")
+             for n in range(3)]  # this supplier is always paid 5 days before the due date
+    late = [_settled_bill(f"L{n}", date(2026, 8, 25) + timedelta(days=n), 3, "PARTY_supp_late")
+            for n in range(3)]  # and this one 3 days after it
+    open_bills = [bill("B1", date(2026, 9, 25), date(2026, 10, 20), 900, party="PARTY_supp_early"),
+                  bill("B2", date(2026, 9, 25), date(2026, 10, 20), 400, party="PARTY_supp_late")]
+    base = _baseline(bills=[*early, *late, *open_bills])
+    assert sorted(_flows(base, FlowKind.bill)) == [(date(2026, 10, 15), D("900.00")),
+                                                   (date(2026, 10, 20), D("400.00"))]
+    assert [(ob.bill.id, ob.pay_day) for ob in base.open_bills] == [
+        (f"{T}:B1", date(2026, 10, 15)), (f"{T}:B2", date(2026, 10, 20))]
+
+
+def test_the_run_rates_are_the_mean_of_the_daily_history_the_simulation_resamples():
+    txns = [txn(AS_OF - timedelta(days=n), 700, "outflow", TxCategory.purchase)
+            for n in range(0, 91, 2)]  # Tk 700 every other day
+    base = _baseline(txns=txns, bills=[bill("B1", date(2026, 9, 1), date(2026, 9, 8), 910,
+                                            paid=910, paid_date=date(2026, 9, 8))])
+    history = base.history(FlowKind.purchases)
+    assert len(history) == 91 and history[-1] == D(700) and history[-2] == D(0)
+    assert {a for _d, a in _flows(base, FlowKind.purchases)} == {sum(history) / 91}
+    assert sum(base.history(FlowKind.new_bills)) == D(910)
+
+
 def test_open_bills_fall_on_their_due_date_and_overdue_ones_tomorrow():
     bills = [bill("B1", date(2026, 9, 25), date(2026, 10, 2), 900),
              bill("B2", date(2026, 9, 1), date(2026, 9, 20), 400),

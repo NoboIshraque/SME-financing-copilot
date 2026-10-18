@@ -7,7 +7,8 @@ balance(day) = opening balance + expected inflows - expected outflows, where
            + collections on invoices not yet issued: recent credit-sales rate x the share of
              invoices paid within that many days of issue
 - outflows = recurring obligations on their schedule (rent, salary, EMI, utilities, ...)
-           + open bills on their due date (overdue ones tomorrow)
+           + open bills when the business usually pays that supplier, never after the due date
+             (overdue ones tomorrow)
            + bills not yet issued: recent credit-purchase rate x the share paid within that many
              days of issue
            + cash purchases and other running costs at their recent daily rate (categories
@@ -15,13 +16,14 @@ balance(day) = opening balance + expected inflows - expected outflows, where
 
 Transfers between the business's own accounts cancel out in the total balance and are left
 out. Disputed invoices are not expected to be collected. Every flow keeps the document it
-comes from, for drivers and provenance. Pure: contracts in, `Baseline` out.
+comes from, for drivers and provenance. The day-by-day totals behind each run rate are kept
+too: the Monte Carlo (`simulate.py`) resamples them. Pure: contracts in, `Baseline` out.
 """
 
 from __future__ import annotations
 
 import calendar as _calendar
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
@@ -85,6 +87,13 @@ class Flow:
 
 
 @dataclass(frozen=True)
+class OpenBill:
+    bill: Bill
+    owed: Decimal  # outstanding on as_of
+    pay_day: date  # when the forecast pays it (may be after the horizon)
+
+
+@dataclass(frozen=True)
 class Baseline:
     tenant_id: str
     as_of: date
@@ -95,6 +104,17 @@ class Baseline:
     invoice_delays: DelayTable
     open_invoices: tuple[tuple[Invoice, Decimal], ...]  # (invoice, outstanding on as_of)
     data_mode: DataMode
+    bill_delays: DelayTable = DelayTable({}, (), ())
+    open_bills: tuple[OpenBill, ...] = ()
+    obligations: tuple[RecurringObligation, ...] = ()
+    # Day-by-day totals over the run-rate window (oldest first) behind each run-rate flow:
+    # new_invoices / new_bills = documents issued that day, purchases / running_cost = spent.
+    daily_history: Mapping[FlowKind, tuple[Decimal, ...]] | None = None
+    history_days: int = 0  # days from the first known transaction to as_of, inclusive
+
+    @property
+    def horizon(self) -> int:
+        return len(self.days)
 
     def total(self, day: date, direction: Direction) -> Decimal:
         return sum((f.amount for f in self.flows if f.day == day and f.direction is direction),
@@ -113,6 +133,9 @@ class Baseline:
             running += net[day]
             out.append((day, running.quantize(CENT)))
         return out
+
+    def history(self, kind: FlowKind) -> tuple[Decimal, ...]:
+        return (self.daily_history or {}).get(kind, ())
 
 
 # ---------------------------------------------------------------- schedules
@@ -147,19 +170,32 @@ def obligation_days(obligation: RecurringObligation, start: date, end: date) -> 
         year, month = year + (month - 1) // 12, (month - 1) % 12 + 1
 
 
-def _run_rate(transactions: Iterable[Transaction], as_of: date,
-              categories: frozenset[TxCategory]) -> Decimal:
-    since = as_of - timedelta(days=RUN_RATE_DAYS - 1)
-    total = sum((t.amount.amount for t in transactions
-                 if t.direction is OUTFLOW and t.category in categories
-                 and since <= t.day <= as_of), ZERO)
-    return total / RUN_RATE_DAYS
+def bill_pay_day(bill: Bill, as_of: date, delays: DelayTable) -> date:
+    """When the forecast pays an open bill: on the due date, or earlier when the business
+    usually pays this supplier early (its median delay is negative); never in the past."""
+    typical = delays.typical_delay(bill.counterparty_token)
+    due = bill.due_date + timedelta(days=min(typical or 0, 0))
+    return max(due, as_of + timedelta(days=1))
 
 
-def _issued_rate(documents: Iterable[Invoice | Bill], as_of: date) -> Decimal:
+def daily_totals(items: Iterable[Transaction | Invoice | Bill], as_of: date,
+                 day_of: Callable, keep: Callable[[object], bool]) -> tuple[Decimal, ...]:
+    """Totals per day over the run-rate window ending on `as_of`, oldest first."""
     since = as_of - timedelta(days=RUN_RATE_DAYS - 1)
-    return sum((d.amount.amount for d in documents if since <= d.issue_date <= as_of),
-               ZERO) / RUN_RATE_DAYS
+    totals = [ZERO] * RUN_RATE_DAYS
+    for item in items:
+        day = day_of(item)
+        if since <= day <= as_of and keep(item):
+            totals[(day - since).days] += item.amount.amount
+    return tuple(totals)
+
+
+def _spent(categories: frozenset[TxCategory]) -> Callable[[object], bool]:
+    return lambda t: t.direction is OUTFLOW and t.category in categories
+
+
+def _rate(totals: Sequence[Decimal]) -> Decimal:
+    return sum(totals, ZERO) / RUN_RATE_DAYS
 
 
 def _modes(*groups: Iterable[Transaction | Invoice | Bill | RecurringObligation]) -> DataMode:
@@ -188,6 +224,7 @@ def forecast_baseline(
     known_txns = [t for t in transactions if t.day <= as_of]
     known_invoices = [i for i in invoices if i.issue_date <= as_of]
     known_bills = [b for b in bills if b.issue_date <= as_of]
+    own_obligations = tuple(o for o in obligations if o.tenant_id == tenant_id)
     days = tuple(as_of + timedelta(days=n) for n in range(1, horizon + 1))
     end = days[-1]
     flows: list[Flow] = []
@@ -208,27 +245,33 @@ def forecast_baseline(
             if day <= end:
                 flows.append(Flow(day, owed * probability, INFLOW, FlowKind.collection, inv.id,
                                   inv.counterparty_token))
-    credit_sales = _issued_rate(known_invoices, as_of)
     bill_delays = DelayTable.from_documents(known_bills, as_of)
-    credit_purchases = _issued_rate(known_bills, as_of)
+    history = {
+        FlowKind.new_invoices: daily_totals(known_invoices, as_of, lambda d: d.issue_date,
+                                            lambda _d: True),
+        FlowKind.new_bills: daily_totals(known_bills, as_of, lambda d: d.issue_date,
+                                         lambda _d: True),
+    }
+    credit_sales = _rate(history[FlowKind.new_invoices])
+    credit_purchases = _rate(history[FlowKind.new_bills])
     for n, day in enumerate(days, start=1):
         if credit_sales and (share := invoice_delays.paid_within(n - 1)):
             flows.append(Flow(day, credit_sales * share, INFLOW, FlowKind.new_invoices))
         if credit_purchases and (share := bill_delays.paid_within(n - 1)):
             flows.append(Flow(day, credit_purchases * share, OUTFLOW, FlowKind.new_bills))
 
+    open_bills = []
     for bill in known_bills:
         owed = outstanding_on(bill, as_of)
         if owed > 0:
-            due = bill.due_date if bill.due_date > as_of else days[0]
-            if due <= end:
-                flows.append(Flow(due, owed, OUTFLOW, FlowKind.bill, bill.id,
+            pay_day = bill_pay_day(bill, as_of, bill_delays)
+            open_bills.append(OpenBill(bill, owed, pay_day))
+            if pay_day <= end:
+                flows.append(Flow(pay_day, owed, OUTFLOW, FlowKind.bill, bill.id,
                                   bill.counterparty_token))
 
     covered: set[TxCategory] = set()
-    for obligation in obligations:
-        if obligation.tenant_id != tenant_id:
-            continue
+    for obligation in own_obligations:
         if obligation_days(obligation, days[0], end) or obligation.end_date is None or \
                 obligation.end_date >= as_of:
             covered.add(OBLIGATION_CATEGORY[obligation.kind])
@@ -236,18 +279,25 @@ def forecast_baseline(
             flows.append(Flow(due, obligation.amount.amount, OUTFLOW, FlowKind.obligation,
                               obligation.id, obligation.counterparty_token))
 
-    purchases = _run_rate(known_txns, as_of, frozenset({TxCategory.purchase}))
-    running = _run_rate(known_txns, as_of, frozenset(
-        c for c in TxCategory if c not in _NOT_RUN_RATE and c not in covered))
+    history[FlowKind.purchases] = daily_totals(known_txns, as_of, lambda t: t.day,
+                                               _spent(frozenset({TxCategory.purchase})))
+    history[FlowKind.running_cost] = daily_totals(known_txns, as_of, lambda t: t.day, _spent(
+        frozenset(c for c in TxCategory if c not in _NOT_RUN_RATE and c not in covered)))
+    purchases = _rate(history[FlowKind.purchases])
+    running = _rate(history[FlowKind.running_cost])
     for day in days:
         if purchases:
             flows.append(Flow(day, purchases, OUTFLOW, FlowKind.purchases))
         if running:
             flows.append(Flow(day, running, OUTFLOW, FlowKind.running_cost))
 
+    first_day = min((t.day for t in known_txns), default=None)
     return Baseline(
         tenant_id=tenant_id, as_of=as_of, opening_balance=opening_balance, days=days,
         flows=tuple(flows), sales=sales, invoice_delays=invoice_delays,
         open_invoices=tuple(open_invoices),
-        data_mode=_modes(known_txns, known_invoices, known_bills, obligations),
+        data_mode=_modes(known_txns, known_invoices, known_bills, own_obligations),
+        bill_delays=bill_delays, open_bills=tuple(open_bills), obligations=own_obligations,
+        daily_history=history,
+        history_days=(as_of - first_day).days + 1 if first_day else 0,
     )

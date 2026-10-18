@@ -65,13 +65,23 @@ class DelayTable:
         own = self.by_party.get(party, ())
         return own if len(own) >= MIN_HISTORY else self.overall
 
+    def typical_delay(self, party: str) -> int | None:
+        """The (lower) median delay for a party, None without any history."""
+        delays = self.delays_for(party)
+        return delays[(len(delays) - 1) // 2] if delays else None
+
+    def possible_days(self, doc: Invoice | Bill, as_of: date) -> list[date]:
+        """Every payment day the history still allows for a document open on `as_of`, one per
+        observed delay (so repeats carry weight), earliest first."""
+        return [doc.due_date + timedelta(days=d) for d in self.delays_for(doc.counterparty_token)
+                if doc.due_date + timedelta(days=d) > as_of]
+
     def payment_days(self, doc: Invoice | Bill, as_of: date) -> list[tuple[date, Decimal]]:
         """(day, probability) of payment for a document still open on `as_of`."""
-        possible = [d for d in self.delays_for(doc.counterparty_token)
-                    if doc.due_date + timedelta(days=d) > as_of]
+        possible = self.possible_days(doc, as_of)
         if not possible:
             return []
-        counts = Counter(doc.due_date + timedelta(days=d) for d in possible)
+        counts = Counter(possible)
         total = Decimal(len(possible))
         return sorted((day, Decimal(n) / total) for day, n in counts.items())
 
