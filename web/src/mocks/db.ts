@@ -1,6 +1,7 @@
 // In-memory state of the offline mock API. Every value is synthetic (CLAUDE.md rule 8).
-import type { Approval, NettingRound, Role } from "../api/contracts";
-import type { Session } from "../api/types";
+import type { Approval, MessageDraft, NettingRound, PassportVersion, Role, ShareGrant } from "../api/contracts";
+import type { Session, UserSettings } from "../api/types";
+import { DEFAULT_SETTINGS, initialDrafts, initialPassports, initialShares } from "./fixtures/inbox";
 import { initialRounds } from "./fixtures/mesh";
 
 export const DEMO_PASSWORD = "hishab-demo";
@@ -29,6 +30,10 @@ export interface MockDb {
   /** Invoice id -> dispute reason, for invoices disputed in this session. */
   disputes: Record<string, string>;
   rounds: NettingRound[];
+  drafts: MessageDraft[];
+  passports: PassportVersion[];
+  shares: ShareGrant[];
+  settings: UserSettings;
 }
 
 /** The caller's role. In "auto" mode the real backend may own the session while the mock still
@@ -89,7 +94,18 @@ export function sessionFor(account: MockUser): Session {
 /** Fresh mock state. `signedInAs` starts a session for that demo email (tests skip the login). */
 export function createMockDb(options: { signedInAs?: string } = {}): MockDb {
   const users = demoUsers();
-  const db: MockDb = { users, session: null, pendingTotp: null, approvals: [], disputes: {}, rounds: initialRounds() };
+  const db: MockDb = {
+    users,
+    session: null,
+    pendingTotp: null,
+    approvals: [],
+    disputes: {},
+    rounds: initialRounds(),
+    drafts: initialDrafts(),
+    passports: initialPassports(),
+    shares: initialShares(),
+    settings: { ...DEFAULT_SETTINGS },
+  };
   if (options.signedInAs) {
     const account = users.find((u) => u.email === options.signedInAs);
     if (!account) throw new Error(`no demo user ${options.signedInAs}`);
