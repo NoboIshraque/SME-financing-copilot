@@ -84,6 +84,8 @@ class FormatSpec:
     xlsx_format: SourceFormat | None = None
     # Wallet formats: known transaction-type labels, used to break ties between look-alikes.
     type_labels: Mapping[str, Label] = field(default_factory=dict)
+    # Institution exports with a fixed dd/mm date order (bKash, Nagad, Bangladeshi banks).
+    known_day_first: bool = False
 
     def map_header(self, header: Sequence[str]) -> dict[str, int]:
         """canonical field -> column index, each column used at most once, first match wins."""
@@ -150,6 +152,7 @@ BKASH = FormatSpec(
     filename_hints=("bkash", "বিকাশ"),
     priority=2,
     type_labels=BKASH_TYPES,
+    known_day_first=True,
 )
 
 NAGAD = FormatSpec(
@@ -174,6 +177,7 @@ NAGAD = FormatSpec(
     filename_hints=("nagad",),
     priority=2,
     type_labels=NAGAD_TYPES,
+    known_day_first=True,
 )
 
 BANK = FormatSpec(
@@ -201,6 +205,7 @@ BANK = FormatSpec(
                               "deposit", "cheque ref no", "value date")),
     filename_hints=("bank", "dbbl", "brac", "ebl", "ibbl", "sonali", "city"),
     priority=1,
+    known_day_first=True,
 )
 
 LEDGER = FormatSpec(

@@ -154,3 +154,46 @@ def test_register_without_due_date_is_due_on_issue():
     (doc,) = parse(data, "baki.csv").invoices
     assert doc.due_date == doc.issue_date
     assert doc.status.value == "open"
+
+
+# ---------------------------------------------------------------- ambiguous dates -> drafts
+
+AMBIGUOUS = ["01/02/2025,Rahim,sales,in,500,cash,R1", "03/02/2025,Karim,sales,in,700,cash,R2"]
+
+
+def test_hand_made_ledger_with_undecidable_dates_becomes_drafts():
+    result = parse(_ledger(*AMBIGUOUS), "book.csv")
+    assert result.transactions == []
+    assert [(d.row_ref, d.flagged, d.confidence) for d in result.drafts] == [
+        ("book.csv#L2", True, Decimal("0.50")), ("book.csv#L3", True, Decimal("0.50"))]
+    assert result.drafts[0].transaction.occurred_at.date().isoformat() == "2025-02-01"
+
+
+def test_owner_stating_the_order_removes_the_doubt():
+    result = parse(_ledger(*AMBIGUOUS), "book.csv", day_first=False)
+    assert result.drafts == []
+    assert [t.occurred_at.date().isoformat() for t in result.transactions] == [
+        "2025-01-02", "2025-03-02"]
+
+
+def test_one_unambiguous_date_settles_the_whole_file():
+    result = parse(_ledger(*AMBIGUOUS, "13/02/2025,Rahim,sales,in,100,cash,R3"), "book.csv")
+    assert result.drafts == [] and len(result.transactions) == 3
+
+
+def test_ambiguous_invoices_become_drafts_and_ambiguous_bills_are_refused():
+    rows = ["INV-1,Rahim,01/02/2025,03/02/2025,500,0,,open",
+            "INV-2,Karim,02/02/2025,04/02/2025,700,0,,open"]
+    invoices = parse(_register(*rows), "baki.csv")
+    bills = parse(_register(*(r.replace("INV", "BILL") for r in rows)), "bills.csv")
+    assert [d.invoice.id for d in invoices.drafts] == [f"{T}:INV-1", f"{T}:INV-2"]
+    assert invoices.invoices == []
+    assert reasons(bills) == ["ingest.date.ambiguous"] * 2 and bills.bills == []
+
+
+def test_institution_statements_are_read_day_first_without_drafts():
+    result = parse(bkash("A1,01/02/2025 10:00:00,Payment Received,017,10,0,0,R",
+                         "A2,02/02/2025 10:00:00,Payment Received,017,10,0,0,R"), "b.csv")
+    assert result.drafts == []
+    assert [t.occurred_at.date().isoformat() for t in result.transactions] == [
+        "2025-02-01", "2025-02-02"]

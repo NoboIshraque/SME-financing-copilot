@@ -103,10 +103,10 @@ CASES = {
         SourceFormat.bank_csv, [(datetime(2025, 4, 10), D("650.00"), IN)]),
     "ledger-bangla-headers-and-digits": (
         "khata.csv",
-        csv_bytes(["তারিখ,বিবরণ,জমা,খরচ", "০১/০৪/২০২৫,মাল বিক্রি,১২০০,",
-                   "০২/০৪/২০২৫,দোকান ভাড়া,,৩৫০০০"]),
-        SourceFormat.ledger_csv, [(datetime(2025, 4, 1), D("1200.00"), IN),
-                                  (datetime(2025, 4, 2), D("35000.00"), OUT)]),
+        csv_bytes(["তারিখ,বিবরণ,জমা,খরচ", "১৪/০৪/২০২৫,মাল বিক্রি,১২০০,",
+                   "১৫/০৪/২০২৫,দোকান ভাড়া,,৩৫০০০"]),
+        SourceFormat.ledger_csv, [(datetime(2025, 4, 14), D("1200.00"), IN),
+                                  (datetime(2025, 4, 15), D("35000.00"), OUT)]),
     "ledger-xlsx-native-cells": (
         "cashbook.xlsx",
         xlsx_bytes([["Date", "Party", "Category", "Type", "Amount", "Channel"],

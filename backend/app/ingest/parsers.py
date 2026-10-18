@@ -27,6 +27,7 @@ from app.contracts import (
     DataMode,
     Direction,
     DocumentStatus,
+    DraftRow,
     Invoice,
     Money,
     SourceFormat,
@@ -41,9 +42,9 @@ from app.ingest.normalise import (
     When,
     clean_text,
     header_key,
-    infer_day_first,
     parse_amount,
     parse_when,
+    resolve_day_first,
     split_drcr,
 )
 from app.ingest.parties import PartyResolver, identifiers, mask_excerpt
@@ -51,6 +52,10 @@ from app.ingest.tabular import Row, TableError, is_xlsx, read_sheets
 
 INFLOW, OUTFLOW = Direction.inflow, Direction.outflow
 CENT = Decimal("0.01")
+# A row whose day and month could be swapped, in a file that cannot tell which is which,
+# becomes a flagged draft the owner confirms; it is never committed on a coin toss.
+DRAFT_CONFIDENCE = Decimal("0.50")
+_PENDING_TOKEN = "PARTY_pending"
 
 SUMMARY_WORDS = tuple(header_key(w) for w in (
     "total", "grand total", "sub total", "subtotal", "opening balance", "closing balance",
@@ -104,9 +109,12 @@ class ParseResult:
     transactions: list[Transaction] = field(default_factory=list)
     invoices: list[Invoice] = field(default_factory=list)
     bills: list[Bill] = field(default_factory=list)
+    drafts: list[DraftRow] = field(default_factory=list)
     unparsed: list[UnparsedRow] = field(default_factory=list)
     duplicates_skipped: int = 0
     modes: set[DataMode] = field(default_factory=set)
+    # Ids pinned by the source (its transaction id, or a running balance): dedupe by id only.
+    strong_ids: set[str] = field(default_factory=set)
 
     @property
     def data_mode(self) -> DataMode:
@@ -221,30 +229,50 @@ def _when(get: Get, day_first: bool) -> When:
     return parse_when(text, day_first=day_first)
 
 
-def _day_first(detection: Detection, opts: IngestOptions, field_: str = "when") -> bool:
-    if opts.day_first is not None:
-        return opts.day_first
+def _column(detection: Detection, field_: str) -> list[str]:
     index = detection.mapping.get(field_)
     if index is None:
-        return True
-    values = [r.cells[index] for r in detection.data_rows if index < len(r.cells)]
-    return infer_day_first(values)
+        return []
+    return [r.cells[index] for r in detection.data_rows if index < len(r.cells)]
 
 
-# ---------------------------------------------------------------- transactions
+def _day_first(detection: Detection, opts: IngestOptions, field_: str = "when",
+               evidence_fields: tuple[str, ...] = ()) -> tuple[bool, bool]:
+    """(day_first, certain) for the file; an explicit option is always certain."""
+    if opts.day_first is not None:
+        return opts.day_first, True
+    extra = [v for f in evidence_fields for v in _column(detection, f)]
+    return resolve_day_first(_column(detection, field_), extra_evidence=extra,
+                             default_is_known=detection.spec.known_day_first)
+
+
+# ---------------------------------------------------------------- record collection
+
+
+@dataclass
+class _Pending:
+    record: Transaction | Invoice | Bill
+    party_ids: tuple[str, ...]
+    draft: bool
 
 
 class _Builder:
+    """Collects a file's records and resolves every counterparty token in one call at the end,
+    so the party resolver can cluster identifiers across the whole file."""
+
     def __init__(self, spec: str, opts: IngestOptions, resolver: PartyResolver,
-                 result: ParseResult) -> None:
+                 result: ParseResult, dates_certain: bool = True) -> None:
         self.spec, self.opts, self.resolver, self.result = spec, opts, resolver, result
+        self.dates_certain = dates_certain
+        self.pending: list[_Pending] = []
         self.seen: set[str] = set()
         self.occurrences: Counter[str] = Counter()
 
     def add(self, row: Row, *, when: When, amount: Decimal, direction: Direction,
             channel: Channel, category: TxCategory, reference: str | None,
             party_ids: tuple[str, ...], external_id: str | None, mode: DataMode,
-            fee: Decimal | None = None, content: str = "") -> None:
+            fee: Decimal | None = None, balance: Decimal | None = None,
+            content: str = "") -> None:
         if amount == 0:
             raise NormaliseError("ingest.amount.zero")
         tenant = self.opts.tenant_id
@@ -255,34 +283,76 @@ class _Builder:
                 return
         else:
             key = "|".join([when.at.isoformat(), str(amount), direction.value, channel.value,
-                            reference or "", content, *party_ids])
+                            reference or "", content, "" if balance is None else str(balance),
+                            *party_ids])
             number = self.occurrences[key]
             self.occurrences[key] += 1
             digest = hashlib.sha256(f"{key}|{number}".encode()).hexdigest()[:16]
             tx_id = f"{tenant}:{self.spec}:{digest}"
         self.seen.add(tx_id)
-        token = self.resolver.resolve(tenant, party_ids)
+        strong = bool(external_id) or balance is not None
         invoice_id = (f"{tenant}:{reference}"
                       if category is TxCategory.collection and reference else None)
         txn = Transaction(
             id=tx_id, tenant_id=tenant, occurred_at=when.aware(), amount=Money.of(amount),
-            direction=direction, channel=channel, category=category, counterparty_token=token,
-            reference=reference or None, invoice_id=invoice_id, source_ref=row.ref,
-            data_mode=mode,
+            direction=direction, channel=channel, category=category, reference=reference or None,
+            invoice_id=invoice_id, source_ref=row.ref, data_mode=mode,
         )
-        self.result.transactions.append(txn)
+        draft = when.ambiguous and not self.dates_certain
+        self._keep(txn, party_ids, draft, strong)
         if fee is not None and fee > 0:
-            self.result.transactions.append(txn.model_copy(update={
+            fee_txn = txn.model_copy(update={
                 "id": f"{tx_id}:fee", "amount": Money.of(fee), "direction": OUTFLOW,
-                "category": TxCategory.fee, "counterparty_token": None, "invoice_id": None,
-            }))
+                "category": TxCategory.fee, "invoice_id": None,
+            })
+            self._keep(fee_txn, (), draft, strong)
+
+    def _keep(self, txn: Transaction, party_ids: tuple[str, ...], draft: bool,
+              strong: bool) -> None:
+        if strong:
+            self.result.strong_ids.add(txn.id)
+        self.pending.append(_Pending(txn, party_ids, draft))
+
+    def add_document(self, doc: Invoice | Bill, party_ids: tuple[str, ...], draft: bool) -> None:
+        self.pending.append(_Pending(doc, party_ids, draft))
+
+    def finish(self) -> None:
+        groups = [p.party_ids for p in self.pending]
+        tokens = self.resolver.resolve_many(self.opts.tenant_id, groups)
+        for item, token in zip(self.pending, tokens, strict=True):
+            record = item.record
+            if item.party_ids:
+                record = record.model_copy(update={"counterparty_token": token})
+            if item.draft:
+                self.result.drafts.append(_draft(record))
+            elif isinstance(record, Transaction):
+                self.result.transactions.append(record)
+            elif isinstance(record, Invoice):
+                self.result.invoices.append(record)
+            else:
+                self.result.bills.append(record)
+        self.pending.clear()
+
+
+def _draft(record: Transaction | Invoice | Bill) -> DraftRow:
+    if isinstance(record, Transaction):
+        suffix = ":fee" if record.id.endswith(":fee") else ""
+        return DraftRow(row_ref=record.source_ref + suffix, confidence=DRAFT_CONFIDENCE,
+                        transaction=record, flagged=True)
+    if isinstance(record, Invoice):
+        return DraftRow(row_ref=record.source_ref, confidence=DRAFT_CONFIDENCE, invoice=record,
+                        flagged=True)
+    raise TypeError("bills cannot be drafts")  # pragma: no cover - rejected before this point
+
+
+# ---------------------------------------------------------------- transactions
 
 
 def _parse_transactions(detection: Detection, opts: IngestOptions, resolver: PartyResolver,
                         result: ParseResult) -> None:
     spec = detection.spec.name
-    builder = _Builder(spec, opts, resolver, result)
-    day_first = _day_first(detection, opts)
+    day_first, certain = _day_first(detection, opts)
+    builder = _Builder(spec, opts, resolver, result, dates_certain=certain)
     handler = {"bkash": _wallet_row, "nagad": _wallet_row, "bank": _bank_row,
                "ledger": _ledger_row}[spec]
     for row, get in _data_rows(detection, result):
@@ -292,6 +362,19 @@ def _parse_transactions(detection: Detection, opts: IngestOptions, resolver: Par
             result.reject(row, exc.reason_key)
         except ValidationError:
             result.reject(row, "ingest.row.invalid")
+    builder.finish()
+
+
+def _balance(get: Get) -> Decimal | None:
+    """Running balance (with an optional Dr/Cr marker), used only to pin a row's identity."""
+    text, marker = split_drcr(get("balance"))
+    if not text.strip():
+        return None
+    try:
+        value = _money(text)
+    except NormaliseError:
+        return None
+    return -value if marker == "dr" else value
 
 
 def _wallet_row(spec: str, row: Row, get: Get, day_first: bool, builder: _Builder) -> None:
@@ -313,7 +396,7 @@ def _wallet_row(spec: str, row: Row, get: Get, day_first: bool, builder: _Builde
     builder.add(row, when=when, amount=abs(amount), direction=direction, channel=channel,
                 category=category, reference=reference, party_ids=identifiers(counterparty),
                 external_id=get("external_id"), mode=_row_mode(get, builder.result),
-                fee=_optional_money(get("fee")))
+                fee=_optional_money(get("fee")), balance=_balance(get))
 
 
 def _signed_amount(get: Get) -> tuple[Decimal, Direction]:
@@ -350,7 +433,7 @@ def _bank_row(spec: str, row: Row, get: Get, day_first: bool, builder: _Builder)
         counterparty = description[span[1]:].strip(" -/:")
     builder.add(row, when=when, amount=amount, direction=direction, channel=Channel.bank,
                 category=category, reference=reference, party_ids=identifiers(counterparty),
-                external_id=None, mode=_row_mode(get, builder.result),
+                external_id=None, mode=_row_mode(get, builder.result), balance=_balance(get),
                 content=description)
 
 
@@ -376,7 +459,7 @@ def _ledger_row(spec: str, row: Row, get: Get, day_first: bool, builder: _Builde
                 category=category, reference=reference,
                 party_ids=identifiers(counterparty, get("phone")),
                 external_id=get("external_id"), mode=_row_mode(get, builder.result),
-                content=description)
+                balance=_balance(get), content=description)
 
 
 def _unknown_channel(raw: str) -> Channel:
@@ -416,12 +499,13 @@ def _parse_register(detection: Detection, opts: IngestOptions, resolver: PartyRe
                                            raw_excerpt=""))
         return
     cls: type[Invoice] | type[Bill] = Invoice if kind == "invoice" else Bill
-    target = result.invoices if kind == "invoice" else result.bills
-    issue_first = _day_first(detection, opts, "issue_date")
+    day_first, certain = _day_first(detection, opts, "issue_date",
+                                    evidence_fields=("due_date", "paid_date"))
+    builder = _Builder("register", opts, resolver, result, dates_certain=certain)
     seen: set[str] = set()
     for row, get in _data_rows(detection, result):
         try:
-            doc = _document(cls, row, get, opts, resolver, issue_first, result)
+            doc, party_ids, ambiguous = _document(cls, row, get, opts, day_first, result)
         except NormaliseError as exc:
             result.reject(row, exc.reason_key)
             continue
@@ -432,26 +516,41 @@ def _parse_register(detection: Detection, opts: IngestOptions, resolver: PartyRe
             result.duplicates_skipped += 1
             continue
         seen.add(doc.id)
-        target.append(doc)
+        draft = ambiguous and not certain
+        if draft and cls is Bill:
+            result.reject(row, "ingest.date.ambiguous")  # a draft can only hold an invoice
+            continue
+        builder.add_document(doc, party_ids, draft)
+    builder.finish()
 
 
-def _date(text: str, day_first: bool) -> date:
-    return parse_when(text, day_first=day_first).at.date()
+def _date(text: str, day_first: bool) -> tuple[date, bool]:
+    when = parse_when(text, day_first=day_first)
+    return when.at.date(), when.ambiguous
 
 
 def _document(cls: type[Invoice] | type[Bill], row: Row, get: Get, opts: IngestOptions,
-              resolver: PartyResolver, day_first: bool, result: ParseResult) -> Invoice | Bill:
+              day_first: bool, result: ParseResult
+              ) -> tuple[Invoice | Bill, tuple[str, ...], bool]:
+    """The document (with a placeholder token), its party identifiers, and whether any of its
+    dates could have been read with day and month swapped."""
     number = clean_text(get("number"))
     if not number:
         raise NormaliseError("ingest.document.number_missing")
-    issue = _date(get("issue_date"), day_first)
+    issue, ambiguous = _date(get("issue_date"), day_first)
     # A register without a due date means "payable on demand": due the day it was issued.
-    due = _date(get("due_date"), day_first) if get("due_date") else issue
+    due = issue
+    if get("due_date"):
+        due, due_ambiguous = _date(get("due_date"), day_first)
+        ambiguous |= due_ambiguous
     amount = _money(get("amount"))
     paid = _optional_money(get("amount_paid")) or Decimal(0)
     if amount <= 0 or paid < 0:
         raise NormaliseError("ingest.amount.negative")
-    paid_date = _date(get("paid_date"), day_first) if get("paid_date") else None
+    paid_date = None
+    if get("paid_date"):
+        paid_date, paid_ambiguous = _date(get("paid_date"), day_first)
+        ambiguous |= paid_ambiguous
     raw_status = header_key(get("status"))
     if raw_status:
         status = STATUS_WORDS.get(raw_status)
@@ -464,12 +563,12 @@ def _document(cls: type[Invoice] | type[Bill], row: Row, get: Get, opts: IngestO
     else:
         status = DocumentStatus.paid
     party_ids = identifiers(get("counterparty"), get("phone"))
-    token = resolver.resolve(opts.tenant_id, party_ids)
-    if token is None:
+    if not party_ids:
         raise NormaliseError("ingest.document.party_missing")
-    return cls(
-        id=f"{opts.tenant_id}:{number}", tenant_id=opts.tenant_id, counterparty_token=token,
-        issue_date=issue, due_date=due, amount=Money.of(amount), amount_paid=Money.of(paid),
-        status=status, paid_date=paid_date, source_ref=row.ref,
-        data_mode=_row_mode(get, result),
+    doc = cls(
+        id=f"{opts.tenant_id}:{number}", tenant_id=opts.tenant_id,
+        counterparty_token=_PENDING_TOKEN, issue_date=issue, due_date=due,
+        amount=Money.of(amount), amount_paid=Money.of(paid), status=status,
+        paid_date=paid_date, source_ref=row.ref, data_mode=_row_mode(get, result),
     )
+    return doc, party_ids, ambiguous
