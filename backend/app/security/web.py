@@ -1,7 +1,6 @@
 """Web hardening for the API (WP-11 milestone 6): headers, rate limits, origin check.
 
-    from app.security.web import install_security
-    install_security(application, settings)      # in create_app (WP-00 wires this line)
+    install_security(application, settings)   # called by app/security/app_hooks.py
 
 Installs, outermost first:
 1. `SecurityHeadersMiddleware`: CSP, HSTS, nosniff, frame denial, referrer and permissions
@@ -10,11 +9,12 @@ Installs, outermost first:
    tightest); 429 `error.rate_limited` with Retry-After.
 3. `OriginCheckMiddleware`: state-changing requests from a browser must come from our own
    origin or an allowed one (CSRF defence in depth behind the SameSite=Strict cookie).
-Plus the app-wide `SecurityProblem` handler and the source-row masking policy for WP-01.
+Plus the app-wide `SecurityProblem` handler, and the source-row masking policy and a
+stable masking key (from SECRET_KEY) for WP-01.
 
-CORS itself stays in `create_app` (an explicit origin list, never "*"); `install_security`
-refuses a wildcard origin when the app is deployed. Caddy (WP-18) sets the same headers for
-the web app; these keep the API safe when it is reached without Caddy.
+CORS itself stays in `create_app`, outermost (an explicit origin list, never "*");
+`install_security` refuses a wildcard origin when the app is deployed. Caddy (WP-18) sets the
+same headers for the web app; these keep the API safe when it is reached without Caddy.
 """
 
 from __future__ import annotations
@@ -30,8 +30,9 @@ from typing import Any
 from fastapi import FastAPI
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from app.facts.masking import set_masker
+from app.facts.masking import set_masker, set_masking_key
 from app.security.errors import SecurityProblem, problem_handler
+from app.security.keys import derive_key
 from app.security.roles import policy_masker
 from app.settings import AppEnv, Settings
 
@@ -217,6 +218,7 @@ def install_security(app: FastAPI, settings: Settings) -> None:
     if settings.app_env in (AppEnv.demo, AppEnv.production) and "*" in settings.cors_origins:
         raise ValueError("CORS must list explicit origins when deployed, never '*'")
     app.add_exception_handler(SecurityProblem, problem_handler)
+    set_masking_key(derive_key(settings.secret_key.get_secret_value(), "masking"))
     set_masker(policy_masker)
     app.add_middleware(OriginCheckMiddleware, allowed_origins=list(settings.cors_origins))
     app.add_middleware(RateLimitMiddleware, now=_clock_seconds)

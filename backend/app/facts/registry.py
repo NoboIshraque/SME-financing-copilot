@@ -49,7 +49,13 @@ _QUANTUM = {
 
 
 class NotComputable(ValueError):
-    """The metric cannot be computed honestly from the data available (abstain, don't guess)."""
+    """The metric cannot be computed honestly from the data available (abstain, don't guess).
+
+    `reason_key` is the i18n key callers show; the message is for logs and tests."""
+
+    def __init__(self, reason_key: str, message: str = "") -> None:
+        super().__init__(message or reason_key)
+        self.reason_key = reason_key
 
 
 class UnknownMetric(KeyError):
@@ -75,8 +81,21 @@ class LedgerInputs:
 @dataclass(frozen=True)
 class LedgerResult:
     value: Decimal
-    source_refs: tuple[str, ...]
+    rows: tuple[str, ...]  # citations of the records read, see `cite`
     input_facts: tuple[Fact, ...] = ()
+
+
+def cite(record: Transaction | Invoice | Bill | Fact) -> str:
+    """A tenant-scoped reference to a record a figure read: 'txn:<id>', 'inv:<id>', 'bill:<id>'
+    or 'fact:<id>'. Record ids are unique per tenant, unlike 'file#line' source refs, which
+    repeat across monthly uploads of a file with the same name."""
+    if isinstance(record, Transaction):
+        return f"txn:{record.id}"
+    if isinstance(record, Invoice):
+        return f"inv:{record.id}"
+    if isinstance(record, Bill):
+        return f"bill:{record.id}"
+    return f"fact:{record.id}"
 
 
 LedgerFn = Callable[[LedgerInputs], LedgerResult]
@@ -113,15 +132,14 @@ class MetricDefinition:
         if self.from_ledger is None:
             raise TypeError(f"{self.metric} is a derived metric")
         result = self.from_ledger(data)
-        return LedgerResult(quantize(result.value, self.unit), result.source_refs,
-                            result.input_facts)
+        return LedgerResult(quantize(result.value, self.unit), result.rows, result.input_facts)
 
     def compute_derived(self, values: Mapping[str, Decimal], period: Period) -> Decimal:
         if self.from_inputs is None:
             raise TypeError(f"{self.metric} is a ledger metric")
         missing = [name for name in self.inputs if name not in values]
         if missing:
-            raise NotComputable(f"{self.metric}: missing inputs {missing}")
+            raise NotComputable("facts.missing_input", f"{self.metric}: missing inputs {missing}")
         return quantize(self.from_inputs({k: values[k] for k in self.inputs}, period), self.unit)
 
 
@@ -173,8 +191,7 @@ def _in_period(txns: Iterable[Transaction], period: Period) -> list[Transaction]
 
 
 def _sum_txns(txns: list[Transaction]) -> LedgerResult:
-    return LedgerResult(sum((t.amount.amount for t in txns), ZERO),
-                        tuple(t.source_ref for t in txns))
+    return LedgerResult(sum((t.amount.amount for t in txns), ZERO), tuple(cite(t) for t in txns))
 
 
 def _flow(direction: Direction, categories: frozenset[TxCategory] | None = None) -> LedgerFn:
@@ -186,10 +203,13 @@ def _flow(direction: Direction, categories: frozenset[TxCategory] | None = None)
     return compute
 
 
-def _credit_sales(data: LedgerInputs) -> LedgerResult:
-    docs = [i for i in data.invoices if data.period.contains(i.issue_date)]
-    return LedgerResult(sum((i.amount.amount for i in docs), ZERO),
-                        tuple(i.source_ref for i in docs))
+def _issued_in_period(attr: str) -> LedgerFn:
+    def compute(data: LedgerInputs) -> LedgerResult:
+        docs = [d for d in getattr(data, attr) if data.period.contains(d.issue_date)]
+        return LedgerResult(sum((d.amount.amount for d in docs), ZERO),
+                            tuple(cite(d) for d in docs))
+
+    return compute
 
 
 def _purchases(data: LedgerInputs) -> LedgerResult:
@@ -198,8 +218,7 @@ def _purchases(data: LedgerInputs) -> LedgerResult:
     billed = [b for b in data.bills if data.period.contains(b.issue_date)]
     value = sum((t.amount.amount for t in cash), ZERO) + sum((b.amount.amount for b in billed),
                                                              ZERO)
-    return LedgerResult(value, tuple(t.source_ref for t in cash) +
-                        tuple(b.source_ref for b in billed))
+    return LedgerResult(value, tuple(cite(t) for t in cash) + tuple(cite(b) for b in billed))
 
 
 def outstanding_at(doc: Invoice | Bill, day: date) -> Decimal:
@@ -216,10 +235,15 @@ def outstanding_at(doc: Invoice | Bill, day: date) -> Decimal:
 
 
 def _open_documents(attr: str) -> LedgerFn:
+    """Sum of what is still owed at period end. Cites the documents that contribute; when none
+    does, every document issued by then is the evidence that nothing is open."""
+
     def compute(data: LedgerInputs) -> LedgerResult:
-        docs = [d for d in getattr(data, attr) if d.issue_date <= data.period.end]
-        return LedgerResult(sum((outstanding_at(d, data.period.end) for d in docs), ZERO),
-                            tuple(d.source_ref for d in docs))
+        issued = [d for d in getattr(data, attr) if d.issue_date <= data.period.end]
+        owed = [(d, outstanding_at(d, data.period.end)) for d in issued]
+        contributing = [d for d, amount in owed if amount > 0]
+        return LedgerResult(sum((amount for _d, amount in owed), ZERO),
+                            tuple(cite(d) for d in (contributing or issued)))
 
     return compute
 
@@ -227,14 +251,15 @@ def _open_documents(attr: str) -> LedgerFn:
 def _opening_balance(data: LedgerInputs) -> LedgerResult:
     initial = data.initial_balance
     if initial is None:
-        raise NotComputable("opening_balance needs an initial_balance fact")
+        raise NotComputable("facts.needs_initial_balance",
+                            "opening_balance needs an initial_balance fact")
     since = initial.period.start
     if data.period.start < since:
-        raise NotComputable("period starts before the initial balance is known")
+        raise NotComputable("facts.before_initial_balance",
+                            "period starts before the initial balance is known")
     before = [t for t in data.transactions if since <= t.day < data.period.start]
     value = initial.value + sum((t.signed_amount.amount for t in before), ZERO)
-    return LedgerResult(value, tuple(initial.source_refs) + tuple(t.source_ref for t in before),
-                        (initial,))
+    return LedgerResult(value, (cite(initial), *(cite(t) for t in before)), (initial,))
 
 
 # ---------------------------------------------------------------- derived metric functions
@@ -242,7 +267,7 @@ def _opening_balance(data: LedgerInputs) -> LedgerResult:
 
 def _ratio(numerator: Decimal, denominator: Decimal, what: str) -> Decimal:
     if denominator == 0:
-        raise NotComputable(f"{what}: denominator is zero")
+        raise NotComputable("facts.zero_denominator", f"{what}: denominator is zero")
     return numerator / denominator
 
 
@@ -251,11 +276,11 @@ def _gross_margin(v: Mapping[str, Decimal], _p: Period) -> Decimal:
 
 
 def _dso(v: Mapping[str, Decimal], p: Period) -> Decimal:
-    return _ratio(v["receivables"], v["net_sales"], "dso") * p.days
+    return _ratio(v["receivables"], v["credit_sales"], "dso") * p.days
 
 
 def _dpo(v: Mapping[str, Decimal], p: Period) -> Decimal:
-    return _ratio(v["payables"], v["purchases"], "dpo") * p.days
+    return _ratio(v["payables"], v["credit_purchases"], "dpo") * p.days
 
 
 def build_default_registry() -> MetricRegistry:
@@ -274,7 +299,10 @@ def build_default_registry() -> MetricRegistry:
                                                 frozenset({TxCategory.sales}))),
         MetricDefinition("credit_sales", "sales.credit_sales", 1,
                          "sum(amount of invoices issued in period)", bdt,
-                         from_ledger=_credit_sales),
+                         from_ledger=_issued_in_period("invoices")),
+        MetricDefinition("credit_purchases", "costs.credit_purchases", 1,
+                         "sum(amount of bills issued in period)", bdt,
+                         from_ledger=_issued_in_period("bills")),
         MetricDefinition("purchases", "costs.purchases", 1,
                          "sum(outflow transactions with category 'purchase' in period) "
                          "+ sum(amount of bills issued in period)", bdt,
@@ -312,10 +340,15 @@ def build_default_registry() -> MetricRegistry:
         MetricDefinition("gross_margin", "analysis.gross_margin", 1,
                          "(net_sales - purchases) / net_sales", Unit.ratio,
                          inputs=("net_sales", "purchases"), from_inputs=_gross_margin),
-        MetricDefinition("dso", "receivables.dso", 1, "receivables / net_sales * days_in_period",
-                         Unit.days, inputs=("receivables", "net_sales"), from_inputs=_dso),
-        MetricDefinition("dpo", "payables.dpo", 1, "payables / purchases * days_in_period",
-                         Unit.days, inputs=("payables", "purchases"), from_inputs=_dpo),
+        # Days on a credit basis: what customers owe against what was sold on credit (baki),
+        # and what the shop owes against what it bought on credit. Cash sales and cash
+        # purchases never wait, so a total-sales basis would understate the wait.
+        MetricDefinition("dso", "receivables.dso", 1,
+                         "receivables / credit_sales * days_in_period", Unit.days,
+                         inputs=("receivables", "credit_sales"), from_inputs=_dso),
+        MetricDefinition("dpo", "payables.dpo", 1,
+                         "payables / credit_purchases * days_in_period", Unit.days,
+                         inputs=("payables", "credit_purchases"), from_inputs=_dpo),
     ):
         reg.register(d)
     return reg

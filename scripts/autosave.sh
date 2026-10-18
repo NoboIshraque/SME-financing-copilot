@@ -17,7 +17,7 @@ while true; do
     leaks="$(git diff --cached --name-only | grep -E '(^|/)\.env($|\.)' | grep -v '\.env\.example$' || true)"
     if [ -n "$leaks" ]; then git reset -q -- $leaks; echo "[$stamp] Refused to commit: $leaks"; fi
     if [ -n "$(git diff --cached --name-only)" ]; then
-      git commit -q -m "autosave($branch): $stamp" --no-verify && echo "[$stamp] Committed on $branch."
+      git commit -q -m "autosave($branch): $stamp [skip ci]" --no-verify && echo "[$stamp] Committed on $branch."
     fi
     git push -q -u origin "$branch" 2>>.autosave.log || echo "[$stamp] Push failed (offline?), will retry."
   fi

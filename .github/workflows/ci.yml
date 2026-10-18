@@ -1,8 +1,11 @@
 name: CI
 
+# Runs on main and on every PR (not on every branch push): autosave pushes every 5 minutes
+# from several sessions would otherwise burn the private repo's Actions minutes. Autosave
+# commits also carry [skip ci]. Need CI on a branch without a PR? Actions -> CI -> Run workflow.
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -102,7 +105,10 @@ jobs:
       - name: Gitleaks (full history)
         run: |
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz | tar -xz gitleaks
-          ./gitleaks git --redact --verbose --exit-code 1 .
+          # Full history of the commit under test only (HEAD: main, or the PR merge commit).
+          # Scanning --all refs made one WP branch's finding turn main and every PR red; that
+          # branch is scanned on its own PR. An all-refs scan runs before the repo goes public.
+          ./gitleaks git --log-opts="HEAD" --redact --verbose --exit-code 1 .
 
   stack:
     name: Docker stack (build + boot + smoke)

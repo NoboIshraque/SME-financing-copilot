@@ -4,7 +4,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.contracts import Role
+from app.contracts import Principal, Role
 from app.facts import masking
 from app.main import create_app
 from app.security.errors import not_authenticated
@@ -144,9 +144,13 @@ def test_a_wildcard_cors_origin_is_refused_when_deployed():
         install_security(FastAPI(), settings)
 
 
-def test_install_plugs_the_role_masking_policy_into_the_fact_ledger(hardened):
-    rows, masked = masking.get_masker()("t1", ("bank.csv#L1",), Role.staff)
+def test_install_plugs_the_role_masking_policy_into_the_fact_ledger(hardened, settings):
+    staff = Principal(user_id="u-1", tenant_id="t1", role=Role.staff)
+    rows, masked = masking.get_masker()("t1", ("bank.csv#L1",), staff)
     assert masked and re.fullmatch(r"masked:[0-9a-f]{16}", rows[0])
+    again = create_app(settings)  # the masking key comes from SECRET_KEY: stable across apps
+    assert masking.get_masker()("t1", ("bank.csv#L1",), staff)[0] == rows
+    assert again.state.security_installed is True
 
 
 def test_the_hardened_app_still_signs_in_end_to_end(web, make_user, clock):

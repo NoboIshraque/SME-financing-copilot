@@ -68,13 +68,24 @@ def test_expired_access_has_no_permissions():
     (Role.staff, True), (Role.lender_viewer, True),
 ])
 def test_source_rows_are_masked_for_roles_without_source_row_access(role, masked):
-    rows, was_masked = policy_masker("t1", ("bank.csv#L1", "bank.csv#L2"), role)
+    rows, was_masked = policy_masker("t1", ("bank.csv#L1", "bank.csv#L2"), principal(role))
     assert was_masked is masked
     if masked:
         assert rows[0].startswith("masked:") and rows[0] != rows[1]
-        assert policy_masker("t1", ("bank.csv#L1",), role)[0][0] == rows[0]  # stable
+        assert policy_masker("t1", ("bank.csv#L1",), principal(role))[0][0] == rows[0]  # stable
     else:
         assert rows == ("bank.csv#L1", "bank.csv#L2")
+
+
+def test_another_tenants_owner_sees_masked_rows():
+    rows, masked = policy_masker("t2", ("bank.csv#L1",), principal(Role.owner))
+    assert masked and rows[0].startswith("masked:")
+
+
+def test_compliance_access_that_expired_sees_masked_rows():
+    expired = Principal(user_id="u-1", tenant_id="t1", role=Role.compliance,
+                        expires_at=datetime(2020, 1, 1, tzinfo=UTC))
+    assert policy_masker("t1", ("bank.csv#L1",), expired)[1] is True
 
 
 # ------------------------------------------------------------------------- team API

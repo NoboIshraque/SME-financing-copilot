@@ -67,9 +67,9 @@ Check `C:\hishab\integration.log` now and then; if a run shows FAILED, post in t
   ```
   Post "WP-17 results pushed" in the group. If a notebook errors, screenshot the red cell and
   post it; don't change the code yourself.
-- **When WP-03 (privacy) is merged:** run the anonymiser on your shop files (the orchestrator
-  posts the exact command), check the output has no names or numbers, commit only the
-  anonymised files to `data/real_anonymised/` on branch `wp-20-data`, open a PR.
+- **After each shop:** anonymise its files with `app.privacy.shopfiles`: exact steps in
+  `docs/packages/WP-20.md` → "Anonymise". Only the anonymised files go to `data/real_anonymised/`
+  on branch `wp-20-data`; raw files and photos stay in the private Drive folder.
 
 ## Monday – Tuesday
 - Keep PC-4 running; rerun any notebook the orchestrator asks for.

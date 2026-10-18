@@ -4,12 +4,12 @@ Deliverable 05 · FinTechathon 2026, Topic E · Draft by WP-11, 18 Oct 2026. The
 finalises it in WP-19. Every control below names the code that implements it and the tests that
 check it. The known-risk list at the end is deliberately blunt.
 
-**Status at this draft.** WP-11 is implemented on branch `wp-11-security`, with 398 automated
-tests in `backend/tests/security/`. WP-03 (privacy) is merged. WP-10 (LLM gateway and agents)
-and WP-16 (adversarial evaluation) are not built yet, so controls that live there are marked
-*planned*. One wiring step is pending: `install_security()` must be called from `main.py`
-(owned by WP-00, requested in `docs/packages/WP-11.md`). Until it is, the app-level rate limits
-and Origin check are off; Caddy still sets the security headers in production.
+**Status at this draft.** WP-11 is implemented on branch `wp-11-security`, with 400 automated
+tests in `backend/tests/security/` (the whole backend suite, 1,463 tests, passes with the
+security layer installed in every app). WP-03 (privacy) is merged. WP-10 (LLM gateway and
+agents) and WP-16 (adversarial evaluation) are not built yet, so controls that live there are
+marked *planned*. The web hardening is installed app-wide through `app/security/app_hooks.py`,
+which `create_app` calls for every app.
 
 ---
 
@@ -180,7 +180,8 @@ Source: `backend/app/security/web.py`, plus `infra/Caddyfile` (WP-18). Tests: `t
 - **Headers.** Strict CSP (`default-src 'none'` on API responses), HSTS, `nosniff`,
   `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, a permissions policy, COOP/CORP,
   and `Cache-Control: no-store` on API data.
-- **CORS.** An explicit origin list with credentials. Wildcard origins are refused when
+- **CORS.** An explicit origin list with credentials; CORS is the outermost layer, so even
+  a 429 or 403 from the security middleware carries CORS headers. Wildcard origins are refused when
   deployed, and a foreign-origin preflight is rejected (tested).
 - **CSRF.** SameSite=Strict cookies, plus an Origin check that refuses cross-site requests that
   change state.
@@ -216,9 +217,9 @@ Source: `backend/app/security/web.py`, plus `infra/Caddyfile` (WP-18). Tests: `t
 
 ## 9. Known-risk list
 
-1. **`install_security()` is not yet wired into `main.py`** (WP-00 owns that file). Until it
-   is, app-level rate limits, the Origin check and the app-wide error handler are off. Caddy
-   still sets the headers in production.
+1. **The fact API still uses a development stub for the caller** (`app/api/facts.py`,
+   WP-01) until it switches to the authenticated principal; outside development and test, that
+   stub only ever grants masked, lender-level access.
 2. **Rate limits live in process memory.** They reset on restart and are per process. The
    demo runs one API process; scaling out would need a shared store.
 3. **Guard generalisation is unmeasured.** The rules were written with sight of the corpus they

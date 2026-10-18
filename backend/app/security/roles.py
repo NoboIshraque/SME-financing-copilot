@@ -10,11 +10,11 @@ A lender viewer holds no permission of its own: only the scopes the owner consen
 
 from __future__ import annotations
 
-import hashlib
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from app.contracts import Principal, Role
+from app.facts.masking import mask_value
 
 
 class Permission(StrEnum):
@@ -63,15 +63,12 @@ def has_permission(principal: Principal, permission: Permission, now: datetime) 
     return permission in permissions_of(principal, now)
 
 
-def mask_row(tenant_id: str, row: str) -> str:
-    """Stable opaque reference, same format as WP-01's stub (`app.facts.masking`)."""
-    return "masked:" + hashlib.sha256(f"{tenant_id}|{row}".encode()).hexdigest()[:16]
-
-
-def policy_masker(tenant_id: str, rows: tuple[str, ...], role: Role
+def policy_masker(tenant_id: str, rows: tuple[str, ...], caller: Principal
                   ) -> tuple[tuple[str, ...], bool]:
-    """Source-row masking for `app.facts.masking.set_masker`: rows are shown only to roles
-    holding `source_rows:read`; everyone else gets stable opaque references."""
-    if Permission.source_rows_read in ROLE_PERMISSIONS[role]:
+    """Source-row masking for `app.facts.masking.set_masker`: rows are shown only to a caller
+    of the same tenant who holds `source_rows:read` right now (so an expired grant masks);
+    everyone else gets WP-01's keyed, stable opaque references."""
+    if caller.tenant_id == tenant_id and has_permission(caller, Permission.source_rows_read,
+                                                        datetime.now(UTC)):
         return rows, False
-    return tuple(mask_row(tenant_id, row) for row in rows), True
+    return tuple(mask_value(tenant_id, row) for row in rows), True
