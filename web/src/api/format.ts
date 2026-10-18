@@ -1,7 +1,7 @@
 // Money and number formatting without floats: amounts arrive from the API as exact strings.
 import type { Language } from "../i18n";
 import type { Currency } from "./contracts";
-import { roundDecimal, shiftDecimal, trimZeros } from "./decimal";
+import { compareDecimal, roundDecimal, shiftDecimal, trimZeros } from "./decimal";
 
 const BANGLA_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
 
@@ -98,4 +98,24 @@ export function formatDateTime(iso: string, language: Language): string {
     hourCycle: "h23",
     timeZone: "Asia/Dhaka",
   }).format(new Date(iso));
+}
+
+/** Short amounts for chart axes: lakh/crore in English and Bangla, 万 in Chinese. */
+export function formatCompactTaka(amount: string, language: Language): string {
+  const negative = amount.trim().startsWith("-") && /[1-9]/.test(amount);
+  const abs = amount.trim().replace("-", "");
+  const steps: Array<[string, number, Record<Language, string>]> =
+    language === "zh"
+      ? [["10000", 4, { en: "", bn: "", zh: "万" }]]
+      : [
+          ["10000000", 7, { en: " Cr", bn: " কোটি", zh: "" }],
+          ["100000", 5, { en: " L", bn: " লাখ", zh: "" }],
+          ["1000", 3, { en: "K", bn: " হাজার", zh: "" }],
+        ];
+  for (const [threshold, places, suffix] of steps) {
+    if (compareDecimal(abs, threshold) >= 0) {
+      return `${negative ? "-" : ""}৳${formatNumber(shiftDecimal(abs, -places), language, 1)}${suffix[language]}`;
+    }
+  }
+  return `${negative ? "-" : ""}৳${formatNumber(abs, language, 0)}`;
 }
