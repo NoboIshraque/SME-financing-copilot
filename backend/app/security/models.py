@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, Integer, LargeBinary, String, Text
+from sqlalchemy import Boolean, DateTime, Integer, LargeBinary, String, Text, UniqueConstraint
 from sqlalchemy.engine import Dialect
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import TypeDecorator
@@ -111,3 +111,30 @@ class LenderGrantRow(Base):
     consented_at: Mapped[datetime] = mapped_column(UTCDateTime)
     expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
     revoked_at: Mapped[datetime | None] = mapped_column(UTCDateTime, default=None)
+
+
+class ApprovalRow(Base):
+    """An owner approval for one exact action card (milestone 3). The card is stored with its
+    digest; execution refuses a card that no longer matches."""
+
+    __tablename__ = "security_approvals"
+    __table_args__ = (UniqueConstraint("tenant_id", "idempotency_key"),)
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    action_card_id: Mapped[str] = mapped_column(String(128))
+    action_type: Mapped[str] = mapped_column(String(48))
+    tier: Mapped[str] = mapped_column(String(16))
+    card_json: Mapped[str] = mapped_column(Text)
+    card_digest: Mapped[str] = mapped_column(String(64))
+    requested_by: Mapped[str] = mapped_column(String(40))
+    decided_by: Mapped[str | None] = mapped_column(String(40), default=None)
+    status: Mapped[str] = mapped_column(String(16), index=True)
+    step_up_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    idempotency_key: Mapped[str] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    decided_at: Mapped[datetime | None] = mapped_column(UTCDateTime, default=None)
+    executed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, default=None)
+    execution_key: Mapped[str | None] = mapped_column(String(128), default=None)
+    result_json: Mapped[str | None] = mapped_column(Text, default=None)

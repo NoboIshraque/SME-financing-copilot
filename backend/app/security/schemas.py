@@ -11,7 +11,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.contracts import DataMode, Principal, Role
+from app.contracts import ActionCard, ActionType, Approval, DataMode, Principal, Role
 
 
 class _Body(BaseModel):
@@ -101,3 +101,15 @@ class LenderGrantView(BaseModel):
     revoked_at: datetime | None
     initial_password: str | None = Field(
         default=None, description="Shown once, when the grant is created")
+
+
+class ApprovalRequestBody(_Body):
+    card: ActionCard
+
+
+class ApprovalView(BaseModel):
+    approval: Approval
+    action_type: ActionType
+    card: ActionCard
+    result: dict[str, str] | None = None
+    replayed: bool = False
