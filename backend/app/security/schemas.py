@@ -134,3 +134,32 @@ class AnchorView(BaseModel):
     explorer_url: str | None
     anchored_at: datetime
     heads: int
+
+
+class GuardCheckBody(_Body):
+    text: str = Field(max_length=200_000)
+    source: str = "user_message"
+
+
+class VerdictView(BaseModel):
+    allowed: bool
+    source: str
+    rule_ids: list[str]
+    families: list[str]
+    classifier: str | None
+    classifier_score: float | None
+    text_sha256: str
+    quarantine_id: str | None
+
+
+class QuarantineView(BaseModel):
+    id: str
+    source: str
+    actor: str
+    text: str
+    text_sha256: str
+    rule_ids: list[str]
+    score: float | None
+    created_at: datetime
+    released_at: datetime | None
+    released_by: str | None

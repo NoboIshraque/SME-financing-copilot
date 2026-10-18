@@ -221,3 +221,22 @@ for _statement in _SQLITE_TRIGGERS:
 for _statement in _POSTGRES_TRIGGERS:
     event.listen(AuditRow.__table__, "after_create",
                  DDL(_statement).execute_if(dialect="postgresql"))
+
+
+class QuarantineRow(Base):
+    """Text the injection guard stopped before it reached a model (milestone 5). Kept on the
+    server only, for the owner to review; the audit chain records just its SHA-256."""
+
+    __tablename__ = "security_quarantine"
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    source: Mapped[str] = mapped_column(String(24))
+    actor: Mapped[str] = mapped_column(String(64))
+    text: Mapped[str] = mapped_column(Text)
+    text_sha256: Mapped[str] = mapped_column(String(64))
+    rule_ids: Mapped[str] = mapped_column(Text)  # JSON list
+    score: Mapped[float | None] = mapped_column(default=None)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    released_at: Mapped[datetime | None] = mapped_column(UTCDateTime, default=None)
+    released_by: Mapped[str | None] = mapped_column(String(40), default=None)

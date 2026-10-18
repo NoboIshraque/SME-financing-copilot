@@ -39,6 +39,12 @@ Audit chain (milestone 4; every outcome above is appended to the tenant's chain)
     POST /api/audit/anchor                    (audit:verify) -> today's anchor (idempotent)
     GET  /api/audit/anchors                   (audit:read)   -> [anchor]
 
+Injection guard (milestone 5; WP-10 and WP-02 call app.security.guard.screen directly):
+
+    POST /api/guard/check  {text, source}     -> verdict (a hit is quarantined and audited)
+    GET  /api/guard/quarantine                (audit:read)   -> [quarantined text]
+    POST /api/guard/quarantine/{id}/release   (owner)        -> released entry
+
 Errors are ApiError bodies: 401 error.invalid_credentials, 401 error.invalid_totp,
 423 error.account_locked (detail.retry_after_minutes), 401 error.not_authenticated,
 422 error.weak_password (detail.problems). A failed attempt is written before the error is
@@ -79,8 +85,15 @@ from app.security.deps import (
     step_up,
 )
 from app.security.errors import ProblemRoute, SecurityProblem, forbidden, not_authenticated
+from app.security.guard import Source, quarantined, release, screen
 from app.security.jobs import anchorer_for
-from app.security.models import ApprovalRow, AuditAnchorRow, LenderGrantRow, UserRow
+from app.security.models import (
+    ApprovalRow,
+    AuditAnchorRow,
+    LenderGrantRow,
+    QuarantineRow,
+    UserRow,
+)
 from app.security.roles import Permission, has_permission
 from app.security.schemas import (
     AnchorView,
@@ -89,6 +102,7 @@ from app.security.schemas import (
     ChainReportView,
     CodeBody,
     DemoAccountView,
+    GuardCheckBody,
     LenderGrantBody,
     LenderGrantView,
     LoginBody,
@@ -97,8 +111,10 @@ from app.security.schemas import (
     MemberView,
     NewMemberBody,
     PasswordChangeBody,
+    QuarantineView,
     SessionView,
     TotpEnrolment,
+    VerdictView,
 )
 from app.security.sessions import COOKIE_NAME, SessionStore, Stage, cookie_attributes, lifetime
 from app.security.team import Team, grant_scopes
@@ -573,6 +589,53 @@ def _anchor(row: AuditAnchorRow) -> AnchorView:
                       anchored_at=row.anchored_at, heads=len(json.loads(row.heads)))
 
 
+# ---------------------------------------------------------------------- injection guard
+
+guard_router = APIRouter(prefix="/guard", tags=["guard"], route_class=ProblemRoute)
+
+
+def _quarantine(row: QuarantineRow) -> QuarantineView:
+    return QuarantineView(id=row.id, source=row.source, actor=row.actor, text=row.text,
+                          text_sha256=row.text_sha256, rule_ids=list(json.loads(row.rule_ids)),
+                          score=row.score, created_at=row.created_at,
+                          released_at=row.released_at, released_by=row.released_by)
+
+
+@guard_router.post("/check", response_model=VerdictView)
+def guard_check(body: GuardCheckBody, principal: Principal = Depends(current_principal),
+                db: Session = Depends(get_session),
+                clock: Clock = Depends(get_clock)) -> VerdictView | JSONResponse:
+    try:
+        source = Source(body.source)
+    except ValueError:
+        return SecurityProblem(422, "invalid_source", "error.invalid_source").response()
+    verdict = screen(db, principal.tenant_id, principal.user_id, body.text, source, clock())
+    return VerdictView(allowed=verdict.allowed, source=verdict.source.value,
+                       rule_ids=list(verdict.rule_ids), families=list(verdict.families),
+                       classifier=verdict.classifier, classifier_score=verdict.classifier_score,
+                       text_sha256=verdict.text_sha256, quarantine_id=verdict.quarantine_id)
+
+
+@guard_router.get("/quarantine", response_model=list[QuarantineView])
+def guard_quarantine(response: Response, include_released: bool = False,
+                     principal: Principal = Depends(require(Permission.audit_read)),
+                     db: Session = Depends(get_session)) -> list[QuarantineView]:
+    response.headers.update(NO_STORE)
+    return [_quarantine(row) for row in quarantined(db, principal.tenant_id,
+                                                     include_released=include_released)]
+
+
+@guard_router.post("/quarantine/{quarantine_id}/release", response_model=QuarantineView)
+def guard_release(quarantine_id: str,
+                  principal: Principal = Depends(require(Permission.approvals_decide)),
+                  db: Session = Depends(get_session),
+                  clock: Clock = Depends(get_clock)) -> QuarantineView | JSONResponse:
+    row = release(db, principal.tenant_id, quarantine_id, principal.user_id, clock())
+    if row is None:
+        return SecurityProblem(404, "not_found", "error.not_found").response()
+    return _quarantine(row)
+
+
 router = APIRouter()
-for _sub in (auth_router, approvals_router, policy_router, audit_router):
+for _sub in (auth_router, approvals_router, policy_router, audit_router, guard_router):
     router.include_router(_sub)
