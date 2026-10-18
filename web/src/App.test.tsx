@@ -51,7 +51,9 @@ describe("App shell", () => {
   it("tells a lender viewer plainly that a screen is outside their access", async () => {
     renderApp("/cash", { signedInAs: LENDER });
     expect(await screen.findByRole("heading", { level: 2, name: "Not available for your role" })).toBeInTheDocument();
-    expect(screen.getByText(/Lender \(view only\)/, { selector: "p" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Your role (Lender (view only)) doesn't use this screen. Ask the owner if you need access."),
+    ).toBeInTheDocument();
   });
 
   it("signs out, drops cached business data and returns to the sign-in screen", async () => {

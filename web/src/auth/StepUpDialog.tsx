@@ -5,7 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Dialog } from "../components/Dialog";
 import { Icon } from "../components/Icon";
 import { describeError, useServerText } from "../i18n/serverText";
-import { CodeField, normalizeCode } from "./CodeField";
+import { normalizeCode } from "./code";
+import { CodeField } from "./CodeField";
 
 interface StepUpDialogProps {
   open: boolean;

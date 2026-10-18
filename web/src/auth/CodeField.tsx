@@ -1,11 +1,4 @@
-// 6-digit TOTP input. Accepts Bangla and full-width digits; `normalizeCode` turns them into ASCII.
-import { toAsciiDigits } from "../api/format";
-
-/** The 6 ASCII digits of a typed code, or null when it is not exactly 6 digits. */
-export function normalizeCode(raw: string): string | null {
-  const digits = toAsciiDigits(raw).replace(/[\s-]/g, "");
-  return /^\d{6}$/.test(digits) ? digits : null;
-}
+// 6-digit TOTP input. Accepts Bangla and full-width digits; normalizeCode (./code) reads them.
 
 interface CodeFieldProps {
   id: string;

@@ -11,7 +11,8 @@ import { PublicLayout } from "../components/PublicLayout";
 import { useDocumentTitle } from "../components/useDocumentTitle";
 import { describeError, useServerText } from "../i18n/serverText";
 import { homePath } from "../navigation";
-import { CodeField, normalizeCode } from "./CodeField";
+import { normalizeCode } from "./code";
+import { CodeField } from "./CodeField";
 import { SESSION_KEY, safeNext, useSession } from "./session";
 
 type ErrorText = { key: string; values: Record<string, string> };

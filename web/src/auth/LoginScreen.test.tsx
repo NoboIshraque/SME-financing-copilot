@@ -55,7 +55,7 @@ describe("sign-in screen", () => {
 
   it("offers one-tap demo accounts and shows the demo code to TOTP accounts", async () => {
     const { user } = renderApp("/", { signedInAs: null });
-    await user.click(await screen.findByRole("button", { name: /Sign in as Owner/ }));
+    await user.click(await screen.findByRole("button", { name: /Sign in as Owner.*Mirpur Mudi Store/ }));
 
     expect(await screen.findByRole("heading", { level: 2, name: "Enter your code" })).toBeInTheDocument();
     expect(screen.getByText("Demo code: 246810")).toBeInTheDocument();
