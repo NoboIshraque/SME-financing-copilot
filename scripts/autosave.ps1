@@ -34,7 +34,7 @@ while ($true) {
         }
         $pending = git diff --cached --name-only
         if ($pending) {
-            git commit -q -m "autosave($branch): $stamp" --no-verify
+            git commit -q -m "autosave($branch): $stamp [skip ci]" --no-verify
             Write-Host "[$stamp] Committed $(@($pending).Count) file(s) on $branch." -ForegroundColor Cyan
         }
         $push = git push -q -u origin $branch 2>&1
