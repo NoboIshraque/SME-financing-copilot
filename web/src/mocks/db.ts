@@ -1,5 +1,5 @@
 // In-memory state of the offline mock API. Every value is synthetic (CLAUDE.md rule 8).
-import type { Role } from "../api/contracts";
+import type { Approval, Role } from "../api/contracts";
 import type { Session } from "../api/types";
 
 export const DEMO_PASSWORD = "hishab-demo";
@@ -24,6 +24,13 @@ export interface MockDb {
   session: Session | null;
   /** Email of a user who passed the password step and still owes a TOTP code. */
   pendingTotp: string | null;
+  approvals: Approval[];
+}
+
+/** The caller's role. In "auto" mode the real backend may own the session while the mock still
+ *  answers a route, so an unknown session is treated as the owner. */
+export function callerRole(db: MockDb): Role {
+  return db.session?.principal.role ?? "owner";
 }
 
 function user(email: string, role: Role, displayName: string, totp: boolean, extra: Partial<MockUser> = {}): MockUser {
@@ -78,7 +85,7 @@ export function sessionFor(account: MockUser): Session {
 /** Fresh mock state. `signedInAs` starts a session for that demo email (tests skip the login). */
 export function createMockDb(options: { signedInAs?: string } = {}): MockDb {
   const users = demoUsers();
-  const db: MockDb = { users, session: null, pendingTotp: null };
+  const db: MockDb = { users, session: null, pendingTotp: null, approvals: [] };
   if (options.signedInAs) {
     const account = users.find((u) => u.email === options.signedInAs);
     if (!account) throw new Error(`no demo user ${options.signedInAs}`);

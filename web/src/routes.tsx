@@ -7,10 +7,11 @@ import { AppShell } from "./components/AppShell";
 import { NotFound } from "./components/NotFound";
 import { Placeholder } from "./components/Placeholder";
 import { SCREENS, type Screen } from "./navigation";
+import { TodayScreen } from "./screens/today/TodayScreen";
 
 // WP-14 replaces each Placeholder with the real screen, milestone by milestone.
 const SCREEN_ELEMENTS: Record<Screen, ReactNode> = {
-  today: <Placeholder screen="today" />,
+  today: <TodayScreen />,
   cash: <Placeholder screen="cash" />,
   receivables: <Placeholder screen="receivables" />,
   financing: <Placeholder screen="financing" />,
