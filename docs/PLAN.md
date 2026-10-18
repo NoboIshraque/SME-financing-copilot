@@ -211,7 +211,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-08 | in progress (5/8) | wp-08-mesh | 83 | engine, consent, attestations, anchor done; API waits for WP-01/11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |
-| WP-11 | in progress (6/7) | wp-11-security | 398 | auth, roles, tiers + approvals, audit chain + anchor, injection guard, web hardening (`install_security` waits for one line in main.py, see WP-11 Questions) |
+| WP-11 | done (7/7) | wp-11-security | 398 | auth (argon2id, TOTP step-up, strict cookies, lockout), roles + consented lender access, tier policy + approvals, hash-chained audit + daily anchor, multilingual injection guard, web hardening, self-assessment draft; needs one `install_security` line in main.py (WP-00, see WP-11 Questions) |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
 | WP-14 | not started | — | 0 | |
