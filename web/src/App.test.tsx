@@ -58,8 +58,8 @@ describe("App shell", () => {
 
   it("signs out, drops cached business data and returns to the sign-in screen", async () => {
     const { user, db, queryClient } = renderApp("/cash");
-    await screen.findByRole("heading", { level: 2, name: "Cash" });
-    queryClient.setQueryData(["cash", "forecast"], { opening_balance: { amount: "427842.00" } });
+    await screen.findByRole("table", { name: "Week-by-week forecast balance" });
+    expect(queryClient.getQueryData(["cash", "forecast"])).toBeDefined();
 
     await user.click(screen.getByRole("button", { name: "Sign out" }));
 
