@@ -60,7 +60,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | --- | --- | --- | --- | --- |
 | WP-00 | Foundation: scaffold, contracts, CI, seed data, autosave | Orchestrator | 0 | 40 |
 | WP-01 | Typed Fact Ledger + provenance (N5, N13 backend) | A1 | 1 | 60 |
-| WP-02 | done (5/5) | wp-02-ingest | 294 | parsers (bKash/Nagad/bank/ledger/registers), Bangla normaliser, OCR drafts, preview/commit, API; awaiting review |
+| WP-02 | Ingestion: bKash/Nagad/bank CSV, Excel, OCR, Bangla/Banglish (P4) | A1 | 1 | 80 |
 | WP-03 | Privacy vault, detectors, anonymiser, amount scaling (N6, N18, P11) | Orchestrator | 1 | 70 |
 | WP-04 | Cash engine: forecast, Monte Carlo, gaps, alerts, smoothing (Q1, Q3) | A1 | 1–2 | 120 |
 | WP-05 | Receivables & collections: aging, risk, limits, ladder, disputes (Q2) | A1 | 2 | 60 |
@@ -202,7 +202,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | --- | --- | --- | --- | --- |
 | WP-00 | done | main | 237 backend + 34 web + 4 e2e | contracts v1.0.0 (58 models), synthetic universe, CI |
 | WP-01 | done | merged | 101 | fact store, registry, provenance, API (merged 18 Oct 05:55) |
-| WP-02 | in progress (3/5) | wp-02-ingest | 262 | parsers, normaliser, ledger-photo OCR drafts (Tesseract ben+eng, confidence, flags) |
+| WP-02 | done (5/5) | wp-02-ingest | 294 | parsers (bKash/Nagad/bank/ledger/registers), Bangla normaliser, OCR drafts, preview/commit, API; awaiting review |
 | WP-03 | done (4/4) | merged | 80 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; built by the orchestrator |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
