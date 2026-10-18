@@ -14,10 +14,10 @@ from collections.abc import Iterable, Mapping, Sequence
 from typing import Protocol
 
 from app.ingest.normalise import ascii_digits, clean_text
+from app.privacy.detectors import detect
 
 _PHONE = re.compile(r"^(?:\+?880|0)?(1[3-9]\d{8})$")
 _DIGIT_RUN = re.compile(r"\d[\d\s\-]{5,}\d")
-_EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 
 
 def normalise_phone(text: str) -> str | None:
@@ -135,9 +135,14 @@ class ClusteringPartyResolver(HmacPartyResolver):
         return [token_of[find(group[0])] if group else None for group in groups]
 
 
-def mask_excerpt(text: str, limit: int = 200) -> str:
-    """Stub of the WP-03 masker for unparsed-row excerpts: hides phone/account-like digit runs
-    and e-mail addresses, then truncates."""
-    masked = _EMAIL.sub("[email]", ascii_digits(text))
-    masked = _DIGIT_RUN.sub(lambda m: "#" * len(m.group(0)), masked)
+def mask_excerpt(text: str, limit: int = 200, party_names: Iterable[str] = ()) -> str:
+    """An unparsed row as it may be stored and shown: every personal detail the WP-03
+    detectors find (phones, NID, card and account numbers, e-mails, addresses, names) is
+    replaced by its kind, e.g. '[PHONE]'; leftover long digit runs are hidden too."""
+    out, last = [], 0
+    for found in detect(text, party_names=party_names):
+        out += [text[last:found.start], f"[{found.kind.value}]"]
+        last = found.end
+    out.append(text[last:])
+    masked = _DIGIT_RUN.sub(lambda m: "#" * len(m.group(0)), ascii_digits("".join(out)))
     return masked[:limit]

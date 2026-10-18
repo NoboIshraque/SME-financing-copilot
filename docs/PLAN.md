@@ -202,7 +202,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | --- | --- | --- | --- | --- |
 | WP-00 | done | main | 237 backend + 34 web + 4 e2e | contracts v1.0.0 (58 models), synthetic universe, CI |
 | WP-01 | done | merged | 101 | fact store, registry, provenance, API (merged 18 Oct 05:55) |
-| WP-02 | in progress (2/5) | wp-02-ingest | 245 | parsers + normaliser (Bangla digits/months, Bengali calendar, d/m inference, dedupe, party clustering) |
+| WP-02 | in progress (3/5) | wp-02-ingest | 262 | parsers, normaliser, ledger-photo OCR drafts (Tesseract ben+eng, confidence, flags) |
 | WP-03 | done (4/4) | merged | 80 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; built by the orchestrator |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
