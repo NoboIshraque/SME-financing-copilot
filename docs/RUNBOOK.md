@@ -140,9 +140,9 @@ the **branch** to use (e.g. `wp-01-facts`). Its STATUS list shows what's done.
 | --- | --- | --- |
 | A1 | PC-1 `C:\hishab\repo` | WP-01 → WP-02 → WP-04 → WP-05 → WP-07 → (WP-09, WP-12 if Worker C isn't used) |
 | B1 | PC-2 `C:\hishab\repo` | WP-14 → WP-15 |
-| B2 | PC-2 `C:\hishab\repo-b2` | WP-03 → WP-11 → WP-10 → WP-16 |
+| B2 | PC-2 `C:\hishab\repo-b2` | WP-11 → WP-10 → WP-16 (WP-03 moved to the orchestrator, 18 Oct) |
 | Worker C (optional) | PC-3 | WP-09 → WP-12 |
-| Orchestrator | cloud | WP-00 → WP-06 → WP-08 → WP-13 → WP-18 → WP-19, plus notebooks for WP-17, reviews and merges |
+| Orchestrator | cloud | WP-00 → WP-06 → WP-08 → WP-13 → WP-18 → WP-03 → WP-19, plus notebooks for WP-17, reviews and merges |
 
 ## 5. Manual tasks only humans can do
 
