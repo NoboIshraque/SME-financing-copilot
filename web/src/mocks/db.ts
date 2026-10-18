@@ -25,6 +25,8 @@ export interface MockDb {
   /** Email of a user who passed the password step and still owes a TOTP code. */
   pendingTotp: string | null;
   approvals: Approval[];
+  /** Invoice id -> dispute reason, for invoices disputed in this session. */
+  disputes: Record<string, string>;
 }
 
 /** The caller's role. In "auto" mode the real backend may own the session while the mock still
@@ -85,7 +87,7 @@ export function sessionFor(account: MockUser): Session {
 /** Fresh mock state. `signedInAs` starts a session for that demo email (tests skip the login). */
 export function createMockDb(options: { signedInAs?: string } = {}): MockDb {
   const users = demoUsers();
-  const db: MockDb = { users, session: null, pendingTotp: null, approvals: [] };
+  const db: MockDb = { users, session: null, pendingTotp: null, approvals: [], disputes: {} };
   if (options.signedInAs) {
     const account = users.find((u) => u.email === options.signedInAs);
     if (!account) throw new Error(`no demo user ${options.signedInAs}`);

@@ -4,12 +4,14 @@ import { callerRole, DEMO_TOTP_CODE } from "../db";
 import { alerts } from "../fixtures/cash";
 import { NOW, TENANT } from "../fixtures/common";
 import { todayRecommendation } from "../fixtures/copilot";
+import { reminderPlan } from "../fixtures/receivables";
 import { apiError, ok, type MockRoute } from "../http";
 
 /** Every action card any mock screen shows; screens added later register theirs here. */
 export const CARD_SOURCES: Array<() => readonly ActionCard[]> = [
   () => todayRecommendation().action_cards ?? [],
   () => alerts().flatMap((alert) => alert.fixes ?? []),
+  reminderPlan,
 ];
 
 const MAY_APPROVE: Record<Exclude<Tier, "READ" | "DENY">, readonly Role[]> = {

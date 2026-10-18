@@ -4,5 +4,6 @@ import { actionRoutes } from "./actions";
 import { authRoutes } from "./auth";
 import { cashRoutes } from "./cash";
 import { copilotRoutes } from "./copilot";
+import { receivablesRoutes } from "./receivables";
 
-export const ROUTES: MockRoute[] = [...authRoutes, ...cashRoutes, ...copilotRoutes, ...actionRoutes];
+export const ROUTES: MockRoute[] = [...authRoutes, ...cashRoutes, ...copilotRoutes, ...actionRoutes, ...receivablesRoutes];
