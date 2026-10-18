@@ -18,3 +18,13 @@ paths = [
 description = "i18n label keys are not secrets"
 regexTarget = "match"
 regexes = ['''label_key\s*=\s*["'][a-z][a-z0-9_]*(?:\.[a-z0-9_]+)+["']''']
+
+# Key-derivation labels ("hishab/ingest/digest/v1") and explicit test placeholders
+# ("test-secret-...") are not secrets; the regexes match the whole detected value only.
+[[allowlists]]
+description = "HKDF/version labels and test-secret placeholders"
+regexTarget = "secret"
+regexes = [
+  '''^hishab/[a-z0-9_]+(?:/[a-z0-9_]+)*/v[0-9]+$''',
+  '''^test-secret-[0-9a-z-]+$''',
+]

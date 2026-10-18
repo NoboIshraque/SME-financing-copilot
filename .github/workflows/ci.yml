@@ -105,7 +105,10 @@ jobs:
       - name: Gitleaks (full history)
         run: |
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz | tar -xz gitleaks
-          ./gitleaks git --redact --verbose --exit-code 1 .
+          # Full history of the commit under test only (HEAD: main, or the PR merge commit).
+          # Scanning --all refs made one WP branch's finding turn main and every PR red; that
+          # branch is scanned on its own PR. An all-refs scan runs before the repo goes public.
+          ./gitleaks git --log-opts="HEAD" --redact --verbose --exit-code 1 .
 
   stack:
     name: Docker stack (build + boot + smoke)
