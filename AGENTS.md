@@ -92,6 +92,10 @@ Run a single backend test: `cd backend && uv run pytest tests/cash/test_forecast
   It is mounted under `/api` automatically. Do not edit `main.py`.
 - **Your tables:** create `backend/app/<area>/models.py` subclassing `app.db.Base`. Tables are
   created automatically. Get a session in routes with `Depends(get_session)` from `app.main`.
+- **App-wide hooks:** middleware, exception handlers or startup checks go in
+  `backend/app/<area>/app_hooks.py` with `install(app, settings)`; `create_app` calls it after
+  mounting every router and before CORS (CORS stays outermost). `api_routes(app)` from
+  `app.main` lists every route (full path, methods, endpoint). Do not edit `main.py`.
 - **Tests:** `client` fixture = app on in-memory SQLite. Any non-localhost network call fails
   the test on purpose. Hypothesis runs derandomised in CI (`HYPOTHESIS_PROFILE=ci`).
 - **Festival calendar:** `data/public/calendar/bd_festivals.yaml` (Eid dates are +/- 1 day).
