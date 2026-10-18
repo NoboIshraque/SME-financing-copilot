@@ -6,7 +6,7 @@ LoginResponse, DemoAccount), which WP-14's mock API serves until this router is 
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -113,3 +113,24 @@ class ApprovalView(BaseModel):
     card: ActionCard
     result: dict[str, str] | None = None
     replayed: bool = False
+
+
+class ChainReportView(BaseModel):
+    tenant_id: str
+    valid: bool
+    length: int
+    head_hash: str
+    first_bad_seq: int | None = None
+    reason: str | None = None
+    anchors_checked: int = 0
+
+
+class AnchorView(BaseModel):
+    day: date
+    digest: str
+    chain: str
+    tx_hash: str | None
+    block_number: int | None
+    explorer_url: str | None
+    anchored_at: datetime
+    heads: int

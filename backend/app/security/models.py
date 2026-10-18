@@ -8,10 +8,21 @@ emails are stored only as digests.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, Integer, LargeBinary, String, Text, UniqueConstraint
+from sqlalchemy import (
+    DDL,
+    Boolean,
+    Date,
+    DateTime,
+    Integer,
+    LargeBinary,
+    String,
+    Text,
+    UniqueConstraint,
+    event,
+)
 from sqlalchemy.engine import Dialect
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import TypeDecorator
@@ -138,3 +149,75 @@ class ApprovalRow(Base):
     executed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, default=None)
     execution_key: Mapped[str | None] = mapped_column(String(128), default=None)
     result_json: Mapped[str | None] = mapped_column(Text, default=None)
+
+
+class AuditRow(Base):
+    """One link of a tenant's append-only, SHA-256 hash-chained audit log (milestone 4).
+
+    `details` is the redacted JSON whose SHA-256 is `details_digest` (ids, counts and digests,
+    never personal data). UPDATE and DELETE are refused by the ORM and by database triggers.
+    """
+
+    __tablename__ = "security_audit"
+
+    tenant_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    seq: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    at: Mapped[datetime] = mapped_column(UTCDateTime)
+    actor: Mapped[str] = mapped_column(String(64))
+    action: Mapped[str] = mapped_column(String(64), index=True)
+    tier: Mapped[str | None] = mapped_column(String(16), default=None)
+    target: Mapped[str | None] = mapped_column(String(128), default=None)
+    details: Mapped[str] = mapped_column(Text)
+    details_digest: Mapped[str] = mapped_column(String(64))
+    prev_hash: Mapped[str] = mapped_column(String(64))
+    hash: Mapped[str] = mapped_column(String(64))
+
+
+class AuditAnchorRow(Base):
+    """A day's audit heads (one per tenant) committed to one digest and anchored on chain."""
+
+    __tablename__ = "security_audit_anchors"
+
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    digest: Mapped[str] = mapped_column(String(64))
+    heads: Mapped[str] = mapped_column(Text)  # JSON [[tenant_id, seq, hash], ...]
+    chain: Mapped[str] = mapped_column(String(16))
+    tx_hash: Mapped[str | None] = mapped_column(String(80), default=None)
+    block_number: Mapped[int | None] = mapped_column(Integer, default=None)
+    explorer_url: Mapped[str | None] = mapped_column(String(200), default=None)
+    anchored_at: Mapped[datetime] = mapped_column(UTCDateTime)
+
+
+class AppendOnlyViolation(RuntimeError):
+    pass
+
+
+@event.listens_for(AuditRow, "before_update")
+def _refuse_update(_mapper: object, _connection: object, _target: object) -> None:
+    raise AppendOnlyViolation("the audit log is append-only: rows are never updated")
+
+
+@event.listens_for(AuditRow, "before_delete")
+def _refuse_delete(_mapper: object, _connection: object, _target: object) -> None:
+    raise AppendOnlyViolation("the audit log is append-only: rows are never deleted")
+
+
+_SQLITE_TRIGGERS = [
+    "CREATE TRIGGER security_audit_no_update BEFORE UPDATE ON security_audit "
+    "BEGIN SELECT RAISE(ABORT, 'audit log is append-only'); END",
+    "CREATE TRIGGER security_audit_no_delete BEFORE DELETE ON security_audit "
+    "BEGIN SELECT RAISE(ABORT, 'audit log is append-only'); END",
+]
+_POSTGRES_TRIGGERS = [
+    "CREATE OR REPLACE FUNCTION security_audit_append_only() RETURNS trigger AS $$ "
+    "BEGIN RAISE EXCEPTION 'audit log is append-only'; END; $$ LANGUAGE plpgsql",
+    "CREATE TRIGGER security_audit_no_change BEFORE UPDATE OR DELETE ON security_audit "
+    "FOR EACH ROW EXECUTE FUNCTION security_audit_append_only()",
+    "CREATE TRIGGER security_audit_no_truncate BEFORE TRUNCATE ON security_audit "
+    "FOR EACH STATEMENT EXECUTE FUNCTION security_audit_append_only()",
+]
+for _statement in _SQLITE_TRIGGERS:
+    event.listen(AuditRow.__table__, "after_create", DDL(_statement).execute_if(dialect="sqlite"))
+for _statement in _POSTGRES_TRIGGERS:
+    event.listen(AuditRow.__table__, "after_create",
+                 DDL(_statement).execute_if(dialect="postgresql"))

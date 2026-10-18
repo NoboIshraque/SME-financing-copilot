@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from app.contracts import Principal
 from app.main import get_session
 from app.security.accounts import Accounts, principal_of
+from app.security.audit import AuditLog
 from app.security.clock import Clock, system_clock
 from app.security.errors import SecurityProblem, forbidden, not_authenticated
 from app.security.models import SessionRow, UserRow
@@ -87,7 +88,12 @@ def step_up(request: Request, auth: Authenticated = Depends(authenticated),
         return StepUp(auth, SecurityProblem(401, "step_up_required", "error.step_up_required"))
     if not auth.user.totp_enrolled:
         return StepUp(auth, SecurityProblem(403, "totp_not_enrolled", "error.totp_not_enrolled"))
-    result = Accounts(db, request.app.state.settings).check_totp(auth.user, code, clock())
+    now = clock()
+    result = Accounts(db, request.app.state.settings).check_totp(auth.user, code, now)
+    if result.status != "ok":
+        AuditLog(db).append(auth.user.tenant_id, actor=auth.user.id, now=now,
+                            action="auth.locked" if result.status == "locked"
+                            else "auth.step_up_failed")
     if result.status == "locked":
         return StepUp(auth, SecurityProblem(423, "account_locked", "error.account_locked",
                                             retry_after_minutes=result.retry_after_minutes))
