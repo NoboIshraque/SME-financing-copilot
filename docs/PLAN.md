@@ -200,15 +200,15 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 
 | WP | Status | Branch | Tests | Notes |
 | --- | --- | --- | --- | --- |
-| WP-00 | done | merged | 242 backend + 34 web + 4 e2e | contracts v1.1.0 (58 models), synthetic universe, CI, Mission control (issue #8) |
+| WP-00 | done | merged + PR #15 | 248 backend + 34 web + 4 e2e | contracts v1.1.0 (58 models), synthetic universe, CI, Mission control (issue #8); app-wide hooks (`app/<area>/app_hooks.py`) + `api_routes()` for WP-11 (PR #15) |
 | WP-01 | done (merged 18 Oct 05:55); review fixes on wp-01-facts | merged | 143 | fact store, registry, provenance, API; fixes: ledger revisions, caller scoping, masking, races, rows endpoint (awaiting full review) |
 | WP-02 | in progress (2/5) | wp-02-ingest | — | A1: parsers, normaliser pushed (18 Oct); OCR drafts next |
-| WP-03 | done (5/5) | merged + PR #12 | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20 (PR #12); built by the orchestrator |
+| WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
 | WP-06 | in progress (7/8) | merged | 123 | engine + real BD catalogue done; API (milestone 8) waits for WP-11 principal + step-up |
 | WP-07 | not started | — | 0 | |
-| WP-08 | in progress (5/8) | merged | 83 | engine, consent, attestations, anchor done; residual routing, lender events, API wait for WP-11 |
+| WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API waits for WP-11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |
 | WP-11 | not started | — | 0 | B2 (PC-2) |
@@ -217,8 +217,8 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-14 | in progress (0/11) | wp-14-web | — | B1 (PC-2) started 18 Oct ~11:00 |
 | WP-15 | not started | — | 0 | |
 | WP-16 | not started | — | 0 | P3 approved |
-| WP-17 | in progress (2/4) | merged + PR #11 | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families (PR #11); Labib runs 01/03/04 on Kaggle |
-| WP-18 | in progress (4/6) | merged + PR #10 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only, autosave skips CI (PR #10); China checks + mirror pending |
+| WP-17 | in progress (2/4) | merged | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families; Labib runs 01/03/04 on Kaggle |
+| WP-18 | in progress (4/6) | merged + PR #14 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only; secret scan scoped to the tested commit (PR #14, all-refs scan before going public); China checks + mirror pending |
 | WP-19 | not started | — | — | |
 | WP-20 | in progress | wp-20-data | — | P7 approved; Labib at shops 18 Oct 10:00–14:00; anonymiser ready (PR #12) |
 
