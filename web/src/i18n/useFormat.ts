@@ -5,6 +5,11 @@ import type { Money, Unit } from "../api/contracts";
 import { formatDate, formatDateTime, formatMoney, formatNumber, formatPercent } from "../api/format";
 import type { Language } from ".";
 
+/** Paisa are shown only when there are some: ৳4,27,842 but ৳57.70. */
+function withPaisa(amount: string): boolean {
+  return /\.\d*[1-9]/.test(amount);
+}
+
 export function useFormat() {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || "en") as Language;
@@ -20,7 +25,7 @@ export function useFormat() {
       case "BDT":
       case "USD":
       case "CNY":
-        return formatMoney(raw, unit, lang);
+        return formatMoney(raw, unit, lang, { paisa: withPaisa(raw) });
       case "percent":
         return formatPercent(raw, lang, { maxFraction: 2 });
       case "probability":
@@ -39,7 +44,7 @@ export function useFormat() {
     lang,
     days,
     value,
-    money: (money: Money) => formatMoney(money.amount, money.currency ?? "BDT", lang),
+    money: (money: Money) => formatMoney(money.amount, money.currency ?? "BDT", lang, { paisa: withPaisa(money.amount) }),
     number: (raw: string, maxFraction?: number) => formatNumber(raw, lang, maxFraction),
     percent: (raw: string) => formatPercent(raw, lang, { maxFraction: 2 }),
     probability: (raw: string) => formatPercent(raw, lang, { probability: true }),

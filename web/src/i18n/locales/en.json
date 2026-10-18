@@ -104,7 +104,8 @@
     "invalid_need": "Check the amount and dates.",
     "nothing_to_net": "There is no circular debt to net right now.",
     "not_a_participant": "Your business is not part of this round.",
-    "not_anchored": "This round has not been anchored yet."
+    "not_anchored": "This round has not been anchored yet.",
+    "invalid_quantity": "Enter a quantity, for example 500."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -261,7 +262,10 @@
   },
   "unit": {
     "days_one": "{{value}} day",
-    "days_other": "{{value}} days"
+    "days_other": "{{value}} days",
+    "kg": "kg",
+    "litre": "litre",
+    "metric_ton": "tonne"
   },
   "receivables": {
     "remindersTitle": "Reminders to send",
@@ -543,5 +547,69 @@
     "valid": "Verified: the record matches the anchored hash.",
     "invalid": "Does not match the anchored hash. Do not trust this record.",
     "stepUpSummary": "Clear {{gross}} of debt by paying {{net}} in total"
+  },
+  "market": {
+    "alertsTitle": "Price alerts",
+    "noAlerts": "No big price moves today.",
+    "rose": "{{commodity}} is up",
+    "dropped": "{{commodity}} is down",
+    "riseAdvice": "Buy only what you need this week",
+    "dropAdvice": "A good time to stock up",
+    "published": "{{source}}, published {{date}}",
+    "source": {
+      "tcb": "TCB Dhaka",
+      "agripricebd": "AgriPriceBD",
+      "worldbank_pinksheet": "World Bank Pink Sheet",
+      "vendor": "your vendor's quote",
+      "manual": "entered by you"
+    },
+    "watchTitle": "Prices you watch",
+    "noWatch": "No inputs watched yet. They appear once purchases are on record.",
+    "commodity": "Item",
+    "today": "Latest",
+    "median": "4-week median",
+    "change": "Change",
+    "vendorsTitle": "Best vendor for an order",
+    "quantity": "Quantity",
+    "rank": "Rank vendors",
+    "noQuotes": "No vendor quotes on record for this item.",
+    "leadTime": "arrives in {{days}}",
+    "onTime": "on time {{rate}}",
+    "negotiateTitle": "Negotiate a sale",
+    "negotiateHelp": "Enter the buyer's offer. Hishab works out your walk-away point and a script with the numbers behind each step.",
+    "offer": "Buyer's offer per unit (৳)",
+    "paymentDays": "Buyer pays after",
+    "makePlan": "Make my plan",
+    "walkAway": "Walk away below",
+    "target": "Aim for",
+    "belowWalkAway": "The target is below your walk-away point. Do not accept this deal.",
+    "change_vs_median": "Change vs 4-week median",
+    "landed_cost": "Landed cost",
+    "unit_price": "Price",
+    "delivery_per_unit": "Delivery",
+    "delay_cost": "Waiting cost",
+    "reliability_penalty": "Reliability risk"
+  },
+  "commodity": {
+    "onion": "Onion",
+    "lentil_masur": "Lentils (masur)",
+    "rice_coarse": "Rice (coarse)",
+    "soybean_oil": "Soybean oil",
+    "sugar": "Sugar"
+  },
+  "negotiation": {
+    "step": {
+      "open_high": "Open high and ask for payment within a week.",
+      "trade_term": "If they want longer credit, raise the price to cover what that credit costs you.",
+      "discount_for_speed": "Offer a small discount for fast payment: it costs less than borrowing.",
+      "walk_away": "Do not go below your walk-away price: below it you lose money once delivery and credit are counted."
+    },
+    "walk_away": "Walk-away price",
+    "target": "Target price",
+    "price": "Price",
+    "credit_cost": "Credit cost per unit",
+    "discount": "Discount",
+    "monthly_cost": "Its cost per month",
+    "loan_monthly_cost": "Your loan's cost per month"
   }
 }

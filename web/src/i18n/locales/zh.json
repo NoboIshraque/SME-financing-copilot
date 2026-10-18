@@ -104,7 +104,8 @@
     "invalid_need": "请检查金额和日期。",
     "nothing_to_net": "目前没有可轧差的循环债务。",
     "not_a_participant": "您的企业不在本轮之中。",
-    "not_anchored": "本轮尚未锚定。"
+    "not_anchored": "本轮尚未锚定。",
+    "invalid_quantity": "请输入数量，例如 500。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -261,7 +262,10 @@
   },
   "unit": {
     "days_one": "{{value}} 天",
-    "days_other": "{{value}} 天"
+    "days_other": "{{value}} 天",
+    "kg": "公斤",
+    "litre": "升",
+    "metric_ton": "吨"
   },
   "receivables": {
     "remindersTitle": "待发送的提醒",
@@ -543,5 +547,69 @@
     "valid": "已核实：记录与锚定哈希一致。",
     "invalid": "与锚定哈希不一致，请勿信任此记录。",
     "stepUpSummary": "共支付 {{net}}，清偿 {{gross}} 债务"
+  },
+  "market": {
+    "alertsTitle": "价格预警",
+    "noAlerts": "今天没有明显的价格变动。",
+    "rose": "{{commodity}}上涨",
+    "dropped": "{{commodity}}下跌",
+    "riseAdvice": "本周只买需要的量",
+    "dropAdvice": "适合备货的时机",
+    "published": "{{source}}，发布于 {{date}}",
+    "source": {
+      "tcb": "TCB 达卡",
+      "agripricebd": "AgriPriceBD",
+      "worldbank_pinksheet": "世界银行粉色单",
+      "vendor": "供应商报价",
+      "manual": "您手动录入"
+    },
+    "watchTitle": "关注的价格",
+    "noWatch": "尚未关注任何商品。有采购记录后会自动出现。",
+    "commodity": "商品",
+    "today": "最新",
+    "median": "4 周中位数",
+    "change": "变化",
+    "vendorsTitle": "订单的最佳供应商",
+    "quantity": "数量",
+    "rank": "给供应商排名",
+    "noQuotes": "该商品没有供应商报价记录。",
+    "leadTime": "{{days}}送达",
+    "onTime": "准时率 {{rate}}",
+    "negotiateTitle": "销售谈判",
+    "negotiateHelp": "输入买方出价。Hishab 会算出您的底价，并给出每一步都有数据支撑的谈判脚本。",
+    "offer": "买方单价出价 (৳)",
+    "paymentDays": "买方付款期",
+    "makePlan": "生成我的方案",
+    "walkAway": "低于此价放弃",
+    "target": "目标价",
+    "belowWalkAway": "目标价低于您的底价，请不要接受这笔交易。",
+    "change_vs_median": "相对 4 周中位数的变化",
+    "landed_cost": "到店成本",
+    "unit_price": "价格",
+    "delivery_per_unit": "运费",
+    "delay_cost": "等待成本",
+    "reliability_penalty": "可靠性风险"
+  },
+  "commodity": {
+    "onion": "洋葱",
+    "lentil_masur": "红扁豆",
+    "rice_coarse": "粗米",
+    "soybean_oil": "大豆油",
+    "sugar": "白糖"
+  },
+  "negotiation": {
+    "step": {
+      "open_high": "先报高价，并要求一周内付款。",
+      "trade_term": "如果对方要更长账期，就提高价格，覆盖这段赊账的成本。",
+      "discount_for_speed": "对快速付款给一点折扣：这比借钱便宜。",
+      "walk_away": "不要低于底价：算上运费和赊账成本，低于底价就会亏损。"
+    },
+    "walk_away": "底价",
+    "target": "目标价",
+    "price": "价格",
+    "credit_cost": "每单位赊账成本",
+    "discount": "折扣",
+    "monthly_cost": "每月成本",
+    "loan_monthly_cost": "您的贷款每月成本"
   }
 }

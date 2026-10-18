@@ -6,7 +6,8 @@ import { authRoutes } from "./auth";
 import { cashRoutes } from "./cash";
 import { copilotRoutes } from "./copilot";
 import { financingRoutes } from "./financing";
+import { marketRoutes } from "./market";
 import { meshRoutes } from "./mesh";
 import { receivablesRoutes } from "./receivables";
 
-export const ROUTES: MockRoute[] = [...authRoutes, ...cashRoutes, ...copilotRoutes, ...actionRoutes, ...receivablesRoutes, ...financingRoutes, ...analysisRoutes, ...meshRoutes];
+export const ROUTES: MockRoute[] = [...authRoutes, ...cashRoutes, ...copilotRoutes, ...actionRoutes, ...receivablesRoutes, ...financingRoutes, ...analysisRoutes, ...meshRoutes, ...marketRoutes];

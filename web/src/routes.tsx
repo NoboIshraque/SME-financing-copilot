@@ -7,6 +7,7 @@ import { AppShell } from "./components/AppShell";
 import { NotFound } from "./components/NotFound";
 import { Placeholder } from "./components/Placeholder";
 import { SCREENS, type Screen } from "./navigation";
+import { MarketScreen } from "./screens/market/MarketScreen";
 import { MeshScreen } from "./screens/mesh/MeshScreen";
 import { AnalysisScreen } from "./screens/analysis/AnalysisScreen";
 import { CashScreen } from "./screens/cash/CashScreen";
@@ -22,7 +23,7 @@ const SCREEN_ELEMENTS: Record<Screen, ReactNode> = {
   financing: <FinancingScreen />,
   analysis: <AnalysisScreen />,
   mesh: <MeshScreen />,
-  market: <Placeholder screen="market" />,
+  market: <MarketScreen />,
   messages: <Placeholder screen="messages" />,
   reports: <Placeholder screen="reports" />,
   trust: <Placeholder screen="trust" />,
