@@ -21,7 +21,8 @@
     "contracts": "uv --directory backend run python -m app.contracts.export && npm --prefix web run gen:contracts",
     "synthetic": "uv --directory backend run python ../data/synthetic/generate.py",
     "eval": "uv --directory backend run python -m eval.run",
-    "evidence": "uv --directory backend run python -m eval.evidence"
+    "evidence": "uv --directory backend run python -m eval.evidence",
+    "anonymise": "uv --directory backend run python -m app.privacy.shopfiles"
   },
   "devDependencies": {
     "concurrently": "^9.2.5"

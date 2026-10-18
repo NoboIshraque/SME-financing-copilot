@@ -30,5 +30,6 @@ Mobile). Done something? Tick it in your head and comment "done: <item>" on the 
 
 - [ ] Accept the GitHub invite, install **GitHub Mobile**, *Watch → Custom → Issues*.
 - [ ] **10:00–14:00 shops (WP-20):** consent → statement export → baki-khata photos → 5-minute interview. Raw files only in the private Drive folder.
+- [ ] **After each shop, anonymise (10 min):** type the baki photos into a sheet, put `known_names.txt` (owner/shop/staff names) in the shop's raw folder, then in `C:\hishab\repo` (branch `wp-20-data`): `uv --directory backend run python -m app.privacy.shopfiles "G:\My Drive\hishab-raw\shop01" --shop shop01-grocery` (change the path to that shop's raw folder; next shop: `shop02-pharmacy` etc.). Check `data\real_anonymised\shop01-grocery\` by eye, then commit and push. Full steps: `docs/packages/WP-20.md` → "Anonymise".
 - [ ] **Afternoon: Kaggle notebooks 01, 03, 04** (table in `docs/team/LABIB.md`, now on `main`). Download AgriPriceBD first: https://data.mendeley.com/datasets/bkmxnrn3hn
 - [ ] PC-4 hourly jobs (LABIB.md "PC-4 always-on jobs") if not running yet.
