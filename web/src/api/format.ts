@@ -7,6 +7,13 @@ export function toBanglaDigits(text: string): string {
   return text.replace(/[0-9]/g, (d) => BANGLA_DIGITS[Number(d)] ?? d);
 }
 
+/** Bangla (০-৯) and full-width (０-９, from Chinese IMEs) digits to ASCII, for codes users type. */
+export function toAsciiDigits(text: string): string {
+  return text
+    .replace(/[০-৯]/g, (d) => String(d.charCodeAt(0) - 0x09e6))
+    .replace(/[０-９]/g, (d) => String(d.charCodeAt(0) - 0xff10));
+}
+
 /** Group an integer string the South Asian way (12,34,567) or the Western way (1,234,567). */
 export function groupDigits(integer: string, style: "south_asian" | "western"): string {
   if (integer.length <= 3) return integer;
