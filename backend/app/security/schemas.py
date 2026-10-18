@@ -6,6 +6,7 @@ LoginResponse, DemoAccount), which WP-14's mock API serves until this router is 
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -59,3 +60,44 @@ class DemoAccountView(BaseModel):
 class TotpEnrolment(BaseModel):
     secret: str
     otpauth_uri: str
+
+
+class NewMemberBody(_Body):
+    email: str = Field(max_length=254)
+    display_name: str = Field(min_length=1, max_length=128)
+    role: Role
+    password: str = Field(max_length=1024)
+
+
+class MemberView(BaseModel):
+    user_id: str
+    email: str
+    role: Role
+    display_name: str
+    active: bool
+    totp_enrolled: bool
+    expires_at: datetime | None
+    scopes: list[str]
+
+
+class LenderGrantBody(_Body):
+    lender_email: str = Field(max_length=254)
+    lender_label: str = Field(min_length=1, max_length=80)
+    purpose: str = Field(min_length=1, max_length=200)
+    scopes: list[str] = Field(min_length=1, max_length=8)
+    days: int = Field(ge=1, le=365)
+    consent: bool
+
+
+class LenderGrantView(BaseModel):
+    id: str
+    lender_email: str
+    lender_label: str
+    purpose: str
+    scopes: list[str]
+    consented_by: str
+    consented_at: datetime
+    expires_at: datetime
+    revoked_at: datetime | None
+    initial_password: str | None = Field(
+        default=None, description="Shown once, when the grant is created")

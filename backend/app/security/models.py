@@ -94,3 +94,20 @@ class LoginFailureRow(Base):
     failures: Mapped[int] = mapped_column(Integer, default=0)
     window_started_at: Mapped[datetime] = mapped_column(UTCDateTime)
     locked_until: Mapped[datetime | None] = mapped_column(UTCDateTime, default=None)
+
+
+class LenderGrantRow(Base):
+    """The owner's consent for one lender to see some scopes until a date (milestone 2)."""
+
+    __tablename__ = "security_lender_grants"
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    user_id: Mapped[str] = mapped_column(String(40), index=True)  # the lender_viewer account
+    lender_label: Mapped[str] = mapped_column(String(80))
+    purpose: Mapped[str] = mapped_column(String(200))
+    scopes: Mapped[str] = mapped_column(Text)  # JSON list
+    consented_by: Mapped[str] = mapped_column(String(40))
+    consented_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    revoked_at: Mapped[datetime | None] = mapped_column(UTCDateTime, default=None)

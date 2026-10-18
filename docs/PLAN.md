@@ -211,7 +211,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-08 | in progress (5/8) | wp-08-mesh | 83 | engine, consent, attestations, anchor done; API waits for WP-01/11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |
-| WP-11 | in progress (1/7) | wp-11-security | 81 | auth: argon2id, TOTP step-up (replay-proof), HttpOnly SameSite=Strict sessions, lockout, demo accounts (demo mode only) |
+| WP-11 | in progress (2/7) | wp-11-security | 169 | auth (argon2id, replay-proof TOTP, strict cookies, lockout, demo-only demo accounts); roles + consented, expiring lender access |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
 | WP-14 | not started | — | 0 | |

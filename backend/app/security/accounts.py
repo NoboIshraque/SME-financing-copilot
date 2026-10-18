@@ -2,7 +2,7 @@
 
     accounts = Accounts(db, settings)
     result = accounts.sign_in(email, password, now)     # ok | totp_required | invalid | locked
-    result = accounts.complete_totp(user, code, now)    # second step when TOTP is enrolled
+    result = accounts.check_totp(user, code, now)       # second step, and every step-up
 
 Unknown emails, wrong passwords, disabled or expired accounts, and demo accounts outside demo
 mode all answer `invalid` after the same argon2 work, so responses do not reveal which accounts
@@ -139,7 +139,8 @@ class Accounts:
             self.db.flush()
         return SignIn("totp_required" if user.totp_enrolled else "ok", user=user)
 
-    def complete_totp(self, user: UserRow, code: str, now: datetime) -> SignIn:
+    def check_totp(self, user: UserRow, code: str, now: datetime) -> SignIn:
+        """The TOTP step of sign-in, and every step-up: lockout-aware, replay-proof."""
         remaining = self.lockout.locked_for(user.email, now)
         if remaining is not None:
             return SignIn("locked", retry_after_minutes=minutes_left(remaining))
