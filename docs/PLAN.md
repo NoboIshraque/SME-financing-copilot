@@ -202,7 +202,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | --- | --- | --- | --- | --- |
 | WP-00 | done | main | 237 backend + 34 web + 4 e2e | contracts v1.0.0 (58 models), synthetic universe, CI |
 | WP-01 | not started | — | 0 | |
-| WP-02 | not started | — | 0 | |
+| WP-02 | in progress (1/5) | wp-02-ingest | 147 | parsers: bKash/Nagad/bank/ledger/registers, CSV+XLSX; all synthetic exports reconcile with truth |
 | WP-03 | not started | — | 0 | |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
