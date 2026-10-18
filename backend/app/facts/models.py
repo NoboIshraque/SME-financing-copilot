@@ -68,8 +68,20 @@ class FactRow(Base):
     entity_token: Mapped[str] = mapped_column(String(128), default="")
     # 0 for raw facts read straight from a source row (no formula).
     formula_version: Mapped[int] = mapped_column(Integer, default=0)
+    # The tenant's ledger revision this fact was last confirmed against (see LedgerRevisionRow).
+    # A computed fact older than the current revision may be stale and is recomputed.
+    revision: Mapped[int] = mapped_column(Integer, default=0)
     value: Mapped[str] = mapped_column(String(64))
     payload: Mapped[str] = mapped_column(Text)
+
+
+class LedgerRevisionRow(Base):
+    """Bumped whenever a tenant's ledger records or raw facts change."""
+
+    __tablename__ = "facts_revisions"
+
+    tenant_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, default=0)
 
 
 class FormulaRow(Base):
