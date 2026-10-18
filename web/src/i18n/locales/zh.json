@@ -4,7 +4,8 @@
     "tagline": "您店铺的财务副驾驶"
   },
   "banner": {
-    "synthetic": "演示数据：此处显示的所有内容均为合成数据，并非真实企业。"
+    "synthetic": "演示数据：此处显示的所有内容均为合成数据，并非真实企业。",
+    "mock": "离线模拟：本页部分结果来自内置的模拟接口，而非真实计算引擎。"
   },
   "language": {
     "label": "语言",
@@ -13,6 +14,9 @@
     "zh": "中文"
   },
   "nav": {
+    "main": "主导航",
+    "quick": "快捷导航",
+    "more": "更多",
     "today": "今日",
     "cash": "现金",
     "receivables": "应收账款",
@@ -28,6 +32,67 @@
   "common": {
     "loading": "加载中…",
     "comingSoon": "此页面正在建设中。",
-    "error": "出错了，请重试。"
+    "error": "出错了，请重试。",
+    "retry": "重试",
+    "cancel": "取消",
+    "back": "返回",
+    "goHome": "返回主页",
+    "notFound": "页面不存在",
+    "notFoundHelp": "此地址没有对应的页面。"
+  },
+  "shell": {
+    "skipToContent": "跳到主要内容",
+    "darkMode": "深色模式",
+    "signOut": "退出登录",
+    "signedInAs": "当前用户：{{name}}",
+    "notForRoleTitle": "您的角色无法使用此页面",
+    "notForRole": "您的角色（{{role}}）不使用此页面。如需访问，请联系店主。"
+  },
+  "role": {
+    "owner": "店主",
+    "accountant": "会计",
+    "staff": "员工",
+    "lender_viewer": "贷款方（只读）",
+    "compliance": "合规"
+  },
+  "auth": {
+    "title": "登录",
+    "subtitle": "请输入您店铺的邮箱和密码。",
+    "email": "邮箱",
+    "password": "密码",
+    "signIn": "登录",
+    "signingIn": "正在登录…",
+    "totpTitle": "输入验证码",
+    "totpHelp": "打开身份验证器应用，输入 Hishab 的 6 位验证码。",
+    "code": "6 位验证码",
+    "verify": "验证",
+    "verifying": "正在验证…",
+    "codeFormat": "请输入 6 位数字验证码。",
+    "demoTitle": "体验演示",
+    "demoHelp": "仅含合成的模拟企业，一键即可登录。",
+    "demoAs": "以{{role}}身份登录",
+    "demoCode": "演示验证码：{{code}}"
+  },
+  "stepUp": {
+    "title": "确认是您本人",
+    "help": "此操作涉及资金或承诺。请输入身份验证器中的 6 位验证码以批准。",
+    "confirm": "批准",
+    "confirming": "正在批准…"
+  },
+  "error": {
+    "network": "无法连接服务器，请检查网络后重试。",
+    "server": "服务器出现问题，请重试。",
+    "not_found": "未找到。",
+    "not_authenticated": "请重新登录。",
+    "invalid_credentials": "邮箱或密码不正确。",
+    "account_locked": "尝试次数过多，请 {{retry_after_minutes}} 分钟后再试。",
+    "invalid_code": "验证码不正确，请查看应用后重试。",
+    "step_up_failed": "验证码未通过，因此没有批准任何操作。",
+    "forbidden": "您的角色无权执行此操作。",
+    "invalid_period": "时间段无效。",
+    "fact_not_found": "该数字尚无记录。",
+    "unknown_metric": "未知指标。",
+    "not_computable": "无法根据现有记录计算该数字。",
+    "figure_not_found": "未找到该数字的说明。"
   }
 }

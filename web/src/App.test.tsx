@@ -1,37 +1,13 @@
-import { QueryClient } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { screen, within } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
-import { App } from "./App";
-import { SCREENS } from "./components/AppShell";
-import i18n from "./i18n";
-
-function stubHealth(banner: "synthetic" | null) {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ status: "ok", contracts_version: "1.0.0", data_mode_banner: banner }), {
-        status: 200,
-      }),
-    ),
-  );
-}
-
-function renderAt(path: string) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<App initialPath={path} queryClient={queryClient} />);
-}
-
-afterEach(async () => {
-  await i18n.changeLanguage("en");
-});
+import { SCREENS } from "./navigation";
+import { LENDER, renderApp } from "./test/render";
 
 describe("App shell", () => {
-  it("shows a navigation link for every screen", () => {
-    stubHealth(null);
-    renderAt("/");
-    const nav = screen.getByRole("navigation", { name: "Main" });
+  it("shows the owner a navigation link for every screen", async () => {
+    renderApp("/");
+    const nav = await screen.findByRole("navigation", { name: "Main" });
     expect(within(nav).getAllByRole("link")).toHaveLength(SCREENS.length);
   });
 
@@ -40,30 +16,76 @@ describe("App shell", () => {
     ["/cash", "Cash"],
     ["/mesh", "Mesh"],
     ["/trust", "Trust & audit"],
-  ])("route %s renders the %s screen", (path, heading) => {
-    stubHealth(null);
-    renderAt(path);
-    expect(screen.getByRole("heading", { level: 2, name: heading })).toBeInTheDocument();
+  ])("route %s renders the %s screen and names the browser tab", async (path, heading) => {
+    renderApp(path);
+    expect(await screen.findByRole("heading", { level: 2, name: heading })).toBeInTheDocument();
+    expect(document.title).toBe(`${heading} · Hishab`);
+  });
+
+  it("sends a signed-out visitor to sign in", async () => {
+    renderApp("/receivables", { signedInAs: null });
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeInTheDocument();
   });
 
   it("shows the synthetic-data banner when the server runs on synthetic data", async () => {
-    stubHealth("synthetic");
-    renderAt("/");
+    renderApp("/");
     expect(await screen.findByRole("status")).toHaveTextContent(/synthetic/i);
   });
 
   it("shows no banner on real data", async () => {
-    stubHealth(null);
-    renderAt("/");
+    renderApp("/", {
+      overrides: { "GET /api/health": { body: { status: "ok", contracts_version: "1.1.0", data_mode_banner: null } } },
+    });
     await screen.findByRole("heading", { level: 2 });
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
-  it("switches the whole UI to Bangla", async () => {
-    stubHealth(null);
-    renderAt("/cash");
-    await userEvent.selectOptions(screen.getByLabelText("Language"), "bn");
+  it("switches the whole UI to Bangla and remembers the choice", async () => {
+    const { user } = renderApp("/cash");
+    await user.selectOptions(await screen.findByLabelText("Language"), "bn");
     expect(await screen.findByRole("heading", { level: 2, name: "নগদ" })).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("bn");
+    expect(window.localStorage.getItem("hishab.language")).toBe("bn");
+  });
+
+  it("tells a lender viewer plainly that a screen is outside their access", async () => {
+    renderApp("/cash", { signedInAs: LENDER });
+    expect(await screen.findByRole("heading", { level: 2, name: "Not available for your role" })).toBeInTheDocument();
+    expect(screen.getByText(/Lender \(view only\)/, { selector: "p" })).toBeInTheDocument();
+  });
+
+  it("signs out, drops cached business data and returns to the sign-in screen", async () => {
+    const { user, db, queryClient } = renderApp("/cash");
+    await screen.findByRole("heading", { level: 2, name: "Cash" });
+    queryClient.setQueryData(["cash", "forecast"], { opening_balance: { amount: "427842.00" } });
+
+    await user.click(screen.getByRole("button", { name: "Sign out" }));
+
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeInTheDocument();
+    expect(db.session).toBeNull();
+    expect(queryClient.getQueryData(["cash", "forecast"])).toBeUndefined();
+  });
+
+  it("returns to sign-in when any API call says the session has ended", async () => {
+    renderApp("/", {
+      overrides: { "GET /api/health": { status: 401, body: { code: "not_authenticated", message_key: "error.not_authenticated" } } },
+    });
+    expect(await screen.findByRole("heading", { level: 2, name: "Sign in" })).toBeInTheDocument();
+  });
+
+  it("opens the full menu from the phone bar's More button", async () => {
+    const { user } = renderApp("/");
+    const more = await screen.findByRole("button", { name: "More" });
+    expect(more).toHaveAttribute("aria-expanded", "false");
+    await user.click(more);
+    expect(more).toHaveAttribute("aria-expanded", "true");
+    expect(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Today" })).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(more).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("shows a not-found page for unknown addresses", async () => {
+    renderApp("/no-such-screen");
+    expect(await screen.findByRole("heading", { level: 2, name: "Page not found" })).toBeInTheDocument();
   });
 });

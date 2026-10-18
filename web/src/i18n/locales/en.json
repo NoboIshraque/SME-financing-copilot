@@ -4,7 +4,8 @@
     "tagline": "Your shop's finance copilot"
   },
   "banner": {
-    "synthetic": "Demo data: everything shown is synthetic, not a real business."
+    "synthetic": "Demo data: everything shown is synthetic, not a real business.",
+    "mock": "Offline mock: some answers on this page come from the built-in mock API, not the real engines."
   },
   "language": {
     "label": "Language",
@@ -13,6 +14,9 @@
     "zh": "中文"
   },
   "nav": {
+    "main": "Main",
+    "quick": "Shortcuts",
+    "more": "More",
     "today": "Today",
     "cash": "Cash",
     "receivables": "Receivables",
@@ -28,6 +32,67 @@
   "common": {
     "loading": "Loading…",
     "comingSoon": "This screen is being built.",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "back": "Back",
+    "goHome": "Go to your home screen",
+    "notFound": "Page not found",
+    "notFoundHelp": "This address doesn't match any screen."
+  },
+  "shell": {
+    "skipToContent": "Skip to content",
+    "darkMode": "Dark mode",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as {{name}}",
+    "notForRoleTitle": "Not available for your role",
+    "notForRole": "Your role ({{role}}) doesn't use this screen. Ask the owner if you need access."
+  },
+  "role": {
+    "owner": "Owner",
+    "accountant": "Accountant",
+    "staff": "Staff",
+    "lender_viewer": "Lender (view only)",
+    "compliance": "Compliance"
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Use the email and password for your shop.",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "totpTitle": "Enter your code",
+    "totpHelp": "Open your authenticator app and type the 6-digit code for Hishab.",
+    "code": "6-digit code",
+    "verify": "Verify",
+    "verifying": "Checking…",
+    "codeFormat": "Enter the 6 digits of the code.",
+    "demoTitle": "Try the demo",
+    "demoHelp": "Synthetic businesses only. One tap signs you in.",
+    "demoAs": "Sign in as {{role}}",
+    "demoCode": "Demo code: {{code}}"
+  },
+  "stepUp": {
+    "title": "Confirm it's you",
+    "help": "This action moves money or makes a commitment. Enter the 6-digit code from your authenticator app to approve it.",
+    "confirm": "Approve",
+    "confirming": "Approving…"
+  },
+  "error": {
+    "network": "Can't reach the server. Check your connection and try again.",
+    "server": "The server had a problem. Please try again.",
+    "not_found": "Not found.",
+    "not_authenticated": "Please sign in again.",
+    "invalid_credentials": "That email and password don't match.",
+    "account_locked": "Too many attempts. Try again in {{retry_after_minutes}} minutes.",
+    "invalid_code": "That code is not right. Check the app and try again.",
+    "step_up_failed": "The code was not accepted, so nothing was approved.",
+    "forbidden": "Your role can't do this.",
+    "invalid_period": "The period is not valid.",
+    "fact_not_found": "This figure isn't on record yet.",
+    "unknown_metric": "Unknown figure.",
+    "not_computable": "This figure can't be computed from the data on record.",
+    "figure_not_found": "This figure's explanation was not found."
   }
 }

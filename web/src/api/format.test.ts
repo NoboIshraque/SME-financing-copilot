@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatTaka, groupDigits, toBanglaDigits } from "./format";
+import { formatTaka, groupDigits, toAsciiDigits, toBanglaDigits } from "./format";
 
 describe("formatTaka", () => {
   it.each([
@@ -35,5 +35,11 @@ describe("digit helpers", () => {
 
   it("converts every ASCII digit to Bangla", () => {
     expect(toBanglaDigits("0123456789")).toBe("০১২৩৪৫৬৭৮৯");
+  });
+
+  it("reads Bangla and full-width digits back as ASCII, leaving other text alone", () => {
+    expect(toAsciiDigits("০১২৩৪৫৬৭৮৯")).toBe("0123456789");
+    expect(toAsciiDigits("０１２３４５６７８９")).toBe("0123456789");
+    expect(toAsciiDigits("কোড ২৪৬-810")).toBe("কোড 246-810");
   });
 });
