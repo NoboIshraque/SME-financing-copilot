@@ -202,7 +202,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | --- | --- | --- | --- | --- |
 | WP-00 | done | merged + PR #15 | 248 backend + 34 web + 4 e2e | contracts v1.1.0 (58 models), synthetic universe, CI, Mission control (issue #8); app-wide hooks (`app/<area>/app_hooks.py`) + `api_routes()` for WP-11 (PR #15) |
 | WP-01 | done | merged | 143 | fact store, registry, provenance, API; fixes merged 18 Oct: ledger revisions (no stale figures), caller-scoped + masked explain/facts, race-safe inserts, rows endpoint, record_computed, profile facts + snapshot |
-| WP-02 | in progress (2/5) | wp-02-ingest | — | A1: parsers, normaliser pushed (18 Oct); OCR drafts next |
+| WP-02 | done | merged | 294 | parsers (bKash/Nagad/bank/ledger/registers, CSV+XLSX), Bangla/Banglish normaliser + Bengali calendar, dedupe, party clustering, OCR drafts (Tesseract ben+eng), preview/commit with keyed digest, API |
 | WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
