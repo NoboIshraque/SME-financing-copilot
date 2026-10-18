@@ -10,7 +10,7 @@ import { api } from "../../api/endpoints";
 import type { MeshGraph } from "../../api/types";
 import { StepUpDialog } from "../../auth/StepUpDialog";
 import { useRequiredSession } from "../../auth/session";
-import { EmptyState, ErrorState, QueryView } from "../../components/States";
+import { ErrorState, QueryView } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
 import { useFormat } from "../../i18n/useFormat";
 
@@ -187,7 +187,7 @@ export function MeshScreen() {
                   <li key={o.id}>
                     {t("mesh.owes", { debtor: data.labels[o.debtor_tenant] ?? o.debtor_tenant, creditor: data.labels[o.creditor_tenant] ?? o.creditor_tenant })}{" "}
                     <span className="font-semibold tabular-nums">{format.money(o.amount)}</span> · {t("mesh.due", { date: format.date(o.due_date) })}
-                    {o.attested && <span className="ml-1 text-xs text-emerald-700 dark:text-emerald-300">({t("mesh.attested")})</span>}
+                    {o.attested && <span className="text-xs text-emerald-700 dark:text-emerald-300"> ({t("mesh.attested")})</span>}
                   </li>
                 ))}
               </ul>
