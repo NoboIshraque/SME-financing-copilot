@@ -1,7 +1,7 @@
 // Response envelopes the web expects from each router, built from the shared contracts.
 // They are not contracts themselves: each owner WP is named on its type. The mock API in
 // src/mocks serves exactly these shapes, so a router that matches them drops in unchanged.
-import type { DataMode, Principal, Role } from "./contracts";
+import type { DataMode, Figure, ForecastBand, Principal, Role } from "./contracts";
 
 /** GET /api/health (WP-00). */
 export interface Health {
@@ -38,4 +38,13 @@ export interface DemoAccount {
   business_name: string;
   /** Current demo TOTP code, shown so judges can sign in without an authenticator app. */
   totp_hint?: string | null;
+}
+
+/** GET /api/cash/forecast (WP-04): the 13-week band and its headline figures, each explainable.
+ *  Figure label_keys the screens look for: cash.closing_balance (cash now), cash.buffer_target,
+ *  cash.runway_days (days until the likely balance falls below the buffer; equals the horizon
+ *  when it never does), cash.lowest_likely_balance. */
+export interface CashForecast {
+  band: ForecastBand;
+  figures: Figure[];
 }
