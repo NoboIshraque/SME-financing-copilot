@@ -8,7 +8,6 @@ Mobile). Done something? Tick it in your head and comment "done: <item>" on the 
 ## Nobo (@NoboIshraque) — PC-1 and PC-2
 
 - [ ] **Now, 2 min: merge the orchestrator's PRs** (this session can't merge; one tap each in GitHub Mobile, all green): **#10** CI-minutes fix first, then **#12** (Labib's anonymiser, needed by ~14:00), then **#11** (WP-17 injection fix).
-- [ ] **Now, 1 min:** your **account** settings (profile picture → Settings → Billing, not the repo settings) → usage for **Actions**: note the minutes used / included this month and tell the orchestrator.
 - [ ] **Now, 5 min:** repo → Settings → Collaborators → *Add people* → `amdad1203` and `lab-af` (Write access).
 - [ ] **Now:** start **B2 on WP-11** (`C:\hishab\repo-b2`, branch `wp-11-security`) with the RUNBOOK §4 start prompt (B1 is on WP-14, A1 on WP-02: both running).
 - [ ] **Keys, 10 min (never in chat or in git):** repo → Settings → Secrets and variables → Actions → *New repository secret*: `GEMINI_API_KEY`, `GROQ_API_KEY`. Do **not** add the MetaMask key to GitHub; it goes only into the server's `.env` (Amdad's step) .
