@@ -39,3 +39,5 @@ requirements-audit.txt
 pytest-report.xml
 vitest-report.json
 docs/submission/evidence/vitest-report.json
+ml/.venv/
+ml/notebooks/hishab_ml/

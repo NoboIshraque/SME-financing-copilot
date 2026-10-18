@@ -1,0 +1,37 @@
+{
+  "data": [
+    "synthetic"
+  ],
+  "data_mode": "synthetic",
+  "train_rows": 2488,
+  "test_rows": 709,
+  "split": "time: test = issued on/after 2026-05-01",
+  "mae_days": {
+    "customer_mean_baseline": 2.83,
+    "lightgbm": 2.922
+  },
+  "late_over_7_days": {
+    "share_in_test": 0.1735,
+    "auc_lightgbm": 0.9276,
+    "auc_history_share": 0.9322
+  },
+  "feature_importance": {
+    "amount_ratio": 997,
+    "hist_mean_late": 848,
+    "days_due_to_eid": 848,
+    "hist_std_late": 826,
+    "log_amount": 757,
+    "hist_n": 481,
+    "due_weekday": 287,
+    "hist_share_late7": 242,
+    "hist_median_late": 236,
+    "terms_days": 48,
+    "sector": 30
+  },
+  "seed": 20261020,
+  "decision": {
+    "use": "customer_history_baseline",
+    "mae_improvement": -0.0325,
+    "rule": "use LightGBM only if it cuts MAE by >= 5% versus the customer-history baseline"
+  }
+}

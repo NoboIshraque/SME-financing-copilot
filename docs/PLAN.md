@@ -61,7 +61,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | WP-00 | Foundation: scaffold, contracts, CI, seed data, autosave | Orchestrator | 0 | 40 |
 | WP-01 | Typed Fact Ledger + provenance (N5, N13 backend) | A1 | 1 | 60 |
 | WP-02 | Ingestion: bKash/Nagad/bank CSV, Excel, OCR, Bangla/Banglish (P4) | A1 | 1 | 80 |
-| WP-03 | Privacy vault, detectors, anonymiser, amount scaling (N6, N18, P11) | B2 | 1 | 70 |
+| WP-03 | Privacy vault, detectors, anonymiser, amount scaling (N6, N18, P11) | Orchestrator | 1 | 70 |
 | WP-04 | Cash engine: forecast, Monte Carlo, gaps, alerts, smoothing (Q1, Q3) | A1 | 1–2 | 120 |
 | WP-05 | Receivables & collections: aging, risk, limits, ladder, disputes (Q2) | A1 | 2 | 60 |
 | WP-06 | Financing: catalogue, effective APR, eligibility, ranking, lender check (P1, N20, P14) | Orchestrator | 2 | 90 |
@@ -201,9 +201,9 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP | Status | Branch | Tests | Notes |
 | --- | --- | --- | --- | --- |
 | WP-00 | done | main | 237 backend + 34 web + 4 e2e | contracts v1.0.0 (58 models), synthetic universe, CI |
-| WP-01 | done (4/4), review fixes in | wp-01-facts | 143 | store, registry, provenance, /facts + /explain (+rows); ledger revisions, caller scoping, masking; awaiting full review |
+| WP-01 | done (merged 18 Oct 05:55); review fixes on wp-01-facts | merged | 143 | fact store, registry, provenance, API; fixes: ledger revisions, caller scoping, masking, races, rows endpoint (awaiting full review) |
 | WP-02 | not started | — | 0 | |
-| WP-03 | not started | — | 0 | |
+| WP-03 | done (4/4) | merged | 80 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; built by the orchestrator |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
 | WP-06 | in progress (7/8) | wp-06-financing | 123 | engine + real BD catalogue done; API waits for WP-01 |
@@ -213,11 +213,11 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-10 | not started | — | 0 | |
 | WP-11 | not started | — | 0 | |
 | WP-12 | not started | — | 0 | |
-| WP-13 | not started | — | 0 | |
+| WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
 | WP-14 | not started | — | 0 | |
 | WP-15 | not started | — | 0 | |
 | WP-16 | not started | — | 0 | needs P3 approval |
-| WP-17 | not started | — | 0 | |
+| WP-17 | in progress (2/4) | merged | 6 | notebooks 01-04 + corpus merged; 02 done; CPU baseline classifier run; Labib runs 01/03/04 on Kaggle |
 | WP-18 | in progress (4/6) | wp-18-infra | 14 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; China checks + mirror pending |
 | WP-19 | not started | — | — | |
 | WP-20 | not started | — | — | needs P7 approval |
