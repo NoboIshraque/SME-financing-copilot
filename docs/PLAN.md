@@ -204,7 +204,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-01 | done | merged | 101 | fact store, registry, provenance, API (merged 18 Oct 05:55) |
 | WP-02 | in progress (2/5) | wp-02-ingest | — | A1: parsers, normaliser pushed (18 Oct); OCR drafts next |
 | WP-03 | done (5/5) | merged + PR #12 | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20 (PR #12); built by the orchestrator |
-| WP-04 | not started | — | 0 | |
+| WP-04 | in progress (1/8) | wp-04-cash | 27 | baseline forecaster (sales seasonality incl. festivals, per-customer delays, obligations, bills) |
 | WP-05 | not started | — | 0 | |
 | WP-06 | in progress (7/8) | merged | 123 | engine + real BD catalogue done; API (milestone 8) waits for WP-11 principal + step-up |
 | WP-07 | not started | — | 0 | |
