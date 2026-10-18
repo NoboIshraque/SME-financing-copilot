@@ -1,9 +1,22 @@
 @import "tailwindcss";
 
+/* Dark mode follows the `dark` class on <html>: the saved choice, else the OS setting (theme.ts). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --font-sans: "Inter Variable", "Noto Sans Bengali", system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+  /* System CJK fonts come before the self-hosted Noto Sans SC, so most devices never download it. */
+  --font-sans: "Inter Variable", "Noto Sans Bengali", "PingFang SC", "Microsoft YaHei", "Noto Sans SC",
+    system-ui, sans-serif;
 }
 
 :root {
   color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
 }
