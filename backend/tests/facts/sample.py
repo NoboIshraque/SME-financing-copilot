@@ -5,12 +5,12 @@ Every expected value below was computed by hand from these rows; see the comment
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from app.contracts import Granularity, Period, TxCategory
+from app.contracts import Granularity, Period, Principal, Role, TxCategory
 from app.facts.store import FactStore
-from tests.facts.helpers import SEP, bill, invoice, raw_fact, txn
+from tests.facts.helpers import SEP, T, bill, invoice, raw_fact, txn
 
 INITIAL_DAY = Period(start=date(2026, 8, 1), end=date(2026, 8, 1), granularity=Granularity.day)
 
@@ -34,12 +34,17 @@ BILLS = (
     bill(2, date(2026, 7, 1), 800, paid=800, paid_date=date(2026, 7, 30)),        # settled
 )
 INITIAL = raw_fact("initial_balance", "10000.00", period=INITIAL_DAY, refs=("profile.json#L1",))
+OWNER = Principal(user_id="u-owner", tenant_id=T, role=Role.owner)
+LENDER = Principal(user_id="u-lender", tenant_id=T, role=Role.lender_viewer,
+                   expires_at=datetime(2026, 12, 31, tzinfo=UTC))
+STRANGER = Principal(user_id="u-other", tenant_id="tenant_b", role=Role.owner)
 
 EXPECTED_SEP = {
     "cash_in": Decimal("1500.00"),             # 1000 + 500
     "cash_out": Decimal("650.00"),             # 300 + 200 + 100 + 50
     "cash_sales": Decimal("1000.00"),
     "credit_sales": Decimal("2000.00"),        # INV-1
+    "credit_purchases": Decimal("1200.00"),    # BIL-1
     "purchases": Decimal("1500.00"),           # 300 cash + 1200 billed
     "operating_expenses": Decimal("300.00"),   # rent 200 + salary 100
     "receivables": Decimal("2500.00"),         # 1500 (INV-1) + 1000 (INV-2 paid in Oct)
@@ -50,8 +55,8 @@ EXPECTED_SEP = {
     "closing_balance": Decimal("11250.00"),    # 10400 + 1500 - 650
     "gross_profit": Decimal("1500.00"),        # 3000 - 1500
     "gross_margin": Decimal("0.5000"),         # 1500 / 3000
-    "dso": Decimal("25.0"),                    # 2500 / 3000 * 30
-    "dpo": Decimal("24.0"),                    # 1200 / 1500 * 30
+    "dso": Decimal("37.5"),                    # 2500 / 2000 (credit sales) * 30
+    "dpo": Decimal("30.0"),                    # 1200 / 1200 (credit purchases) * 30
 }
 
 
