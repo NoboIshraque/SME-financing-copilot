@@ -2,10 +2,19 @@
 [extend]
 useDefault = true
 
-[allowlist]
+[[allowlists]]
 description = "Synthetic data and examples contain no real secrets"
 paths = [
   '''data/synthetic/universe/.*''',
   '''backend/\.env\.example''',
   '''docs/api/contracts\.json''',
 ]
+
+# i18n label keys (label_key="cash.forecast_p50") trip generic-api-key on entropy alone.
+# Only the matched text is allow-listed, and only a lowercase dotted key assigned to label_key:
+# a random-looking value assigned to label_key, or a real key elsewhere on the same line, is
+# still reported. (targetRules does not apply to the extended default rules in 8.28.)
+[[allowlists]]
+description = "i18n label keys are not secrets"
+regexTarget = "match"
+regexes = ['''label_key\s*=\s*["'][a-z][a-z0-9_]*(?:\.[a-z0-9_]+)+["']''']

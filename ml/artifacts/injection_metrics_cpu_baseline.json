@@ -1,0 +1,96 @@
+{
+  "model": "distilbert/distilbert-base-multilingual-cased",
+  "seed": 20261020,
+  "epochs": 4,
+  "threshold": 0.1021,
+  "public_rows_cap": 400,
+  "threshold_rule": "lowest score that keeps recall >= 0.95 on validation attacks (held-out training families); test scored once",
+  "validation_families": [
+    "fake_owner",
+    "loan_compare",
+    "mesh_question",
+    "override_rules"
+  ],
+  "validation": {
+    "n": 32,
+    "precision": 0.6667,
+    "recall": 1.0,
+    "f1": 0.8,
+    "auc": 0.8867
+  },
+  "hishab_unseen_families": {
+    "n": 48,
+    "precision": 0.5714,
+    "recall": 1.0,
+    "f1": 0.7273,
+    "auc": 0.6875
+  },
+  "by_language": {
+    "en": {
+      "n": 12,
+      "precision": 0.6,
+      "recall": 1.0,
+      "f1": 0.75,
+      "auc": 0.6944
+    },
+    "bn": {
+      "n": 12,
+      "precision": 0.5455,
+      "recall": 1.0,
+      "f1": 0.7059,
+      "auc": 0.7778
+    },
+    "bl": {
+      "n": 12,
+      "precision": 0.5455,
+      "recall": 1.0,
+      "f1": 0.7059,
+      "auc": 0.9444
+    },
+    "zh": {
+      "n": 12,
+      "precision": 0.6,
+      "recall": 1.0,
+      "f1": 0.75,
+      "auc": 0.6111
+    }
+  },
+  "by_family": {
+    "change_bank_details": 1.0,
+    "hard_negative_override": 0.375,
+    "report_request": 0.875,
+    "role_play_jailbreak": 1.0,
+    "skip_approval": 1.0,
+    "statement_rows": 1.0
+  },
+  "test_families": [
+    "change_bank_details",
+    "hard_negative_override",
+    "report_request",
+    "role_play_jailbreak",
+    "skip_approval",
+    "statement_rows"
+  ],
+  "public_english_test": {
+    "n": 516,
+    "precision": 0.8333,
+    "recall": 0.984,
+    "f1": 0.9024,
+    "auc": 0.9868
+  },
+  "run": {
+    "where": "orchestrator cloud sandbox, CPU only (2 cores), ~13 min",
+    "date": "2026-10-18",
+    "notebook": "ml/notebooks/03_injection_classifier.py (sections 1-3; ONNX export skipped)",
+    "env": {
+      "HISHAB_INJ_MODEL": "distilbert/distilbert-base-multilingual-cased",
+      "HISHAB_INJ_EPOCHS": "4",
+      "HISHAB_PUBLIC_CAP": "400"
+    },
+    "hishab_corpus_data_mode": {
+      "synthetic": 192
+    },
+    "best_checkpoint": "epoch 2 (lowest validation loss)"
+  },
+  "reading": "CPU baseline only. On unseen Hishab families the model separates attacks from benign text weakly (AUC 0.69): it reaches 100% recall only at a low threshold that also flags most statement rows and report requests. Not usable as the guard on its own; the WP-11 rules layer runs first, and the Kaggle GPU run (mDeBERTa, full public data) replaces this."
+}

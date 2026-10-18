@@ -200,27 +200,27 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 
 | WP | Status | Branch | Tests | Notes |
 | --- | --- | --- | --- | --- |
-| WP-00 | done | main | 237 backend + 34 web + 4 e2e | contracts v1.0.0 (58 models), synthetic universe, CI |
+| WP-00 | done | merged | 242 backend + 34 web + 4 e2e | contracts v1.1.0 (58 models), synthetic universe, CI, Mission control (issue #8) |
 | WP-01 | done | merged | 101 | fact store, registry, provenance, API (merged 18 Oct 05:55) |
 | WP-02 | done (5/5) | wp-02-ingest | 294 | parsers (bKash/Nagad/bank/ledger/registers), Bangla normaliser, OCR drafts, preview/commit, API; awaiting review |
-| WP-03 | done (4/4) | merged | 80 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; built by the orchestrator |
+| WP-03 | done (5/5) | merged + PR #12 | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20 (PR #12); built by the orchestrator |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
-| WP-06 | in progress (7/8) | wp-06-financing | 123 | engine + real BD catalogue done; API waits for WP-01 |
+| WP-06 | in progress (7/8) | merged | 123 | engine + real BD catalogue done; API (milestone 8) waits for WP-11 principal + step-up |
 | WP-07 | not started | — | 0 | |
-| WP-08 | in progress (5/8) | wp-08-mesh | 83 | engine, consent, attestations, anchor done; API waits for WP-01/11 |
+| WP-08 | in progress (5/8) | merged | 83 | engine, consent, attestations, anchor done; residual routing, lender events, API wait for WP-11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |
-| WP-11 | not started | — | 0 | |
+| WP-11 | not started | — | 0 | B2 (PC-2) |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
-| WP-14 | not started | — | 0 | |
+| WP-14 | in progress (0/11) | wp-14-web | — | B1 (PC-2) started 18 Oct ~11:00 |
 | WP-15 | not started | — | 0 | |
-| WP-16 | not started | — | 0 | needs P3 approval |
-| WP-17 | in progress (2/4) | merged | 6 | notebooks 01-04 + corpus merged; 02 done; CPU baseline classifier run; Labib runs 01/03/04 on Kaggle |
-| WP-18 | in progress (4/6) | wp-18-infra | 14 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; China checks + mirror pending |
+| WP-16 | not started | — | 0 | P3 approved |
+| WP-17 | in progress (2/4) | merged + PR #11 | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families (PR #11); Labib runs 01/03/04 on Kaggle |
+| WP-18 | in progress (4/6) | merged + PR #10 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only, autosave skips CI (PR #10); China checks + mirror pending |
 | WP-19 | not started | — | — | |
-| WP-20 | not started | — | — | needs P7 approval |
+| WP-20 | in progress | wp-20-data | — | P7 approved; Labib at shops 18 Oct 10:00–14:00; anonymiser ready (PR #12) |
 
 ## 9. Submission (the 6 official deliverables)
 

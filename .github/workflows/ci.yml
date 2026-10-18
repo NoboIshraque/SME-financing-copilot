@@ -1,8 +1,11 @@
 name: CI
 
+# Runs on main and on every PR (not on every branch push): autosave pushes every 5 minutes
+# from several sessions would otherwise burn the private repo's Actions minutes. Autosave
+# commits also carry [skip ci]. Need CI on a branch without a PR? Actions -> CI -> Run workflow.
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
