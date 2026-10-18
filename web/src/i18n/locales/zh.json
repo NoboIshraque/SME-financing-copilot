@@ -105,7 +105,11 @@
     "nothing_to_net": "目前没有可轧差的循环债务。",
     "not_a_participant": "您的企业不在本轮之中。",
     "not_anchored": "本轮尚未锚定。",
-    "invalid_quantity": "请输入数量，例如 500。"
+    "invalid_quantity": "请输入数量，例如 500。",
+    "not_approved": "请先批准消息再发送。",
+    "invalid_share": "请填写贷款方名称、选择可查看内容，期限最多 30 天。",
+    "passport_not_found": "没有该编号的护照。",
+    "no_evidence": "请先添加流水再生成护照。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -611,5 +615,157 @@
     "discount": "折扣",
     "monthly_cost": "每月成本",
     "loan_monthly_cost": "您的贷款每月成本"
+  },
+  "messages": {
+    "pendingTitle": "等待您批准",
+    "nothingPending": "没有等待批准的事项。",
+    "draftsTitle": "消息草稿",
+    "draftsHelp": "消息根据您的记录填写，批准后才会发出。",
+    "noDrafts": "目前没有草稿。",
+    "approve": "批准消息",
+    "send": "发送",
+    "copy": "复制消息",
+    "copied": "已复制，请粘贴到聊天应用中。",
+    "sent": "已发送",
+    "channel": {
+      "in_app": "应用内",
+      "email": "电子邮件",
+      "copy": "复制后自行发送"
+    },
+    "status": {
+      "draft": "草稿",
+      "approved": "已批准",
+      "sent": "已发送",
+      "rejected": "已拒绝"
+    },
+    "purpose": {
+      "pre_due_reminder": "到期前友好提醒",
+      "overdue_reminder": "逾期提醒",
+      "payment_plan_offer": "分期付款方案",
+      "supplier_term_extension": "请供应商延长账期",
+      "lender_update": "给贷款方的更新",
+      "netting_invitation": "轧差结算邀请",
+      "sale_memo": "销售备忘"
+    }
+  },
+  "reports": {
+    "passportTitle": "信任护照",
+    "passportHelp": "可提供给任何贷款方的自有可验证证据：流水、执照、交易方确认，以及 Hishab 的诚信记录。",
+    "noPassport": "还没有护照，请先添加流水。",
+    "version": "第 {{version}} 版",
+    "digest": "指纹 {{hash}}",
+    "notAnchored": "尚未锚定",
+    "evidence": {
+      "mobile_money_statement": "移动钱包流水",
+      "bank_statement": "银行流水",
+      "trade_licence": "营业执照",
+      "etin": "电子税号 (e-TIN)",
+      "bin_vat": "BIN / 增值税登记",
+      "utility_bill": "水电账单",
+      "lender_report": "贷款方报告"
+    },
+    "verified": "已与来源核对",
+    "selfDeclared": "自行申报",
+    "attestations": "交易方确认",
+    "attestationCounts": "{{confirmed}} 条确认，{{disputed}} 条争议",
+    "abstentionRate": "Hishab 说\"我不知道\"的频率",
+    "drillRate": "审计演练捕获率",
+    "openVerify": "打开公开验证页面",
+    "issue": "生成新版本",
+    "history_one": "{{count}} 个早期版本",
+    "history_other": "{{count}} 个早期版本",
+    "shareTitle": "与贷款方分享",
+    "shareHelp": "对方只能看到您勾选的内容，到期自动失效，每次查看都会记录。",
+    "lender": "贷款方名称",
+    "scopes": "可查看内容",
+    "scope": {
+      "passport_read": "信任护照",
+      "report_read": "贷款方报告",
+      "statements_read": "财务报表"
+    },
+    "expiresIn": "访问期限",
+    "shareWithCode": "输入验证码分享",
+    "shareSummary": "与 {{lender}} 分享护照 {{days}} 天",
+    "sharesTitle": "谁可以查看",
+    "noShares": "尚未与任何人分享。",
+    "until": "至 {{date}}",
+    "revoked": "已撤销",
+    "revoke": "撤销",
+    "lenderAccess": "您正在查看他人分享给您的护照，访问将于 {{date}} 结束。"
+  },
+  "verify": {
+    "title": "验证信任护照",
+    "help": "输入您收到的护照编号。我们会重新计算其指纹，并与公开测试网上锚定的指纹比对。",
+    "passportId": "护照编号",
+    "check": "验证",
+    "valid": "真实：该护照自锚定以来未被修改。",
+    "invalid": "不真实：护照与锚定的指纹不一致。",
+    "recomputed": "当前指纹",
+    "anchored": "链上指纹",
+    "noAnchor": "无",
+    "checkedOn": "核验于 {{date}}"
+  },
+  "trust": {
+    "chainTitle": "审计日志",
+    "chainValid_one": "完整：共 {{count}} 条记录，每条都与上一条相连。",
+    "chainValid_other": "完整：共 {{count}} 条记录，每条都与上一条相连。",
+    "chainBroken": "在第 {{seq}} 条处断开：有内容被修改或删除。",
+    "head": "最新哈希 {{hash}}",
+    "verifyAgain": "重新验证",
+    "drillTitle": "夜间审计演练",
+    "drillHelp": "每晚 Hishab 会在您账本的副本中植入错误，并统计能发现多少。",
+    "drillCaught": "植入的 {{planted}} 个错误中发现了 {{caught}} 个",
+    "drillRun": "最近一次运行 {{when}}",
+    "eventsTitle": "最近操作",
+    "noEvents": "尚无操作记录。",
+    "when": "时间",
+    "who": "操作人",
+    "what": "内容",
+    "tier": "级别",
+    "abstentionsTitle": "Hishab 说\"我不知道\"的时候",
+    "abstentionsHelp": "每次拒绝猜测的记录，以及缺少的信息。",
+    "noAbstentions": "没有弃答记录。",
+    "missing": "缺少：{{items}}",
+    "drill_catch_rate": "审计演练捕获率"
+  },
+  "audit": {
+    "approve": "已批准",
+    "quarantine_input": "拦截了可疑指令",
+    "abstain": "拒绝猜测",
+    "share_passport": "分享了护照",
+    "login": "登录"
+  },
+  "settings": {
+    "profile": "个人信息",
+    "name": "姓名",
+    "role": "角色",
+    "business": "企业",
+    "twoStep": "两步登录",
+    "twoStepOn": "已开启（身份验证器）",
+    "twoStepOff": "未开启",
+    "accessUntil": "访问截止",
+    "display": "显示",
+    "theme": "主题",
+    "themes": {
+      "system": "跟随设备",
+      "light": "浅色",
+      "dark": "深色"
+    },
+    "notifications": "通知",
+    "autoSend": "自动发送低风险提醒",
+    "autoSendHelp": "仅限友好提醒。涉及资金或承诺的事项仍需您批准。",
+    "ownerOnly": "只有店主可以更改此项。",
+    "emailAlerts": "通过邮件发送警告和紧急预警",
+    "save": "保存",
+    "saved": "已保存。",
+    "data": "数据",
+    "contracts": "数据契约版本 {{version}}",
+    "apiMode": "API（开发用）",
+    "apiModes": {
+      "live": "真实后端",
+      "mock": "离线模拟",
+      "auto": "真实后端，缺失部分用模拟"
+    },
+    "reloadNeeded": "重新加载后生效。"
   }
 }

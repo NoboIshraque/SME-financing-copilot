@@ -5,8 +5,12 @@ import { LoginScreen } from "./auth/LoginScreen";
 import { RequireAuth, ScreenGate } from "./auth/RequireAuth";
 import { AppShell } from "./components/AppShell";
 import { NotFound } from "./components/NotFound";
-import { Placeholder } from "./components/Placeholder";
 import { SCREENS, type Screen } from "./navigation";
+import { VerifyScreen } from "./screens/reports/VerifyScreen";
+import { SettingsScreen } from "./screens/settings/SettingsScreen";
+import { TrustScreen } from "./screens/trust/TrustScreen";
+import { ReportsScreen } from "./screens/reports/ReportsScreen";
+import { MessagesScreen } from "./screens/messages/MessagesScreen";
 import { MarketScreen } from "./screens/market/MarketScreen";
 import { MeshScreen } from "./screens/mesh/MeshScreen";
 import { AnalysisScreen } from "./screens/analysis/AnalysisScreen";
@@ -15,7 +19,7 @@ import { FinancingScreen } from "./screens/financing/FinancingScreen";
 import { ReceivablesScreen } from "./screens/receivables/ReceivablesScreen";
 import { TodayScreen } from "./screens/today/TodayScreen";
 
-// WP-14 replaces each Placeholder with the real screen, milestone by milestone.
+// One screen component per navigation entry.
 const SCREEN_ELEMENTS: Record<Screen, ReactNode> = {
   today: <TodayScreen />,
   cash: <CashScreen />,
@@ -24,10 +28,10 @@ const SCREEN_ELEMENTS: Record<Screen, ReactNode> = {
   analysis: <AnalysisScreen />,
   mesh: <MeshScreen />,
   market: <MarketScreen />,
-  messages: <Placeholder screen="messages" />,
-  reports: <Placeholder screen="reports" />,
-  trust: <Placeholder screen="trust" />,
-  settings: <Placeholder screen="settings" />,
+  messages: <MessagesScreen />,
+  reports: <ReportsScreen />,
+  trust: <TrustScreen />,
+  settings: <SettingsScreen />,
 };
 
 function gated(screen: Screen): ReactNode {
@@ -36,6 +40,8 @@ function gated(screen: Screen): ReactNode {
 
 export const routes: RouteObject[] = [
   { path: "/login", element: <LoginScreen /> },
+  // Public: a lender checks a Trust Passport without an account.
+  { path: "/verify/:passportId?", element: <VerifyScreen /> },
   {
     path: "/",
     element: (

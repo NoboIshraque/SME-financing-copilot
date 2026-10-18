@@ -105,7 +105,11 @@
     "nothing_to_net": "There is no circular debt to net right now.",
     "not_a_participant": "Your business is not part of this round.",
     "not_anchored": "This round has not been anchored yet.",
-    "invalid_quantity": "Enter a quantity, for example 500."
+    "invalid_quantity": "Enter a quantity, for example 500.",
+    "not_approved": "Approve the message before sending it.",
+    "invalid_share": "Name the lender, pick what they can see, and choose up to 30 days.",
+    "passport_not_found": "No passport with that ID.",
+    "no_evidence": "Add statements before issuing a passport."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -611,5 +615,157 @@
     "discount": "Discount",
     "monthly_cost": "Its cost per month",
     "loan_monthly_cost": "Your loan's cost per month"
+  },
+  "messages": {
+    "pendingTitle": "Waiting for your approval",
+    "nothingPending": "Nothing is waiting for approval.",
+    "draftsTitle": "Message drafts",
+    "draftsHelp": "Messages are filled from your records and go out only after approval.",
+    "noDrafts": "No drafts right now.",
+    "approve": "Approve message",
+    "send": "Send",
+    "copy": "Copy message",
+    "copied": "Copied. Paste it into your chat app.",
+    "sent": "Sent",
+    "channel": {
+      "in_app": "In-app",
+      "email": "Email",
+      "copy": "Copy and send yourself"
+    },
+    "status": {
+      "draft": "Draft",
+      "approved": "Approved",
+      "sent": "Sent",
+      "rejected": "Rejected"
+    },
+    "purpose": {
+      "pre_due_reminder": "Friendly reminder before the due date",
+      "overdue_reminder": "Overdue reminder",
+      "payment_plan_offer": "Payment plan offer",
+      "supplier_term_extension": "Ask a supplier for more time",
+      "lender_update": "Update for your lender",
+      "netting_invitation": "Invitation to a netting round",
+      "sale_memo": "Sale memo"
+    }
+  },
+  "reports": {
+    "passportTitle": "Trust Passport",
+    "passportHelp": "Your own verifiable evidence for any lender: statements, licences, counterparty confirmations and Hishab's honesty record.",
+    "noPassport": "No passport yet. Add statements first.",
+    "version": "Version {{version}}",
+    "digest": "Fingerprint {{hash}}",
+    "notAnchored": "Not anchored yet",
+    "evidence": {
+      "mobile_money_statement": "Mobile money statements",
+      "bank_statement": "Bank statements",
+      "trade_licence": "Trade licence",
+      "etin": "e-TIN",
+      "bin_vat": "BIN / VAT registration",
+      "utility_bill": "Utility bills",
+      "lender_report": "Lender report"
+    },
+    "verified": "checked against source",
+    "selfDeclared": "self-declared",
+    "attestations": "Confirmed by trading partners",
+    "attestationCounts": "{{confirmed}} confirmed, {{disputed}} disputed",
+    "abstentionRate": "How often Hishab said \"I don't know\"",
+    "drillRate": "Audit drill catch rate",
+    "openVerify": "Open the public verify page",
+    "issue": "Issue a new version",
+    "history_one": "{{count}} earlier version",
+    "history_other": "{{count}} earlier versions",
+    "shareTitle": "Share with a lender",
+    "shareHelp": "Access is limited to what you tick, ends by itself, and every view is logged.",
+    "lender": "Lender's name",
+    "scopes": "What they can see",
+    "scope": {
+      "passport_read": "Trust Passport",
+      "report_read": "Lender report",
+      "statements_read": "Statements"
+    },
+    "expiresIn": "Access ends after",
+    "shareWithCode": "Share with code",
+    "shareSummary": "Share your passport with {{lender}} for {{days}} days",
+    "sharesTitle": "Who can see it",
+    "noShares": "Not shared with anyone.",
+    "until": "until {{date}}",
+    "revoked": "revoked",
+    "revoke": "Revoke",
+    "lenderAccess": "You are viewing a passport shared with you. Your access ends on {{date}}."
+  },
+  "verify": {
+    "title": "Verify a Trust Passport",
+    "help": "Enter the passport ID you were given. We recompute its fingerprint and compare it with the one anchored on the public testnet.",
+    "passportId": "Passport ID",
+    "check": "Verify",
+    "valid": "Genuine: this passport has not been changed since it was anchored.",
+    "invalid": "Not genuine: the passport does not match its anchored fingerprint.",
+    "recomputed": "Fingerprint now",
+    "anchored": "Fingerprint on chain",
+    "noAnchor": "none",
+    "checkedOn": "Checked {{date}}"
+  },
+  "trust": {
+    "chainTitle": "Audit log",
+    "chainValid_one": "Intact: {{count}} entry, each linked to the one before.",
+    "chainValid_other": "Intact: {{count}} entries, each linked to the one before.",
+    "chainBroken": "Broken at entry {{seq}}: something was changed or removed.",
+    "head": "Latest hash {{hash}}",
+    "verifyAgain": "Verify again",
+    "drillTitle": "Nightly audit drill",
+    "drillHelp": "Each night Hishab plants errors in a copy of your ledger and counts how many it catches.",
+    "drillCaught": "caught {{caught}} of {{planted}} planted errors",
+    "drillRun": "Last run {{when}}",
+    "eventsTitle": "Recent actions",
+    "noEvents": "No actions recorded yet.",
+    "when": "When",
+    "who": "Who",
+    "what": "What",
+    "tier": "Tier",
+    "abstentionsTitle": "When Hishab said \"I don't know\"",
+    "abstentionsHelp": "Every time it refused to guess, and what was missing.",
+    "noAbstentions": "No abstentions recorded.",
+    "missing": "Missing: {{items}}",
+    "drill_catch_rate": "Audit drill catch rate"
+  },
+  "audit": {
+    "approve": "Approved",
+    "quarantine_input": "Blocked a suspicious instruction",
+    "abstain": "Declined to guess",
+    "share_passport": "Shared the passport",
+    "login": "Signed in"
+  },
+  "settings": {
+    "profile": "You",
+    "name": "Name",
+    "role": "Role",
+    "business": "Business",
+    "twoStep": "Two-step sign-in",
+    "twoStepOn": "On (authenticator code)",
+    "twoStepOff": "Off",
+    "accessUntil": "Access until",
+    "display": "Display",
+    "theme": "Theme",
+    "themes": {
+      "system": "Follow my device",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "notifications": "Notifications",
+    "autoSend": "Send low-risk reminders automatically",
+    "autoSendHelp": "Only friendly reminders. Anything with money or a promise still waits for you.",
+    "ownerOnly": "Only the owner can change this.",
+    "emailAlerts": "Email me Warning and Critical alerts",
+    "save": "Save",
+    "saved": "Saved.",
+    "data": "Data",
+    "contracts": "Data contracts version {{version}}",
+    "apiMode": "API (development)",
+    "apiModes": {
+      "live": "Real backend",
+      "mock": "Offline mock",
+      "auto": "Real, mock for missing parts"
+    },
+    "reloadNeeded": "Reload to apply."
   }
 }
