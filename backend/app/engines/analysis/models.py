@@ -32,6 +32,18 @@ class SnapshotRow(Base):
     payload: Mapped[str] = mapped_column(Text)
 
 
+class ComparisonRow(Base):
+    """A scenario comparison as it was asked (decisions, buffer, seed, assumptions, question),
+    so `POST /api/analysis/stability` can re-run the recommendation by its id."""
+
+    __tablename__ = "analysis_comparisons"
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    request: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class SnapshotImmutable(RuntimeError):
     """A stored snapshot was about to be changed."""
 

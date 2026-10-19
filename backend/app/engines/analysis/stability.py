@@ -264,6 +264,14 @@ class EngineDecider:
             self._choices = {k: v for k, v in self._choices.items() if k[0] != id(ledger)}
         return cached[1]
 
+    def remember(self, ledger: Ledger, inputs: ScenarioInputs) -> None:
+        """Use a forecast the caller already made for `ledger` (same seed and paths)."""
+        if inputs.draws.seed != self.seed or inputs.draws.paths != self.paths or \
+                inputs.buffer != self.buffer:
+            raise ValueError("the forecast was made with another seed, paths or buffer")
+        self._inputs[id(ledger)] = (ledger, inputs)
+        self._choices = {k: v for k, v in self._choices.items() if k[0] != id(ledger)}
+
     def __call__(self, request: Request, shift: Shift = NO_SHIFT) -> str:
         """The recommended decision. Shifts are told apart by their name."""
         inputs = self.inputs(request.ledger)
