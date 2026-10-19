@@ -191,3 +191,7 @@ def test_the_shops_own_bkash_statement_adds_nothing_to_its_seeded_ledger(client:
     with client.app.state.session_factory() as session:
         assert len(FactStore(session).transactions(sme.id)) == len(sme.transactions)
     assert closing() == sme.balance_on(universe.as_of).amount
+def test_a_lender_viewer_may_not_list_uploads(client: TestClient):
+    _as(client, LENDER)  # consented scopes are passport and reports only, not ledger:read
+    res = client.get("/api/ingest/history")
+    assert (res.status_code, res.json()["code"]) == (403, "forbidden")

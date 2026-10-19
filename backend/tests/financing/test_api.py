@@ -69,10 +69,20 @@ def test_match_without_facts_abstains_instead_of_passing_rules(api: TestClient):
     assert body["data_mode"] == "public"
 
 
-def test_every_option_says_it_was_ranked_without_a_forecast(api: TestClient):
+def test_fit_comes_from_the_cash_forecast(api: TestClient):
+    options = api.post("/api/financing/match", json=NEED).json()["options"]
+    assert not any("fit.no_forecast" in o["reason_keys"] for o in options)
+    breach = [Decimal(o["p_buffer_breach"]) for o in options]
+    assert all(Decimal(0) <= p <= Decimal(1) for p in breach)
+    assert any(p > 0 for p in breach)  # a real band, not the placeholder zero
+    fig = next(f for f in options[0]["figures"] if f["label_key"] == "financing.p_buffer_breach")
+    assert fig["provenance"]["formula_id"] == "financing.fit.max_daily_breach_probability"
+
+
+def test_without_enough_history_options_say_they_were_ranked_without_a_forecast(api: TestClient):
+    _as(api, Principal(user_id="u-new", tenant_id="sme_new", role=Role.owner))
     options = api.post("/api/financing/match", json=NEED).json()["options"]
     assert all("fit.no_forecast" in o["reason_keys"] for o in options)
-    assert all(Decimal(o["p_buffer_breach"]) == 0 for o in options)
 
 
 def test_figures_carry_their_formula(api: TestClient):
