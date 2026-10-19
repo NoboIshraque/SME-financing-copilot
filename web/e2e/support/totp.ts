@@ -13,7 +13,7 @@ import type { APIRequestContext } from "@playwright/test";
 import { demoAccounts, type DemoAccount } from "./accounts";
 import { TARGET, WEB_DIR } from "./target";
 
-const STATE_DIR = join(WEB_DIR, "e2e", ".state");
+const STATE_DIR = join(WEB_DIR, "test-results", "totp");
 const STEP_MS = 30_000;
 const STALE_LOCK_MS = 3 * 60_000;
 const MAX_ATTEMPTS = 3;

@@ -13,7 +13,7 @@ export type SavedRole = (typeof SAVED_ROLES)[number];
 
 /** Playwright storage state (session cookie) for a role on this run's target. */
 export function sessionFile(role: SavedRole | "critical_owner"): string {
-  return join(WEB_DIR, "e2e", ".auth", `${TARGET}-${role}.json`);
+  return join(WEB_DIR, "test-results", "auth", `${TARGET}-${role}.json`);
 }
 
 interface ApiErrorBody {

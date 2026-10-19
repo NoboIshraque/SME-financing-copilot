@@ -23,7 +23,9 @@ const projects: Project[] = [
 
 export default defineConfig({
   testDir: "./e2e",
-  outputDir: "./test-results",
+  // Everything a run writes stays under test-results/: git-ignored, and outside the Vite dev
+  // server's file watcher (on Windows a watched report file being written crashes `npm run dev`).
+  outputDir: "./test-results/artifacts",
   // Local: the synthetic universe is loaded into the dev database first (idempotent).
   globalSetup: "./e2e/global-setup.ts",
   // A journey that needs a fresh TOTP code may wait for the next 30-second step (e2e/support/totp.ts).
@@ -34,7 +36,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   // The API rate-limits per client IP (WP-11): a few workers keep the run inside its budget.
   workers: 4,
-  reporter: [["list"], ["html", { open: "never", outputFolder: "./playwright-report" }]],
+  reporter: [["list"], ["html", { open: "never", outputFolder: "./test-results/report" }], ["./e2e/support/known-bugs-reporter.ts"]],
   metadata: { target, baseURL },
   use: {
     baseURL,
