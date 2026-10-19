@@ -64,7 +64,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | WP-03 | Privacy vault, detectors, anonymiser, amount scaling (N6, N18, P11) | Orchestrator | 1 | 70 |
 | WP-04 | Cash engine: forecast, Monte Carlo, gaps, alerts, smoothing (Q1, Q3) | A1 | 1–2 | 120 |
 | WP-05 | Receivables & collections: aging, risk, limits, ladder, disputes (Q2) | A1 | 2 | 60 |
-| WP-06 | done (8/8) | merged (PR #20, #22, #23) | 147 | engine + real BD catalogue; API: match (web FinancingMatch shape: lenders + application draft), lender check, application draft; application card is `submit_loan_application` (EXECUTE, owner approves with step-up; PR #23). Fit still waits for the WP-04 band to be wired in |
+| WP-06 | Financing: catalogue, effective APR, eligibility, ranking, lender check (P1, N20, P14) | Orchestrator | 2 | 90 |
 | WP-07 | Analysis: P&L, ratios, variance, scenarios, stability score (N1, N12, N16) | A1 | 2 | 90 |
 | WP-08 | Liquidity mesh: netting, consent, attestations, Sepolia anchor (N14, Q4) | Orchestrator | 2 | 70 |
 | WP-09 | Market watch, vendor ranking, negotiation (N3, N19) | Worker C* | 2 | 50 |
@@ -200,13 +200,13 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 
 | WP | Status | Branch | Tests | Notes |
 | --- | --- | --- | --- | --- |
-| WP-00 | done | merged + PR #15 | 248 backend + 34 web + 4 e2e | contracts v1.1.0 (58 models), synthetic universe, CI, Mission control (issue #8); app-wide hooks (`app/<area>/app_hooks.py`) + `api_routes()` for WP-11 (PR #15); `/api/docs` only in development/test (PR #18) |
+| WP-00 | done | merged + PR #15 | 248 backend + 34 web + 4 e2e | contracts v1.2.0 (1.2: `ActionType.submit_loan_application`, PR #23), synthetic universe, CI, Mission control (issue #8); app-wide hooks (`app/<area>/app_hooks.py`) + `api_routes()` for WP-11 (PR #15); `/api/docs` only in development/test (PR #18) |
 | WP-01 | done | merged | 143 | fact store, registry, provenance, API; fixes merged 18 Oct: ledger revisions (no stale figures), caller-scoped + masked explain/facts, race-safe inserts, rows endpoint, record_computed, profile facts + snapshot; facts + ingest APIs take the signed-in principal (PR #17) |
 | WP-02 | done | merged | 294 | parsers (bKash/Nagad/bank/ledger/registers, CSV+XLSX), Bangla/Banglish normaliser + Bengali calendar, dedupe, party clustering, OCR drafts (Tesseract ben+eng), preview/commit with keyed digest, API |
 | WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
 | WP-04 | done (8/8) | merged (PR #19) | 191 | forecast (seasonality incl. festivals, per-customer delays, supplier habits), Monte Carlo (1,000 seeded integer paths, block bootstrap, common random numbers), gaps + 5 leading indicators, Q1 alert tiers with dedupe/cooldown, 6 measured levers as action cards (WP-06/WP-08 interfaces), buffer target + surplus sweep, walk-forward backtest, API (forecast/gaps/alerts/what-if) + daily alert scan |
 | WP-05 | not started | — | 0 | |
-| WP-06 | done (8/8) | merged (PR #20) | 142 | engine + real BD catalogue; API (PR #20): match, lender check, application draft. Open: application card tier vs WP-11 policy (WP-06.md Questions); fit waits for WP-04 forecast |
+| WP-06 | done (8/8) | merged (PR #20, #22, #23) | 147 | engine + real BD catalogue; API: match (web FinancingMatch shape: lenders + application draft), lender check, application draft; application card is `submit_loan_application` (EXECUTE, owner approves with step-up; PR #23). Fit still waits for the WP-04 band to be wired in |
 | WP-07 | not started | — | 0 | |
 | WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API (milestone 8) unblocked by WP-11 |
 | WP-09 | not started | — | 0 | |
