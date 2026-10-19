@@ -32,7 +32,7 @@ export function TrustScreen() {
           {(data) => (
             <>
               <p className={`mt-2 text-lg font-semibold ${data.valid ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}>
-                {data.valid ? t("trust.chainValid", { count: data.length }) : t("trust.chainBroken", { seq: data.broken_at_seq ?? "?" })}
+                {data.valid ? t("trust.chainValid", { count: data.length, value: format.number(String(data.length), 0) }) : t("trust.chainBroken", { seq: data.broken_at_seq ?? "?" })}
               </p>
               <p className="mt-1 break-all font-mono text-xs text-slate-600 dark:text-slate-400">{t("trust.head", { hash: data.head_hash })}</p>
               {data.anchor && <p className="mt-1 text-sm">{t(`mesh.chain.${data.anchor.chain}`)} · {format.dateTime(data.anchor.anchored_at)}</p>}

@@ -15,9 +15,8 @@ describe("Messages & approvals inbox", () => {
   });
 
   it("approves a Bangla draft, then copies exactly the approved text", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     const { user, db } = renderApp("/messages");
+    const writeText = vi.spyOn(navigator.clipboard, "writeText");
     const draft = await screen.findByRole("article", { name: "Friendly reminder before the due date · Customer 11" });
     const body = within(draft).getByText(/প্রিয় Customer 11/);
     expect(body).toHaveAttribute("lang", "bn");

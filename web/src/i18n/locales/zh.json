@@ -707,8 +707,8 @@
   },
   "trust": {
     "chainTitle": "审计日志",
-    "chainValid_one": "完整：共 {{count}} 条记录，每条都与上一条相连。",
-    "chainValid_other": "完整：共 {{count}} 条记录，每条都与上一条相连。",
+    "chainValid_one": "完整：共 {{value}} 条记录，每条都与上一条相连。",
+    "chainValid_other": "完整：共 {{value}} 条记录，每条都与上一条相连。",
     "chainBroken": "在第 {{seq}} 条处断开：有内容被修改或删除。",
     "head": "最新哈希 {{hash}}",
     "verifyAgain": "重新验证",

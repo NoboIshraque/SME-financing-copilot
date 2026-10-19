@@ -707,8 +707,8 @@
   },
   "trust": {
     "chainTitle": "Audit log",
-    "chainValid_one": "Intact: {{count}} entry, each linked to the one before.",
-    "chainValid_other": "Intact: {{count}} entries, each linked to the one before.",
+    "chainValid_one": "Intact: {{value}} entry, each linked to the one before.",
+    "chainValid_other": "Intact: {{value}} entries, each linked to the one before.",
     "chainBroken": "Broken at entry {{seq}}: something was changed or removed.",
     "head": "Latest hash {{hash}}",
     "verifyAgain": "Verify again",
