@@ -99,11 +99,17 @@ _BANGLA = re.compile(r"[ঀ-৿]")
 _CJK = re.compile(r"[一-鿿]")
 
 
+# Chinese has no word breaks: a keyword inside a longer word must not match. 毛利率 (gross margin)
+# contains 利率 (interest rate) and is an analysis question, not a financing one (WP-16 finding).
+_CJK_NOT_AFTER = {"利率": "毛"}
+
+
 def _pattern(word: str) -> re.Pattern[str]:
     if _BANGLA.search(word):
         return re.compile(rf"(?<![ঀ-৿]){re.escape(word)}")
     if _CJK.search(word):
-        return re.compile(re.escape(word))
+        before = _CJK_NOT_AFTER.get(word)
+        return re.compile((rf"(?<!{before})" if before else "") + re.escape(word))
     return re.compile(rf"(?<![a-z]){re.escape(word)}(?![a-z])")
 
 

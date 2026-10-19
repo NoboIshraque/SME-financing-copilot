@@ -88,3 +88,9 @@ def test_rule_narration_repeats_only_verified_claims():
 def test_rules_refuse_what_they_cannot_answer(request_):
     with pytest.raises(deterministic.Unsupported):
         deterministic.answer(request_)
+
+
+def test_gross_margin_in_chinese_is_an_analysis_question_not_financing():
+    from app.llm.deterministic import classify
+    assert classify("我们的毛利率是多少？") == ["business_health"]
+    assert "find_financing" in classify("贷款利率是多少？")  # interest rate still means financing
