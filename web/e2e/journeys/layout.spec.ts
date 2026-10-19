@@ -2,7 +2,7 @@
 // Mobile-first layout (WP-14 design: 360 px first): no screen may be wider than the device, or
 // the page pans sideways and the fixed bottom bar is laid out wider than the screen.
 import { sessionFile } from "../support/auth";
-import { expect, SCREENS, test } from "../support/fixtures";
+import { expect, knownBug, SCREENS, test } from "../support/fixtures";
 
 test.use({ storageState: sessionFile("owner") });
 
@@ -24,6 +24,9 @@ test("no screen is wider than the device", async ({ app, page }) => {
       clientWidth: document.documentElement.clientWidth,
     }));
     if (scrollWidth > clientWidth) tooWide.push(screen);
+  }
+  if (app.isPhone) {
+    for (const screen of KNOWN_TOO_WIDE_ON_PHONES) knownBug(`WP-14 (layout): on a phone the ${screen} screen is wider than the screen, so the page pans and the bottom bar is laid out off-screen`);
   }
   expect(tooWide).toEqual(app.isPhone ? KNOWN_TOO_WIDE_ON_PHONES : []);
 });

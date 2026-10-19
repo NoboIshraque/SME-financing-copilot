@@ -158,6 +158,14 @@ export class App {
   }
 }
 
+/**
+ * Record that this test pins a known bug whose fix belongs to another work package: every run
+ * lists them at the end (support/known-bugs-reporter.ts), so a green run never hides them.
+ */
+export function knownBug(description: string): void {
+  base.info().annotations.push({ type: "known bug", description });
+}
+
 export const test = base.extend<{ app: App; foreignHosts: string[] }>({
   app: async ({ page }, provide) => {
     await provide(new App(page));

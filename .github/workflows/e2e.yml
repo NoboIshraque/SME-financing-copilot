@@ -52,7 +52,9 @@ jobs:
         if: always()
         with:
           name: e2e-local
+          # Report, traces, screenshots, videos and the known-bugs list; never the saved sessions.
           path: |
-            web/playwright-report/
-            web/test-results/
+            web/test-results/report/
+            web/test-results/artifacts/
+            web/test-results/known-bugs.json
           retention-days: 14

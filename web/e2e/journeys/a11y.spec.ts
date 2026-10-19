@@ -5,7 +5,7 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 
 import { sessionFile } from "../support/auth";
-import { expect, SCREENS, test } from "../support/fixtures";
+import { expect, knownBug, SCREENS, test } from "../support/fixtures";
 
 type AxePage = ConstructorParameters<typeof AxeBuilder>[0]["page"];
 
@@ -26,8 +26,20 @@ const KNOWN: Record<string, { desktop?: string[]; phone?: string[] }> = {
   trust: { phone: BOTH_THEMES("scrollable-region-focusable") },
 };
 
+const RULES: Record<string, string> = {
+  "color-contrast": "text below the 4.5:1 contrast minimum",
+  "aria-hidden-focus": "focusable elements inside an aria-hidden region",
+  "scrollable-region-focusable": "a scrolling region the keyboard cannot reach",
+};
+
+/** The pinned violations for a screen, each recorded as a known bug for the run's summary. */
 function known(name: string, phone: boolean): string[] {
-  return [...((phone ? KNOWN[name]?.phone : KNOWN[name]?.desktop) ?? [])].sort();
+  const entries = [...((phone ? KNOWN[name]?.phone : KNOWN[name]?.desktop) ?? [])].sort();
+  for (const entry of entries) {
+    const [theme, rule = ""] = entry.split(" ");
+    knownBug(`WP-14 (WCAG 2.1 AA): ${name}, ${theme} theme: ${RULES[rule] ?? rule}`);
+  }
+  return entries;
 }
 
 async function violations(page: Page, path: string): Promise<string[]> {

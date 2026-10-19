@@ -1,7 +1,7 @@
 // Journey: a lender viewer (WP-11 consented lender access) sees only what was shared: the Trust
 // Passport and their own settings. Other screens say so plainly, and the API refuses the rest.
 import { sessionFile } from "../support/auth";
-import { expect, test } from "../support/fixtures";
+import { expect, knownBug, test } from "../support/fixtures";
 import { tPattern } from "../support/i18n";
 
 test.use({ storageState: sessionFile("lender_viewer") });
@@ -45,12 +45,14 @@ test("the lender viewer sees only the shared Trust Passport, and the API refuses
 // them as soon as they pass, so the markers can come off.
 test("the lender viewer cannot read ledger figures", async ({ page }) => {
   test.fail(true, "WP-01: GET /api/facts/{metric} does not check ledger:read");
+  knownBug("WP-01 (security): GET /api/facts/{metric} computes the shop's ledger figures for a lender viewer, who holds no ledger:read");
   const response = await page.request.get("/api/facts/net_sales?start=2026-09-01&end=2026-09-30&granularity=month");
   expect(response.status()).toBe(403);
 });
 
 test("the lender viewer cannot list the shop's uploads", async ({ page }) => {
   test.fail(true, "WP-02: GET /api/ingest/history does not check ledger:read");
+  knownBug("WP-02 (security): GET /api/ingest/history lists the shop's uploads to a lender viewer, who holds no ledger:read");
   const response = await page.request.get("/api/ingest/history");
   expect(response.status()).toBe(403);
 });
