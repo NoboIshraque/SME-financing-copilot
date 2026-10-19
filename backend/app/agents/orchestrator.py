@@ -21,14 +21,16 @@ import hashlib
 import secrets
 import threading
 import time
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
+from app.agents import agreement as agreement_mod
 from app.agents import claims as claims_mod
 from app.agents import critic as critic_mod
+from app.agents.agreement import AgreementOutcome
 from app.agents.budget import Budget
 from app.agents.checker import Checker, log_rejections, unverified_numbers
 from app.agents.claims import Statement
@@ -56,7 +58,7 @@ from app.contracts import (
     Recommendation,
     Role,
 )
-from app.llm import LLMGateway, LLMRequest, LLMResponse
+from app.llm import LLMGateway, LLMRequest, LLMResponse, NoProviderAvailable
 from app.llm import deterministic as rules
 from app.llm.prompts import narrate_request, plan_request
 from app.privacy import PrivacyViolation, TokenVault, anonymise
@@ -155,6 +157,7 @@ class Run:
     skipped: Mapping[str, str] = field(default_factory=dict)  # tool -> why (secondary intents)
     stakes: Stakes | None = None
     objection: Objection | None = None  # the critic's, with who argued it
+    agreement: AgreementOutcome | None = None  # the vote on the judgement, if one was taken
     budget: Mapping[str, object] = field(default_factory=dict)
     trace: tuple[TraceEvent, ...] = ()
 
@@ -208,6 +211,24 @@ class Orchestrator:
                   ",".join(f"{a.slot}={a.outcome.value}" for a in reply.attempts))
         return reply
 
+    def vote_call(self, budget: Budget, trace: Trace
+                  ) -> Callable[[LLMRequest, str, Sequence[str]], LLMResponse | None]:
+        """A voter call pinned to the given models, never the rules, charged to the budget."""
+        def call(request: LLMRequest, what: str, slots: Sequence[str]) -> LLMResponse | None:
+            if not budget.take_llm(what):
+                return None
+            started = time.perf_counter()
+            try:
+                reply = self.gateway.complete(request, slots=slots, rules_fallback=False)
+            except NoProviderAvailable as exc:
+                trace.add(what, ",".join(slots), "unavailable", started,
+                          ",".join(f"{a.slot}={a.outcome.value}" for a in exc.attempts))
+                return None
+            budget.spend_tokens(reply.tokens_in + reply.tokens_out)
+            trace.add(what, reply.slot, "cached" if reply.cached else "ok", started)
+            return reply
+        return call
+
     def _plan(self, ctx: ToolContext, question: str, language: str | None, private: bool,
               party_names: tuple[str, ...], budget: Budget, trace: Trace) -> Plan:
         anon = anonymise(question, vault=self.vault, tenant=ctx.tenant_id, anchor=ctx.as_of,
@@ -216,7 +237,7 @@ class Orchestrator:
             reply = self.llm(plan_request(anon.text, private=private, party_names=party_names),
                              "plan", budget, trace)
             return build_plan(reply.data, question, self.registry, planner=reply.slot,
-                              language=language)
+                              language=language, asked=anon.text)
         except PrivacyViolation as exc:
             # Something the anonymiser missed: plan locally, nothing leaves the server.
             trace.add("plan", "deterministic", "privacy_blocked", time.perf_counter(),
@@ -290,10 +311,16 @@ class Orchestrator:
                 lambda request, what: self.llm(request, what, budget, trace), answer,
                 statements, found, language=plan.language,
                 brain_families=(self.family(plan.planner), narrator), private=private)
+        agreement = None
+        if stakes.needs_agreement:  # N9: other models vote on the judgement code made
+            judgement = agreement_mod.judgement_for(plan, results, cards, plan.asked)
+            if judgement is not None:
+                agreement = agreement_mod.agree(self.vote_call(budget, trace), judgement,
+                                                stakes, private=private)
         return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
                             statements=statements, answer=answer, cards=cards, checks=checks,
                             dropped_cards=dropped, stakes=stakes, objection=objection,
-                            budget=budget, trace=trace)
+                            agreement=agreement, budget=budget, trace=trace)
 
     def family(self, slot: str) -> str:
         provider = self.gateway.table.get(slot)
@@ -376,7 +403,8 @@ class Orchestrator:
                 cards: tuple[ActionCard, ...] = (), abstention: Abstention | None = None,
                 checks: tuple[CheckResult, ...] = (), dropped_cards: tuple[str, ...] = (),
                 stakes: Stakes | None = None, objection: Objection | None = None,
-                budget: Budget, trace: Trace) -> Run:
+                agreement: AgreementOutcome | None = None, budget: Budget,
+                trace: Trace) -> Run:
         results = results or {}
         statements = statements or []
         figures: dict[str, Figure] = {s.figure.id: s.figure for s in statements}
@@ -393,10 +421,11 @@ class Orchestrator:
             action_cards=cards if abstention is None else (),
             figures=tuple(figures.values()) if abstention is None else (),
             critic_objection=objection.text if objection and abstention is None else None,
+            agreement=agreement.report if agreement is not None else None,
             abstention=abstention, tools_used=tuple(n for n in plan.tools if n in results),
             data_mode=most_cautious(modes) if modes else DataMode.synthetic,
             created_at=ctx.now)
         return Run(recommendation=recommendation, plan=plan, statements=tuple(statements),
                    results=dict(results), skipped=dict(skipped or {}), checks=checks,
                    dropped_cards=dropped_cards, stakes=stakes, objection=objection,
-                   budget=budget.report(), trace=trace.events())
+                   agreement=agreement, budget=budget.report(), trace=trace.events())

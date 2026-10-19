@@ -53,6 +53,7 @@ class Plan:
     params: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
     dropped: tuple[str, ...] = ()  # names the planner gave that do not exist
     notes: tuple[str, ...] = ()
+    asked: str = ""  # the question as the models saw it (anonymised); "" if none saw it
 
     @property
     def understood(self) -> bool:
@@ -91,7 +92,7 @@ def _ordered(tools: Iterable[str]) -> tuple[str, ...]:
 
 
 def build_plan(proposal: Mapping[str, Any] | None, question: str, registry: ToolRegistry, *,
-               planner: str, language: str | None = None) -> Plan:
+               planner: str, language: str | None = None, asked: str = "") -> Plan:
     """Repair a planner's proposal into a runnable plan (or an empty one: not understood)."""
     proposal = proposal or {}
     raw_intents = [i for i in proposal.get("intents") or () if isinstance(i, str)]
@@ -112,4 +113,4 @@ def build_plan(proposal: Mapping[str, Any] | None, question: str, registry: Tool
     lang = language or (proposed_language if proposed_language in LANGUAGES
                         else language_of(question))
     return Plan(intents=intents if ordered else (), tools=ordered, language=lang,
-                planner=planner, params=params, dropped=dropped, notes=notes)
+                planner=planner, params=params, dropped=dropped, notes=notes, asked=asked)

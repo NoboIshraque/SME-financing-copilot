@@ -16,7 +16,8 @@ from app.agents.tools import ToolContext
 from app.agents.toolset import build_registry
 from app.api import cash as cash_api
 from app.contracts import AbstentionReason, ActionType, CheckStatus, DataMode, Role
-from app.llm import LLMGateway
+from app.llm import LLMGateway, Outcome
+from app.llm.transport import Completion, ProviderError
 from app.privacy import Anonymised
 from app.settings import LLMMode
 from tests.agents.helpers import NOW, Scripted, seeded_store
@@ -90,7 +91,9 @@ def test_past_the_model_budget_the_rules_plan_and_narrate(orch, ledger):
     run = ask(orch, ledger, CASH_Q, budget=Budget(max_llm_calls=0))
     assert run.plan.planner == "deterministic"
     assert run.recommendation.answer_text == " ".join(s.claim.text for s in run.statements)
-    assert run.budget["refused"] == ["llm:plan", "llm:narrate", "llm:critique"]
+    refused = run.budget["refused"]
+    assert refused[:3] == ["llm:plan", "llm:narrate", "llm:critique"]
+    assert set(refused[3:]) == {"llm:vote"}  # no voter was asked either
 
 
 def test_model_narration_is_used_when_a_model_answers(live_settings, ledger, clock):
@@ -305,3 +308,59 @@ def test_the_critic_is_a_model_the_answer_did_not_come_from(live_settings, ledge
     run = Orchestrator(gateway).ask(ToolContext(ledger, "sme_hardware", NOW), CASH_Q)
     assert (run.objection.source, run.objection.family) == ("groq_qwen", "alibaba")
     assert run.recommendation.critic_objection.startswith("The customer asked")
+
+
+# --- milestone 6: agreement inside the run ------------------------------------------------
+
+class Voters(Scripted):
+    """Plans and narrates with Gemini; each voter picks the option at `pick` in its ballot."""
+
+    def __init__(self, pick: dict[str, int]) -> None:
+        super().__init__({"gemini_flash": [
+            json.dumps({"intents": ["cash_outlook"], "tools": [], "language": "en"}),
+            json.dumps({"text": "A cash gap is close."})]})
+        self.pick = pick
+
+    def send(self, provider, request):
+        if request.task.value == "critique":  # a working critic, so no voter is cooling down
+            self.calls.append(provider.slot)
+            return Completion(json.dumps({"objection": "It may not hold.", "severity": "low"}))
+        if request.task.value != "vote":
+            return super().send(provider, request)
+        self.calls.append(provider.slot)
+        if provider.slot not in self.pick:
+            raise ProviderError(Outcome.unreachable)
+        body = request.messages[1].content.removeprefix("<data>").removesuffix("</data>")
+        options = json.loads(body)["options"]
+        choice = options[self.pick[provider.slot]]["id"]
+        return Completion(json.dumps({"choice": choice, "rationale": "r"}), 5, 3)
+
+
+def test_voters_that_agree_with_code_are_reported(live_settings, ledger, clock):
+    gateway = LLMGateway(live_settings, clock=clock,
+                         transport=Voters({"groq_gpt_oss_120b": 0, "groq_qwen": 0}))
+    run = Orchestrator(gateway).ask(ToolContext(ledger, "sme_hardware", NOW), CASH_Q)
+    report = run.recommendation.agreement
+    assert report.agreement_rate == 1 and report.stakes == "high"
+    assert report.winning_choice == run.recommendation.action_cards[0].id
+    assert run.agreement.supports_code
+
+
+def test_dissent_at_high_stakes_is_measured(live_settings, ledger, clock):
+    gateway = LLMGateway(live_settings, clock=clock,
+                         transport=Voters({"groq_gpt_oss_120b": 0, "groq_qwen": 1}))
+    run = Orchestrator(gateway).ask(ToolContext(ledger, "sme_hardware", NOW), CASH_Q)
+    assert run.agreement.report.agreement_rate == Decimal(2) / 3
+    assert not run.agreement.supports_code  # high stakes need everyone
+
+
+def test_offline_there_are_no_voters_and_no_agreement_is_claimed(orch, ledger):
+    run = ask(orch, ledger, CASH_Q)
+    assert run.recommendation.agreement is None
+    assert run.agreement.note == "agreement.unavailable"
+
+
+def test_low_stakes_answers_take_no_vote(orch, ledger):
+    run = ask(orch, ledger, "How is my business doing? Profit and margin please",
+              tenant="sme_grocery")
+    assert run.agreement is None and not any(e.step == "vote" for e in run.trace)
