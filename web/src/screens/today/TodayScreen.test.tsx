@@ -141,7 +141,7 @@ describe("Today screen", () => {
     };
     renderApp("/", { overrides: { "GET /api/copilot/today": { body: recommendation } } });
     const denied = await screen.findByRole("article", { name: "Export raw personal data" });
-    expect(within(denied).getByText("Blocked: Hishab never does this.")).toBeInTheDocument();
+    expect(within(denied).getByText("Blocked: DecisionGuard never does this.")).toBeInTheDocument();
     expect(within(denied).queryByRole("button")).not.toBeInTheDocument();
   });
 

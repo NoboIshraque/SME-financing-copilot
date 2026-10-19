@@ -1,7 +1,7 @@
 """Public verification of a Trust Passport (WP-13 milestone 4).
 
 Anyone holding the passport document and its salt recomputes the digest and compares it with
-the anchored one. No login, no trust in Hishab or the SME.
+the anchored one. No login, no trust in DecisionGuard or the SME.
 """
 
 from __future__ import annotations

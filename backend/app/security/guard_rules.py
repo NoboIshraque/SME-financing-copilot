@@ -6,7 +6,7 @@ lower case, zero-width and bidi controls removed, look-alike letters folded, Ban
 ASCII. A few high-signal phrases are also matched with every separator removed, which catches
 "i g n o r e  p r e v i o u s" and "ign.ore prev-ious".
 
-Rules target Hishab's own invariants (approvals, step-up, payees, bank details, audit, the
+Rules target DecisionGuard's own invariants (approvals, step-up, payees, bank details, audit, the
 token vault, secrets, invented numbers) more than generic jailbreak wording, and were checked
 against hard negatives that use the same words innocently ("ignore the disputed invoice",
 "how do I update my own bank details", "approve the netting round with my code").

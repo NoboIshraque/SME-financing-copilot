@@ -1,4 +1,4 @@
-# Hishab — full handover (orchestrator chat → new chat)
+# DecisionGuard — full handover (orchestrator chat → new chat)
 
 > **Note (19 Oct 06:15 Dhaka, orch-A):** this is a snapshot from 18 Oct 06:10. Current state lives
 > in `docs/ORCHESTRATOR.md` (baton), `docs/CLAIMS.md`, `docs/NOW.md` and PLAN §8. Since then:
@@ -15,7 +15,7 @@ rules. The repo is the source of truth for code and the live status board.
 
 ## 0. First message to send the new chat
 
-> You are the orchestrator for team Hishab in the 2026 Shenzhen FinTechathon (Topic E, SME
+> You are the orchestrator for team DecisionGuard in the 2026 Shenzhen FinTechathon (Topic E, SME
 > Finance Copilot). Read this handover fully. The repo is `NoboIshraque/SME-financing-copilot`
 > (private). Attach it (add_repo with push access), clone it, read `CLAUDE.md`,
 > `docs/PLAN.md` (§8 = live status board), `docs/NOW.md` (who does what next) and the WP files
@@ -60,7 +60,7 @@ rules. The repo is the source of truth for code and the live status board.
 
 ---
 
-## 2. The product: Hishab
+## 2. The product: DecisionGuard
 
 Mobile-first PWA + FastAPI backend + agents for a small Bangladeshi business (grocery,
 pharmacy, fabric wholesaler, garment subcontractor, hardware). Three official areas:

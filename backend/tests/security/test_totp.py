@@ -59,8 +59,8 @@ def test_new_secrets_are_160_bit_base32_and_unique():
 
 def test_provisioning_uri_names_the_issuer_and_the_account():
     uri = totp.provisioning_uri(SECRET, "owner@shop.test")
-    assert uri.startswith("otpauth://totp/Hishab:owner%40shop.test?")
-    assert f"secret={SECRET}" in uri and "issuer=Hishab" in uri
+    assert uri.startswith("otpauth://totp/DecisionGuard:owner%40shop.test?")
+    assert f"secret={SECRET}" in uri and "issuer=DecisionGuard" in uri
 
 
 def test_sealed_secret_opens_only_for_its_owner_and_key():

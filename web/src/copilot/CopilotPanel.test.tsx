@@ -5,8 +5,8 @@ import { LENDER, renderApp } from "../test/render";
 
 async function openPanel(path = "/") {
   const view = renderApp(path);
-  await view.user.click(await screen.findByRole("button", { name: "Ask Hishab" }));
-  return { ...view, panel: screen.getByRole("dialog", { name: "Ask Hishab" }) };
+  await view.user.click(await screen.findByRole("button", { name: "Ask DecisionGuard" }));
+  return { ...view, panel: screen.getByRole("dialog", { name: "Ask DecisionGuard" }) };
 }
 
 describe("copilot panel", () => {
@@ -61,7 +61,7 @@ describe("copilot panel", () => {
   it("is not offered to a lender viewer", async () => {
     renderApp("/reports", { signedInAs: LENDER });
     await screen.findByRole("heading", { level: 2, name: "Reports" });
-    expect(screen.queryByRole("button", { name: "Ask Hishab" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ask DecisionGuard" })).not.toBeInTheDocument();
   });
 });
 

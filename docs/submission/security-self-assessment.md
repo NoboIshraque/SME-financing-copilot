@@ -1,8 +1,8 @@
-# Hishab: security self-assessment
+# DecisionGuard: security self-assessment
 
 | | |
 | --- | --- |
-| **Team** | Hishab: Nobo Ishraque (lead), Amdad, Labib |
+| **Team** | DecisionGuard: Nobo Ishraque (lead), Amdad, Labib |
 | **University** | Bangladesh University of Professionals (BUP), Dhaka |
 | **Competition** | 2026 Shenzhen International FinTech Competition (FinTechathon), International Track |
 | **Topic** | E: SME Finance Copilot |
@@ -52,8 +52,8 @@ planner answers. (2) The optional Sepolia anchor, which sends one 32-byte digest
 Every action an agent or a person can take has a tier. Two rules apply in this order.
 
 1. **What the action needs.** `READ` to look. `DRAFT` to prepare something that stays inside
-   Hishab. `EXECUTE` for anything that leaves Hishab: a message, a payment, or data shared with
-   a lender. `DENY` for things nobody may do through Hishab.
+   DecisionGuard. `EXECUTE` for anything that leaves DecisionGuard: a message, a payment, or data shared with
+   a lender. `DENY` for things nobody may do through DecisionGuard.
 2. **How far a role may take it.** A role that holds less than the action needs may still
    suggest or draft it for someone who holds more. `SUGGEST` lets a role propose an idea but
    not put a card in the owner's queue: requesting an approval needs at least `DRAFT`
@@ -266,7 +266,7 @@ Source: `backend/app/security/guard.py`, `guard_rules.py`. Tests: `test_guard.py
 - **Rules layer.** 153 patterns in 12 attack families, written for English, Bangla, Banglish
   and Chinese, plus 6 phrases matched with every separator removed (`guard_rules.py`). They run
   on normalised text: NFKC, case folding, zero-width and bidi controls removed, look-alike
-  letters folded, Bangla digits read as ASCII. The rules target Hishab's own invariants:
+  letters folded, Bangla digits read as ASCII. The rules target DecisionGuard's own invariants:
   approvals, step-up, payees, bank details, the audit log, the token vault, secrets and invented
   numbers. Text over 20,000 characters is refused outright.
 - **Measured result.** On WP-17's 192-row synthetic corpus
@@ -352,7 +352,7 @@ Source: `backend/app/security/web.py`, plus `infra/Caddyfile` (WP-18). Tests: `t
 
 ## 8. Threat model (STRIDE)
 
-| Threat | Example against Hishab | Mitigation | Residual risk |
+| Threat | Example against DecisionGuard | Mitigation | Residual risk |
 | --- | --- | --- | --- |
 | **S**poofing | Stolen password; someone claiming to be the owner in chat; replayed TOTP code | argon2id; TOTP for owners; single-use TOTP steps; lockout; "fake owner" guard rules; approvals need a fresh code, not a chat claim | A phished password **and** a live TOTP code still get through: no phishing-resistant factor (WebAuthn). In demo mode the owners' codes are published on purpose (R5) |
 | **T**ampering | Editing a stored action card after approval; rewriting the audit log; changing a supplier's bank details | Card digest checked at execution; hash chain with triggers and a daily anchor; `change_bank_details` is DENY | A database administrator can rewrite history consistently after the last anchor (up to 24 h; longer in offline mode). The content of a pending card is whatever the requester sent (R3) |
@@ -363,7 +363,7 @@ Source: `backend/app/security/web.py`, plus `infra/Caddyfile` (WP-18). Tests: `t
 
 ## 9. OWASP Top 10 for LLM Applications (2025)
 
-| Risk | How Hishab addresses it | Status on 19 Oct |
+| Risk | How DecisionGuard addresses it | Status on 19 Oct |
 | --- | --- | --- |
 | LLM01 Prompt Injection | Multilingual guard on user, upload and tool text; quarantine plus audit; tiers mean an injected instruction still needs an owner's TOTP to have any effect | Implemented: the guard screens every copilot question before any model (`wp-10-agents`); generalisation unmeasured (R4) |
 | LLM02 Sensitive Information Disclosure | Only anonymised payloads may leave (fail-closed gate); vault encrypted; lender scopes; masked source rows | Gate on every model request (`wp-10-agents`); offline by default; lender over-read on the fact API is open (R1) |

@@ -10,7 +10,7 @@ describe("Reports & Trust Passport", () => {
     expect(within(passport).getByText("Mobile money statements").nextSibling).toHaveTextContent("checked against source");
     expect(within(passport).getByText("e-TIN").nextSibling).toHaveTextContent("self-declared");
     expect(passport).toHaveTextContent("12 confirmed, 1 disputed");
-    expect(passport).toHaveTextContent("How often Hishab said \"I don't know\"6%");
+    expect(passport).toHaveTextContent("How often DecisionGuard said \"I don't know\"6%");
     expect(passport).toHaveTextContent("Audit drill catch rate90%");
     expect(passport).toHaveTextContent("Anchored on Ethereum Sepolia (testnet)");
     expect(within(passport).getByRole("link", { name: "Open the public verify page" })).toHaveAttribute("href", "/verify/pp-grocery-2");

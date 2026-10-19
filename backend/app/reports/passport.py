@@ -1,11 +1,11 @@
 """Trust Passport (WP-13 milestone 2; FEATURES Q4).
 
 A passport version bundles the SME's verifiable evidence (statements, licences, the lender
-report), counterparty attestations from the mesh, and Hishab's own reliability record
+report), counterparty attestations from the mesh, and DecisionGuard's own reliability record
 (abstention rate, audit-drill catch rate). Each version is sealed with a salted SHA-256
 commitment and the digest is anchored (WP-08). The SME gives a lender the passport document
 plus its salt; the lender recomputes the digest and compares it with the chain, trusting
-neither the SME nor Hishab.
+neither the SME nor DecisionGuard.
 """
 
 from __future__ import annotations

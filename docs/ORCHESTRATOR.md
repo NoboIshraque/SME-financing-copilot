@@ -1,6 +1,6 @@
 # Orchestrator baton
 
-Hishab has more than one orchestrator session (one per Claude account). They cannot see
+DecisionGuard has more than one orchestrator session (one per Claude account). They cannot see
 each other's chats, so **this file is how they talk**. The repo is the only shared memory.
 Nothing important may live only inside a session's sandbox.
 

@@ -65,7 +65,7 @@ def buyer_early_pay(customer_token: str, invoice_amount: Money, discount_percent
 
 def mesh_netting(cash_saved: Money, data_mode: DataMode) -> FinancingProduct:
     return FinancingProduct(
-        id="own-mesh-netting", provider="Hishab liquidity mesh", name="Net circular debts",
+        id="own-mesh-netting", provider="DecisionGuard liquidity mesh", name="Net circular debts",
         kind=ProductKind.mesh_netting, rate_type=RateType.none, nominal_rate_pa=Decimal(0),
         rate_basis=RateBasis.own_terms, max_amount=cash_saved, data_mode=data_mode,
     )

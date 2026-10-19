@@ -34,9 +34,9 @@ SHORT_HISTORY_DAYS = 182
 RISKS: dict[str, tuple[str, str, str, str]] = {
     "eligibility_unknown": (
         "high", "We could not confirm that you qualify for {name}: the lender will ask for "
-        "facts Hishab does not hold.",
+        "facts DecisionGuard does not hold.",
         "{name} পাওয়ার যোগ্যতা নিশ্চিত করা যায়নি: ঋণদাতা এমন তথ্য চাইবে যা হিসাবে নেই।",
-        "无法确认您符合{name}的条件：贷方会要求 Hishab 没有的资料。"),
+        "无法确认您符合{name}的条件：贷方会要求 DecisionGuard 没有的资料。"),
     "loan_too_slow": (
         "high", "{name} may not be approved before the cash gap starts.",
         "নগদ ঘাটতি শুরুর আগে {name} অনুমোদন নাও হতে পারে।",
@@ -62,9 +62,9 @@ RISKS: dict[str, tuple[str, str, str, str]] = {
         "পূর্বাভাসটি ছয় মাসের কম সময়ের তথ্যের উপর ভিত্তি করে।",
         "该预测所依据的历史数据不足六个月。"),
     "no_track_record": (
-        "low", "The lender has no track record with Hishab users yet.",
+        "low", "The lender has no track record with DecisionGuard users yet.",
         "এই ঋণদাতার সাথে হিসাব ব্যবহারকারীদের এখনও কোনো অভিজ্ঞতা নেই।",
-        "该贷方在 Hishab 用户中尚无记录。"),
+        "该贷方在 DecisionGuard 用户中尚无记录。"),
     "synthetic": (
         "low", "These figures come from synthetic demo data, not real books.",
         "এই সংখ্যাগুলো ডেমোর কৃত্রিম তথ্য থেকে, আসল হিসাব থেকে নয়।",

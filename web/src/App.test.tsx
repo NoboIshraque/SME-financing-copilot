@@ -19,7 +19,7 @@ describe("App shell", () => {
   ])("route %s renders the %s screen and names the browser tab", async (path, heading) => {
     renderApp(path);
     expect(await screen.findByRole("heading", { level: 2, name: heading })).toBeInTheDocument();
-    expect(document.title).toBe(`${heading} · Hishab`);
+    expect(document.title).toBe(`${heading} · DecisionGuard`);
   });
 
   it("sends a signed-out visitor to sign in", async () => {

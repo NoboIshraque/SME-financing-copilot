@@ -1,4 +1,4 @@
-# Deploy Hishab from zero
+# Deploy DecisionGuard from zero
 
 One Linux server (2 vCPU, 4 GB RAM, Ubuntu 22.04+) with Docker. Everything else runs in
 containers: PostgreSQL, the API, a background worker and Caddy (HTTPS + the web app).

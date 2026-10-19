@@ -2089,7 +2089,7 @@
     },
     "MeshObligation": {
       "additionalProperties": false,
-      "description": "`debtor_tenant` owes `creditor_tenant`. Both are Hishab tenants that opted in.",
+      "description": "`debtor_tenant` owes `creditor_tenant`. Both are DecisionGuard tenants that opted in.",
       "properties": {
         "amount": {
           "$ref": "#/$defs/Money"
@@ -2388,7 +2388,7 @@
         },
         "is_tenant": {
           "default": false,
-          "description": "True if this party is itself a Hishab tenant (mesh peer)",
+          "description": "True if this party is itself a DecisionGuard tenant (mesh peer)",
           "title": "Is Tenant",
           "type": "boolean"
         },

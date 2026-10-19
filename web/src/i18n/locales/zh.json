@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Hishab",
+    "name": "DecisionGuard",
     "tagline": "您店铺的财务副驾驶"
   },
   "banner": {
@@ -64,7 +64,7 @@
     "signIn": "登录",
     "signingIn": "正在登录…",
     "totpTitle": "输入验证码",
-    "totpHelp": "打开身份验证器应用，输入 Hishab 的 6 位验证码。",
+    "totpHelp": "打开身份验证器应用，输入 DecisionGuard 的 6 位验证码。",
     "code": "6 位验证码",
     "verify": "验证",
     "verifying": "正在验证…",
@@ -96,7 +96,7 @@
     "not_computable": "无法根据现有记录计算该数字。",
     "figure_not_found": "未找到该数字的说明。",
     "idempotency_required": "请求缺少安全密钥，请重试。",
-    "action_denied": "无论谁要求，Hishab 都不会执行。",
+    "action_denied": "无论谁要求，DecisionGuard 都不会执行。",
     "nothing_to_approve": "这里没有需要批准的内容。",
     "already_decided": "此事项已经决定。",
     "owner_only": "只有店主可以批准此操作。",
@@ -111,7 +111,7 @@
     "invalid_share": "请填写贷款方名称、选择可查看内容，期限最多 30 天。",
     "passport_not_found": "没有该编号的护照。",
     "no_evidence": "请先添加流水再生成护照。",
-    "input_quarantined": "这条消息疑似试图绕过 Hishab 的安全规则，已被拦截并记录。",
+    "input_quarantined": "这条消息疑似试图绕过 DecisionGuard 的安全规则，已被拦截并记录。",
     "empty_question": "请先输入问题。",
     "no_file": "请选择要上传的文件。",
     "digest_mismatch": "预览后文件已变更，请重新上传。",
@@ -175,10 +175,10 @@
   },
   "tierHelp": {
     "READ": "仅供参考。",
-    "SUGGEST": "由您自己执行，Hishab 只提出建议。",
-    "DRAFT": "Hishab 起草，经您批准后才会发送。",
+    "SUGGEST": "由您自己执行，DecisionGuard 只提出建议。",
+    "DRAFT": "DecisionGuard 起草，经您批准后才会发送。",
     "EXECUTE": "涉及资金或承诺，需店主输入验证码批准。",
-    "DENY": "无论谁要求，Hishab 都不会执行。"
+    "DENY": "无论谁要求，DecisionGuard 都不会执行。"
   },
   "actionCard": {
     "open": "打开",
@@ -188,7 +188,7 @@
     "approved": "已批准，并已记入审计日志。",
     "ownerOnly": "只有店主可以批准此操作。",
     "roleCannot": "您的角色无法批准此操作。",
-    "never": "已阻止：Hishab 从不执行此操作。",
+    "never": "已阻止：DecisionGuard 从不执行此操作。",
     "expires": "{{when}} 到期",
     "cost": "成本",
     "dueDate": "到期日 {{date}}",
@@ -366,7 +366,7 @@
     "find": "查找方案",
     "matching": "正在比较方案…",
     "optionsTitle": "您的方案（最优在前）",
-    "applicationHelp": "Hishab 已为您符合条件的最佳方案预填申请。在您批准前不会发送任何内容。",
+    "applicationHelp": "DecisionGuard 已为您符合条件的最佳方案预填申请。在您批准前不会发送任何内容。",
     "rank": "排名 {{rank}}",
     "eligibility": {
       "pass": "符合条件",
@@ -555,7 +555,7 @@
     }
   },
   "mesh": {
-    "empty": "您目前不在任何债务环中。当您的买方和供应商加入 Hishab 后，可以在这里用少量现金清偿循环债务。",
+    "empty": "您目前不在任何债务环中。当您的买方和供应商加入 DecisionGuard 后，可以在这里用少量现金清偿循环债务。",
     "graphTitle": "谁欠谁",
     "owes": "{{debtor}} 欠 {{creditor}}",
     "due": "到期 {{date}}",
@@ -614,7 +614,7 @@
     "leadTime": "{{days}}送达",
     "onTime": "准时率 {{rate}}",
     "negotiateTitle": "销售谈判",
-    "negotiateHelp": "输入买方出价。Hishab 会算出您的底价，并给出每一步都有数据支撑的谈判脚本。",
+    "negotiateHelp": "输入买方出价。DecisionGuard 会算出您的底价，并给出每一步都有数据支撑的谈判脚本。",
     "offer": "买方单价出价 (৳)",
     "paymentDays": "买方付款期",
     "makePlan": "生成我的方案",
@@ -685,7 +685,7 @@
   },
   "reports": {
     "passportTitle": "信任护照",
-    "passportHelp": "可提供给任何贷款方的自有可验证证据：流水、执照、交易方确认，以及 Hishab 的诚信记录。",
+    "passportHelp": "可提供给任何贷款方的自有可验证证据：流水、执照、交易方确认，以及 DecisionGuard 的诚信记录。",
     "noPassport": "还没有护照，请先添加流水。",
     "version": "第 {{version}} 版",
     "digest": "指纹 {{hash}}",
@@ -703,7 +703,7 @@
     "selfDeclared": "自行申报",
     "attestations": "交易方确认",
     "attestationCounts": "{{confirmed}} 条确认，{{disputed}} 条争议",
-    "abstentionRate": "Hishab 说\"我不知道\"的频率",
+    "abstentionRate": "DecisionGuard 说\"我不知道\"的频率",
     "drillRate": "审计演练捕获率",
     "openVerify": "打开公开验证页面",
     "issue": "生成新版本",
@@ -748,7 +748,7 @@
     "head": "最新哈希 {{hash}}",
     "verifyAgain": "重新验证",
     "drillTitle": "夜间审计演练",
-    "drillHelp": "每晚 Hishab 会在您账本的副本中植入错误，并统计能发现多少。",
+    "drillHelp": "每晚 DecisionGuard 会在您账本的副本中植入错误，并统计能发现多少。",
     "drillCaught": "植入的 {{planted}} 个错误中发现了 {{caught}} 个",
     "drillRun": "最近一次运行 {{when}}",
     "eventsTitle": "最近操作",
@@ -757,7 +757,7 @@
     "who": "操作人",
     "what": "内容",
     "tier": "级别",
-    "abstentionsTitle": "Hishab 说\"我不知道\"的时候",
+    "abstentionsTitle": "DecisionGuard 说\"我不知道\"的时候",
     "abstentionsHelp": "每次拒绝猜测的记录，以及缺少的信息。",
     "noAbstentions": "没有弃答记录。",
     "missing": "缺少：{{items}}",
@@ -816,11 +816,11 @@
     "masked": "根据您的角色，部分来源记录已隐藏。",
     "parameters": "使用的参数",
     "recordedOnly": "详细分解暂不可用，以下是随数字记录的来源信息。",
-    "codeComputes": "由 Hishab 的计算引擎根据您的记录算出，没有任何 AI 模型生成这个数字。"
+    "codeComputes": "由 DecisionGuard 的计算引擎根据您的记录算出，没有任何 AI 模型生成这个数字。"
   },
   "copilot": {
-    "open": "问 Hishab",
-    "title": "问 Hishab",
+    "open": "问 DecisionGuard",
+    "title": "问 DecisionGuard",
     "subtitle": "回答以决策卡片呈现，每个数字都根据您的记录计算。",
     "tryAsking": "试着问：",
     "ask": "您的问题",

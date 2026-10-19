@@ -1,9 +1,9 @@
-# Hishab — SME Finance Copilot
+# DecisionGuard — SME Finance Copilot
 
 **2026 Shenzhen International FinTech Competition (FinTechathon), International Track, Topic E: SME Finance Copilot.**
-Team Hishab, Bangladesh University of Professionals: Nobo Ishraque (lead), Amdad, Labib.
+Team DecisionGuard, Bangladesh University of Professionals: Nobo Ishraque (lead), Amdad, Labib.
 
-Hishab is a mobile-first copilot for a small Bangladeshi business: a grocery in Mirpur, a
+DecisionGuard is a mobile-first copilot for a small Bangladeshi business: a grocery in Mirpur, a
 pharmacy in Dhanmondi, a fabric wholesaler in Islampur. It reads the shop's own records (bKash,
 Nagad and bank statements, cash book, baki register), warns before cash runs short, ranks real
 financing options by their true yearly cost, and explains the business's numbers. **Code
@@ -17,7 +17,7 @@ show its formula and the source rows behind it.
 
 ## What it does
 
-| Area (Topic E) | What Hishab does | Where |
+| Area (Topic E) | What DecisionGuard does | Where |
 | --- | --- | --- |
 | A. Financing-option matching | True yearly cost of every option, fees included (effective annual rate from the cash flows); eligibility with reasons, and "not on record" instead of guessing; ranking; non-loan options; draft application that only the owner can submit, with a step-up code | `backend/app/engines/financing/`, `backend/app/api/financing.py` |
 | B. Cash-flow management with alerts | 13-week forecast band from seeded Monte Carlo paths, cash gaps, alerts in Watch / Warning / Critical tiers, what-if levers, cash buffer | `backend/app/engines/cash/`, `backend/app/api/cash.py` |

@@ -16,8 +16,8 @@ export default defineConfig({
       injectRegister: "auto",
       includeAssets: ["favicon.svg"],
       manifest: {
-        name: "Hishab - SME finance copilot",
-        short_name: "Hishab",
+        name: "DecisionGuard - SME finance copilot",
+        short_name: "DecisionGuard",
         description: "Cash-flow alerts, financing options and analysis for small businesses in Bangladesh.",
         lang: "en",
         start_url: "/",

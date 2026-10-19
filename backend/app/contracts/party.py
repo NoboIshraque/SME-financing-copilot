@@ -36,6 +36,6 @@ class Party(Contract):
         description="Neutral label safe to show anywhere, e.g. 'Customer 3'", max_length=64
     )
     is_tenant: bool = Field(
-        default=False, description="True if this party is itself a Hishab tenant (mesh peer)"
+        default=False, description="True if this party is itself a DecisionGuard tenant (mesh peer)"
     )
     data_mode: DataMode

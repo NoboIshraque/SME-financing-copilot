@@ -1,4 +1,4 @@
-# Master plan — Hishab (SME Finance Copilot)
+# Master plan — DecisionGuard (SME Finance Copilot)
 
 Owner: Nobo (lead) · Team: Nobo, Amdad, Labib · Orchestrator: Claude (cloud chat session)
 

@@ -15,7 +15,7 @@ import pyotp
 DIGITS = 6
 STEP_SECONDS = 30
 DRIFT_STEPS = 1
-ISSUER = "Hishab"
+ISSUER = "DecisionGuard"
 
 _BANGLA_DIGITS = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
 _SEPARATORS = str.maketrans("", "", " - ")

@@ -19,7 +19,7 @@ class ObligationStatus(StrEnum):
 
 
 class MeshObligation(Contract):
-    """`debtor_tenant` owes `creditor_tenant`. Both are Hishab tenants that opted in."""
+    """`debtor_tenant` owes `creditor_tenant`. Both are DecisionGuard tenants that opted in."""
 
     id: str
     debtor_tenant: str

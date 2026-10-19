@@ -1,4 +1,4 @@
-# Hishab: SME Finance Copilot. Technical documentation
+# DecisionGuard: SME Finance Copilot. Technical documentation
 
 **Deliverable 01: architecture, core algorithms, security design**
 
@@ -6,7 +6,7 @@
 | --- | --- |
 | Competition | 2026 Shenzhen International FinTech Competition (FinTechathon), International Track |
 | Topic | **E: SME Finance Copilot** (financing-option matching, cash-flow management with alerts, business financial analysis) |
-| Team | Hishab: Nobo Ishraque (lead), Amdad, Labib |
+| Team | DecisionGuard: Nobo Ishraque (lead), Amdad, Labib |
 | University | Bangladesh University of Professionals (BUP), Dhaka, Bangladesh |
 | Date | 20 Oct 2026 (final submission) |
 | Code | `main` at the code-freeze commit named in `docs/submission/evidence/README.md` |
@@ -68,7 +68,7 @@ costs, when cash will run short and what to do about it, and an honest picture o
 The theme is *AI as a Financial Participant*. An agent that acts on money must be right about
 numbers and must never act alone. Research summarised in `docs/CONTEXT.md` §4 shows why plain
 LLMs fail here: they are not calculators, they retrieve the wrong figure, they cannot reliably
-correct themselves, and their stated confidence is inflated. Hishab is built around five rules,
+correct themselves, and their stated confidence is inflated. DecisionGuard is built around five rules,
 stated as non-negotiable in `CLAUDE.md`:
 
 | # | Rule (from `CLAUDE.md`) | How the code enforces it |
@@ -781,7 +781,7 @@ agreement is claimed; computed for this document with `POST /api/copilot/ask` on
 | Question | Tools run | Claims stated / verified | Action cards | Critic | Stability |
 | --- | --- | --- | --- | --- | --- |
 | "Will I run out of cash in the next month?" | `cash.forecast`, `cash.gaps` | 12 / 12 | 2 x ask a buyer for an advance (EXECUTE) | "Asking a customer to pay early can strain the relationship and may be refused." | 0.75: if customers pay 7 days later, netting becomes the better first fix |
-| "How big a loan can I safely take?" | `cash.gaps`, `financing.match` | 14 / 14 | 2 x advance (EXECUTE), 1 x propose a netting round (DRAFT) | "We could not confirm that you qualify for Startup financing ...: the lender will ask for facts Hishab does not hold." | 1.00 |
+| "How big a loan can I safely take?" | `cash.gaps`, `financing.match` | 14 / 14 | 2 x advance (EXECUTE), 1 x propose a netting round (DRAFT) | "We could not confirm that you qualify for Startup financing ...: the lender will ask for facts DecisionGuard does not hold." | 1.00 |
 
 From the second answer, every figure checked: cash gap starting in 5 days with probability 86.70%
 and expected shortfall Tk 73,460.90; the cheapest fix closes Tk 71,736.88 of it at no cost; the
