@@ -1,4 +1,4 @@
-# Feature list — SME Finance Copilot (working name: Hishab)
+# Feature list — SME Finance Copilot (working name: DecisionGuard)
 
 > **Scope cuts approved by Nobo, 19 Oct 22:19 Dhaka**, to fit the time before the 20 Oct deadline. Kept whole:
 > WP-10 agents (done). Cut: WP-09 market (N3, N19), WP-12 sending channels (N2 keeps drafts in

@@ -108,7 +108,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     local = settings.app_env in (AppEnv.development, AppEnv.test)
     application = FastAPI(
-        title="Hishab - SME Finance Copilot API",
+        title="DecisionGuard - SME Finance Copilot API",
         version="0.1.0",
         # Interactive docs only where developers run the app: Swagger UI loads from a
         # third-party CDN (may be blocked in China, needs a relaxed CSP). The API contract is

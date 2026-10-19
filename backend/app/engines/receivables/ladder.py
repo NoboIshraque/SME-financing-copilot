@@ -4,7 +4,7 @@ Each open invoice has reminders at due -3 days (friendly, pre-due), due day, +3,
 Per customer, the plan takes the most urgent invoice: its next step on or after `as_of` (an
 invoice more than 20 days late stays on the last step). One card per customer, soonest first.
 
-Sending a message leaves Hishab, so the card is `send_reminder` at EXECUTE tier: the owner
+Sending a message leaves DecisionGuard, so the card is `send_reminder` at EXECUTE tier: the owner
 approves it with a step-up code (WP-11). Sending channels were cut (WP-12), so an approved
 reminder is recorded and the owner sends the drafted text themselves. The payment link is a
 placeholder until a payment provider is connected.

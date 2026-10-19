@@ -3,8 +3,8 @@
 Two questions, both answered here and nowhere else:
 
 1. What does an action *need*? (`REQUIRED`) READ to look, DRAFT to prepare something that
-   stays inside Hishab, EXECUTE for anything that leaves it (a message, a payment, data shared
-   with a lender), DENY for what no one may do through Hishab at all.
+   stays inside DecisionGuard, EXECUTE for anything that leaves it (a message, a payment, data
+   shared with a lender), DENY for what no one may do through DecisionGuard at all.
 2. How far may a role take it? (`POLICY`) A role holding less than the action needs may still
    suggest or draft it for someone who holds more.
 

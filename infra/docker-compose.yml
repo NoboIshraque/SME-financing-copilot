@@ -1,4 +1,4 @@
-# Hishab on one server (Singapore). Start from the repo root:
+# DecisionGuard on one server (Singapore). Start from the repo root:
 #   docker compose --env-file ~/hishab/shared/.env -f infra/docker-compose.yml -p hishab up -d --build
 # The env file holds secrets and lives only on the server (template: infra/.env.example).
 name: hishab

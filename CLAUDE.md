@@ -1,4 +1,4 @@
-# Hishab — SME Finance Copilot (FinTechathon 2026, Topic E)
+# DecisionGuard — SME Finance Copilot (FinTechathon 2026, Topic E)
 
 Mobile-first web app + API + agents that help a small Bangladeshi business with financing-option
 matching, cash-flow management with alerts, and business financial analysis.

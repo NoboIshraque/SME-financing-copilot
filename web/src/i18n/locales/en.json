@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Hishab",
+    "name": "DecisionGuard",
     "tagline": "Your shop's finance copilot"
   },
   "banner": {
@@ -64,7 +64,7 @@
     "signIn": "Sign in",
     "signingIn": "Signing in…",
     "totpTitle": "Enter your code",
-    "totpHelp": "Open your authenticator app and type the 6-digit code for Hishab.",
+    "totpHelp": "Open your authenticator app and type the 6-digit code for DecisionGuard.",
     "code": "6-digit code",
     "verify": "Verify",
     "verifying": "Checking…",
@@ -96,7 +96,7 @@
     "not_computable": "This figure can't be computed from the data on record.",
     "figure_not_found": "This figure's explanation was not found.",
     "idempotency_required": "The request was missing its safety key. Please try again.",
-    "action_denied": "Hishab never does this, whoever asks.",
+    "action_denied": "DecisionGuard never does this, whoever asks.",
     "nothing_to_approve": "There is nothing to approve here.",
     "already_decided": "This was already decided.",
     "owner_only": "Only the owner can approve this.",
@@ -111,7 +111,7 @@
     "invalid_share": "Name the lender, pick what they can see, and choose up to 30 days.",
     "passport_not_found": "No passport with that ID.",
     "no_evidence": "Add statements before issuing a passport.",
-    "input_quarantined": "This message looked like an attempt to override Hishab's safety rules, so it was blocked and logged.",
+    "input_quarantined": "This message looked like an attempt to override DecisionGuard's safety rules, so it was blocked and logged.",
     "empty_question": "Type a question first.",
     "no_file": "Choose a file to upload.",
     "digest_mismatch": "The file changed since the preview. Please upload it again.",
@@ -175,10 +175,10 @@
   },
   "tierHelp": {
     "READ": "Information only.",
-    "SUGGEST": "You do this yourself; Hishab only suggests it.",
-    "DRAFT": "Hishab prepares it; nothing is sent until you approve.",
+    "SUGGEST": "You do this yourself; DecisionGuard only suggests it.",
+    "DRAFT": "DecisionGuard prepares it; nothing is sent until you approve.",
     "EXECUTE": "Moves money or makes a commitment, so the owner approves it with a code.",
-    "DENY": "Hishab never does this, whoever asks."
+    "DENY": "DecisionGuard never does this, whoever asks."
   },
   "actionCard": {
     "open": "Open",
@@ -188,7 +188,7 @@
     "approved": "Approved. It is recorded in the audit log.",
     "ownerOnly": "Only the owner can approve this.",
     "roleCannot": "Your role can't approve this.",
-    "never": "Blocked: Hishab never does this.",
+    "never": "Blocked: DecisionGuard never does this.",
     "expires": "Expires {{when}}",
     "cost": "Cost",
     "dueDate": "due {{date}}",
@@ -366,7 +366,7 @@
     "find": "Find options",
     "matching": "Comparing options…",
     "optionsTitle": "Your options, best first",
-    "applicationHelp": "Hishab pre-filled an application for the best option you qualify for. Nothing is sent until you approve it.",
+    "applicationHelp": "DecisionGuard pre-filled an application for the best option you qualify for. Nothing is sent until you approve it.",
     "rank": "Rank {{rank}}",
     "eligibility": {
       "pass": "You qualify",
@@ -555,7 +555,7 @@
     }
   },
   "mesh": {
-    "empty": "You are not in any debt ring yet. When your buyers and suppliers join Hishab, circular debts can be cleared here with little cash.",
+    "empty": "You are not in any debt ring yet. When your buyers and suppliers join DecisionGuard, circular debts can be cleared here with little cash.",
     "graphTitle": "Who owes whom",
     "owes": "{{debtor}} owes {{creditor}}",
     "due": "due {{date}}",
@@ -614,7 +614,7 @@
     "leadTime": "arrives in {{days}}",
     "onTime": "on time {{rate}}",
     "negotiateTitle": "Negotiate a sale",
-    "negotiateHelp": "Enter the buyer's offer. Hishab works out your walk-away point and a script with the numbers behind each step.",
+    "negotiateHelp": "Enter the buyer's offer. DecisionGuard works out your walk-away point and a script with the numbers behind each step.",
     "offer": "Buyer's offer per unit (৳)",
     "paymentDays": "Buyer pays after",
     "makePlan": "Make my plan",
@@ -685,7 +685,7 @@
   },
   "reports": {
     "passportTitle": "Trust Passport",
-    "passportHelp": "Your own verifiable evidence for any lender: statements, licences, counterparty confirmations and Hishab's honesty record.",
+    "passportHelp": "Your own verifiable evidence for any lender: statements, licences, counterparty confirmations and DecisionGuard's honesty record.",
     "noPassport": "No passport yet. Add statements first.",
     "version": "Version {{version}}",
     "digest": "Fingerprint {{hash}}",
@@ -703,7 +703,7 @@
     "selfDeclared": "self-declared",
     "attestations": "Confirmed by trading partners",
     "attestationCounts": "{{confirmed}} confirmed, {{disputed}} disputed",
-    "abstentionRate": "How often Hishab said \"I don't know\"",
+    "abstentionRate": "How often DecisionGuard said \"I don't know\"",
     "drillRate": "Audit drill catch rate",
     "openVerify": "Open the public verify page",
     "issue": "Issue a new version",
@@ -748,7 +748,7 @@
     "head": "Latest hash {{hash}}",
     "verifyAgain": "Verify again",
     "drillTitle": "Nightly audit drill",
-    "drillHelp": "Each night Hishab plants errors in a copy of your ledger and counts how many it catches.",
+    "drillHelp": "Each night DecisionGuard plants errors in a copy of your ledger and counts how many it catches.",
     "drillCaught": "caught {{caught}} of {{planted}} planted errors",
     "drillRun": "Last run {{when}}",
     "eventsTitle": "Recent actions",
@@ -757,7 +757,7 @@
     "who": "Who",
     "what": "What",
     "tier": "Tier",
-    "abstentionsTitle": "When Hishab said \"I don't know\"",
+    "abstentionsTitle": "When DecisionGuard said \"I don't know\"",
     "abstentionsHelp": "Every time it refused to guess, and what was missing.",
     "noAbstentions": "No abstentions recorded.",
     "missing": "Missing: {{items}}",
@@ -816,11 +816,11 @@
     "masked": "Some source rows are hidden for your role.",
     "parameters": "Settings used",
     "recordedOnly": "The detailed breakdown is not available yet. This is the provenance recorded with the number.",
-    "codeComputes": "Computed by Hishab's engines from your records. No AI model produced this number."
+    "codeComputes": "Computed by DecisionGuard's engines from your records. No AI model produced this number."
   },
   "copilot": {
-    "open": "Ask Hishab",
-    "title": "Ask Hishab",
+    "open": "Ask DecisionGuard",
+    "title": "Ask DecisionGuard",
     "subtitle": "Answers come as decision cards. Every number is computed from your records.",
     "tryAsking": "Try asking:",
     "ask": "Your question",

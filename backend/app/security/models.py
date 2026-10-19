@@ -49,7 +49,7 @@ class UTCDateTime(TypeDecorator[datetime]):
 
 
 class TenantRow(Base):
-    """A business using Hishab. `data_mode` labels synthetic demo tenants."""
+    """A business using DecisionGuard. `data_mode` labels synthetic demo tenants."""
 
     __tablename__ = "security_tenants"
 

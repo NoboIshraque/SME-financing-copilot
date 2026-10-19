@@ -1,6 +1,6 @@
 # Orchestrator baton
 
-Hishab has more than one orchestrator session (one per Claude account). They cannot see
+DecisionGuard has more than one orchestrator session (one per Claude account). They cannot see
 each other's chats, so **this file is how they talk**. The repo is the only shared memory.
 Nothing important may live only inside a session's sandbox.
 
@@ -17,10 +17,10 @@ Session names: `orch-A`, `orch-C` (`orch-B` only in an emergency).
 | On duty | orch-C |
 | Since (Dhaka) | 2026-10-19 10:55 |
 | Merge authority | the on-duty orchestrator only |
-| Working on | #29 (WP-10), #30 (web demo fixes), #31 (WP-05) merged 20 Oct ~00:10 |
-| Next 3 steps | 1. Lender-viewer leaks on facts/ingest (e2e known bugs). 2. Wire the WP-04 band into financing fit. 3. Merge WP-16 / orch-A PRs as they come. |
-| Open PRs and their state | none of orch-C's; WP-16 (B2) and orch-A demo fixes expected |
-| Waiting on (people / CI / limits) | — |
+| Working on | handover 20 Oct ~01:00: everything merged or cut; WP-19 final pass merged; renamed DecisionGuard |
+| Next 3 steps | 1. Nobo records the video and republishes the deck (NOW.md). 2. Amdad's server, then the hosted E2E and `CHAIN_MODE=sepolia`. 3. Labib's notebook 01 on Kaggle (datasets blocked from the cloud). |
+| Open PRs and their state | none |
+| Waiting on (people / CI / limits) | Nobo (video, deck, sending), Amdad (server), Labib (notebook 01) |
 | Lives only in a sandbox (must be committed) | nothing (orch-A's CPU runner is on main since af37713) |
 | Off-duty orchestrator | orch-A (limit reset time not recorded) |
 
@@ -70,3 +70,4 @@ limit, or before stopping for any reason.
 | When (Dhaka) | Session | What happened | Handover commit |
 | --- | --- | --- | --- |
 | 2026-10-18 06:10 | orch-A | Wrote HANDOVER_2 (see docs/HANDOVER.md); hit usage limit later | — |
+| 2026-10-20 01:00 | orch-C | Merged #17–#36 (WP-04/05/06/07/08/10/12/13/14/16, demo fixes, cuts); renamed to DecisionGuard; WP-19 final pass (docs, evidence, PDFs) | wp-19-submission |

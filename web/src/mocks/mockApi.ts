@@ -7,7 +7,7 @@ import { createMockDb, type MockDb } from "./db";
 import { apiError, compilePattern, type MockHandler, type MockRequest, type MockResult } from "./http";
 import { ROUTES } from "./routes";
 
-export const MOCK_HEADER = "X-Hishab-Mock";
+export const MOCK_HEADER = "X-DecisionGuard-Mock";
 
 /** Replace one route's answer, keyed "METHOD /api/path" (`:param` segments allowed). */
 export type MockOverrides = Record<string, MockResult | MockHandler>;

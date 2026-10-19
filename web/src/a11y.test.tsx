@@ -52,8 +52,8 @@ describe("WCAG 2.1 AA (axe)", () => {
 
   it("the copilot panel with an answer has no violations", async () => {
     const { user } = renderApp("/");
-    await user.click(await screen.findByRole("button", { name: "Ask Hishab" }));
-    const panel = screen.getByRole("dialog", { name: "Ask Hishab" });
+    await user.click(await screen.findByRole("button", { name: "Ask DecisionGuard" }));
+    const panel = screen.getByRole("dialog", { name: "Ask DecisionGuard" });
     await user.click(within(panel).getByRole("button", { name: "Which customer should I chase first?" }));
     await within(panel).findByText(/Chase Customer 10 first/);
     expect(await violations()).toEqual([]);

@@ -567,7 +567,7 @@ export type ObligationStatus1 = "open" | "in_round" | "settled" | "disputed";
 export type DisplayLabel = string;
 export type Id15 = string;
 /**
- * True if this party is itself a Hishab tenant (mesh peer)
+ * True if this party is itself a DecisionGuard tenant (mesh peer)
  */
 export type IsTenant = boolean;
 /**
@@ -1409,7 +1409,7 @@ export interface LenderProfile {
   regulator?: Regulator;
 }
 /**
- * `debtor_tenant` owes `creditor_tenant`. Both are Hishab tenants that opted in.
+ * `debtor_tenant` owes `creditor_tenant`. Both are DecisionGuard tenants that opted in.
  *
  * This interface was referenced by `HishabContracts`'s JSON-Schema
  * via the `definition` "MeshObligation".

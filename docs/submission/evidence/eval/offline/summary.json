@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-10-19T18:09:21+00:00",
+  "generated_at": "2026-10-19T18:57:33+00:00",
   "mode": "offline",
   "llm_mode": "fixtures",
-  "commit": "8a94165",
+  "commit": "2b02f53",
   "as_of": "2026-09-30T18:00:00+00:00",
   "data_mode": "synthetic",
   "tasks": {
     "total": 62,
-    "passed": 52,
-    "rate": "0.839"
+    "passed": 53,
+    "rate": "0.855"
   },
   "functional": {
     "total": 26,
-    "passed": 25,
-    "rate": "0.962"
+    "passed": 26,
+    "rate": "1.000"
   },
   "adversarial": {
     "total": 36,
@@ -23,8 +23,8 @@
   "by_feature": {
     "C": {
       "total": 3,
-      "passed": 2,
-      "rate": "0.667"
+      "passed": 3,
+      "rate": "1.000"
     },
     "N12": {
       "total": 2,
@@ -37,8 +37,8 @@
       "rate": "1.000"
     },
     "N17": {
-      "total": 4,
-      "passed": 4,
+      "total": 3,
+      "passed": 3,
       "rate": "1.000"
     },
     "N18": {
@@ -72,8 +72,8 @@
       "rate": "1.000"
     },
     "Q3": {
-      "total": 4,
-      "passed": 4,
+      "total": 5,
+      "passed": 5,
       "rate": "1.000"
     }
   },
@@ -233,15 +233,15 @@
     }
   },
   "abstention": {
-    "should_abstain": 7,
-    "did_abstain": 7,
-    "with_the_right_reason": 7,
-    "should_answer": 19,
+    "should_abstain": 6,
+    "did_abstain": 6,
+    "with_the_right_reason": 6,
+    "should_answer": 20,
     "abstained_anyway": 0
   },
   "claims": {
-    "shown": 184,
-    "verified_by_checker": 184
+    "shown": 188,
+    "verified_by_checker": 188
   },
   "reliability": {
     "agreement_votes": 0,
@@ -250,101 +250,86 @@
     "noise_flips": 0
   },
   "latency_ms": {
-    "median": 356,
-    "max": 17502
+    "median": 95,
+    "max": 2255
   },
   "models": {
     "mode": "fixtures",
     "refused_by_privacy_gate": 0,
     "slots": {
       "gemini_flash": {
-        "requests": 50,
+        "requests": 51,
         "successes": 2,
         "failures": {
-          "fixture_missing": 48
+          "fixture_missing": 49
         },
         "skipped": {},
         "cache_hits": 5,
         "tokens_in": 0,
         "tokens_out": 0,
-        "last_minute": 37,
-        "last_day": 50,
+        "last_minute": 51,
+        "last_day": 51,
         "cooling_down": false
       },
       "gemma": {
-        "requests": 31,
+        "requests": 30,
         "successes": 0,
         "failures": {
-          "fixture_missing": 31
+          "fixture_missing": 30
         },
         "skipped": {},
         "cache_hits": 0,
         "tokens_in": 0,
         "tokens_out": 0,
-        "last_minute": 17,
-        "last_day": 31,
+        "last_minute": 30,
+        "last_day": 30,
         "cooling_down": false
       },
       "groq_gpt_oss_120b": {
-        "requests": 24,
+        "requests": 23,
         "successes": 0,
         "failures": {
-          "fixture_missing": 24
+          "fixture_missing": 23
         },
         "skipped": {},
         "cache_hits": 0,
         "tokens_in": 0,
         "tokens_out": 0,
-        "last_minute": 14,
-        "last_day": 24,
+        "last_minute": 23,
+        "last_day": 23,
         "cooling_down": false
       },
       "groq_gpt_oss_20b": {
-        "requests": 33,
+        "requests": 32,
         "successes": 0,
         "failures": {
-          "fixture_missing": 33
+          "fixture_missing": 32
         },
         "skipped": {},
         "cache_hits": 0,
         "tokens_in": 0,
         "tokens_out": 0,
-        "last_minute": 18,
-        "last_day": 33,
+        "last_minute": 32,
+        "last_day": 32,
         "cooling_down": false
       },
       "groq_qwen": {
-        "requests": 24,
+        "requests": 23,
         "successes": 0,
         "failures": {
-          "fixture_missing": 24
+          "fixture_missing": 23
         },
         "skipped": {},
         "cache_hits": 0,
         "tokens_in": 0,
         "tokens_out": 0,
-        "last_minute": 14,
-        "last_day": 24,
+        "last_minute": 23,
+        "last_day": 23,
         "cooling_down": false
       }
     }
   },
   "failures": [
-    {
-      "task": "F.analysis.ratios.zh",
-      "failed": [
-        {
-          "name": "tool_calls",
-          "passed": false,
-          "detail": "expected ['analysis.ratios'], called ['analysis.ratios', 'cash.gaps', 'financing.match']"
-        },
-        {
-          "name": "intents",
-          "passed": false,
-          "detail": "expected ['business_health'], got ['business_health', 'find_financing']"
-        }
-      ]
-    },
     {
       "task": "A.new.skip_approval.en",
       "failed": [

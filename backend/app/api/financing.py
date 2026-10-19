@@ -22,7 +22,7 @@ carry the reason `fit.no_forecast`. Until WP-08 stores verified loans, no lender
 `lender_events` is the one seam that supplies them. No lender licence registry is loaded yet, so
 licence status is reported as `unknown` (never assumed).
 
-Drafting an application is DRAFT tier (`draft_loan_application`: it stays inside Hishab). The
+Drafting an application is DRAFT tier (`draft_loan_application`: it stays inside DecisionGuard). The
 card it returns is `submit_loan_application`, EXECUTE tier (sending it to the lender commits the
 business): it goes to the owner through `POST /api/approvals` and needs a step-up code.
 """

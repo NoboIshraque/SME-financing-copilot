@@ -21,7 +21,7 @@ describe("Trust & audit screen", () => {
     expect(rows).toHaveLength(5);
     expect(rows[1]).toHaveTextContent("Blocked a suspicious instruction · chat-msg-77");
     expect(rows[1]?.querySelector("[data-tier]")).toHaveAttribute("data-tier", "DENY");
-    const log = screen.getByRole("region", { name: "When Hishab said \"I don't know\"" });
+    const log = screen.getByRole("region", { name: "When DecisionGuard said \"I don't know\"" });
     const first = (await within(log).findAllByRole("listitem"))[0];
     expect(first).toHaveTextContent("How big a loan can I safely take for Eid stock?");
     expect(first?.querySelector("q")).toHaveTextContent("How big a loan can I safely take for Eid stock?");

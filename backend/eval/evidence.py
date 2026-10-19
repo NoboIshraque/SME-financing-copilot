@@ -188,7 +188,9 @@ def readme(backend: Counter[str], web: int | None, stamp: str) -> str:
     lines = [
         "# Execution evidence (deliverable 06)", "",
         f"Generated {stamp} by `npm run evidence`. Every figure below comes from a run in "
-        "this repository; all data is synthetic (`data_mode: \"synthetic\"`).", "",
+        "this repository; all data is synthetic (`data_mode: \"synthetic\"`). The hand-written "
+        "index (freeze record, sandbox operation log, worked examples, what the evidence does "
+        "not show) is [`INDEX.md`](INDEX.md).", "",
         "| Path | What |", "| --- | --- |",
         "| `eval/offline/tasks/<task>.jsonl` | Step log of one eval task, one JSON object per "
         "line: the input and expected outcome, every orchestrator step (injection guard, "

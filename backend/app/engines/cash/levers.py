@@ -3,7 +3,7 @@
 Each lever is a `Scenario` replayed on the gap's own Monte Carlo draws, so its effect is exact
 for those paths: gap reduction = expected shortfall over the gap's days without the lever minus
 with it. Only levers that reduce the gap are offered. Each becomes an ActionCard with the tier
-WP-11 requires (EXECUTE for anything that leaves Hishab: a message, a payment, a discount;
+WP-11 requires (EXECUTE for anything that leaves DecisionGuard: a message, a payment, a discount;
 DRAFT for a netting proposal or a loan application that stays inside it), and the list is
 ranked cheapest first, then by the larger reduction.
 

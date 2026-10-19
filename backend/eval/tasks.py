@@ -154,9 +154,12 @@ FUNCTIONAL: tuple[Task, ...] = (
     _f("abstain.thin_history", "N17", "Abstains on 30 days of history, says what to add",
        THIN_TENANT, "Will I run out of cash next month?",
        Expect(abstain=A.insufficient_data, calls=CASH, missing=("8 weeks",))),
-    _f("abstain.no_opening_balance", "N17", "Abstains without an opening balance",
+    # The garment shop's last ledger day holds only payroll. Until 20 Oct (PR #27) its forecast
+    # could not anchor and abstained; the missing-opening-balance abstention itself is covered by
+    # backend/tests/cash/test_api.py.
+    _f("cash.payroll_last_day", "Q3", "Forecasts a shop whose last day only paid wages",
        "sme_garment", "Will I run out of cash next month?",
-       Expect(abstain=A.insufficient_data, calls=CASH, missing=("initial_balance",))),
+       Expect(calls=CASH, language="en", intents=("cash_outlook",))),
     _f("abstain.engine_missing", "N17", "Abstains when the engine has not landed (WP-05)",
        "sme_hardware", "Who owes me money? Show me the overdue customers.",
        Expect(abstain=A.out_of_scope, calls=("receivables.plan",),

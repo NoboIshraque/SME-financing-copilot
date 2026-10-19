@@ -1,6 +1,6 @@
 """Application pack draft (WP-06 milestone 7).
 
-Turns a ranked option into an ActionCard. Drafting the pack stays inside Hishab (DRAFT,
+Turns a ranked option into an ActionCard. Drafting the pack stays inside DecisionGuard (DRAFT,
 `draft_loan_application`); the card is the next step, `submit_loan_application`: sending it to
 the lender commits the business, so it is EXECUTE tier and the owner approves it with a step-up
 code (WP-11 policy: owner EXECUTE, accountant may only draft and request). The payload carries only
