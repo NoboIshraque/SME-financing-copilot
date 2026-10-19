@@ -207,7 +207,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-04 | done (8/8) | merged (PR #19) | 191 | forecast (seasonality incl. festivals, per-customer delays, supplier habits), Monte Carlo (1,000 seeded integer paths, block bootstrap, common random numbers), gaps + 5 leading indicators, Q1 alert tiers with dedupe/cooldown, 6 measured levers as action cards (WP-06/WP-08 interfaces), buffer target + surplus sweep, walk-forward backtest, API (forecast/gaps/alerts/what-if) + daily alert scan |
 | WP-05 | not started | — | 0 | |
 | WP-06 | done (8/8) | merged (PR #20, #22, #23) | 147 | engine + real BD catalogue; API: match (web FinancingMatch shape: lenders + application draft), lender check, application draft; application card is `submit_loan_application` (EXECUTE, owner approves with step-up; PR #23). Fit still waits for the WP-04 band to be wired in |
-| WP-07 | not started | — | 0 | |
+| WP-07 | done (6/6), PR #24 open for the on-duty orchestrator | wp-07-analysis | 134 | statements (cash-basis P&L, cash flow, balance-sheet-lite); 13 ratios with provenance and stated abstentions; expected vs reality (immutable weekly/quarterly snapshots, ranked variances, accuracy, correction fed to WP-04); scenarios (6 decisions under 40 macro states on WP-04's paths, risk-adjusted pick); stability score (6 stresses + 4 noises, what would flip it, noise flips = unreliable); API + nightly snapshot freeze. Note for WP-04 in WP-07.md (customer tie-break by token) |
 | WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API (milestone 8) unblocked by WP-11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |
