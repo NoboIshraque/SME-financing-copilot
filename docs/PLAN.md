@@ -214,7 +214,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-11 | not started | — | 0 | |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
-| WP-14 | in progress (9/12) | wp-14-web | 175 web (141 new) | shell: role-aware routing, sign-in + TOTP, step-up dialog, typed API client, offline mock API (live/mock/auto), synthetic banner, light/dark, self-hosted BN/ZH fonts |
+| WP-14 | in progress (10/12) | wp-14-web | 183 web (149 new) | shell: role-aware routing, sign-in + TOTP, step-up dialog, typed API client, offline mock API (live/mock/auto), synthetic banner, light/dark, self-hosted BN/ZH fonts |
 | WP-15 | not started | — | 0 | |
 | WP-16 | not started | — | 0 | needs P3 approval |
 | WP-17 | in progress (2/4) | merged | 6 | notebooks 01-04 + corpus merged; 02 done; CPU baseline classifier run; Labib runs 01/03/04 on Kaggle |
