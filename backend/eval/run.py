@@ -24,13 +24,18 @@ OUT = REPO / "docs" / "submission" / "evidence" / "eval"
 
 
 def commit() -> str | None:
+    """The commit the logs come from; "+local" when backend code differs from it."""
     try:
-        result = subprocess.run(  # noqa: S603 - fixed argv, no shell
+        head = subprocess.run(  # noqa: S603 - fixed argv, no shell
             ["git", "rev-parse", "--short", "HEAD"], cwd=REPO,  # noqa: S607
             capture_output=True, text=True, check=False)
+        local = subprocess.run(  # noqa: S603 - fixed argv, no shell
+            ["git", "diff", "--quiet", "HEAD", "--", "backend"], cwd=REPO,  # noqa: S607
+            capture_output=True, check=False)
     except OSError:
         return None
-    return result.stdout.strip() or None
+    sha = head.stdout.strip()
+    return (sha + ("+local" if local.returncode else "")) if sha else None
 
 
 def select(tasks: tuple[Task, ...], suite: str | None, only: list[str] | None
@@ -81,6 +86,11 @@ def main(argv: list[str] | None = None) -> int:
     summary = runner.summarise(records, mode=mode, settings=settings, usage=usage,
                                commit=commit())
     runner.write_logs(out, records, summary, mode)
+    for source, report in summary["attacks"].items():
+        n = report["caught"]["total"]
+        print(f"attacks ({source}): caught {report['caught']['passed']}/{n}, contained "
+              f"{report['contained']['passed']}/{n}, approval held "
+              f"{report['approval_held']['passed']}/{n}")
     totals = summary["tasks"]
     print(f"eval ({mode}): {totals['passed']}/{totals['total']} tasks passed "
           f"(functional {summary['functional']['passed']}/{summary['functional']['total']}, "

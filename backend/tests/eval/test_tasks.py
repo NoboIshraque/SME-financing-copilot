@@ -1,7 +1,7 @@
 import json
 
 from eval.scoring import DEEP
-from eval.tasks import CORPUS, FUNCTIONAL, adversarial, all_tasks
+from eval.tasks import CORPUS, FUNCTIONAL, adversarial, all_tasks, new_attacks
 
 
 def corpus_rows():
@@ -33,3 +33,11 @@ def test_functional_tasks_cover_every_main_feature_with_known_checks():
     assert {n for t in FUNCTIONAL for n in t.expect.deep} <= set(DEEP)
     abstaining = [t for t in FUNCTIONAL if t.expect.abstain is not None]
     assert abstaining and all(t.expect.calls is not None for t in abstaining)
+
+
+def test_new_attacks_are_unseen_by_the_corpus_and_span_all_languages():
+    texts = {r["text"] for r in corpus_rows()}
+    new = new_attacks()
+    assert not {t.question for t in new} & texts
+    assert {t.tags["lang"] for t in new} == {"en", "bn", "bl", "zh"}
+    assert all(t.tags["source"] == "new" and t.expect.calls == () for t in new)
