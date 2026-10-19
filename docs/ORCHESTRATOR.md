@@ -17,10 +17,10 @@ Session names: `orch-A`, `orch-C` (`orch-B` only in an emergency).
 | On duty | orch-C |
 | Since (Dhaka) | 2026-10-19 10:55 |
 | Merge authority | the on-duty orchestrator only |
-| Working on | taking the baton; merging #17 and #18 |
-| Next 3 steps | 1. Merge #17 (principal fix) and #18 (docs off) once Nobo says go. 2. Refresh `docs/NOW.md` (still lists #14/#15/WP-11 start, all done) and PLAN §8. 3. WP-06 and WP-08 milestone 8 APIs, now unblocked by WP-11. |
-| Open PRs and their state | #17 green, merges clean; #18 green, merges clean |
-| Waiting on (people / CI / limits) | Nobo: go-ahead to merge #17/#18 |
+| Working on | refreshing NOW.md and PLAN §8 after merging #17 and #18 |
+| Next 3 steps | 1. WP-06 milestone 8 (financing API) on WP-11 principal + step-up. 2. WP-08 milestone 8 (mesh API). 3. Review PRs from A1/B1 as they come. |
+| Open PRs and their state | none (#17 and #18 merged 2026-10-19 ~11:05; backend 1473 passed on combined main) |
+| Waiting on (people / CI / limits) | — |
 | Lives only in a sandbox (must be committed) | nothing (orch-A's CPU runner is on main since af37713) |
 | Off-duty orchestrator | orch-A (limit reset time not recorded) |
 
