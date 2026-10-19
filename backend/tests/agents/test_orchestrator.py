@@ -11,6 +11,7 @@ from app.agents.budget import Budget
 from app.agents.checker import unverified_numbers
 from app.agents.models import RejectedClaimRow
 from app.agents.orchestrator import Orchestrator
+from app.agents.stakes import Stakes
 from app.agents.tools import ToolContext
 from app.agents.toolset import build_registry
 from app.api import cash as cash_api
@@ -89,7 +90,7 @@ def test_past_the_model_budget_the_rules_plan_and_narrate(orch, ledger):
     run = ask(orch, ledger, CASH_Q, budget=Budget(max_llm_calls=0))
     assert run.plan.planner == "deterministic"
     assert run.recommendation.answer_text == " ".join(s.claim.text for s in run.statements)
-    assert run.budget["refused"] == ["llm:plan", "llm:narrate"]
+    assert run.budget["refused"] == ["llm:plan", "llm:narrate", "llm:critique"]
 
 
 def test_model_narration_is_used_when_a_model_answers(live_settings, ledger, clock):
@@ -274,3 +275,33 @@ def test_no_number_in_a_final_answer_lacks_provenance(orch, ledger, tenant, ques
         for fig in (card.impact, card.cost, *card.figures):
             if fig is not None:
                 assert fig.id in figures and fig.provenance.formula_id
+
+
+# --- milestone 5: the critic inside the run -----------------------------------------------
+
+def test_a_material_recommendation_carries_the_case_against(orch, ledger):
+    run = ask(orch, ledger, CASH_Q)  # cards include an advance request: high stakes
+    assert run.stakes is Stakes.high
+    assert run.recommendation.critic_objection == run.objection.text
+    assert run.objection.source == "rules"  # no critic model recorded offline
+    assert any(e.step == "critique" for e in run.trace)
+
+
+def test_an_information_only_answer_skips_the_critic(orch, ledger):
+    run = ask(orch, ledger, "How is my business doing? Profit and margin please",
+              tenant="sme_grocery")
+    assert run.stakes is Stakes.low
+    assert run.recommendation.critic_objection is None and run.objection is None
+    assert not any(e.step == "critique" for e in run.trace)
+
+
+def test_the_critic_is_a_model_the_answer_did_not_come_from(live_settings, ledger, clock):
+    plan = json.dumps({"intents": ["cash_outlook"], "tools": [], "language": "en"})
+    narration = json.dumps({"text": "A cash gap is close; ask for an advance."})
+    objection = json.dumps({"objection": "The customer asked to pay early already pays late.",
+                            "severity": "high"})
+    gateway = LLMGateway(live_settings, clock=clock, transport=Scripted({
+        "gemini_flash": [plan, narration], "groq_qwen": [objection]}))
+    run = Orchestrator(gateway).ask(ToolContext(ledger, "sme_hardware", NOW), CASH_Q)
+    assert (run.objection.source, run.objection.family) == ("groq_qwen", "alibaba")
+    assert run.recommendation.critic_objection.startswith("The customer asked")

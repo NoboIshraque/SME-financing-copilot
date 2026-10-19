@@ -28,10 +28,13 @@ from datetime import datetime
 from typing import Any
 
 from app.agents import claims as claims_mod
+from app.agents import critic as critic_mod
 from app.agents.budget import Budget
 from app.agents.checker import Checker, log_rejections, unverified_numbers
 from app.agents.claims import Statement
+from app.agents.critic import Objection
 from app.agents.planning import DEPENDS, Plan, build_plan
+from app.agents.stakes import Stakes, assess
 from app.agents.tools import (
     InsufficientData,
     ToolContext,
@@ -150,6 +153,8 @@ class Run:
     checks: tuple[CheckResult, ...] = ()  # every claim, verified or not
     dropped_cards: tuple[str, ...] = ()  # cards whose figures did not pass the checker
     skipped: Mapping[str, str] = field(default_factory=dict)  # tool -> why (secondary intents)
+    stakes: Stakes | None = None
+    objection: Objection | None = None  # the critic's, with who argued it
     budget: Mapping[str, object] = field(default_factory=dict)
     trace: tuple[TraceEvent, ...] = ()
 
@@ -275,10 +280,24 @@ class Orchestrator:
             return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
                                 abstention=abstention, checks=checks, budget=budget,
                                 trace=trace)
-        answer = self._narrate(statements, plan, private, budget, trace)
+        answer, narrator = self._narrate(statements, plan, private, budget, trace)
+        stakes = assess(plan.intents, cards)
+        objection = None
+        if stakes.needs_critic:  # N11: every material recommendation gets the case against
+            found = critic_mod.risks(results, cards, plan.language,
+                                     history_days=ctx.history_days, data_mode=ctx.data_mode)
+            objection = critic_mod.critique(
+                lambda request, what: self.llm(request, what, budget, trace), answer,
+                statements, found, language=plan.language,
+                brain_families=(self.family(plan.planner), narrator), private=private)
         return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
                             statements=statements, answer=answer, cards=cards, checks=checks,
-                            dropped_cards=dropped, budget=budget, trace=trace)
+                            dropped_cards=dropped, stakes=stakes, objection=objection,
+                            budget=budget, trace=trace)
+
+    def family(self, slot: str) -> str:
+        provider = self.gateway.table.get(slot)
+        return provider.family if provider is not None else "rules"
 
     @staticmethod
     def verify(checker: Checker, composed: list[Statement], ctx: ToolContext, rec_id: str,
@@ -318,20 +337,21 @@ class Orchestrator:
         return tuple(kept), tuple(dropped)
 
     def _narrate(self, statements: list[Statement], plan: Plan, private: bool, budget: Budget,
-                 trace: Trace) -> str:
+                 trace: Trace) -> tuple[str, str]:
+        """The answer text and the family that wrote it ("rules" for the claim texts)."""
         texts = [s.claim.text for s in statements]
-        fallback = " ".join(texts)
+        fallback = " ".join(texts), "rules"
         reply = self.llm(narrate_request(texts, language=plan.language, private=private),
                          "narrate", budget, trace)
         text = (reply.data or {}).get("text")
-        if not isinstance(text, str) or not text.strip():
+        if reply.deterministic or not isinstance(text, str) or not text.strip():
             return fallback
         invented = unverified_numbers(text, statements)
         if invented:  # a narrated number no verified claim states: use the claims themselves
             trace.add("check", "narration", "rejected", time.perf_counter(),
                       ",".join(sorted(str(n) for n in invented)))
             return fallback
-        return text
+        return text, reply.family
 
     @staticmethod
     def cards(results: Mapping[str, ToolResult], role: Role,
@@ -355,6 +375,7 @@ class Orchestrator:
                 statements: list[Statement] | None = None, answer: str | None = None,
                 cards: tuple[ActionCard, ...] = (), abstention: Abstention | None = None,
                 checks: tuple[CheckResult, ...] = (), dropped_cards: tuple[str, ...] = (),
+                stakes: Stakes | None = None, objection: Objection | None = None,
                 budget: Budget, trace: Trace) -> Run:
         results = results or {}
         statements = statements or []
@@ -371,9 +392,11 @@ class Orchestrator:
             checks=checks,
             action_cards=cards if abstention is None else (),
             figures=tuple(figures.values()) if abstention is None else (),
+            critic_objection=objection.text if objection and abstention is None else None,
             abstention=abstention, tools_used=tuple(n for n in plan.tools if n in results),
             data_mode=most_cautious(modes) if modes else DataMode.synthetic,
             created_at=ctx.now)
         return Run(recommendation=recommendation, plan=plan, statements=tuple(statements),
                    results=dict(results), skipped=dict(skipped or {}), checks=checks,
-                   dropped_cards=dropped_cards, budget=budget.report(), trace=trace.events())
+                   dropped_cards=dropped_cards, stakes=stakes, objection=objection,
+                   budget=budget.report(), trace=trace.events())

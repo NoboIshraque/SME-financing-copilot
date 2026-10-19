@@ -47,7 +47,8 @@ VOTE_SYSTEM = (
 
 CRITIC_SYSTEM = (
     "You are Hishab's critic. Argue the case against the recommendation, using only the "
-    "facts given: what could make it wrong or harmful for the shop owner? " + _RULES + "\n"
+    "facts given: what could make it wrong or harmful for the shop owner? Write in the "
+    "language asked for. " + _RULES + "\n"
     'Shape: {"objection": "<the single strongest objection, one or two sentences>", '
     '"severity": "low" | "medium" | "high"}.'
 )
@@ -76,9 +77,11 @@ def vote_request(question: str, choices: Sequence[dict[str, Any]], default: str 
 
 
 def critique_request(recommendation: str, facts: Sequence[str],
-                     risks: Sequence[dict[str, str]] = (), **options: Any) -> LLMRequest:
+                     risks: Sequence[dict[str, str]] = (), language: str = "en",
+                     **options: Any) -> LLMRequest:
     """`risks` are code-detected ({"text", "severity"}); the rules fall back to the worst."""
-    payload = {"recommendation": recommendation, "facts": list(facts)}
+    payload = {"language": language, "recommendation": recommendation, "facts": list(facts),
+               "risks_found_by_code": [dict(r) for r in risks]}
     return LLMRequest(Role.critic, Task.critique,
                       (Message("system", CRITIC_SYSTEM), Message("user", _data(payload))),
                       context={"risks": [dict(r) for r in risks]}, **options)
