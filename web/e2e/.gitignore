@@ -1,0 +1,3 @@
+# Saved demo sessions and the shared TOTP state (support/auth.ts, support/totp.ts): local only.
+.auth/
+.state/

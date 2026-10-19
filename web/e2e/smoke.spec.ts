@@ -1,21 +1,30 @@
-import { expect, test } from "@playwright/test";
+import { sessionFile } from "./support/auth";
+import { expect, test } from "./support/fixtures";
 
-// External-domain audit (WP-18 extends this to every screen): the app must only talk to its
-// own host, so nothing depends on services blocked in mainland China.
-test("home loads and contacts no third-party host", async ({ page, baseURL }) => {
-  const ownHost = new URL(baseURL ?? "http://localhost:5173").host;
-  const foreign: string[] = [];
-  page.on("request", (request) => {
-    const url = new URL(request.url());
-    if (url.protocol.startsWith("http") && url.host !== ownHost) foreign.push(url.host);
+test.describe("signed in", () => {
+  test.use({ storageState: sessionFile("owner") });
+
+  // External-domain audit (WP-18 milestone 4; the language journey repeats it on every screen):
+  // the app only talks to its own host, so nothing depends on services blocked in mainland China.
+  test("home loads and contacts no third-party host", async ({ app, page, foreignHosts }) => {
+    await app.start("today");
+    await page.waitForLoadState("networkidle");
+    expect(foreignHosts, `third-party hosts contacted: ${foreignHosts.join(", ")}`).toEqual([]);
   });
-  await page.goto("/");
-  await expect(page.getByRole("heading", { level: 2, name: "Today" })).toBeVisible();
-  await page.waitForLoadState("networkidle");
-  expect(foreign, `third-party hosts contacted: ${foreign.join(", ")}`).toEqual([]);
+
+  test("the synthetic-data banner is visible in demo mode", async ({ app }) => {
+    await app.start("today");
+    await expect(app.banner()).toBeVisible();
+  });
 });
 
-test("the synthetic-data banner is visible in demo mode", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("status")).toContainText(/synthetic/i);
+test.describe("signed out", () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test("a signed-out visitor is sent to sign in, keeping where they were going", async ({ app, page }) => {
+    await page.goto("/cash");
+    await expect(page).toHaveURL(/\/login\?next=%2Fcash$/);
+    await expect(page.getByRole("heading", { level: 2, name: app.t("auth.title") })).toBeVisible();
+    await expect(app.banner()).toBeVisible();
+  });
 });
