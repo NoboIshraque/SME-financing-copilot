@@ -51,6 +51,14 @@ _EXPRESSIONS = {
                                     "with the lever / paths",
     "cash.lever_cost": "what the lever costs beyond moving cash in time: the discount given, "
                        "or the loan's interest and fees (WP-06 total cost); 0 for a re-timing",
+    "cash.buffer_target": "95th percentile (nearest rank) over paths of the deepest dip below "
+                          "the likely (P50) balance",
+    "cash.sweepable_surplus": "5th percentile (nearest rank) over paths of the lowest balance "
+                              "from the sweep day to the end of the horizon - buffer, rounded "
+                              "down to Tk 1,000",
+    "cash.runway_days": "days until the likely (P50) balance first falls below the buffer; the "
+                        "horizon when it never does",
+    "cash.forecast_p50_min": "lowest likely (P50) end-of-day balance over the horizon",
 }
 FORMULAS: dict[str, FormulaRef] = {
     formula_id: FormulaRef(formula_id=formula_id, version=1, expression=expression)
