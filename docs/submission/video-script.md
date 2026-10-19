@@ -29,12 +29,11 @@ before you record. They are not narration.
 | **LIVE CODE** | A terminal running our real engines on the synthetic data (no web API involved). The caption says so |
 | **OFFLINE MOCK** | The web app's built-in mock API. The app's banner then also reads "Offline mock…". The caption must say "demo data, offline mock" |
 
-Status on 19 Oct (verify again with the pre-flight check on Tuesday): auth, approvals, audit,
-guard, cash, financing, facts/explain and ingest are on `main`. **Analysis (WP-07) is merged.**
-**Copilot (WP-10)** is finished on `origin/wp-10-agents` but not merged. The **mesh API (WP-08
-milestone 8)** is being built by orch-C and is not on `main`. Receivables, Reports/Passport,
-the audit-drill score (WP-16) and Settings storage have no backend router. **Market (WP-09)
-and Messaging (WP-12) are cut.**
+Status on 20 Oct 01:00 (verify again with the pre-flight check on Tuesday): auth, approvals,
+audit, guard, cash, financing (with fit from the forecast), facts/explain, ingest, analysis,
+mesh, copilot (WP-10), receivables (WP-05) and message drafts (WP-12) are on `main`.
+Reports/Passport sharing and Settings storage have no backend router. **Market (WP-09) is cut:**
+its screen is a labelled preview on sample data. The audit-drill card was removed (P8 cut).
 
 ---
 
@@ -118,9 +117,9 @@ Total 4:40. Timings are for the final cut, not for recording order (see "Recordi
   **Why you qualify or not**, the lines are ✓ … yes. Then **Source · checked 18 Oct 2026**.
   Scroll to one option tagged "Not on record" (with "? … not on record, so not counted") and
   one tagged "Not eligible" (with ✗).
-- **Avoid:** the **Fit with your cash** column. The forecast is not wired into financing yet,
-  so it reads 0% for every option. Also avoid **Lender check**: no lender has a track record
-  yet, so licence shows "Unknown". Do not narrate either one.
+- **Fit with your cash** now comes from the forecast; show it without a number claim in the VO.
+- **Avoid:** **Lender check**: no lender has a track record yet, so licence shows "Unknown".
+  Do not narrate it.
 - **VO:** "Before borrowing, compare. DecisionGuard ranks real Bangladeshi loan products by their
   true yearly cost, not the advertised rate. Each one says why I qualify or not, and links to
   its public source. If a fact isn't on record, it says so instead of guessing."
@@ -192,9 +191,8 @@ editing the record: False".
 - **On screen / actions:** go to **Analysis** and scroll straight to **Compare decisions**.
   Leave the four boxes ticked and tap **Compare**. The table shows Expected balance, Worst 5%
   and Chance below buffer, with a green **Recommended** badge on one row.
-- **Avoid:** the **How stable is today's advice?** card. It waits for the copilot's daily
-  check and stays on "Loading…" in Real-backend mode. Its live behaviour after WP-10 merges is
-  unverified. Skip it unless it renders correctly in the pre-flight check.
+- **How stable is today's advice?** is live since WP-10 merged. Show it only if it renders in the
+  pre-flight check; otherwise skip it.
 - **VO:** "Before a big decision, DecisionGuard simulates each choice on the same thousand paths and
   marks the best risk-adjusted one."
 - **Caption:** "Scenario comparison over 1,000 seeded paths (WP-07)"
@@ -248,9 +246,7 @@ call from Appendix C. The console shows `allowed: false`, `families: ["fake_owne
   entries, each linked to the one before." with the latest hash. Tap **Verify again**, then
   show **Recent actions**: the loan approval steps from S7 and the blocked Bangla message
   from S10.
-- **Crop or skip** the **Nightly audit drill** card between them. WP-16 is not built, so it
-  shows an error in Real-backend mode. Zoom the editor in on the Audit log card, or cut
-  straight to Recent actions.
+- The audit-drill card is gone (P8 cut), so Recent actions follows the Audit log card directly.
 - **VO:** "Every sign-in, every approval and every blocked attack goes into a hash-chained
   audit log. One click re-checks the whole chain."
 - **Caption:** "Append-only, hash-chained audit log · verified live"

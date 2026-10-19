@@ -39,20 +39,20 @@ LLM traces are included or claimed.
 | Ingestion: bKash, Nagad, bank, ledgers, Bangla normaliser, OCR drafts, preview/commit | WP-02 | Built | |
 | Privacy: detectors, token vault, anonymiser, fail-closed gate, shop-file anonymiser | WP-03 | Built | Called by the WP-10 gateway on every model request |
 | Cash engine: forecast, Monte Carlo, gaps, alerts, levers, buffer, backtest, API | WP-04 | Built | |
-| Financing: true cost, catalogue, eligibility, ranking, lender score, API | WP-06 | Built | `/financing/match` ranks without the forecast band (§3.4); the copilot passes it in |
+| Financing: true cost, catalogue, eligibility, ranking, lender score, fit on the WP-04 band, API | WP-06 | Built | `fit.no_forecast` only when the cash engine abstains (too little history) |
 | Analysis: statements, 13 ratios, expected vs reality, scenarios, stability score, API | WP-07 | Built | PR #24 |
-| Liquidity mesh: netting, consent, settlement, residual routing, attestations, anchoring | WP-08 | Built (engines); API in PR #26 | |
-| LLM gateway, agents, checker, critic, agreement, self-loops, abstention, copilot API | WP-10 | Built on branch `wp-10-agents`; PR pending | 9/9 milestones |
+| Liquidity mesh: netting, consent, settlement, residual routing, attestations, anchoring, API | WP-08 | Built | PR #26 |
+| LLM gateway, agents, checker, critic, agreement, self-loops, abstention, copilot API | WP-10 | Built | PR #29, 9/9 milestones |
 | Security: auth, roles, tiers, approvals, audit chain, injection guard, hardening | WP-11 | Built | |
 | Trust Passport, sharing, verification, state adapter | WP-13 | Partial | Lender report cut |
 | Web app (12 milestones) | WP-14 | Built | Screens whose backend is missing are listed in §2.3 |
 | ML notebooks | WP-17 | Partial | Injection classifier not deployed; GPU run and market backtest cut |
 | Docker, Caddy, deploy with rollback, backups | WP-18 | Partial | China check pending; Vercel mirror cut |
-| Receivables: aging, risk score, reminder drafts, API | WP-05 | Not in this snapshot | Shortened to 4 milestones on 19 Oct |
-| Message drafts in the approval queue (sending cut) | WP-12 | Not in this snapshot | |
-| End-to-end flows (about 12) | WP-15 | Not in this snapshot | Two smoke tests exist |
-| Evaluation harness (about 40 tasks) | WP-16 | Not in this snapshot | |
-| Market watch and negotiation (N3, N19); nightly audit drill (P8) | WP-09, WP-16 | Cut | Roadmap |
+| Receivables: aging, risk score, reminder plan, API | WP-05 | Built (reduced) | Milestones 1, 2, 4, 7 (PR #31); limits, dispute log, early-pay calculator cut |
+| Message drafts: EN/BN templates, drafts from the reminder plan, owner approval, send log | WP-12 | Built (reduced) | PR #34; sending channels cut: the owner copies the approved text |
+| End-to-end flows (12, desktop + phone, Playwright with axe) | WP-15 | Built | Run in CI on every PR against the local stack; hosted run waits for the server |
+| Evaluation harness (62 tasks, step logs, evidence bundle) | WP-16 | Built (reduced) | PR #33; mutation score and nightly audit drill cut |
+| Market watch and negotiation (N3, N19); nightly audit drill (P8) | WP-09, WP-16 | Cut | Market screen kept as a labelled preview on bundled sample data |
 
 Source: `docs/PLAN.md` §8 and the merged code. Statuses are re-checked at code freeze.
 
@@ -122,7 +122,7 @@ flowchart TB
   worker["Worker: alert scan 07:30, analysis snapshots,<br/>audit-head anchor 23:55 (Dhaka)"]
   sepolia[("Ethereum Sepolia<br/>32-byte digests only")]
   llm["Hosted LLMs (Gemini, Groq) or local Ollama<br/>(anonymised payloads only)"]
-  planned["Not in this snapshot: receivables WP-05,<br/>message drafts WP-12, eval harness WP-16"]
+  planned["Receivables WP-05, message drafts WP-12<br/>(reduced scope); eval harness WP-16 runs offline"]
 
   user --> screens --> caddy --> sec --> routers
   screens -.-> mock
@@ -167,7 +167,7 @@ Dashed arrows are optional (a hosted model, Sepolia) or development only (the mo
 | Contracts | `backend/app/contracts/` | 58 frozen Pydantic models, version 1.2.0; unknown fields rejected; exported to `docs/api/contracts.json` and generated into `web/src/api/contracts.ts` (CI fails on drift) |
 | App factory | `backend/app/main.py` | Discovers every `app/api/<name>.py` router and every `app/<area>/app_hooks.py`; CORS is added last so it is the outermost layer; interactive API docs only in development and test |
 | Engines | `backend/app/engines/{cash,financing,analysis,mesh}/` | Pure functions: contracts in, contracts out; no database or network |
-| LLM gateway | `backend/app/llm/` | One OpenAI-compatible client; privacy gate on every request; per-slot quotas, cache, fixture replay; deterministic planner as the last fallback |
+| LLM gateway, agents, checker, critic, agreement, self-loops, abstention, copilot API | WP-10 | Built | PR #29, 9/9 milestones |
 | Agents | `backend/app/agents/` | Orchestrator, tool registry, claims, checker, critic, agreement, self-loops, stakes, budget, abstention |
 | Fact ledger | `backend/app/facts/` | Store, metric registry, provenance graph, masking hook |
 | Ingest | `backend/app/ingest/` | File parsers, normaliser, OCR drafts, preview/commit |
@@ -791,12 +791,18 @@ Bangladesh Bank startup fund costs 4.07% a year, Tk 490.28 in total for this nee
 No live-model trace is part of this document. Live answers can be recorded as fixtures and JSONL
 traces with `python -m app.llm.live_check` (keys required); the evidence index lists any that were.
 
-### 3.10 Not in this snapshot
+### 3.10 Receivables, messages, evaluation, and what was cut
 
-- **Receivables** (WP-05, shortened to aging, an explainable risk score, reminder drafts and the
-  API) and **message drafts** in the approval queue (WP-12; sending channels cut).
-- **Evaluation harness** (WP-16, about 40 tasks): `npm run eval` is a placeholder that runs no
-  tasks (`backend/eval/run.py`).
+- **Receivables** (WP-05, reduced): aging buckets, an empirical 0-100 risk score per open invoice
+  with its top 3 factors (monotone in lateness, property-tested), and a reminder ladder (-3, 0,
+  +3, +10, +20 days) giving one EXECUTE `send_reminder` card per customer
+  (`backend/app/engines/receivables/`, `GET /api/receivables`, `GET /api/receivables/plan`).
+- **Message drafts** (WP-12, reduced): English and Bangla templates filled from typed values only
+  (an unfilled variable is refused), one draft per reminder, owner approval and a send log
+  (`backend/app/messaging/`, `/api/messages/*`). There is no sending channel: the owner copies the
+  approved text into their own chat app.
+- **Evaluation harness** (WP-16): `npm run eval` runs the tasks offline and writes per-step JSONL
+  logs to the evidence bundle (`backend/eval/`, results in `docs/submission/evidence/`).
 - **Cut** (roadmap only): market watch and negotiation (WP-09: N3, N19), the nightly audit drill
   (P8), the lender report (WP-13), the GPU injection-classifier run and the market backtest
   (WP-17), the Vercel mirror (WP-18).
@@ -905,16 +911,16 @@ anchorer is tested against a fake web3 object. The live OCR test runs only where
    `/api/health` reporting PostgreSQL, SPA fallback, CSP, HSTS and `X-Frame-Options` headers,
    HTTP to HTTPS redirect.
 
-Not in CI: the evaluation harness (WP-16, not in this snapshot). Mutation testing was cut on 19 Oct.
+The evaluation harness (WP-16) runs offline with `npm run eval` and writes its step logs to the evidence bundle; it is not a CI gate. Mutation testing was cut on 19 Oct.
 
 ---
 
 ## 7. Honest limitations
 
-1. **Not in this snapshot:** receivables, message drafts, the evaluation harness, the end-to-end
-   journey suite and the reports and passport-sharing API. **Cut:** market watch, negotiation, the
-   nightly audit drill and the lender report. Their screens are hidden or run on the mock, which
-   the banner labels, and prove nothing about the backend.
+1. **Reduced or cut:** receivables lost credit limits, the dispute log and the early-pay
+   calculator; messaging has no sending channel (the owner copies the approved text). **Cut:**
+   market watch, negotiation, the nightly audit drill and the lender report. The Market screen is
+   a labelled preview on bundled sample data and proves nothing about a backend.
 2. **All data is synthetic.** Backtest numbers in §3.3 and the examples in §3.8 and §3.9 come
    from shops our own generator produced. They test the harness, not real-world accuracy. No real
    shop data is in the repository.
@@ -930,10 +936,11 @@ Not in CI: the evaluation harness (WP-16, not in this snapshot). Mutation testin
    approval") passed the rules. The copilot did not act on it: it abstained as out of scope, and
    no agent tool can move money (EXECUTE needs the owner's step-up approval). The catch rate on
    unseen paraphrases is unmeasured.
-5. **Financing fit is not wired into `/financing/match`.** That endpoint ranks without the WP-04
-   band: the fit term is set to `P(breach) = 0` with the reason `fit.no_forecast`. This adds the
-   same 25 points to every option, so it does not change the order, but scores are higher than
-   they would be with a forecast. The copilot's `financing.match` tool does pass the band.
+5. **Fit is the highest daily breach probability over the forecast, an approximation.** It uses
+   the tenant's WP-04 band (normal approximation from P10/P90). When the riskiest day falls
+   before the first repayment, every option gets the same fit and fit does not change the order
+   (the synthetic grocery: 0.48% for all options). With too little history the term is dropped
+   and options carry `fit.no_forecast`.
 6. **Eligibility encodes only the conditions we could source.** For example, the Bangladesh Bank
    startup fund is matched on business age of at most 144 months and a trade licence, so a
    6-year-old synthetic shop passes. Real lenders apply more criteria. Approval likelihood and

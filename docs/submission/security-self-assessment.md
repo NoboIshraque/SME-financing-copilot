@@ -146,8 +146,9 @@ the role × permission matrix.
 | `audit:read`, `audit:verify` | yes | no | no | no | yes |
 | `team:manage`, `lender_access:grant` | yes | no | no | no | no |
 
-¹ Not enforced on `/api/facts` and `/api/explain`: a lender viewer can read ledger figures there
-(risk R1). ² Not enforced on ingest preview, column mapping and history (risk R2).
+¹ Enforced on `/api/facts` since 20 Oct; `/api/explain` stays open to lender viewers, masked
+(risk R1). ² Not enforced on ingest preview and column mapping; history needs `ledger:read`
+(risk R2).
 
 **Lender viewers** are created through an owner's recorded consent. The consent names the
 lender, the purpose and the scopes (at most `passport:read` and `reports:read`). Access lasts
@@ -397,24 +398,19 @@ Source: `backend/app/security/web.py`, plus `infra/Caddyfile` (WP-18). Tests: `t
 
 Ratings: our own judgement of likelihood and impact for this deployment.
 
-1. **R1 [Medium] Lender viewers can read ledger figures beyond their consent.** The fact routes
-   check only that the caller is signed in and belongs to the tenant (`current_caller`,
-   `backend/app/api/facts.py` lines 71–76), not a permission. A lender viewer, whose consent
-   covers only `passport:read` and `reports:read`, can query any ledger metric of the SME that
-   granted it, and page through the transactions behind a figure on
-   `/api/explain/{id}/rows`: amounts, times, channel and category, with counterparty,
-   reference and source location masked. The cash and financing APIs do require `ledger:read`
-   and refuse lenders. One test encodes the current behaviour
-   (`test_facts_mask_source_rows_for_callers_who_may_not_see_them`). Bounded by: one tenant,
-   an expiring grant, revocable by the owner, no personal data. Fix: require `ledger:read` on
-   these routes, or map lender scopes to the facts a passport or report cites.
-2. **R2 [Low] Ingest preview and history skip the `ingest:upload` permission.**
-   `/api/ingest/preview`, `/columns` and `/history` check only the session and tenant
-   (`backend/app/api/ingest.py` lines 121–174 and 198–216). A lender viewer or compliance
-   reviewer can upload a file for preview and read the upload history, which shows original
-   filenames. Nothing reaches the ledger: commit is limited to the owner and accountant
-   (line 187). Fix: require `ingest:upload` on preview and columns, and `ledger:read` on
-   history.
+1. **R1 [Low, partly fixed 20 Oct] Lender viewers and the explain routes.** Fixed (PR #32):
+   `GET /api/facts/{metric}` now requires `ledger:read`, so a lender viewer (consent covers only
+   `passport:read` and `reports:read`) can no longer compute ledger figures. Remaining by design:
+   `/api/explain/{id}` and `/api/explain/{id}/rows` stay open to them, masked, so the figures in
+   a Trust Passport they were given can be checked; `/rows` still shows masked amounts, times,
+   channel and category of the rows behind such a figure. Bounded by: one tenant, an expiring,
+   revocable grant, no personal data. Next step: limit lender explain to figures a shared
+   passport or report cites.
+2. **R2 [Low, partly fixed 20 Oct] Ingest preview skips the `ingest:upload` permission.**
+   `/api/ingest/history` now requires `ledger:read` (PR #32). `/api/ingest/preview` and
+   `/columns` still check only the session and tenant, so a lender viewer or compliance reviewer
+   could preview a file; nothing reaches the ledger, since commit is limited to the owner and
+   accountant. Fix: require `ingest:upload` on preview and columns.
 3. **R3 [Medium] Approval cards are accepted as the client sends them.** `POST /api/approvals`
    takes the whole action card from the request body (`ApprovalRequestBody`,
    `backend/app/security/schemas.py` lines 106–107) and does not check that an engine issued
@@ -491,20 +487,17 @@ Ratings: our own judgement of likelihood and impact for this deployment.
 18. **R18 [Info] Free-tier LLM providers** may use inputs to improve their models. Only anonymised
     text leaves, and only when keys are configured; the optional paid tier during judging avoids
     it (`docs/PLAN.md` §6). The submitted evidence was produced offline, with no model call.
-19. **R19 [Low] The copilot controls live on a branch until WP-10 is merged.** The gateway's
-    privacy call, the claim checker, the critic, multi-model agreement, the tool budget and the
-    abstention log are built and tested on `wp-10-agents`. If that PR is not merged by the code
-    freeze, the copilot routes are absent and the web's copilot panel has no backend.
+19. **R19 [Resolved 20 Oct] The copilot controls are merged.** WP-10 (gateway privacy call,
+    claim checker, critic, multi-model agreement, tool budget, abstention log) landed in PR #29.
 20. **R20 [Info] No CI test proves every route is authenticated.** Our 19 Oct probe walked the
     OpenAPI schema by hand. A check built on `api_routes()` would have silently skipped the
     security routes: under FastAPI 0.143.3 that helper missed every route in nested routers
-    (those in `backend/app/api/auth.py`). The helper is fixed on branch `orch-a-demo-fixes`
-    (tested against the OpenAPI paths); the route-coverage test itself is not written.
+    (those in `backend/app/api/auth.py`). The helper is fixed (PR #27, tested against the OpenAPI
+    paths); the route-coverage test itself is not written.
 21. **R21 [Low] Re-uploading a statement could double-count seeded rows.** Rows from a statement
     with transaction ids were matched only by id, so uploading a demo shop's own bKash file into
     its seeded ledger added the rows again. This is an integrity bug, not a breach, and only
-    affects tenants whose ledger was seeded without source ids. Fix on branch
-    `orch-a-demo-fixes`.
+    affects tenants whose ledger was seeded without source ids. Fixed in PR #27.
 
 ## 11. What we have not done
 
