@@ -1,0 +1,144 @@
+// In-memory state of the offline mock API. Every value is synthetic (CLAUDE.md rule 8).
+import type { ActionCard, Approval, MessageDraft, NettingRound, PassportVersion, Role, ShareGrant } from "../api/contracts";
+import type { Session, UserSettings } from "../api/types";
+import { DEFAULT_SETTINGS, initialDrafts, initialPassports, initialShares } from "./fixtures/inbox";
+import { CARD_APPLY } from "./fixtures/financing";
+import { initialRounds } from "./fixtures/mesh";
+
+export const DEMO_PASSWORD = "hishab-demo";
+export const DEMO_TOTP_CODE = "246810";
+export const MAX_FAILED_LOGINS = 5;
+
+export interface MockUser {
+  email: string;
+  password: string;
+  role: Role;
+  display_name: string;
+  tenant_id: string;
+  business_name: string;
+  totp: boolean;
+  scopes: string[];
+  expires_at: string | null;
+  failedLogins: number;
+}
+
+/** An approval with the card it was requested for, and its execution result once executed. */
+export interface ApprovalRecord {
+  approval: Approval;
+  card: ActionCard;
+  result?: Record<string, string> | null;
+}
+
+/** The accountant already asked the owner to approve the loan application. */
+function seededApprovals(): ApprovalRecord[] {
+  return [
+    {
+      card: CARD_APPLY,
+      approval: {
+        id: "ap-seed-apply",
+        tenant_id: "sme_grocery",
+        action_card_id: CARD_APPLY.id,
+        tier: "EXECUTE",
+        requested_by: "u-accountant",
+        status: "pending",
+        step_up_verified: false,
+        idempotency_key: "seed-apply",
+        created_at: "2026-09-30T17:00:00Z",
+        expires_at: "2026-10-01T17:00:00Z",
+      },
+    },
+  ];
+}
+
+export interface MockDb {
+  users: MockUser[];
+  session: Session | null;
+  /** Email of a user who passed the password step and still owes a TOTP code. */
+  pendingTotp: string | null;
+  approvals: ApprovalRecord[];
+  /** Invoice id -> dispute reason, for invoices disputed in this session. */
+  disputes: Record<string, string>;
+  rounds: NettingRound[];
+  drafts: MessageDraft[];
+  passports: PassportVersion[];
+  shares: ShareGrant[];
+  settings: UserSettings;
+}
+
+/** The caller's role. In "auto" mode the real backend may own the session while the mock still
+ *  answers a route, so an unknown session is treated as the owner. */
+export function callerRole(db: MockDb): Role {
+  return db.session?.principal.role ?? "owner";
+}
+
+function user(email: string, role: Role, displayName: string, totp: boolean, extra: Partial<MockUser> = {}): MockUser {
+  return {
+    email,
+    password: DEMO_PASSWORD,
+    role,
+    display_name: displayName,
+    tenant_id: "sme_grocery",
+    business_name: "Mirpur Mudi Store",
+    totp,
+    scopes: [],
+    expires_at: null,
+    failedLogins: 0,
+    ...extra,
+  };
+}
+
+export function demoUsers(): MockUser[] {
+  return [
+    user("owner@hishab.demo", "owner", "Demo owner", true),
+    user("accountant@hishab.demo", "accountant", "Demo accountant", false),
+    user("staff@hishab.demo", "staff", "Demo staff", false),
+    user("lender@hishab.demo", "lender_viewer", "Lender 1 (demo)", false, {
+      scopes: ["passport:read"],
+      expires_at: "2026-10-25T18:00:00Z",
+    }),
+    user("compliance@hishab.demo", "compliance", "Demo compliance officer", false),
+    user("garment@hishab.demo", "owner", "Demo garment owner", true, {
+      tenant_id: "sme_garment",
+      business_name: "Ashulia Stitch Works",
+    }),
+  ];
+}
+
+export function sessionFor(account: MockUser): Session {
+  return {
+    principal: {
+      user_id: `u-${account.email.split("@")[0]}`,
+      tenant_id: account.tenant_id,
+      role: account.role,
+      scopes: account.scopes,
+      expires_at: account.expires_at,
+    },
+    display_name: account.display_name,
+    business_name: account.business_name,
+    totp_enrolled: account.totp,
+    data_mode: "synthetic",
+  };
+}
+
+/** Fresh mock state. `signedInAs` starts a session for that demo email (tests skip the login). */
+export function createMockDb(options: { signedInAs?: string } = {}): MockDb {
+  const users = demoUsers();
+  const db: MockDb = {
+    users,
+    session: null,
+    pendingTotp: null,
+    approvals: seededApprovals(),
+    disputes: {},
+    rounds: initialRounds(),
+    drafts: initialDrafts(),
+    passports: initialPassports(),
+    shares: initialShares(),
+    settings: { ...DEFAULT_SETTINGS },
+  };
+  if (options.signedInAs) {
+    const account = users.find((u) => u.email === options.signedInAs);
+    if (!account) throw new Error(`no demo user ${options.signedInAs}`);
+    db.session = sessionFor(account);
+  }
+  return db;
+}

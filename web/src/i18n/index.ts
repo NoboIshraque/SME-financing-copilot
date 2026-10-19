@@ -1,6 +1,7 @@
-import i18n from "i18next";
+import i18n, { type PostProcessorModule } from "i18next";
 import { initReactI18next } from "react-i18next";
 
+import { toBanglaDigits } from "../api/format";
 import bn from "./locales/bn.json";
 import en from "./locales/en.json";
 import zh from "./locales/zh.json";
@@ -29,12 +30,30 @@ export function rememberLanguage(language: Language): void {
   }
 }
 
-void i18n.use(initReactI18next).init({
-  resources,
-  lng: initialLanguage(),
-  fallbackLng: "en",
-  interpolation: { escapeValue: false },
-  returnNull: false,
+/** In Bangla, digits inside translated sentences (counts, days, minutes) are written ০-৯. */
+const banglaDigits: PostProcessorModule = {
+  type: "postProcessor",
+  name: "banglaDigits",
+  process(value: string, _key: string | string[], options: { lng?: string }, translator: { language?: string }) {
+    return (options.lng ?? translator.language) === "bn" ? toBanglaDigits(value) : value;
+  },
+};
+
+// <html lang> follows the UI language, so screen readers and fonts pick the right script.
+i18n.on("languageChanged", (language) => {
+  document.documentElement.lang = language;
 });
+
+void i18n
+  .use(banglaDigits)
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: initialLanguage(),
+    fallbackLng: "en",
+    interpolation: { escapeValue: false },
+    returnNull: false,
+    postProcess: ["banglaDigits"],
+  });
 
 export default i18n;

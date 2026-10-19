@@ -214,7 +214,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-11 | done (7/7) | merged (PR #16) | 400 | auth (argon2id, TOTP step-up, strict cookies, lockout), roles + consented lender access, tier policy + approvals, hash-chained audit + daily anchor, multilingual injection guard, web hardening, self-assessment draft; installed app-wide through `app/security/app_hooks.py` |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
-| WP-14 | in progress (0/11) | wp-14-web | — | B1 (PC-2) started 18 Oct ~11:00 |
+| WP-14 | done (12/12) | wp-14-web | 210 web (176 new) | all 12 milestones: 11 screens + public verify page, provenance drawer on every number, copilot panel + upload flow, offline mock API (live/mock/auto), EN/BN/ZH, PWA, axe WCAG 2.1 AA clean |
 | WP-15 | not started | — | 0 | |
 | WP-16 | not started | — | 0 | P3 approved |
 | WP-17 | in progress (2/4) | merged | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families; Labib runs 01/03/04 on Kaggle |
