@@ -1,11 +1,14 @@
 import json
+from datetime import UTC, datetime
 from decimal import Decimal
 
 import pytest
 from fastapi.testclient import TestClient
 
 import app.api.ingest as ingest_api
+from app.contracts import Principal, Role
 from app.ingest.ocr import TesseractEngine
+from app.security.deps import current_principal
 from app.settings import AppEnv
 from tests.ingest.helpers import T, bkash, csv_bytes
 
@@ -14,6 +17,22 @@ SALES = bkash("A1,01/10/2026 10:00:00,Payment Received,01711000001,100,0,100,SAL
 AMBIGUOUS = csv_bytes(["date,party,category,type,amount,channel,ref",
                        "01/02/2026,Rahim,sales,in,500,cash,R1",
                        "03/02/2026,Karim,sales,in,700,cash,R2"])
+OWNER = Principal(user_id="u-owner", tenant_id=T, role=Role.owner)
+LENDER = Principal(user_id="u-lender", tenant_id=T, role=Role.lender_viewer,
+                   expires_at=datetime(2026, 12, 31, tzinfo=UTC))
+
+
+def _as(client: TestClient, principal: Principal | None) -> None:
+    """Sign in as `principal` (WP-11's current_principal), or sign out with None."""
+    if principal is None:
+        client.app.dependency_overrides.pop(current_principal, None)
+    else:
+        client.app.dependency_overrides[current_principal] = lambda: principal
+
+
+@pytest.fixture(autouse=True)
+def signed_in_owner(client: TestClient) -> None:
+    _as(client, OWNER)
 
 
 def _preview(client: TestClient, data: bytes = SALES, filename: str = "bkash.csv", **form):
@@ -53,9 +72,28 @@ def test_drafts_need_explicit_confirmation(client: TestClient):
     assert (res.json()["transactions"], res.json()["drafts_confirmed"]) == (1, 1)
 
 
-def test_missing_tenant_is_an_api_error(client: TestClient):
+def test_the_tenant_comes_from_the_signed_in_caller(client: TestClient):
     res = client.post("/api/ingest/preview", files={"file": ("b.csv", SALES, "text/csv")})
-    assert (res.status_code, res.json()["code"]) == (422, "tenant_required")
+    assert (res.status_code, res.json()["tenant_id"]) == (200, T)
+
+
+def test_a_form_naming_another_tenant_is_refused(client: TestClient):
+    res = _preview(client, tenant_id="tenant_b")
+    assert (res.status_code, res.json()["code"], res.json()["detail"]) == (
+        403, "forbidden", {"reason": "tenant"})
+
+
+def test_without_a_session_ingest_answers_401(client: TestClient):
+    preview = _preview(client).json()
+    _as(client, None)
+    responses = [
+        _preview(client),
+        client.post("/api/ingest/columns", files={"file": ("b.csv", SALES, "text/csv")}),
+        _commit(client, preview),
+        client.get("/api/ingest/history"),
+    ]
+    assert [(r.status_code, r.json()["code"]) for r in responses] == [
+        (401, "not_authenticated")] * 4
 
 
 @pytest.mark.parametrize(
@@ -84,15 +122,23 @@ def test_photo_without_local_ocr_is_a_clear_error(client: TestClient, monkeypatc
     assert (res.status_code, res.json()["code"]) == (503, "ocr_unavailable")
 
 
-def test_outside_local_environments_the_stub_caller_cannot_commit(client: TestClient):
+def test_a_lender_viewer_may_not_commit_to_the_ledger(client: TestClient):
     preview = _preview(client).json()
+    _as(client, LENDER)
+    res = _commit(client, preview)
+    assert (res.status_code, res.json()["code"]) == (403, "not_permitted")
+
+
+def test_a_signed_in_owner_can_commit_in_the_hosted_demo(client: TestClient):
+    # The old stub refused every commit outside development, so the demo could not import.
     settings = client.app.state.settings
     client.app.state.settings = settings.model_copy(update={"app_env": AppEnv.demo})
     try:
+        preview = _preview(client).json()
         res = _commit(client, preview)
     finally:
         client.app.state.settings = settings
-    assert (res.status_code, res.json()["code"]) == (403, "not_permitted")
+    assert (res.status_code, res.json()["transactions"]) == (200, 2)
 
 
 def test_columns_offer_the_mapping_step_with_masked_values(client: TestClient):

@@ -10,19 +10,20 @@ calendar month, quarter or year). A stored figure is served only while it is cur
 tenant's ledger; otherwise it is recomputed (with compute=false it is reported as stale).
 Source rows are masked for callers who may not see them. Errors are `ApiError` bodies.
 
-Until WP-11 lands, the caller comes from the `current_caller` stub: the tenant from the query
-string and the role `owner` only in development and test, `lender_viewer` (masked) anywhere
-else. WP-11 replaces that dependency with the authenticated principal.
+The caller is the signed-in principal (WP-11 `current_principal`): without a session every
+route answers 401. The tenant always comes from the principal; `tenant_id` in the query is
+optional (kept for older clients) and must then name the caller's own tenant, or the answer is
+403. A lender viewer sees only the tenant it was granted, with source rows masked.
 """
 
 from __future__ import annotations
 
 import calendar
-from datetime import UTC, date, datetime, timedelta
+from datetime import date
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.contracts import (
@@ -34,7 +35,6 @@ from app.contracts import (
     Invoice,
     Period,
     Principal,
-    Role,
     Transaction,
 )
 from app.facts import FactNotFound, FactStore
@@ -43,9 +43,10 @@ from app.facts.provenance import ProvenanceIncomplete, explain, explain_rows
 from app.facts.provenance import compute as compute_fact
 from app.facts.registry import REGISTRY, NotComputable
 from app.main import get_session
-from app.settings import AppEnv
+from app.security.deps import current_principal
+from app.security.errors import ProblemRoute, forbidden
 
-router = APIRouter(tags=["facts"])
+router = APIRouter(tags=["facts"], route_class=ProblemRoute)
 MAX_PAGE = 500
 _ECHO = 128  # caller-supplied values echoed in error details are cut to this length
 
@@ -67,27 +68,18 @@ class ExplainRows(BaseModel):
     rows: list[ExplainRow]
 
 
-def current_caller(request: Request, tenant_id: str | None = None) -> Principal | None:
-    """Stub until WP-11 (see module docstring). None when no tenant was given."""
-    if not tenant_id:
-        return None
-    local = request.app.state.settings.app_env in (AppEnv.development, AppEnv.test)
-    try:
-        if local:
-            return Principal(user_id="stub", tenant_id=tenant_id, role=Role.owner)
-        return Principal(user_id="stub", tenant_id=tenant_id, role=Role.lender_viewer,
-                         expires_at=datetime.now(UTC) + timedelta(minutes=15))
-    except ValidationError:
-        return None
+def current_caller(principal: Principal = Depends(current_principal),
+                   tenant_id: str | None = None) -> Principal:
+    """The signed-in caller. A `tenant_id` in the query must be the caller's own tenant."""
+    if tenant_id is not None and tenant_id != principal.tenant_id:
+        raise forbidden("tenant")
+    return principal
 
 
 def _error(status: int, code: str, message_key: str, **detail: str) -> JSONResponse:
     body = ApiError(code=code, message_key=message_key,
                     detail={k: str(v)[:_ECHO] for k, v in detail.items()})
     return JSONResponse(status_code=status, content=body.model_dump(mode="json"))
-
-
-_NO_TENANT = ("tenant_required", "error.tenant_required")
 
 
 def _month_end(day: date) -> date:
@@ -141,11 +133,9 @@ def get_fact(
     granularity: str = "month",
     entity: str | None = None,
     compute: str = "true",
-    caller: Principal | None = Depends(current_caller),
+    caller: Principal = Depends(current_caller),
     session: Session = Depends(get_session),
 ) -> Fact | JSONResponse:
-    if caller is None:
-        return _error(422, *_NO_TENANT)
     period = _period(start, end, granularity)
     if isinstance(period, JSONResponse):
         return period
@@ -173,11 +163,9 @@ def get_fact(
 @router.get("/explain/{figure_id}", response_model=Explanation)
 def get_explanation(
     figure_id: str,
-    caller: Principal | None = Depends(current_caller),
+    caller: Principal = Depends(current_caller),
     session: Session = Depends(get_session),
 ) -> Explanation | JSONResponse:
-    if caller is None:
-        return _error(422, *_NO_TENANT)
     try:
         return explain(FactStore(session), figure_id, caller)
     except FactNotFound:
@@ -192,11 +180,9 @@ def get_explanation_rows(
     figure_id: str,
     offset: str = "0",
     limit: str = "100",
-    caller: Principal | None = Depends(current_caller),
+    caller: Principal = Depends(current_caller),
     session: Session = Depends(get_session),
 ) -> ExplainRows | JSONResponse:
-    if caller is None:
-        return _error(422, *_NO_TENANT)
     try:
         first, size = int(offset), int(limit)
     except ValueError:

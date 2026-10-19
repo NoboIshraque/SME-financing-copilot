@@ -14,15 +14,15 @@ Session names: `orch-A`, `orch-C` (`orch-B` only in an emergency).
 
 | Field | Value |
 | --- | --- |
-| On duty | orch-? |
-| Since (Dhaka) | YYYY-MM-DD HH:MM |
+| On duty | orch-C |
+| Since (Dhaka) | 2026-10-19 10:55 |
 | Merge authority | the on-duty orchestrator only |
-| Working on | — |
-| Next 3 steps | 1. — 2. — 3. — |
-| Open PRs and their state | — |
-| Waiting on (people / CI / limits) | — |
-| Lives only in a sandbox (must be committed) | — |
-| Off-duty orchestrator | orch-? (limit resets about HH:MM) |
+| Working on | WP-06 milestone 8 API: branch `wp-06-api` pushed (1b87ee7), backend 1492 passed; PR not opened yet |
+| Next 3 steps | 1. Open + merge the `wp-06-api` PR when Nobo says so. 2. Nobo decides the WP-06 x WP-11 application-card tier question (WP-06.md, Questions). 3. WP-08 milestone 8 (mesh API). |
+| Open PRs and their state | none (#17 and #18 merged 2026-10-19 ~11:05; backend 1473 passed on combined main) |
+| Waiting on (people / CI / limits) | Nobo: open/merge `wp-06-api`; decision on the application-card tier |
+| Lives only in a sandbox (must be committed) | nothing (orch-A's CPU runner is on main since af37713) |
+| Off-duty orchestrator | orch-A (limit reset time not recorded) |
 
 ---
 
