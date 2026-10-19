@@ -137,11 +137,17 @@ def test_without_a_session_every_route_answers_401(seeded: TestClient):
 
 def test_facts_mask_source_rows_for_callers_who_may_not_see_them(seeded: TestClient):
     owner_rows = seeded.get("/api/facts/cash_in", params=SEP_QUERY).json()
-    _as(seeded, LENDER)
-    lender_rows = seeded.get("/api/facts/cash_in", params=SEP_QUERY).json()
+    _as(seeded, Principal(user_id="u-staff", tenant_id=T, role=Role.staff))  # no source_rows:read
+    staff_rows = seeded.get("/api/facts/cash_in", params=SEP_QUERY).json()
     assert owner_rows["provenance"]["source_row_ids"] == ["txn:tenant_a-T1", "txn:tenant_a-T2"]
-    assert all(r.startswith("masked:") for r in lender_rows["provenance"]["source_row_ids"])
-    assert lender_rows["value"] == owner_rows["value"]
+    assert all(r.startswith("masked:") for r in staff_rows["provenance"]["source_row_ids"])
+    assert staff_rows["value"] == owner_rows["value"]
+
+
+def test_a_lender_viewer_cannot_compute_ledger_figures(seeded: TestClient):
+    _as(seeded, LENDER)  # consented scopes are passport and reports only, not ledger:read
+    res = seeded.get("/api/facts/cash_in", params=SEP_QUERY)
+    assert (res.status_code, res.json()["code"]) == (403, "forbidden")
 
 
 def test_explain_returns_formula_inputs_and_rows(seeded: TestClient):

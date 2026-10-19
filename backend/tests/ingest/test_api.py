@@ -158,3 +158,9 @@ def test_columns_offer_the_mapping_step_with_masked_values(client: TestClient):
 def test_history_limit_is_validated(client: TestClient):
     res = client.get("/api/ingest/history", params={"tenant_id": T, "limit": "0"})
     assert (res.status_code, res.json()["code"]) == (422, "invalid_limit")
+
+
+def test_a_lender_viewer_may_not_list_uploads(client: TestClient):
+    _as(client, LENDER)  # consented scopes are passport and reports only, not ledger:read
+    res = client.get("/api/ingest/history")
+    assert (res.status_code, res.json()["code"]) == (403, "forbidden")
