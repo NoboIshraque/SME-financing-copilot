@@ -35,7 +35,9 @@ test("the owner uploads a bKash statement, checks the preview and commits it; a 
   await app.signInAs(owner);
   const statement = bkashStatement(3);
 
-  await app.start("today");
+  // The copilot (and its upload) is on every screen; Settings runs no engine, so nothing else is
+  // writing (the local dev API is SQLite: a forecast being recorded would lock the upload out).
+  await app.start("settings");
   await page.getByRole("button", { name: app.t("copilot.open") }).click();
   await page.getByRole("dialog", { name: app.t("copilot.title") }).getByRole("button", { name: app.t("upload.open") }).click();
   const dialog = page.getByRole("dialog", { name: app.t("upload.title") });
