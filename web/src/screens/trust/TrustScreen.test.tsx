@@ -5,15 +5,13 @@ import { auditVerification } from "../../mocks/fixtures/inbox";
 import { renderApp } from "../../test/render";
 
 describe("Trust & audit screen", () => {
-  it("shows the audit chain intact with its anchored head, and the drill score", async () => {
+  it("shows the audit chain intact with its anchored head, and no audit-drill card (P8 cut)", async () => {
     renderApp("/trust");
     const chain = await screen.findByRole("region", { name: "Audit log" });
     expect(await within(chain).findByText("Intact: 1,284 entries, each linked to the one before.")).toBeInTheDocument();
     expect(await within(chain).findByText(/Anchored on Ethereum Sepolia \(testnet\)/)).toBeInTheDocument();
     expect(chain).toHaveTextContent("Transaction 0x2b4d6f8a");
-    const drill = screen.getByRole("region", { name: "Nightly audit drill" });
-    expect(await within(drill).findByText("90%")).toBeInTheDocument();
-    expect(drill).toHaveTextContent("caught 18 of 20 planted errors");
+    expect(screen.queryByRole("region", { name: "Nightly audit drill" })).not.toBeInTheDocument();
   });
 
   it("lists recent actions with their tiers and every abstention with what was missing", async () => {
