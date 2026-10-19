@@ -5,6 +5,10 @@ import { sessionFile } from "../support/auth";
 import { expect, SCREENS, test, type App } from "../support/fixtures";
 import { untranslatedTells, type Language } from "../support/i18n";
 
+// Trust last: on a phone it is wider than the screen (known WP-14 bug, see layout.spec.ts), which
+// pushes the bottom bar's "More" partly off-screen; the language switch in the header still works.
+const WALK = [...SCREENS.filter((screen) => screen !== "trust"), "trust" as const];
+
 async function expectTranslated(app: App, language: Language, where: string): Promise<void> {
   const page = app.page;
   await expect(page.locator("[aria-busy='true']")).toHaveCount(0);
@@ -20,7 +24,7 @@ test.describe("signed in", () => {
     await app.start("today");
     for (const language of ["bn", "zh"] as const) {
       await app.switchLanguage(language);
-      for (const screen of SCREENS) {
+      for (const screen of WALK) {
         await app.open(screen);
         await expect(page).toHaveTitle(new RegExp(app.t(`nav.${screen}`).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
         await expectTranslated(app, language, screen);
@@ -28,7 +32,7 @@ test.describe("signed in", () => {
     }
     // The choice is remembered: a reload comes back in Chinese.
     await page.reload();
-    await expect(app.heading("settings")).toBeVisible();
+    await expect(app.heading("trust")).toBeVisible();
     expect(foreignHosts, `third-party hosts contacted: ${foreignHosts.join(", ")}`).toEqual([]);
   });
 });
