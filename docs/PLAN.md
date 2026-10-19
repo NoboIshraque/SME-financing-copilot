@@ -64,7 +64,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | WP-03 | Privacy vault, detectors, anonymiser, amount scaling (N6, N18, P11) | Orchestrator | 1 | 70 |
 | WP-04 | Cash engine: forecast, Monte Carlo, gaps, alerts, smoothing (Q1, Q3) | A1 | 1–2 | 120 |
 | WP-05 | Receivables & collections: aging, risk, limits, ladder, disputes (Q2) | A1 | 2 | 60 |
-| WP-06 | Financing: catalogue, effective APR, eligibility, ranking, lender check (P1, N20, P14) | Orchestrator | 2 | 90 |
+| WP-06 | done (8/8) | merged (PR #20, #22, #23) | 147 | engine + real BD catalogue; API: match (web FinancingMatch shape: lenders + application draft), lender check, application draft; application card is `submit_loan_application` (EXECUTE, owner approves with step-up; PR #23). Fit still waits for the WP-04 band to be wired in |
 | WP-07 | Analysis: P&L, ratios, variance, scenarios, stability score (N1, N12, N16) | A1 | 2 | 90 |
 | WP-08 | Liquidity mesh: netting, consent, attestations, Sepolia anchor (N14, Q4) | Orchestrator | 2 | 70 |
 | WP-09 | Market watch, vendor ranking, negotiation (N3, N19) | Worker C* | 2 | 50 |
