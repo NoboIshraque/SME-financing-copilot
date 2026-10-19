@@ -15,8 +15,9 @@ and the trade-licence and e-TIN facts when on record. Nothing is marked `verifie
 says what was recorded, not that a third party checked it. Mesh attestations are counted when
 stored (none yet), the abstention rate is left out until the copilot logs every question, and
 the audit-drill rate was cut. Each version gets a fresh salt kept on the server; its salted
-digest is anchored like a netting round (offline or Sepolia). Public verification recomputes
-the digest and compares it with the anchor.
+digest is anchored like a netting round (offline or Sepolia). A synthetic demo shop with no
+passport gets version 1 on its first read. Public verification recomputes the digest and
+compares it with the anchor.
 """
 
 from __future__ import annotations
@@ -60,8 +61,10 @@ from app.security.clock import Clock
 from app.security.deps import StepUp, get_clock, require, step_up
 from app.security.errors import ProblemRoute
 from app.security.roles import Permission
+from app.synthetic.universe import SME_IDS
 
 router = APIRouter(tags=["reports"], route_class=ProblemRoute)
+DEMO_ISSUER = "system:demo-seed"
 PROFILE_EVIDENCE = (("trade_licence", EvidenceKind.trade_licence),
                     ("etin_registered", EvidenceKind.etin))
 
@@ -116,11 +119,41 @@ def _audit(session: Session, principal: Principal, action: str, target: str, now
                              now=now, tier=tier, target=target)
 
 
+def _issue(session: Session, tenant_id: str, actor: str, now: datetime,
+           anchors: Anchors) -> PassportVersion | None:
+    """A new anchored version, or None when the ledger holds no evidence."""
+    evidence = _evidence(session, tenant_id, now.date())
+    existing = _passports(session, tenant_id)
+    previous = PassportVersion.model_validate_json(existing[0].payload) if existing else None
+    salt = new_salt()
+    try:
+        passport = build_passport(tenant_id=tenant_id, previous=previous, evidence=evidence,
+                                  attestations=(), abstention_rate=None,
+                                  audit_drill_catch_rate=None, salt=salt, now=now,
+                                  data_mode=DataMode.synthetic if tenant_id in SME_IDS
+                                  else DataMode.live)
+    except PassportError:
+        return None
+    passport = anchor_passport(passport, anchors.write, now=now)
+    session.add(PassportRow(id=passport.id, tenant_id=tenant_id, version=passport.version,
+                            salt=salt, issued_at=now, payload=passport.model_dump_json()))
+    AuditLog(session).append(tenant_id, actor=actor, action="passport.issued", now=now,
+                             tier=Tier.DRAFT, target=passport.id)
+    session.flush()
+    return passport
+
+
 @router.get("/reports/passport", response_model=list[PassportVersion])
 def passports(principal: Principal = Depends(require(Permission.passport_read)),
-              session: Session = Depends(get_session)) -> list[PassportVersion]:
-    return [PassportVersion.model_validate_json(r.payload)
-            for r in _passports(session, principal.tenant_id)]
+              clock: Clock = Depends(get_clock),
+              session: Session = Depends(get_session),
+              anchors: Anchors = Depends(get_anchors)) -> list[PassportVersion]:
+    rows = _passports(session, principal.tenant_id)
+    if not rows and principal.tenant_id in SME_IDS:
+        # Synthetic demo shops start with version 1, issued on first read (labelled synthetic).
+        _issue(session, principal.tenant_id, DEMO_ISSUER, clock(), anchors)
+        rows = _passports(session, principal.tenant_id)
+    return [PassportVersion.model_validate_json(r.payload) for r in rows]
 
 
 @router.post("/reports/passport", response_model=PassportVersion, status_code=201)
@@ -128,24 +161,9 @@ def issue(principal: Principal = Depends(require(Permission.approvals_decide)),
           clock: Clock = Depends(get_clock),
           session: Session = Depends(get_session),
           anchors: Anchors = Depends(get_anchors)) -> PassportVersion | JSONResponse:
-    now = clock()
-    evidence = _evidence(session, principal.tenant_id, now.date())
-    existing = _passports(session, principal.tenant_id)
-    previous = PassportVersion.model_validate_json(existing[0].payload) if existing else None
-    modes = {DataMode.synthetic} if principal.tenant_id.startswith("sme_") else {DataMode.live}
-    salt = new_salt()
-    try:
-        passport = build_passport(tenant_id=principal.tenant_id, previous=previous,
-                                  evidence=evidence, attestations=(), abstention_rate=None,
-                                  audit_drill_catch_rate=None, salt=salt, now=now,
-                                  data_mode=modes.pop())
-    except PassportError:
+    passport = _issue(session, principal.tenant_id, principal.user_id, clock(), anchors)
+    if passport is None:
         return _error(422, "not_enough_evidence", "error.not_enough_evidence")
-    passport = anchor_passport(passport, anchors.write, now=now)
-    session.add(PassportRow(id=passport.id, tenant_id=passport.tenant_id,
-                            version=passport.version, salt=salt, issued_at=now,
-                            payload=passport.model_dump_json()))
-    _audit(session, principal, "passport.issued", passport.id, now, Tier.DRAFT)
     return passport
 
 

@@ -35,6 +35,12 @@ def _as(client: TestClient, principal: Principal | None) -> None:
         client.app.dependency_overrides[current_principal] = lambda: principal
 
 
+def test_a_demo_shop_gets_version_one_on_first_read(api: TestClient):
+    listed = api.get("/api/reports/passport").json()
+    assert [p["version"] for p in listed] == [1]
+    assert api.get("/api/reports/passport").json() == listed  # issued once, not on every read
+
+
 def test_owner_issues_versioned_anchored_passports_from_the_ledger(api: TestClient):
     first = api.post("/api/reports/passport").json()
     second = api.post("/api/reports/passport").json()
