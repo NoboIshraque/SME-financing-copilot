@@ -215,7 +215,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
 | WP-14 | done (12/12) | merged (PR #21) | 210 web (176 new) | all 12 milestones: 11 screens + public verify page, provenance drawer on every number, copilot panel + upload flow, offline mock API (live/mock/auto), EN/BN/ZH, PWA, axe WCAG 2.1 AA clean |
-| WP-15 | not started | — | 0 | |
+| WP-15 | in progress (2/3) | wp-15-e2e | 24 e2e (12 flows x desktop + phone) + setup/teardown | the 12 most important flows, green locally against the live auth, approvals, guard, ingest, cash (WP-04) and financing (WP-06) APIs, labelled mock for the rest; every run lists the known bugs it observes (WP-01/02/11 security, WP-14 layout/a11y); hosted evidence pipeline ready, waits for WP-18's server + seeded demo (WP-15.md Questions) |
 | WP-16 | not started | — | 0 | P3 approved |
 | WP-17 | in progress (2/4) | merged | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families; Labib runs 01/03/04 on Kaggle |
 | WP-18 | in progress (4/6) | merged + PR #14 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only; secret scan scoped to the tested commit (PR #14, all-refs scan before going public); China checks + mirror pending |
