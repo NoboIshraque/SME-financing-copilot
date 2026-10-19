@@ -16,8 +16,9 @@ tenant's typed facts as of today (Dhaka): a fact the ledger does not hold is pas
 missing, so the rule answers "not on record" instead of guessing. Every number in a response
 comes from the WP-06 engines.
 
-The WP-04 forecast is not wired in yet: options are ranked without the fit term and carry the
-reason `fit.no_forecast`. Until WP-08 stores verified loans, no lender has a track record:
+Fit uses the tenant's WP-04 cash forecast band (the cash API's cached analysis, default buffer);
+when the cash engine abstains (too little history), options are ranked without the fit term and
+carry the reason `fit.no_forecast`. Until WP-08 stores verified loans, no lender has a track record:
 `lender_events` is the one seam that supplies them. No lender licence registry is loaded yet, so
 licence status is reported as `unknown` (never assumed).
 
@@ -29,7 +30,7 @@ business): it goes to the owner through `POST /api/approvals` and needs a step-u
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 from zoneinfo import ZoneInfo
@@ -39,6 +40,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
+from app.api import cash as cash_api
 from app.contracts import (
     ActionCard,
     ActionType,
@@ -48,6 +50,7 @@ from app.contracts import (
     FinancingNeed,
     FinancingOption,
     FinancingProduct,
+    ForecastBand,
     LenderProfile,
     LicenceStatus,
     Money,
@@ -172,12 +175,24 @@ def _past(need: FinancingNeed, as_of: date) -> JSONResponse | None:
     return _error(422, "needed_by_in_past", "error.needed_by_in_past", as_of=as_of.isoformat())
 
 
+def _band(store: FactStore, tenant_id: str, now: datetime) -> ForecastBand | None:
+    try:
+        analysis = cash_api.analyse(store, tenant_id)
+    except cash_api.Abstain:
+        return None
+    return analysis.plain.band(cash_api.buffer_for(analysis, None), now)
+
+
 def _rank(need: FinancingNeed, body: NeedBody, as_of: date, session: Session,
-          events: Sequence[LenderEvent]):
+          events: Sequence[LenderEvent], now: datetime):
     products = load_catalogue(jurisdiction=body.jurisdiction)
-    facts, modes = _facts(FactStore(session), need.tenant_id, products, as_of)
-    candidates = rank_options(need, products, facts, start=need.needed_by,
+    store = FactStore(session)
+    facts, modes = _facts(store, need.tenant_id, products, as_of)
+    band = _band(store, need.tenant_id, now)
+    candidates = rank_options(need, products, facts, start=need.needed_by, band=band,
                               lenders=_profiles(events))
+    if band is not None:
+        modes.add(band.data_mode)
     modes |= {p.data_mode for p in products}
     if events:
         modes.add(DataMode.synthetic)
@@ -193,7 +208,7 @@ def match(body: NeedBody,
     as_of, need = _today(clock), _need(body, principal)
     if (problem := _past(need, as_of)) is not None:
         return problem
-    facts, candidates, mode = _rank(need, body, as_of, session, events)
+    facts, candidates, mode = _rank(need, body, as_of, session, events, clock())
     options = [c.option for c in candidates]
     providers = sorted({o.product.provider for o in options})
     lenders = [_profile(provider, events, [o.product for o in options
@@ -236,7 +251,7 @@ def application(body: ApplicationBody,
     as_of, need = _today(clock), _need(body, principal)
     if (problem := _past(need, as_of)) is not None:
         return problem
-    facts, candidates, _ = _rank(need, body, as_of, session, events)
+    facts, candidates, _ = _rank(need, body, as_of, session, events, clock())
     chosen = next((c.option for c in candidates if c.option.product.id == body.product_id), None)
     if chosen is None:
         return _error(404, "product_not_found", "error.product_not_found",

@@ -10,7 +10,9 @@ a key derived from the server secret, bound to the tenant). The commit must name
 digest, so what is committed is exactly what was previewed; a mismatch is refused. Drafts (OCR
 lines, rows whose dates stayed ambiguous) are committed only when the owner confirms them by
 `row_ref`; nothing is committed on its own. Duplicates are checked against the ledger at
-preview time and again at commit time, in case another upload landed in between.
+preview time and again at commit time, in case another upload landed in between. A preview
+keeps the ids its source pinned (`strong_ids`); once committed, those mark which ledger rows
+match by id only, and every other ledger row may also match an upload on the weak key.
 """
 
 from __future__ import annotations
@@ -110,6 +112,18 @@ class IngestService:
         known = {r.alias: r.token for r in self.session.scalars(query)}
         return ClusteringPartyResolver(self._party_key, known)
 
+    def _ledger(self, tenant_id: str) -> tuple[list[Transaction], set[str]]:
+        """The tenant's transactions, and those without a strong identity of their own: every
+        one no committed upload pinned by its source id or running balance (seeded rows, rows
+        typed in, rows from a source without ids). See `app/ingest/dedupe.py`."""
+        ledger = self.store.transactions(tenant_id)
+        pinned: set[str] = set()
+        query = select(IngestPreviewRow.strong_ids).where(
+            IngestPreviewRow.tenant_id == tenant_id, IngestPreviewRow.status == "committed")
+        for ids in self.session.scalars(query):
+            pinned.update(json.loads(ids))
+        return ledger, {t.id for t in ledger if t.id not in pinned}
+
     def _new_documents(self, tenant_id: str, invoices: Collection[Invoice],
                        bills: Collection[Bill]) -> tuple[list[Invoice], list[Bill], int]:
         known_invoices = {i.id for i in self.store.invoices(tenant_id)}
@@ -131,8 +145,9 @@ class IngestService:
             result = drafts_from_photo(data, opts, resolver, engine, reference)
         else:
             result = parse_file(data, opts, resolver)
-        kept, duplicates = dedupe(result.transactions, self.store.transactions(opts.tenant_id),
-                                  result.strong_ids)
+        ledger, unpinned = self._ledger(opts.tenant_id)
+        kept, duplicates = dedupe(result.transactions, ledger, result.strong_ids,
+                                  unpinned_ledger_ids=unpinned)
         invoices, bills, known = self._new_documents(opts.tenant_id, result.invoices,
                                                      result.bills)
         preview = IngestPreview(
@@ -182,8 +197,9 @@ class IngestService:
                      for ref in dict.fromkeys(confirm)]
         txns = [*preview.transactions, *(d.transaction for d in confirmed if d.transaction)]
         invoices = [*preview.invoices, *(d.invoice for d in confirmed if d.invoice)]
-        kept, duplicates = dedupe(txns, self.store.transactions(tenant_id),
-                                  set(json.loads(row.strong_ids)))
+        ledger, unpinned = self._ledger(tenant_id)
+        kept, duplicates = dedupe(txns, ledger, set(json.loads(row.strong_ids)),
+                                  unpinned_ledger_ids=unpinned)
         new_invoices, new_bills, known = self._new_documents(tenant_id, invoices, preview.bills)
         self.store.add_transactions(kept)
         self.store.add_invoices(new_invoices)

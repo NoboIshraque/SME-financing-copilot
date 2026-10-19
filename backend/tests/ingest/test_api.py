@@ -7,9 +7,12 @@ from fastapi.testclient import TestClient
 
 import app.api.ingest as ingest_api
 from app.contracts import Principal, Role
+from app.facts import FactStore
+from app.facts.seed import load_sme_into
 from app.ingest.ocr import TesseractEngine
 from app.security.deps import current_principal
 from app.settings import AppEnv
+from app.synthetic.universe import UNIVERSE_DIR
 from tests.ingest.helpers import T, bkash, csv_bytes
 
 SALES = bkash("A1,01/10/2026 10:00:00,Payment Received,01711000001,100,0,100,SALE-1",
@@ -158,3 +161,37 @@ def test_columns_offer_the_mapping_step_with_masked_values(client: TestClient):
 def test_history_limit_is_validated(client: TestClient):
     res = client.get("/api/ingest/history", params={"tenant_id": T, "limit": "0"})
     assert (res.status_code, res.json()["code"]) == (422, "invalid_limit")
+
+
+def test_the_shops_own_bkash_statement_adds_nothing_to_its_seeded_ledger(client: TestClient,
+                                                                          universe):
+    """The seeded ledger has no TrxIDs; the shop's own statement must still be recognised."""
+    sme = universe.smes["sme_grocery"]
+    with client.app.state.session_factory() as session:
+        load_sme_into(FactStore(session), sme, universe.start, universe.as_of)
+        session.commit()
+    _as(client, Principal(user_id="u-grocer", tenant_id=sme.id, role=Role.owner))
+    day = universe.as_of.isoformat()
+
+    def closing() -> Decimal:
+        res = client.get("/api/facts/closing_balance",
+                         params={"start": day, "end": day, "granularity": "day"})
+        assert res.status_code == 200, res.text
+        return Decimal(res.json()["value"])
+
+    assert closing() == sme.balance_on(universe.as_of).amount
+    data = (UNIVERSE_DIR / sme.id / "bkash_statement.csv").read_bytes()
+    rows = len(data.decode().splitlines()) - 1
+    preview = client.post("/api/ingest/preview",
+                          files={"file": ("bkash_statement.csv", data, "text/csv")}).json()
+    assert (len(preview["transactions"]), preview["duplicates_skipped"]) == (0, rows)
+    committed = client.post("/api/ingest/commit", json={
+        "preview_id": preview["preview_id"], "file_digest": preview["file_digest"]}).json()
+    assert (committed["transactions"], committed["duplicates_skipped"]) == (0, rows)
+    with client.app.state.session_factory() as session:
+        assert len(FactStore(session).transactions(sme.id)) == len(sme.transactions)
+    assert closing() == sme.balance_on(universe.as_of).amount
+def test_a_lender_viewer_may_not_list_uploads(client: TestClient):
+    _as(client, LENDER)  # consented scopes are passport and reports only, not ledger:read
+    res = client.get("/api/ingest/history")
+    assert (res.status_code, res.json()["code"]) == (403, "forbidden")

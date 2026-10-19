@@ -100,3 +100,45 @@ def test_api_routes_lists_full_paths_once_even_for_prefixed_routers(settings, mo
     assert routes[("mesh", "/api/mesh/rounds/propose")] == {"POST"}
     assert routes[("health", "/api/health")] == {"GET"}
 
+
+
+HTTP_METHODS = {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
+
+
+def test_api_routes_lists_every_route_the_app_serves_including_included_routers(settings):
+    # app/api/auth.py's router only includes sub-routers (auth, approvals, policy, audit, guard).
+    app = create_app(settings)
+    routes = api_routes(app)
+    listed = {(r.path, method) for r in routes for method in r.methods}
+    documented = {(path, method.upper()) for path, item in app.openapi()["paths"].items()
+                  for method in item if method in HTTP_METHODS}
+    assert listed == documented
+    assert len(routes) == len({(r.path, r.methods) for r in routes})  # each route once
+    by_path = {(r.path, method): r for r in routes for method in r.methods}
+    login = by_path[("/api/auth/login", "POST")]
+    assert (login.module, login.endpoint.__name__) == ("auth", "login")
+    assert by_path[("/api/approvals", "GET")].module == "auth"
+
+
+def test_api_routes_applies_every_include_prefix_on_the_way_down(settings, monkeypatch):
+    leaf, inner, outer = APIRouter(), APIRouter(prefix="/inner"), APIRouter(prefix="/outer")
+
+    @leaf.get("/leaf")
+    def deep() -> dict:
+        return {"at": "leaf"}
+
+    @outer.get("/own")
+    def own() -> dict:
+        return {"at": "own"}
+
+    inner.include_router(leaf, prefix="/sub")
+    outer.include_router(inner, prefix="/mid")
+    real = main_mod.discover_routers()
+    monkeypatch.setattr(main_mod, "discover_routers", lambda: [*real, ("nested", outer)])
+    app = create_app(settings)
+
+    nested = {r.path: r.endpoint for r in api_routes(app) if r.module == "nested"}
+
+    assert nested == {"/api/outer/own": own, "/api/outer/mid/inner/sub/leaf": deep}
+    with TestClient(app) as client:  # the listed paths are the ones served
+        assert [client.get(path).json()["at"] for path in sorted(nested)] == ["leaf", "own"]

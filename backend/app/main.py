@@ -17,13 +17,14 @@ from __future__ import annotations
 import importlib
 import importlib.util
 import pkgutil
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass
 from types import ModuleType
 
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
+from starlette.routing import BaseRoute
 
 import app as app_pkg
 from app import api as api_pkg
@@ -56,17 +57,31 @@ class ApiRoute:
     route: APIRoute
 
 
+def _walk(routes: Sequence[BaseRoute], prefix: str) -> Iterator[tuple[str, APIRoute]]:
+    """(full path, route) for every APIRoute in `routes`, descending into included routers.
+
+    A route's own `path` already carries its router's prefix. FastAPI (0.14x) includes routers
+    lazily: `include_router` appends one entry holding `original_router` and an
+    `include_context` whose `prefix` joins the including router's prefix and the include's own,
+    so the prefixes add up on the way down. Older versions copied the routes in, flattened,
+    which the first branch covers."""
+    for route in routes:
+        if isinstance(route, APIRoute):
+            yield prefix + route.path, route
+            continue
+        included = getattr(route, "original_router", None)
+        context = getattr(route, "include_context", None)
+        if isinstance(included, APIRouter) and context is not None:
+            yield from _walk(included.routes, prefix + context.prefix)
+
+
 def api_routes(application: FastAPI) -> list[ApiRoute]:
-    """Every API route with its full path, from the routers create_app mounted. Public and
-    stable, unlike walking `app.routes` (FastAPI includes routers lazily)."""
-    out = []
-    for module, router in application.state.api_routers:
-        for route in router.routes:
-            if isinstance(route, APIRoute):
-                # route.path already carries the router's own prefix.
-                out.append(ApiRoute(module, API_PREFIX + route.path,
-                                    frozenset(route.methods or ()), route.endpoint, route))
-    return out
+    """Every API route with its full path, from the routers create_app mounted, including the
+    routes of routers they include (at any depth). Public and stable, unlike walking
+    `app.routes` (FastAPI includes routers lazily)."""
+    return [ApiRoute(module, path, frozenset(route.methods or ()), route.endpoint, route)
+            for module, router in application.state.api_routers
+            for path, route in _walk(router.routes, API_PREFIX)]
 
 
 def discover_app_hooks(package: ModuleType = app_pkg) -> list[tuple[str, AppHook]]:

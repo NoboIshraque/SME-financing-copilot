@@ -8,7 +8,7 @@ from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from app.ingest.dedupe import dedupe
-from tests.ingest.helpers import bank, bkash, csv_bytes, parse
+from tests.ingest.helpers import T, bank, bkash, csv_bytes, parse
 
 CASH_HEADER = "date,party,category,type,amount,channel,ref"
 START = date(2025, 4, 1)
@@ -46,6 +46,32 @@ def test_rows_pinned_by_their_source_id_are_never_dropped_on_a_look_alike():
     new = parse(bkash("A2,01/04/2025 10:00:00,Payment Received,017,100,0,0,SALE-1"), "b.csv")
     kept, skipped = dedupe(new.transactions, old.transactions, new.strong_ids)
     assert ([t.id for t in kept], skipped) == ([new.transactions[0].id], 0)
+
+
+def test_two_trxids_that_look_alike_both_stay_beside_a_ledger_row_with_its_own_trxid():
+    """The ledger row came from an earlier statement, so it is pinned by its TrxID and matches
+    only that id: two new TrxIDs with the same look are two new payments."""
+    earlier = parse(bkash("A1,01/04/2025 10:00:00,Payment Received,017,100,0,0,SALE-1"), "b.csv")
+    later = parse(bkash("A2,01/04/2025 10:00:00,Payment Received,017,100,0,0,SALE-1",
+                        "A3,01/04/2025 10:00:00,Payment Received,017,100,0,0,SALE-1"), "b.csv")
+    ledger = earlier.transactions
+    unpinned = {t.id for t in ledger} - earlier.strong_ids
+    kept, skipped = dedupe(later.transactions, ledger, later.strong_ids,
+                           unpinned_ledger_ids=unpinned)
+    assert ([t.id for t in kept], skipped) == ([t.id for t in later.transactions], 0)
+
+
+def test_a_seeded_row_absorbs_one_statement_row_that_looks_the_same():
+    """A seeded (or typed-in) row has no TrxID of its own: the statement row with its look is
+    that payment. Each ledger row absorbs one candidate, so a second TrxID with the same look
+    is still a second payment."""
+    upload = parse(bkash("A1,01/04/2025 10:00:00,Payment Received,017,100,0,100,SALE-1",
+                         "A2,01/04/2025 10:00:00,Payment Received,017,100,0,200,SALE-1"), "b.csv")
+    seeded = upload.transactions[0].model_copy(update={
+        "id": f"{T}-T000001", "source_ref": "transactions_truth.csv#L2"})
+    kept, skipped = dedupe(upload.transactions, [seeded], upload.strong_ids,
+                           unpinned_ledger_ids={seeded.id})
+    assert ([t.id for t in kept], skipped) == ([upload.transactions[1].id], 1)
 
 
 def test_kept_candidates_stay_in_file_order():

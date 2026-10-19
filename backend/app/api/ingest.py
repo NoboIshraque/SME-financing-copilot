@@ -34,8 +34,9 @@ from app.ingest.parties import mask_excerpt
 from app.ingest.preview import MAX_UPLOAD_BYTES, IngestError, IngestService
 from app.ingest.tabular import TableError, read_sheets
 from app.main import get_session
-from app.security.deps import current_principal
+from app.security.deps import current_principal, require
 from app.security.errors import ProblemRoute
+from app.security.roles import Permission
 
 router = APIRouter(tags=["ingest"], route_class=ProblemRoute)
 COMMIT_ROLES = frozenset({Role.owner, Role.accountant})
@@ -200,7 +201,7 @@ def history(
     request: Request,
     tenant_id: str = "",
     limit: str = "50",
-    principal: Principal = Depends(current_principal),
+    principal: Principal = Depends(require(Permission.ledger_read)),
     session: Session = Depends(get_session),
 ) -> list[HistoryItem] | JSONResponse:
     tenant = _tenant(principal, tenant_id)
