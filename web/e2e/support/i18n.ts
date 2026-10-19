@@ -26,10 +26,35 @@ function lookup(tree: Tree, key: string): string | undefined {
 }
 
 /**
- * The whole text of `key` (any plural form), with each {{slot}} matched by the given regex
- * source, e.g. tPattern("trust.chainValid", { value: "[\\d,]+" }).
+ * English UI sentences whose `lang` translation reads differently: on a screen in `lang`, none of
+ * them should show (an untranslated string falls back to English). Fragments around {{slots}}
+ * count when they are long enough to be unmistakable.
  */
-export function tPattern(key: string, slots: Record<string, string>, lang: Language = "en"): RegExp {
+export function untranslatedTells(lang: Language): string[] {
+  const tells = new Set<string>();
+  const walk = (en: Tree, other: Tree | string | undefined) => {
+    for (const [key, value] of Object.entries(en)) {
+      const translated = typeof other === "object" ? other[key] : undefined;
+      if (typeof value !== "string") {
+        walk(value, translated);
+        continue;
+      }
+      if (typeof translated !== "string" || translated === value) continue;
+      for (const fragment of value.split(/\{\{\s*\w+\s*\}\}/)) {
+        const text = fragment.trim();
+        if (text.length >= 16 && text.includes(" ") && !translated.includes(text)) tells.add(text);
+      }
+    }
+  };
+  walk(locales.en, locales[lang]);
+  return [...tells];
+}
+
+/**
+ * The text of `key` (any plural form), with each {{slot}} matched by the given regex source, e.g.
+ * tPattern("trust.chainValid", { value: "[\\d,]+" }). `whole`: the text is the whole string.
+ */
+export function tPattern(key: string, slots: Record<string, string>, lang: Language = "en", whole = true): RegExp {
   const forms = [key, `${key}_one`, `${key}_other`].filter((form) => lookup(locales[lang], form) !== undefined);
   if (forms.length === 0) throw new Error(`missing ${lang} string: ${key}`);
   const markers = Object.fromEntries(Object.keys(slots).map((name) => [name, `\u0001${name}\u0001`]));
@@ -39,7 +64,7 @@ export function tPattern(key: string, slots: Record<string, string>, lang: Langu
       .map((part, index) => (index % 2 === 1 ? `(?:${slots[part] ?? ""})` : part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
       .join(""),
   );
-  return new RegExp(`^(?:${sources.join("|")})$`);
+  return new RegExp(whole ? `^(?:${sources.join("|")})$` : `(?:${sources.join("|")})`);
 }
 
 /** `key` in `lang`, with {{name}} filled in (and Bangla digits in Bangla, as the app writes them). */
