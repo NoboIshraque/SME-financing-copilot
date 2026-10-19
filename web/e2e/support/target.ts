@@ -18,9 +18,9 @@ export const IGNORE_HTTPS_ERRORS = HOSTED_URL ? new URL(HOSTED_URL).hostname ===
 /** The web/ directory (this file is web/e2e/support/target.ts). */
 export const WEB_DIR = fileURLToPath(new URL("../../", import.meta.url));
 
-/** A context with no cookies: what an anonymous visitor (or a probe) sees. */
-export function anonymousContext(): Promise<APIRequestContext> {
-  return request.newContext({ baseURL: BASE_URL, ignoreHTTPSErrors: IGNORE_HTTPS_ERRORS });
+/** An API context on this target: anonymous (a visitor, or a probe), or with a saved session. */
+export function apiContext(storageState?: string): Promise<APIRequestContext> {
+  return request.newContext({ baseURL: BASE_URL, ignoreHTTPSErrors: IGNORE_HTTPS_ERRORS, storageState });
 }
 
 const probes = new Map<string, Promise<boolean>>();
@@ -41,7 +41,7 @@ export function routeIsLive(route: string): Promise<boolean> {
 
 async function probeRoute(route: string): Promise<boolean> {
   const [method = "GET", path = "/"] = route.split(" ");
-  const context = await anonymousContext();
+  const context = await apiContext();
   try {
     const response = await context.fetch(path, {
       method,

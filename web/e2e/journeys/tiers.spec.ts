@@ -2,7 +2,7 @@
 // may approve it, in the UI and at the API; a DENY action is refused whoever asks.
 import { sessionFile } from "../support/auth";
 import { expect, test } from "../support/fixtures";
-import { anonymousContext, needsRoutes } from "../support/target";
+import { apiContext, needsRoutes } from "../support/target";
 
 const RETIME = { id: "e2e-tier-retime", title_key: "action.retime_payable", action_type: "retime_payable", tier: "EXECUTE", payload: {} };
 const MOVE_MONEY = { id: "e2e-tier-move-money", title_key: "action.move_money", action_type: "move_money", tier: "EXECUTE", payload: {} };
@@ -31,13 +31,9 @@ test.describe("staff", () => {
     expect(asked.status()).toBe(403);
 
     // DENY: not even the owner may request it (the owner's saved session, outside this page).
-    const owner = await anonymousContext();
+    const owner = await apiContext(sessionFile("owner"));
     try {
-      const { cookies } = JSON.parse(await (await import("node:fs/promises")).readFile(sessionFile("owner"), "utf8")) as {
-        cookies: { name: string; value: string }[];
-      };
-      const cookie = cookies.map((item) => `${item.name}=${item.value}`).join("; ");
-      const denied = await owner.post("/api/approvals", { data: { card: MOVE_MONEY }, headers: { ...key(), Cookie: cookie } });
+      const denied = await owner.post("/api/approvals", { data: { card: MOVE_MONEY }, headers: key() });
       expect(denied.status()).toBe(403);
       expect(((await denied.json()) as { code: string }).code).toBe("action_denied");
     } finally {

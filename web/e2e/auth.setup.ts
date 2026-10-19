@@ -4,11 +4,11 @@
 import { test as setup } from "@playwright/test";
 
 import { saveSession, SAVED_ROLES } from "./support/auth";
-import { anonymousContext } from "./support/target";
+import { apiContext } from "./support/target";
 
 for (const role of SAVED_ROLES) {
   setup(`sign in the demo ${role}`, async () => {
-    const api = await anonymousContext(); // one cookie jar per role
+    const api = await apiContext(); // one cookie jar per role
     try {
       await saveSession(api, role);
     } finally {
