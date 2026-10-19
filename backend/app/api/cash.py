@@ -7,8 +7,12 @@
          {sales_change_pct, cost_change_pct, collection_delay_days, one_off_cost, one_off_day?}
 
 Signed-in callers holding `ledger:read`, always for their own tenant (WP-11). The forecast
-starts the day after the tenant's latest transaction and opens at its closing balance that day:
-the WP-01 `closing_balance` fact, which every cash figure cites as its input. `buffer` defaults
+starts the day after the tenant's latest transaction and opens at the cash on hand at the close
+of that latest day. That figure is WP-01's `opening_balance` fact for the forecast's first day
+(initial balance + every transaction before that day), the anchor WP-07's analysis API uses too,
+and every cash figure cites it as its input. It equals `closing_balance` of the latest day, but
+`closing_balance` needs cash in and cash out on that day to have source rows, so a shop whose
+last day held only payments (the garment shop's payroll) could not be forecast. `buffer` defaults
 to the buffer target, `seed` to the engine's seed, so the same ledger always gives the same
 answer. A what-if replays the same draws with its shocks (common random numbers): the
 difference to the plain forecast is the shock, never luck. Percentages are percent ("-20").
@@ -30,7 +34,7 @@ import json
 import threading
 from collections import OrderedDict
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Query
@@ -78,6 +82,7 @@ MIN_HISTORY_DAYS = 56  # 8 weeks (FEATURES N17)
 TOP_FIXES = 3
 CACHE_SIZE = 16
 SEED_MAX = 2**32 - 1
+NO_INITIAL_BALANCE = "the balance the ledger starts from (initial_balance)"
 
 
 class CashForecast(BaseModel):
@@ -138,7 +143,7 @@ class Analysis:
 
     tenant_id: str
     as_of: date
-    closing: Fact
+    closing: Fact  # cash at the close of `as_of`: WP-01 opening_balance of the day after
     transactions: tuple
     invoices: tuple
     bills: tuple
@@ -172,12 +177,14 @@ def analyse(store: FactStore, tenant_id: str, seed: int = SEED) -> Analysis:
         raise Abstain("insufficient_data", "abstain.insufficient_data",
                       missing="at least 8 weeks of transactions",
                       history_days=str((as_of - first).days + 1))
+    start = as_of + timedelta(days=1)
     try:
-        closing = compute(store, tenant_id, "closing_balance",
-                          Period(start=as_of, end=as_of, granularity=Granularity.day))
+        closing = compute(store, tenant_id, "opening_balance",
+                          Period(start=start, end=start, granularity=Granularity.day))
     except NotComputable as exc:
-        raise Abstain("insufficient_data", exc.reason_key,
-                      missing="the balance the ledger starts from (initial_balance)") from exc
+        missing = (NO_INITIAL_BALANCE if exc.reason_key == "facts.needs_initial_balance"
+                   else f"the cash balance at the start of {start.isoformat()}")
+        raise Abstain("insufficient_data", exc.reason_key, missing=missing) from exc
     invoices, bills = store.invoices(tenant_id), store.bills(tenant_id)
     baseline = forecast_baseline(tenant_id, as_of, closing.value, txns, invoices, bills,
                                  store.obligations(tenant_id), load_festivals())

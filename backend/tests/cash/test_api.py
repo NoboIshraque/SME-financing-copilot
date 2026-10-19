@@ -1,3 +1,5 @@
+import csv
+import json
 from collections.abc import Iterator
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -6,15 +8,17 @@ import pytest
 from argon2.profiles import CHEAPEST
 from fastapi.testclient import TestClient
 
+import app.api.cash as cash_api
 from app.api.cash import clear_cache
 from app.contracts import DataMode, Role
 from app.engines.cash.jobs import scan_tenant
-from app.facts import FactStore
+from app.facts import FactStore, NotComputable
 from app.facts.seed import load_sme_into
 from app.main import create_app
 from app.security import passwords
 from app.security.accounts import Accounts
 from app.settings import Settings
+from app.synthetic.universe import UNIVERSE_DIR
 from tests.cash.helpers import daily
 
 D = Decimal
@@ -31,7 +35,7 @@ def cash_app(universe):
     app = create_app(settings)
     with app.state.session_factory() as session:
         store = FactStore(session)
-        for sme_id in ("sme_grocery", "sme_hardware"):
+        for sme_id in ("sme_grocery", "sme_hardware", "sme_garment"):
             load_sme_into(store, universe.smes[sme_id], universe.start, universe.as_of)
         short = [t.model_copy(update={"tenant_id": "short_shop", "id": f"short-{t.id}"})
                  for t in daily(date(2026, 9, 1), 30, lambda d: 1000)]
@@ -43,6 +47,7 @@ def cash_app(universe):
         for email, tenant, role in (("owner@grocery.test", "sme_grocery", Role.owner),
                                     ("lender@grocery.test", "sme_grocery", Role.lender_viewer),
                                     ("owner@hardware.test", "sme_hardware", Role.owner),
+                                    ("owner@garment.test", "sme_garment", Role.owner),
                                     ("owner@short.test", "short_shop", Role.owner),
                                     ("owner@none.test", "no_opening", Role.owner)):
             accounts.ensure_tenant(tenant, tenant, DataMode.synthetic, NOW)
@@ -111,6 +116,25 @@ def test_the_forecast_is_a_labelled_band_with_the_headline_figures(grocery, univ
     assert D(figures["cash.buffer_target"]["value"]) == D(band["buffer"]["amount"])
 
 
+def test_a_shop_whose_last_day_has_only_outflows_still_gets_its_forecast(signed_in):
+    """The garment shop's last ledger day (2026-09-30) holds only the payroll: no cash came
+    in that day. The forecast still opens at its cash at close, which is the ground truth:
+    the opening balances in its profile plus every transaction's signed amount."""
+    folder = UNIVERSE_DIR / "sme_garment"
+    with (folder / "transactions_truth.csv").open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    last_day = max(r["occurred_at"][:10] for r in rows)
+    assert {r["direction"] for r in rows if r["occurred_at"][:10] == last_day} == {"outflow"}
+    profile = json.loads((folder / "profile.json").read_text(encoding="utf-8"))
+    truth = sum((D(v) for v in profile["opening_balances"].values()), D(0)) + sum(
+        (D(r["amount"]) if r["direction"] == "inflow" else -D(r["amount"]) for r in rows), D(0))
+    res = signed_in("owner@garment.test").get("/api/cash/forecast")
+    band = _band(res)
+    assert (band["tenant_id"], band["as_of"]) == ("sme_garment", last_day)
+    assert D(band["opening_balance"]["amount"]) == truth
+    assert D(_figures(res)["cash.closing_balance"]["value"]) == truth
+
+
 def test_every_cash_figure_opens_in_explain_with_the_balance_it_starts_from(grocery):
     figures = _figures(grocery.get("/api/cash/forecast"))
     closing = D(figures["cash.closing_balance"]["value"])
@@ -122,7 +146,7 @@ def test_every_cash_figure_opens_in_explain_with_the_balance_it_starts_from(groc
         assert body["formula"]["formula_id"] == figures[label]["provenance"]["formula_id"]
         assert D(body["value"]) == D(figures[label]["value"])
         (only,) = body["inputs"]
-        assert only["metric"] == "closing_balance" and D(only["value"]) == closing
+        assert only["metric"] == "opening_balance" and D(only["value"]) == closing
 
 
 def test_the_same_ledger_and_seed_give_the_same_answer_and_another_seed_does_not(grocery):
@@ -266,3 +290,15 @@ def test_no_opening_balance_on_record_abstains_instead_of_assuming_zero(signed_i
     assert res.status_code == 422
     assert res.json()["detail"]["missing"] == \
         "the balance the ledger starts from (initial_balance)"
+
+
+def test_an_abstention_for_another_reason_does_not_blame_the_initial_balance(signed_in,
+                                                                             monkeypatch):
+    def refuse(*_args, **_kwargs):
+        raise NotComputable("facts.no_source_rows")
+
+    monkeypatch.setattr(cash_api, "compute", refuse)
+    res = signed_in("owner@grocery.test").get("/api/cash/forecast", params={"seed": 99})
+    assert res.status_code == 422
+    assert (res.json()["message_key"], res.json()["detail"]) == (
+        "facts.no_source_rows", {"missing": "the cash balance at the start of 2026-10-01"})
