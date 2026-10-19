@@ -221,10 +221,12 @@ def _stagger(ctx: LeverContext, gap: Gap) -> list[_Offer]:
     first = max(1, last - 6)
     start, end = (base.as_of + timedelta(days=n) for n in (first, last))
     suppliers: dict[str, Decimal] = {}
+    first: dict[str, str] = {}  # equal amounts break on the first bill id, never the name
     for ob in base.open_bills:
         token = ob.bill.counterparty_token
         suppliers[token] = suppliers.get(token, ZERO) + ob.bill.amount.amount
-    supplier = min(suppliers, key=lambda t: (-suppliers[t], t)) if suppliers else None
+        first[token] = min(first.get(token, ob.bill.id), ob.bill.id)
+    supplier = min(suppliers, key=lambda t: (-suppliers[t], first[t])) if suppliers else None
     return [_Offer(
         LeverKind.stagger_purchase, "stagger",
         Scenario(name="stagger", defer_purchases=((start, end, STAGGER_PERCENT, STAGGER_DAYS),)),
