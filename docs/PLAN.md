@@ -64,20 +64,20 @@ Repo layout and ownership are in `CLAUDE.md`.
 | WP-03 | Privacy vault, detectors, anonymiser, amount scaling (N6, N18, P11) | Orchestrator | 1 | 70 |
 | WP-04 | Cash engine: forecast, Monte Carlo, gaps, alerts, smoothing (Q1, Q3) | A1 | 1–2 | 120 |
 | WP-05 | Receivables & collections: aging, risk, limits, ladder, disputes (Q2) | A1 | 2 | 60 |
-| WP-06 | Financing: catalogue, effective APR, eligibility, ranking, lender check (P1, N20, P14) | Orchestrator | 2 | 90 |
+| WP-06 | done (8/8) | merged (PR #20, #22, #23, #32) | 147 | engine + real BD catalogue; API: match (web FinancingMatch shape: lenders + application draft), lender check, application draft; application card is `submit_loan_application` (EXECUTE, owner approves with step-up; PR #23); Fit uses the WP-04 band (PR #32) |
 | WP-07 | Analysis: P&L, ratios, variance, scenarios, stability score (N1, N12, N16) | A1 | 2 | 90 |
 | WP-08 | Liquidity mesh: netting, consent, attestations, Sepolia anchor (N14, Q4) | Orchestrator | 2 | 70 |
-| WP-09 | Market watch, vendor ranking, negotiation (N3, N19) | Worker C* | 2 | 50 |
+| WP-09 | CUT (19 Oct, PR #25) | — | — | market watch, vendors, negotiation (N3, N19) cut; Market screen kept as a labelled preview on sample data (PR #30) |
 | WP-10 | LLM gateway + agents: orchestrator, checker, critic, agreement, abstention (N7–N11, N17, P13) | B2 | 2 | 90 |
 | WP-11 | Security: auth, roles, tiers, approvals, audit chain, injection guard (P2, P5) | B2 | 1–2 | 110 |
-| WP-12 | Messaging & automation: templates, approval queue, email + in-app (N2; P10 cut) | Worker C* | 2 | 40 |
-| WP-13 | Reports + Trust Passport + verify page (N4, Q4) | Orchestrator | 3 | 30 |
+| WP-12 | done (reduced) | merged (PR #34) | 9 | message drafts in EN/BN/ZH; owner approves, then the text is copied for the owner to send (no email/SMS channel, PR #25) |
+| WP-13 | done (4/5; lender report cut) | merged (PR #35) | 35 | passport, sharing, verify, state adapter; API (issue, share with step-up, revoke, public verify); demo shops get v1 on first read; lender report cut (PR #25) |
 | WP-14 | Frontend: all screens, provenance drawer, i18n, PWA, a11y (P6, P9, P12) | B1 | 1–3 | 110 (Vitest) |
-| WP-15 | E2E Playwright on local + hosted | B1 | 3 | 45 |
-| WP-16 | Eval harness: ≥ 100 tasks, adversarial multilingual, nightly audit drill (P3, P8) | B2 | 3 | 100 tasks |
+| WP-15 | done (3/3) | merged | 24 e2e (12 flows x desktop + phone) | the 12 most important flows run in CI (E2E workflow, local target) against the live APIs; hosted evidence run waits for WP-18's server |
+| WP-16 | done (reduced) | merged (PR #33) | 16 + 62 eval tasks | offline eval harness (functional, abstention, guard, privacy, provenance), `npm run evidence` writes `docs/submission/evidence/`; no mutation score (PR #25) |
 | WP-17 | ML on Kaggle/Colab: forecaster backtest, delay model, injection classifier (N15, P5) | Human PC-4 + notebooks from orchestrator | 1–2 | 20 |
 | WP-18 | Infra & deploy: Docker, Caddy, SG server, CI/CD, China tests (P6) | Orchestrator + Amdad | 2–3 | 15 |
-| WP-19 | Submission: 6 deliverables, built by parallel agents | Orchestrator + all | 3 | — |
+| WP-19 | done | merged (wp-19-submission) | — | renamed to DecisionGuard; technical doc, security self-assessment, video script, deck source, evidence bundle, PDFs (`scripts/export_submission_pdfs.py`); video recording by Nobo |
 | WP-20 | Real-shop data collection and anonymisation (P7) | Labib (human) | 1–2 | — |
 
 \* **Worker C** = Google's free coding CLI on Amdad's PC-3 (optional third coder; see §5). If it isn't
