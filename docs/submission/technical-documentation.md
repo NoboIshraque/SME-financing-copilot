@@ -802,7 +802,10 @@ traces with `python -m app.llm.live_check` (keys required); the evidence index l
   (`backend/app/messaging/`, `/api/messages/*`). There is no sending channel: the owner copies the
   approved text into their own chat app.
 - **Evaluation harness** (WP-16): `npm run eval` runs the tasks offline and writes per-step JSONL
-  logs to the evidence bundle (`backend/eval/`, results in `docs/submission/evidence/`).
+  logs to the evidence bundle (`backend/eval/`, results in `docs/submission/evidence/`). On the
+  submission commit: 53 of 62 tasks pass. Functional: 26/26. Adversarial: 27/36. The rule guard
+  catches all 24 corpus attacks but only 3 of 12 new, unseen ones; 11 of those 12 are still
+  contained, and approval held in all 12. We did not tune the guard to the new set.
 - **Cut** (roadmap only): market watch and negotiation (WP-09: N3, N19), the nightly audit drill
   (P8), the lender report (WP-13), the GPU injection-classifier run and the market backtest
   (WP-17), the Vercel mirror (WP-18).

@@ -17,8 +17,8 @@ judgement for this deployment (synthetic data, no executor that moves money). Th
 list in section 10 is deliberately blunt, and it includes problems we found while preparing
 this document that are not fixed yet.
 
-**Test evidence.** On 19 Oct, `cd backend && uv run pytest tests/security -q`: 405 passed; the
-whole backend suite (`uv run pytest -q`): 1,694 passed, 2 skipped (Tesseract not installed
+**Test evidence.** On 20 Oct, `cd backend && uv run pytest tests/security -q`: 405 passed; the
+whole backend suite (`uv run pytest -q`): 2,244 passed, 2 skipped (Tesseract not installed
 locally; one Kaggle notebook not run yet). The suite is re-run on the freeze commit; counts by area
 are in `docs/submission/evidence/test-counts.md`.
 Every test runs offline: `backend/tests/conftest.py` fails any test that opens a non-loopback
