@@ -207,7 +207,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-04 | done (8/8), PR #19 open for the on-duty orchestrator | wp-04-cash | 191 | forecast (seasonality incl. festivals, per-customer delays, supplier habits), Monte Carlo (1,000 seeded integer paths, block bootstrap, common random numbers), gaps + 5 leading indicators, Q1 alert tiers with dedupe/cooldown, 6 measured levers as action cards (WP-06/WP-08 interfaces), buffer target + surplus sweep, walk-forward backtest, API (forecast/gaps/alerts/what-if) + daily alert scan |
 | WP-05 | not started | — | 0 | |
 | WP-06 | in progress (7/8) | merged | 123 | engine + real BD catalogue done; API (milestone 8) unblocked: WP-11 principal + step-up merged |
-| WP-07 | in progress (1/6) | wp-07-analysis | 19 | statements (cash-basis P&L, cash flow, balance-sheet-lite) |
+| WP-07 | in progress (2/6) | wp-07-analysis | 57 | statements (cash-basis P&L, cash flow, balance-sheet-lite); 13 ratios with provenance and stated abstentions |
 | WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API (milestone 8) unblocked by WP-11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |

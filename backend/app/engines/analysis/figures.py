@@ -85,6 +85,34 @@ _EXPRESSIONS = {
                          "ledger shows no loan disbursement, loan repayment or EMI obligation",
     "analysis.bs.total_liabilities": "payables + loans (loans only when known)",
     "analysis.bs.net_position": "total_assets - total_liabilities",
+    # ---- inputs of the ratios (ratios.py)
+    "analysis.input.credit_sales": "sum(amount of invoices issued in period)",
+    "analysis.input.credit_purchases": "sum(amount of bills issued in period)",
+    "analysis.input.debt_service": "sum(outflow transactions with category 'loan_repayment' in "
+                                   "period): principal and interest",
+    "analysis.input.instalments_next_year": "sum of EMI obligation amounts falling due in the "
+                                            "365 days after the day",
+    "analysis.input.current_liabilities": "payables + instalments_next_year",
+    "analysis.input.new_financing": "sum(inflow transactions with category 'loan_disbursement' "
+                                    "or 'owner_topup' in period)",
+    "analysis.input.top_customer_receipts": f"largest sum over credit customers (counterparties "
+                                            f"with an invoice) of {_CUSTOMER}, per customer",
+    # ---- ratios (ratios.py)
+    "analysis.ratio.gross_margin": "gross_profit / revenue x 100",
+    "analysis.ratio.net_margin": "net_profit / revenue x 100",
+    "analysis.ratio.current_ratio": "(cash + receivables + stock) / current_liabilities",
+    "analysis.ratio.quick_ratio": "(cash + receivables) / current_liabilities",
+    "analysis.ratio.dscr": "net_profit / debt_service (cash available for debt service over "
+                           "loan repayments)",
+    "analysis.ratio.interest_cover": "operating_profit / interest_expense",
+    "analysis.ratio.dso": "receivables / credit_sales x days in period",
+    "analysis.ratio.dpo": "payables / credit_purchases x days in period",
+    "analysis.ratio.dio": "stock / purchases x days in period",
+    "analysis.ratio.cash_conversion_cycle": "dso + dio - dpo",
+    "analysis.ratio.burn": "max(0, new_financing - net_cash_flow) x 30 / days in period: cash "
+                           "the business uses up per 30 days before new loans or owner money",
+    "analysis.ratio.runway": "cash / burn x 30: days until the cash runs out at that burn",
+    "analysis.ratio.top_customer_share": "top_customer_receipts / revenue x 100",
 }
 FORMULAS: dict[str, FormulaRef] = {
     formula_id: FormulaRef(formula_id=formula_id, version=1, expression=expression)
@@ -104,21 +132,27 @@ def rows_of(item: Figure | Fact) -> tuple[str, ...]:
     return (cite(item),)
 
 
+def provenance_for(formula_id: str, period: Period, inputs: Iterable[Figure | Fact] = (),
+                   rows: Iterable[str] = (), params: Mapping[str, object] | None = None
+                   ) -> Provenance:
+    """Formula, inputs, the closure of source rows and the parameters (the period first)."""
+    formula = FORMULAS[formula_id]
+    used = tuple(inputs)
+    return Provenance(
+        formula_id=formula_id, formula_version=formula.version,
+        input_fact_ids=tuple(dict.fromkeys(item.id for item in used)),
+        source_row_ids=tuple(sorted({*rows, *(r for item in used for r in rows_of(item))})),
+        parameters={**period_params(period), **{k: str(v) for k, v in (params or {}).items()}})
+
+
 def make_figure(tenant_id: str, data_mode: DataMode, formula_id: str, label_key: str,
                 value: Decimal, unit: Unit, period: Period, *,
                 inputs: Iterable[Figure | Fact] = (), rows: Iterable[str] = (),
                 params: Mapping[str, object] | None = None) -> Figure:
-    formula = FORMULAS[formula_id]
-    used = tuple(inputs)
-    source_rows = tuple(sorted({*rows, *(r for item in used for r in rows_of(item))}))
-    parameters = {**period_params(period), **{k: str(v) for k, v in (params or {}).items()}}
-    input_ids = tuple(dict.fromkeys(item.id for item in used))
+    provenance = provenance_for(formula_id, period, inputs, rows, params)
     value = quantize(value, unit)
-    key = json.dumps([tenant_id, formula_id, formula.version, label_key, str(value), unit.value,
-                      parameters, list(input_ids), list(source_rows)], sort_keys=True)
-    return Figure(
-        id="an_" + hashlib.sha256(key.encode()).hexdigest()[:24], label_key=label_key,
-        value=value, unit=unit, data_mode=data_mode,
-        provenance=Provenance(formula_id=formula_id, formula_version=formula.version,
-                              input_fact_ids=input_ids, source_row_ids=source_rows,
-                              parameters=parameters))
+    key = json.dumps([tenant_id, formula_id, provenance.formula_version, label_key, str(value),
+                      unit.value, provenance.parameters, list(provenance.input_fact_ids),
+                      list(provenance.source_row_ids)], sort_keys=True)
+    return Figure(id="an_" + hashlib.sha256(key.encode()).hexdigest()[:24], label_key=label_key,
+                  value=value, unit=unit, data_mode=data_mode, provenance=provenance)
