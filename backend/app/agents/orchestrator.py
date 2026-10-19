@@ -29,6 +29,7 @@ from typing import Any
 
 from app.agents import claims as claims_mod
 from app.agents.budget import Budget
+from app.agents.checker import Checker, log_rejections, unverified_numbers
 from app.agents.claims import Statement
 from app.agents.planning import DEPENDS, Plan, build_plan
 from app.agents.tools import (
@@ -45,6 +46,8 @@ from app.contracts import (
     Abstention,
     AbstentionReason,
     ActionCard,
+    CheckResult,
+    CheckStatus,
     DataMode,
     Figure,
     Recommendation,
@@ -142,8 +145,10 @@ class ToolRunner:
 class Run:
     recommendation: Recommendation
     plan: Plan
-    statements: tuple[Statement, ...] = ()
+    statements: tuple[Statement, ...] = ()  # verified only
     results: Mapping[str, ToolResult] = field(default_factory=dict)
+    checks: tuple[CheckResult, ...] = ()  # every claim, verified or not
+    dropped_cards: tuple[str, ...] = ()  # cards whose figures did not pass the checker
     skipped: Mapping[str, str] = field(default_factory=dict)  # tool -> why (secondary intents)
     budget: Mapping[str, object] = field(default_factory=dict)
     trace: tuple[TraceEvent, ...] = ()
@@ -253,31 +258,86 @@ class Orchestrator:
         primary = set(subagents[0][1]) if subagents else set()
         primary_errors = {n: e for n, e in errors.items() if n in primary}
         skipped = {n: str(e) for n, e in errors.items() if n not in primary}
-        statements = claims_mod.compose(results, plan.tools, plan.language)
-        if primary_errors or not statements:
+        composed = claims_mod.compose(results, plan.tools, plan.language)
+        if primary_errors or not composed:
             abstention = abstention_for(primary_errors or errors) if (primary_errors or errors) \
                 else Abstention(reason=AbstentionReason.unverifiable,
                                 message_key="abstain.nothing_to_report")
             return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
                                 abstention=abstention, budget=budget, trace=trace)
+        checker = Checker(ctx, results)
+        statements, checks = self.verify(checker, composed, ctx, rec_id, trace)
+        cards, dropped = self.verified_cards(checker, self.cards(results, role, limit=None))
+        if not statements:
+            abstention = Abstention(reason=AbstentionReason.unverifiable,
+                                    message_key="abstain.unverifiable",
+                                    detail="; ".join(sorted({c.reason or "" for c in checks})))
+            return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
+                                abstention=abstention, checks=checks, budget=budget,
+                                trace=trace)
         answer = self._narrate(statements, plan, private, budget, trace)
-        cards = self.cards(results, role)
         return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
-                            statements=statements, answer=answer, cards=cards, budget=budget,
-                            trace=trace)
+                            statements=statements, answer=answer, cards=cards, checks=checks,
+                            dropped_cards=dropped, budget=budget, trace=trace)
+
+    @staticmethod
+    def verify(checker: Checker, composed: list[Statement], ctx: ToolContext, rec_id: str,
+               trace: Trace) -> tuple[list[Statement], tuple[CheckResult, ...]]:
+        """Recompute every claim; keep the verified ones, log and drop the rest."""
+        started = time.perf_counter()
+        checks = tuple(checker.check_statements(composed))
+        verified = [s for s, c in zip(composed, checks, strict=True)
+                    if c.status is CheckStatus.verified]
+        with ctx.db() as store:
+            refused = log_rejections(checks, {s.claim.id: s.claim for s in composed},
+                                     tenant_id=ctx.tenant_id, recommendation_id=rec_id,
+                                     now=ctx.now, session=store.session)
+        trace.add("check", "claims", f"{len(verified)} verified, {refused} removed", started)
+        return verified, checks
+
+    @staticmethod
+    def verified_cards(checker: Checker, cards: tuple[ActionCard, ...]
+                       ) -> tuple[tuple[ActionCard, ...], tuple[str, ...]]:
+        """A card whose impact or cost does not recompute is dropped; a supporting figure
+        that cannot be recomputed is taken off the card."""
+        kept: list[ActionCard] = []
+        dropped: list[str] = []
+        for card in cards:
+            heads = [f for f in (card.impact, card.cost) if f is not None]
+            if any(checker.check_figure(f) is not CheckStatus.verified for f in heads):
+                dropped.append(card.id)
+                continue
+            statuses = {f.id: checker.check_figure(f) for f in card.figures}
+            if any(s is CheckStatus.rejected for s in statuses.values()):
+                dropped.append(card.id)
+                continue
+            figures = tuple(f for f in card.figures if statuses[f.id] is CheckStatus.verified)
+            kept.append(card.model_copy(update={"figures": figures}))
+            if len(kept) == MAX_CARDS:
+                break
+        return tuple(kept), tuple(dropped)
 
     def _narrate(self, statements: list[Statement], plan: Plan, private: bool, budget: Budget,
                  trace: Trace) -> str:
         texts = [s.claim.text for s in statements]
+        fallback = " ".join(texts)
         reply = self.llm(narrate_request(texts, language=plan.language, private=private),
                          "narrate", budget, trace)
         text = (reply.data or {}).get("text")
-        return text if isinstance(text, str) and text.strip() else " ".join(texts)
+        if not isinstance(text, str) or not text.strip():
+            return fallback
+        invented = unverified_numbers(text, statements)
+        if invented:  # a narrated number no verified claim states: use the claims themselves
+            trace.add("check", "narration", "rejected", time.perf_counter(),
+                      ",".join(sorted(str(n) for n in invented)))
+            return fallback
+        return text
 
     @staticmethod
-    def cards(results: Mapping[str, ToolResult], role: Role) -> tuple[ActionCard, ...]:
-        """At most three cards, in plan priority, that the caller's role may at least draft
-        (the approval flow decides who executes)."""
+    def cards(results: Mapping[str, ToolResult], role: Role,
+              limit: int | None = MAX_CARDS) -> tuple[ActionCard, ...]:
+        """Cards in plan priority that the caller's role may at least draft (the approval
+        flow decides who executes); at most `limit`."""
         out: list[ActionCard] = []
         for name in CARD_SOURCES:
             result = results.get(name)
@@ -287,13 +347,14 @@ class Orchestrator:
                 if policy.decide(role, card.action_type, card.tier).allowed or \
                         policy.may_request(role, card.action_type):
                     out.append(card)
-        return tuple(out[:MAX_CARDS])
+        return tuple(out if limit is None else out[:limit])
 
     def _finish(self, ctx: ToolContext, rec_id: str, question: str, plan: Plan, *,
                 results: Mapping[str, ToolResult] | None = None,
                 skipped: Mapping[str, str] | None = None,
                 statements: list[Statement] | None = None, answer: str | None = None,
                 cards: tuple[ActionCard, ...] = (), abstention: Abstention | None = None,
+                checks: tuple[CheckResult, ...] = (), dropped_cards: tuple[str, ...] = (),
                 budget: Budget, trace: Trace) -> Run:
         results = results or {}
         statements = statements or []
@@ -307,11 +368,12 @@ class Orchestrator:
             id=rec_id, tenant_id=ctx.tenant_id, question=question,
             answer_text=answer if abstention is None else None,
             claims=tuple(s.claim for s in statements) if abstention is None else (),
+            checks=checks,
             action_cards=cards if abstention is None else (),
             figures=tuple(figures.values()) if abstention is None else (),
             abstention=abstention, tools_used=tuple(n for n in plan.tools if n in results),
             data_mode=most_cautious(modes) if modes else DataMode.synthetic,
             created_at=ctx.now)
         return Run(recommendation=recommendation, plan=plan, statements=tuple(statements),
-                   results=dict(results), skipped=dict(skipped or {}), budget=budget.report(),
-                   trace=trace.events())
+                   results=dict(results), skipped=dict(skipped or {}), checks=checks,
+                   dropped_cards=dropped_cards, budget=budget.report(), trace=trace.events())

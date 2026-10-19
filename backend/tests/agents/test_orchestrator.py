@@ -1,13 +1,20 @@
+import dataclasses
 import json
+from decimal import Decimal
 
 import pytest
+from sqlalchemy import select
 
+from app.agents import checker as checker_cache
 from app.agents import orchestrator as orchestrator_mod
 from app.agents.budget import Budget
+from app.agents.checker import unverified_numbers
+from app.agents.models import RejectedClaimRow
 from app.agents.orchestrator import Orchestrator
 from app.agents.tools import ToolContext
+from app.agents.toolset import build_registry
 from app.api import cash as cash_api
-from app.contracts import AbstentionReason, ActionType, DataMode, Role
+from app.contracts import AbstentionReason, ActionType, CheckStatus, DataMode, Role
 from app.llm import LLMGateway
 from app.privacy import Anonymised
 from app.settings import LLMMode
@@ -20,11 +27,13 @@ LOAN_Q = "Will I run out of cash, and should I take a loan?"
 @pytest.fixture(scope="module")
 def ledger(universe):
     cash_api.clear_cache()
+    checker_cache.clear_cache()
     engine, session, store = seeded_store(universe)
     yield store
     session.close()
     engine.dispose()
     cash_api.clear_cache()
+    checker_cache.clear_cache()
 
 
 @pytest.fixture
@@ -170,3 +179,98 @@ def test_same_question_same_moment_same_recommendation(orch, ledger):
     first = ask(orch, ledger, CASH_Q).recommendation
     second = ask(orch, ledger, CASH_Q).recommendation
     assert first.id == second.id and first.claims == second.claims
+
+
+# --- milestone 4: the checker inside the run ---------------------------------------------
+
+def tamper(registry, tool, label, delta):
+    """A registry whose `tool` returns figure `label` off by `delta` (claims and cards)."""
+    original = registry.get(tool)
+
+    def fix(fig):
+        if fig is not None and fig.label_key == label:
+            return fig.model_copy(update={"value": fig.value + delta})
+        return fig
+
+    def run(ctx, params):
+        result = original.run(ctx, params)
+        cards = tuple(c.model_copy(update={"impact": fix(c.impact), "cost": fix(c.cost),
+                                           "figures": tuple(fix(f) for f in c.figures)})
+                      for c in result.cards)
+        payload = dict(result.payload)
+        if "gaps" in payload:
+            payload["gaps"] = tuple(g.model_copy(update={"figures": tuple(
+                fix(f) for f in g.figures)}) for g in payload["gaps"])
+        return dataclasses.replace(result, figures=tuple(fix(f) for f in result.figures),
+                                   cards=cards, payload=payload)
+
+    registry._tools[tool] = dataclasses.replace(original, run=run)
+    return registry
+
+
+def test_every_claim_in_an_answer_was_verified(orch, ledger):
+    rec = ask(orch, ledger, CASH_Q).recommendation
+    assert rec.claims and len(rec.checks) == len(rec.claims)
+    assert all(c.status is CheckStatus.verified for c in rec.checks)
+
+
+def test_a_tampered_engine_number_never_reaches_the_owner(settings, ledger):
+    registry = tamper(build_registry(), "cash.forecast", "cash.lowest_likely_balance",
+                      Decimal("1000"))
+    run = Orchestrator(LLMGateway(settings), registry).ask(
+        ToolContext(ledger, "sme_hardware", NOW), CASH_Q)
+    rec = run.recommendation
+    [rejected] = [c for c in rec.checks if c.status is CheckStatus.rejected]
+    assert "cash.lowest_likely_balance" in rejected.claim_id
+    assert rejected.claim_id not in {c.id for c in rec.claims}
+    assert rec.answer_text and "Likely lowest balance" not in rec.answer_text
+    rows = ledger.session.scalars(select(RejectedClaimRow).where(
+        RejectedClaimRow.recommendation_id == rec.id)).all()
+    assert [r.claim_id for r in rows] == [rejected.claim_id]
+
+
+def test_a_card_whose_impact_does_not_recompute_is_dropped(settings, ledger):
+    registry = tamper(build_registry(), "cash.gaps", "action.gap_reduced", Decimal("500"))
+    run = Orchestrator(LLMGateway(settings), registry).ask(
+        ToolContext(ledger, "sme_hardware", NOW), CASH_Q)
+    assert run.dropped_cards
+    assert not set(run.dropped_cards) & {c.id for c in run.recommendation.action_cards}
+
+
+def test_narration_with_an_invented_number_is_replaced_by_the_claims(live_settings, ledger,
+                                                                     clock):
+    plan = json.dumps({"intents": ["cash_outlook"], "tools": [], "language": "en"})
+    narration = json.dumps({"text": "Borrow Tk 50,000 today to be safe."})
+    gateway = LLMGateway(live_settings,
+                         transport=Scripted({"gemini_flash": [plan, narration]}), clock=clock)
+    run = Orchestrator(gateway).ask(ToolContext(ledger, "sme_hardware", NOW), CASH_Q)
+    rec = run.recommendation
+    assert rec.answer_text == " ".join(c.text for c in rec.claims)
+    assert any(e.name == "narration" and e.outcome == "rejected" for e in run.trace)
+
+
+RUNS = [
+    ("sme_hardware", CASH_Q),
+    ("sme_hardware", "আগামী মাসে কি লোন নেওয়া দরকার?"),
+    ("sme_hardware", "如果销售下降30%会怎样？"),
+    ("sme_fabric", "Can we net off the circular debt? And will I run out of cash?"),
+    ("sme_grocery", "How is my business doing? Profit and margin please"),
+    ("sme_grocery", LOAN_Q),
+]
+
+
+@pytest.mark.parametrize(("tenant", "question"), RUNS)
+def test_no_number_in_a_final_answer_lacks_provenance(orch, ledger, tenant, question):
+    run = ask(orch, ledger, question, tenant=tenant)
+    rec = run.recommendation
+    assert rec.abstention is None and rec.answer_text
+    assert unverified_numbers(rec.answer_text, run.statements) == set()
+    figures = {f.id: f for f in rec.figures}
+    verified = {c.claim_id for c in rec.checks if c.status is CheckStatus.verified}
+    for claim, item in zip(rec.claims, run.statements, strict=True):
+        assert claim.id in verified
+        assert figures[item.figure.id].provenance.formula_id == claim.formula_id
+    for card in rec.action_cards:
+        for fig in (card.impact, card.cost, *card.figures):
+            if fig is not None:
+                assert fig.id in figures and fig.provenance.formula_id

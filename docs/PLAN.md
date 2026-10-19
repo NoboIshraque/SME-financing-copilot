@@ -210,7 +210,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-07 | not started | — | 0 | |
 | WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API (milestone 8) unblocked by WP-11 |
 | WP-09 | not started | — | 0 | |
-| WP-10 | in progress (3/9) | wp-10-agents | 158 | gateway (privacy gate, fallback chains, budgets, cache, fixtures, live check); typed tools over WP-01/04/06/08 with enforced provenance; orchestrator: guard, repaired plans, parallel sub-agents, tool budget, claims in en/bn/zh, role-checked action cards; WP-05/07/09/12 tools wait for their engines |
+| WP-10 | in progress (4/9) | wp-10-agents | 235 | gateway (privacy gate, fallback chains, budgets, cache, fixtures, live check); typed tools over WP-01/04/06/08 with enforced provenance; orchestrator (guard, repaired plans, parallel sub-agents, tool budget, en/bn/zh claims, role-checked cards); checker recomputes every claim (registry + SymPy, seeded re-simulation, catalogue, netting) and drops what fails; WP-05/07/09/12 tools wait for their engines |
 | WP-11 | done (7/7) | merged (PR #16) | 400 | auth (argon2id, TOTP step-up, strict cookies, lockout), roles + consented lender access, tier policy + approvals, hash-chained audit + daily anchor, multilingual injection guard, web hardening, self-assessment draft; installed app-wide through `app/security/app_hooks.py` |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
