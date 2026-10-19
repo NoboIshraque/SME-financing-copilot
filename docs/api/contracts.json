@@ -133,6 +133,7 @@
         "send_reminder",
         "send_message",
         "draft_loan_application",
+        "submit_loan_application",
         "retime_payable",
         "request_advance",
         "offer_early_pay_discount",
@@ -3664,5 +3665,5 @@
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Hishab contracts",
-  "version": "1.1.0"
+  "version": "1.2.0"
 }

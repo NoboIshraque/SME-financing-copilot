@@ -9,6 +9,7 @@ EXPECTED = """
 view                      R R R R R
 record_dispute            D D D X X
 draft_loan_application    D D X X X
+submit_loan_application   E D X X X
 propose_netting_round     D D X X X
 send_reminder             E D D X X
 send_message              E D D X X

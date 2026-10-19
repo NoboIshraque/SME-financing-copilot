@@ -28,7 +28,7 @@ describe("Financing screen", () => {
       tenor_days: 180,
       purpose_key: "purpose.working_capital",
     });
-    const application = within(region).getByRole("article", { name: "Draft a loan application" });
+    const application = within(region).getByRole("article", { name: "Submit the loan application" });
     const names = within(region)
       .getAllByRole("article")
       .filter((article) => article !== application)
@@ -83,7 +83,7 @@ describe("Financing screen", () => {
 
   it("offers the pre-filled application as an EXECUTE card needing the owner's code", async () => {
     const { region, user, db } = await findOptions();
-    const application = within(region).getByRole("article", { name: "Draft a loan application" });
+    const application = within(region).getByRole("article", { name: "Submit the loan application" });
     await user.click(within(application).getByRole("button", { name: "Approve with code" }));
     const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
     await user.type(within(dialog).getByLabelText("6-digit code"), "246810");
