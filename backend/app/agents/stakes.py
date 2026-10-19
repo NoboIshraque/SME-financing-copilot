@@ -18,7 +18,7 @@ from enum import StrEnum
 from app.contracts import ActionCard, ActionType
 
 A = ActionType
-HIGH_ACTIONS = frozenset({A.draft_loan_application, A.request_advance,
+HIGH_ACTIONS = frozenset({A.draft_loan_application, A.submit_loan_application, A.request_advance,
                           A.offer_early_pay_discount, A.retime_payable, A.move_money,
                           A.approve_netting_round, A.set_credit_limit, A.share_passport})
 HIGH_INTENTS = frozenset({"find_financing"})

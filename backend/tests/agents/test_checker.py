@@ -33,7 +33,7 @@ TEMPLATES = (
     "cash.closing_balance", "cash.lowest_likely_balance", "cash.runway_days",
     "cash.buffer_target", "cash.expected_shortfall", "cash.lead_time_days",
     "cash.breach_probability", "action.gap_reduced", "action.cost",
-    "financing.effective_annual_rate", "financing.total_cost", "financing.p_buffer_breach",
+    "financing.effective_apr", "financing.total_cost", "financing.p_buffer_breach",
     "analysis.net_sales", "analysis.gross_profit", "analysis.gross_margin",
     "analysis.operating_expenses", "analysis.net_cash_flow", "analysis.dso", "analysis.dpo",
     "scenario.lowest_before", "scenario.lowest_after", "scenario.runway_before",
@@ -176,7 +176,7 @@ def test_numbers_in_reads_grouping_bangla_digits_and_skips_names():
 
 
 def test_a_narrated_number_must_come_from_a_verified_claim(run):
-    items = [run[2]["cash.closing_balance"], run[2]["financing.effective_annual_rate"]]
+    items = [run[2]["cash.closing_balance"], run[2]["financing.effective_apr"]]
     value = render(items[0].claim.value, Unit.BDT)
     rate = render(items[1].claim.value, Unit.percent)
     assert unverified_numbers(f"You hold Tk {value}; the loan costs {rate} a year.",

@@ -161,6 +161,7 @@ def card(action):
     (["cash_outlook"], [ActionType.send_reminder], Stakes.medium),
     (["find_financing"], [], Stakes.high),
     (["cash_outlook"], [ActionType.request_advance], Stakes.high),
+    (["cash_outlook"], [ActionType.submit_loan_application], Stakes.high),
 ])
 def test_stakes(intents, actions, expected):
     assert assess(intents, [card(a) for a in actions]) is expected

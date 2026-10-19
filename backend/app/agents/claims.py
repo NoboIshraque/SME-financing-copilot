@@ -15,6 +15,8 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from app.agents.tools import ToolResult
 from app.contracts import ActionCard, Claim, Figure, Unit
+from app.engines.financing import cost as cost_mod
+from app.engines.financing import fit as fit_mod
 
 CENT = Decimal("0.01")
 MONEY = (Unit.BDT, Unit.USD, Unit.CNY)
@@ -83,7 +85,7 @@ TEMPLATES: dict[str, tuple[str, str, str]] = {
                            "সবচেয়ে সস্তা সমাধানে ঘাটতির {v} টাকা মেটে।",
                            "最便宜的办法可弥补 {v} 塔卡的缺口。"),
     "action.cost": ("That fix costs Tk {v}.", "এই সমাধানের খরচ {v} টাকা।", "该办法的成本为 {v} 塔卡。"),
-    "financing.effective_annual_rate": ("{name}: true annual cost {v}.",
+    "financing.effective_apr": ("{name}: true annual cost {v}.",
                                         "{name}: প্রকৃত বার্ষিক খরচ {v}।",
                                         "{name}：真实年化成本 {v}。"),
     "financing.total_cost": ("{name} costs Tk {v} in total for this need.",
@@ -188,11 +190,15 @@ def _gaps(result: ToolResult, language: str) -> list[Statement]:
 def _financing(result: ToolResult, language: str) -> list[Statement]:
     out: list[Statement] = []
     for option in (result.payload.get("options") or ())[:MAX_OPTIONS]:
-        by_label = {f.label_key: f for f in option.figures}
-        for label in ("financing.effective_annual_rate", "financing.total_cost"):
-            if label in by_label:
-                out.append(statement(label, by_label[label], language, name=option.product.name))
-        breach = by_label.get("financing.p_buffer_breach")
+        # Told apart by formula and unit, not by label (labels are the web's to rename).
+        cost = [f for f in option.figures if f.provenance.formula_id == cost_mod.FORMULA_ID]
+        for template, unit in (("financing.effective_apr", Unit.percent),
+                               ("financing.total_cost", Unit.BDT)):
+            fig = next((f for f in cost if f.unit is unit), None)
+            if fig is not None:
+                out.append(statement(template, fig, language, name=option.product.name))
+        breach = next((f for f in option.figures
+                       if f.provenance.formula_id == fit_mod.FORMULA_ID), None)
         if breach is not None and "fit.no_forecast" not in option.reason_keys:
             out.append(statement("financing.p_buffer_breach", breach, language,
                                  name=option.product.name))

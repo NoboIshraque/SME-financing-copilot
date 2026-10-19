@@ -34,7 +34,7 @@ from app.agents.claims import Statement, render
 from app.agents.models import RejectedClaimRow
 from app.agents.tools import ToolContext, ToolResult
 from app.api import cash as cash_api
-from app.contracts import CheckResult, CheckStatus, Claim, Fact, Figure, Money
+from app.contracts import CheckResult, CheckStatus, Claim, Fact, Figure, Money, Unit
 from app.engines.cash.buffer import headline_figures, target_figure
 from app.engines.cash.figures import FORMULAS as CASH_FORMULAS
 from app.engines.cash.gaps import find_gaps
@@ -302,10 +302,11 @@ class Checker:
             raise Unverifiable("product not in the catalogue")
         result = cost_mod.true_cost(product, Money.of(params["principal"]),
                                     int(params["tenor_days"]))
-        if figure.label_key == "financing.effective_annual_rate":
-            return result.effective_annual_rate
-        if figure.label_key == "financing.total_cost":
-            return result.total_cost.amount
+        if figure.provenance.formula_id == cost_mod.FORMULA_ID:  # rate or cost, by unit
+            if figure.unit is Unit.percent:
+                return result.effective_annual_rate
+            if figure.unit is Unit.BDT:
+                return result.total_cost.amount
         if figure.provenance.formula_id == fit_mod.FORMULA_ID:
             match = self.results.get("financing.match")
             gaps = self.results.get("cash.gaps")

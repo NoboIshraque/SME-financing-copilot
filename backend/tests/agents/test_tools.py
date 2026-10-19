@@ -226,7 +226,7 @@ def test_financing_is_sized_to_the_first_gap_and_uses_the_forecast(hardware):
     assert all(o.eligibility.status is not EligibilityStatus.fail
                for o in result.payload["options"])
     [card] = result.cards
-    assert card.action_type is ActionType.draft_loan_application
+    assert card.action_type is ActionType.submit_loan_application  # owner-approved step
     assert card.payload["product_id"] == result.payload["options"][0].product.id
 
 

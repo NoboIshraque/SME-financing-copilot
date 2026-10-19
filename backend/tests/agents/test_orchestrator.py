@@ -70,7 +70,7 @@ def test_bangla_question_gets_a_bangla_answer_with_financing(orch, ledger):
     assert run.plan.language == "bn"
     assert "financing.match" in run.recommendation.tools_used
     assert "টাকা" in run.recommendation.answer_text
-    assert any(s.figure.label_key == "financing.effective_annual_rate" for s in run.statements)
+    assert any(s.claim.id.startswith("claim:financing.effective_apr:") for s in run.statements)
 
 
 def test_parallel_subagents_share_a_tool_and_run_it_once(orch, ledger):
