@@ -24,7 +24,6 @@ from app.contracts import (
     TxCategory,
     VariationKind,
 )
-from app.engines.analysis.ledger import canonical_parties
 from app.engines.analysis.scenarios import (
     Assumptions,
     compare_decisions,
@@ -164,19 +163,6 @@ def test_noise_transforms_change_form_not_content():
     assert "Should I pay?" in reword("Should I pay?", 1)
 
 
-def test_canonical_parties_ignore_names_and_order():
-    shop = _shop()
-    canonical, names = canonical_parties(shop)
-    for noisy in (rename_parties(shop, 3), shuffle_rows(rename_parties(shop, 4), 5)):
-        other, _names = canonical_parties(noisy)
-        for group in ("transactions", "invoices", "bills", "obligations"):
-            assert Counter(getattr(other, group)) == Counter(getattr(canonical, group))
-    assert names["PARTY_c000000001"] == CUSTOMER  # named by its earliest invoice
-    discount = compare_decisions(prepare(shop, FESTIVALS, D(5000), NOW, paths=200),
-                                 ["offer_discount"], CALM).outcome("offer_discount")
-    assert discount.decision.details["counterparty_token"] == CUSTOMER  # shown as the owner's
-
-
 @st.composite
 def _ledgers(draw):
     days = draw(st.integers(56, 75))
@@ -231,21 +217,5 @@ def test_noise_never_changes_the_engine_decision(case, seed):
 
 DRAWN = ("sales_ratio", "invoice_day", "new_invoice", "new_invoice_delay", "new_bill",
          "new_bill_delay", "purchase", "running")
-
-
-def test_customers_owing_the_same_keep_their_draws_under_any_names():
-    """WP-04 orders customers by what they owe, then their first invoice, then their token, so
-    two customers tied on both would swap lateness draws when renamed. Canonical tokens keep
-    every draw where it was."""
-    sales = [txn(date(2026, 1, 1) + timedelta(days=n), 1000) for n in range(60)]
-    history = [invoice(f"H{n}", date(2026, 1, 1) + timedelta(days=n),
-                       date(2026, 1, 10) + timedelta(days=n), 100, paid=100,
-                       paid_date=date(2026, 1, 10) + timedelta(days=n + n * 7 % 11),
-                       party="PARTY_hist000001") for n in range(10)]
-    tied = [invoice("IA", date(2026, 2, 20), date(2026, 3, 5), 30000, party="PARTY_aaaa000001"),
-            invoice("IB", date(2026, 2, 20), date(2026, 3, 25), 30000, party="PARTY_bbbb000001")]
-    shop = ledger(sales, history + tied)
-    plain = prepare(shop, FESTIVALS, D(0), NOW, paths=200).draws
-    for salt in range(1, 6):
-        renamed = prepare(rename_parties(shop, salt), FESTIVALS, D(0), NOW, paths=200).draws
-        assert np.array_equal(renamed.invoice_day, plain.invoice_day), salt
+# Two customers owing the same are the case that once broke this (WP-04 tied them on their
+# token); tests/cash/test_names.py pins it at the source.

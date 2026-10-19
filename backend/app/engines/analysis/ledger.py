@@ -144,32 +144,3 @@ class Ledger:
 
 def cite_all(records: Sequence[Transaction | Invoice | Bill]) -> tuple[str, ...]:
     return tuple(cite(r) for r in records)
-
-
-def canonical_parties(ledger: Ledger) -> tuple[Ledger, dict[str, str]]:
-    """The ledger with every counterparty token replaced by one derived from record ids
-    ('PARTY_c000000001', ...), and the map back to the original tokens.
-
-    Tokens are numbered by the smallest record that names them (documents first), so neither
-    renaming parties nor reordering rows changes what a forecast sees: WP-04 breaks ties
-    between equally owed customers by token, and a name must never steer a draw (N16)."""
-    first: dict[str, tuple[int, str]] = {}
-    groups = (ledger.invoices, ledger.bills, ledger.obligations, ledger.transactions)
-    for rank, group in enumerate(groups):
-        for item in group:
-            token = item.counterparty_token
-            if token is not None and (token not in first or (rank, item.id) < first[token]):
-                first[token] = (rank, item.id)
-    order = sorted(first, key=lambda t: first[t])
-    forward = {token: f"PARTY_c{n:09d}" for n, token in enumerate(order, start=1)}
-
-    def renamed(items: tuple) -> tuple:
-        return tuple(item if item.counterparty_token is None else
-                     item.model_copy(update={"counterparty_token":
-                                             forward[item.counterparty_token]})
-                     for item in items)
-
-    canonical = Ledger(ledger.tenant_id, ledger.anchor, renamed(ledger.transactions),
-                       renamed(ledger.invoices), renamed(ledger.bills),
-                       renamed(ledger.obligations), ledger.facts)
-    return canonical, {new: old for old, new in forward.items()}

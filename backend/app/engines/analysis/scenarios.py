@@ -69,7 +69,7 @@ from app.contracts import (
     Unit,
 )
 from app.engines.analysis.figures import make_figure
-from app.engines.analysis.ledger import Ledger, NotEnoughData, canonical_parties
+from app.engines.analysis.ledger import Ledger, NotEnoughData
 from app.engines.cash.baseline import Baseline, FlowKind, forecast_baseline
 from app.engines.cash.calendar import Festival
 from app.engines.cash.levers import combine
@@ -171,11 +171,6 @@ class ScenarioInputs:
     facts: Mapping[str, Decimal | None] = field(default_factory=dict)
     lenders: Mapping[str, LenderProfile] = field(default_factory=dict)
     mesh: Sequence[MeshObligation] = ()
-    party_names: Mapping[str, str] = field(default_factory=dict)  # canonical -> original
-
-    def party(self, token: str) -> str:
-        """The original token of a counterparty the forecast knows by its canonical one."""
-        return self.party_names.get(token, token)
 
     @property
     def as_of(self) -> date:
@@ -197,18 +192,17 @@ def prepare(ledger: Ledger, festivals: Sequence[Festival], buffer: Decimal, now:
             facts: Mapping[str, Decimal | None] | None = None,
             lenders: Mapping[str, LenderProfile] | None = None,
             mesh: Sequence[MeshObligation] = ()) -> ScenarioInputs:
-    """WP-04's baseline and draws from the day after the ledger's last transaction, made from
-    canonical counterparty tokens (`canonical_parties`), so names never steer a draw."""
+    """WP-04's baseline and draws from the day after the ledger's last transaction. Party
+    names and row order never change a draw (WP-04 breaks ties on record ids), which the
+    stability score's noise variations check on every recommendation."""
     as_of = ledger.as_of
     opening, _rows = ledger.cash_at_start(as_of + timedelta(days=1))
-    canonical, names = canonical_parties(ledger)
-    baseline = forecast_baseline(ledger.tenant_id, as_of, opening, canonical.transactions,
-                                 canonical.invoices, canonical.bills, canonical.obligations,
-                                 festivals)
+    baseline = forecast_baseline(ledger.tenant_id, as_of, opening, ledger.transactions,
+                                 ledger.invoices, ledger.bills, ledger.obligations, festivals)
     return ScenarioInputs(ledger=ledger, baseline=baseline, draws=draw(baseline, seed, paths),
                           buffer=buffer, now=now, products=tuple(products),
                           facts=dict(facts or {}), lenders=dict(lenders or {}),
-                          mesh=tuple(mesh), party_names=names)
+                          mesh=tuple(mesh))
 
 
 # ---------------------------------------------------------------- the world
@@ -360,7 +354,7 @@ def _offer_discount(inputs: ScenarioInputs) -> Decision:
     return _fixed("offer_discount", CashScenario(name="offer_discount", invoice_changes={
         inv.id: InvoiceChange(receipts=((soon, owed - discount),))}), discount,
         {"discount_pct": DISCOUNT_PERCENT, "invoice_outstanding": owed},
-        {"invoice_id": inv.id, "counterparty_token": inputs.party(inv.counterparty_token),
+        {"invoice_id": inv.id, "counterparty_token": inv.counterparty_token,
          "pay_by": soon.isoformat()}, (f"inv:{inv.id}",))
 
 
