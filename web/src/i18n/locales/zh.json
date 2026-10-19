@@ -46,7 +46,8 @@
     "signOut": "退出登录",
     "signedInAs": "当前用户：{{name}}",
     "notForRoleTitle": "您的角色无法使用此页面",
-    "notForRole": "您的角色（{{role}}）不使用此页面。如需访问，请联系店主。"
+    "notForRole": "您的角色（{{role}}）不使用此页面。如需访问，请联系店主。",
+    "offline": "您已离线。应用仍可打开，但查看数字需要网络连接。"
   },
   "role": {
     "owner": "店主",

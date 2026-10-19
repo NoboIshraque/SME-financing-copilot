@@ -1,6 +1,6 @@
 // One pre-checked action (P9 "rails, not chat"): what it does, its effect and cost, its permission
 // tier, and a single button. EXECUTE asks for a fresh TOTP code; DENY never shows a button.
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -36,7 +36,7 @@ export function ActionCardView({ card, primary = false }: { card: ActionCard; pr
   const [stepUpOpen, setStepUpOpen] = useState(false);
   const ability = abilityFor(card.tier, session.principal.role);
   const title = text(card.title_key);
-  const titleId = `card-${card.id}`;
+  const titleId = useId();
 
   const counterparty = payloadText(card, "counterparty_label");
   const dueDate = payloadText(card, "due_date");

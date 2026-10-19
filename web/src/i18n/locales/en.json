@@ -46,7 +46,8 @@
     "signOut": "Sign out",
     "signedInAs": "Signed in as {{name}}",
     "notForRoleTitle": "Not available for your role",
-    "notForRole": "Your role ({{role}}) doesn't use this screen. Ask the owner if you need access."
+    "notForRole": "Your role ({{role}}) doesn't use this screen. Ask the owner if you need access.",
+    "offline": "You're offline. The app still opens, but numbers need a connection."
   },
   "role": {
     "owner": "Owner",

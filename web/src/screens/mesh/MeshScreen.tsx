@@ -1,7 +1,7 @@
 // Liquidity mesh (N14): who owes whom across opted-in businesses, the proposed netting round,
 // every party's approval (EXECUTE with step-up), and the testnet anchor of settled rounds.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { newIdempotencyKey } from "../../actions/useApproveAction";
@@ -81,7 +81,7 @@ function RoundCard({ round, labels }: { round: NettingRound; labels: Record<stri
   const verify = useMutation({ mutationFn: () => api.mesh.verify(round.id) });
   const approvedByMe = round.approvals?.[me] === true;
   const waiting = round.participants.filter((tenant) => round.approvals?.[tenant] !== true);
-  const titleId = `round-${round.id}`;
+  const titleId = useId();
 
   return (
     <article aria-labelledby={titleId} className={card}>

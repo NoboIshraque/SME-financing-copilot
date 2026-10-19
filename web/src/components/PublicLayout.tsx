@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { DemoBanner } from "./DemoBanner";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { OfflineNotice } from "./OfflineNotice";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function PublicLayout({ children }: { children: ReactNode }) {
@@ -12,6 +13,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <DemoBanner />
+      <OfflineNotice />
       <header className="flex items-center gap-2 px-4 py-3">
         <div className="flex-1">
           <h1 className="text-lg font-semibold text-teal-800 dark:text-teal-300">{t("app.name")}</h1>

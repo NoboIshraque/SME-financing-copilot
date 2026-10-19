@@ -1,4 +1,5 @@
 // One cash alert: what, when, how much and why (FEATURES Q1), plus early warning signs.
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
@@ -21,7 +22,7 @@ export function AlertCard({ alert, level }: { alert: Alert; level: 3 | 4 | 5 }) 
   const text = useServerText();
   const format = useFormat();
   const gap = alert.gap;
-  const titleId = `alert-${alert.id}`;
+  const titleId = useId();
   const shortfall = findFigure(gap?.figures, "cash.expected_shortfall");
   const probability = findFigure(gap?.figures, "cash.breach_probability");
   const fixes = alert.fixes?.length ?? 0;

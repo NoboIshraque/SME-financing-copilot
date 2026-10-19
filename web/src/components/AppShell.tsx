@@ -12,6 +12,7 @@ import { QUICK_SCREENS, SCREEN_ICONS, SCREENS, canSee, screenPath } from "../nav
 import { DemoBanner } from "./DemoBanner";
 import { Icon } from "./Icon";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { OfflineNotice } from "./OfflineNotice";
 import { ThemeToggle } from "./ThemeToggle";
 
 // The copilot advises the business; external viewers (lender, compliance) only read.
@@ -73,6 +74,7 @@ export function AppShell() {
         {t("shell.skipToContent")}
       </a>
       <DemoBanner />
+      <OfflineNotice />
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2">
           <div className="min-w-0 flex-1">
