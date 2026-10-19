@@ -1,4 +1,4 @@
-/* Generated from docs/api/contracts.json (contracts v1.1.0). Do not edit. */
+/* Generated from docs/api/contracts.json (contracts v1.2.0). Do not edit. */
 /* Money amounts are decimal strings: never convert them to floats. */
 
 export type Detail = string | null;
@@ -27,6 +27,7 @@ export type ActionType =
   | "send_reminder"
   | "send_message"
   | "draft_loan_application"
+  | "submit_loan_application"
   | "retime_payable"
   | "request_advance"
   | "offer_early_pay_discount"
@@ -1704,4 +1705,4 @@ export interface VerifyResult {
   valid: Valid;
 }
 
-export const CONTRACTS_VERSION = "1.1.0";
+export const CONTRACTS_VERSION = "1.2.0";

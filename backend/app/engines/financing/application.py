@@ -1,7 +1,9 @@
 """Application pack draft (WP-06 milestone 7).
 
-Turns a ranked option into an ActionCard. Submitting an application commits the business, so
-the card is EXECUTE tier: the owner approves it with a step-up code. The payload carries only
+Turns a ranked option into an ActionCard. Drafting the pack stays inside Hishab (DRAFT,
+`draft_loan_application`); the card is the next step, `submit_loan_application`: sending it to
+the lender commits the business, so it is EXECUTE tier and the owner approves it with a step-up
+code (WP-11 policy: owner EXECUTE, accountant may only draft and request). The payload carries only
 facts we hold (with their values) and the list of facts the lender will ask for that we lack.
 """
 
@@ -37,8 +39,8 @@ def draft_application(option: FinancingOption, need: FinancingNeed,
     by_label = {f.label_key: f for f in option.figures}
     return ActionCard(
         id=f"apply:{product.id}:{need.tenant_id}",
-        title_key="action.draft_loan_application",
-        action_type=ActionType.draft_loan_application,
+        title_key="action.submit_loan_application",
+        action_type=ActionType.submit_loan_application,
         tier=Tier.EXECUTE,
         payload=payload,
         figures=option.figures,

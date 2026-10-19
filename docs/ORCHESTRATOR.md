@@ -17,9 +17,9 @@ Session names: `orch-A`, `orch-C` (`orch-B` only in an emergency).
 | On duty | orch-C |
 | Since (Dhaka) | 2026-10-19 10:55 |
 | Merge authority | the on-duty orchestrator only |
-| Working on | refreshing NOW.md and PLAN §8 after merging #17 and #18 |
-| Next 3 steps | 1. WP-06 milestone 8 (financing API) on WP-11 principal + step-up. 2. WP-08 milestone 8 (mesh API). 3. Review PRs from A1/B1 as they come. |
-| Open PRs and their state | none (#17 and #18 merged 2026-10-19 ~11:05; backend 1473 passed on combined main) |
+| Working on | — (#22 and #23 merged; main green: backend 1694, web 210) |
+| Next 3 steps | 1. Wire the WP-04 forecast band into financing fit. 2. WP-08 milestone 8 (mesh API). 3. Review PRs from A1/B1 as they come. |
+| Open PRs and their state | none open |
 | Waiting on (people / CI / limits) | — |
 | Lives only in a sandbox (must be committed) | nothing (orch-A's CPU runner is on main since af37713) |
 | Off-duty orchestrator | orch-A (limit reset time not recorded) |

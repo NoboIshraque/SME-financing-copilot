@@ -91,7 +91,7 @@ def test_bad_lender_record_lowers_the_score():
 def test_every_option_carries_explainable_figures():
     option = match(need(), [product("p")], FACTS, start=START)[0].option
     labels = {f.label_key for f in option.figures}
-    assert labels == {"financing.effective_annual_rate", "financing.total_cost",
+    assert labels == {"financing.effective_apr", "financing.total_cost",
                       "financing.p_buffer_breach"}
     assert all(f.provenance.parameters["product_id"] == "p" for f in option.figures)
 
