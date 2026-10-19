@@ -1,4 +1,4 @@
-// Journey: sign in with password + TOTP (WP-11 through WP-14's sign-in screen), and sign out.
+// Flow 1: sign in with password + TOTP (WP-11 through WP-14's sign-in screen), and sign out.
 import type { Page, Response } from "@playwright/test";
 
 import { expect, test } from "../support/fixtures";
@@ -21,8 +21,10 @@ async function clickAnswered(page: Page, click: () => Promise<void>, url: RegExp
 test("the owner signs in with a password and a TOTP code, and signs out again", async ({ app, page }) => {
   const owner = await app.account("owner");
 
-  await page.goto("/");
-  await expect(page).toHaveURL(/\/login\?next=%2F$/);
+  // Signed out, the app sends you to sign in and remembers where you were going.
+  await page.goto("/cash");
+  await expect(page).toHaveURL(/\/login\?next=%2Fcash$/);
+  await expect(app.banner()).toBeVisible(); // demo mode: everything shown is synthetic (rule 8)
 
   // Demo mode lists one-tap accounts; the owner's still needs the second factor.
   const demoButton = page.getByRole("button", { name: new RegExp(`^${app.t("auth.demoAs", { role: app.t("role.owner") })}`) })
@@ -51,12 +53,12 @@ test("the owner signs in with a password and a TOTP code, and signs out again", 
     return true;
   });
 
-  await expect(app.heading("today")).toBeVisible();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(app.heading("cash")).toBeVisible();
+  await expect(page).toHaveURL(/\/cash$/);
   await expect(page.getByRole("banner")).toContainText(owner.business_name);
 
   await page.getByRole("button", { name: app.t("shell.signOut") }).click();
-  await expect(page).toHaveURL(/\/login(\?next=%2F)?$/);
+  await expect(page).toHaveURL(/\/login(\?next=%2F\w*)?$/);
   await expect(page.getByRole("heading", { level: 2, name: app.t("auth.title") })).toBeVisible();
   // The server ended the session: coming back to the app asks to sign in again.
   await page.goto("/cash");
