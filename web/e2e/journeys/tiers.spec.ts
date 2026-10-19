@@ -21,7 +21,9 @@ test.describe("staff", () => {
     const actions = page.getByRole("region", { name: app.t("today.actionsTitle") });
     const execute = actions.getByRole("article").filter({ hasText: app.t("tier.EXECUTE") }).first();
     await expect(execute).toContainText(app.t("actionCard.ownerOnly"));
-    await expect(execute.getByRole("button")).toHaveCount(0);
+    for (const action of ["actionCard.approveWithCode", "actionCard.askOwner"]) {
+      await expect(execute.getByRole("button", { name: app.t(action) })).toHaveCount(0);
+    }
     // Staff work on sales and collections; cash planning stays with the owner and accountant.
     const nav = app.isPhone ? page.getByRole("navigation", { name: app.t("nav.quick") }) : app.mainNav();
     await expect(nav.getByRole("link", { name: app.t("nav.cash"), exact: true })).toHaveCount(0);
