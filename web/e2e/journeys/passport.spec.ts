@@ -18,7 +18,9 @@ test.describe("owner", () => {
     const passport = page.getByRole("region", { name: app.t("reports.passportTitle") });
     const latest = passport.getByRole("article").first();
     await expect(latest.getByRole("heading", { level: 4 })).toHaveText(tPattern("reports.version", { version: "\\d+" }, "en", false));
-    await expect(latest).toContainText(app.t("mesh.chain.sepolia"));
+    // Sepolia when the server has keys, otherwise the offline anchor; both are labelled.
+    const chains = [app.t("mesh.chain.sepolia"), app.t("mesh.chain.offline")];
+    await expect(latest).toContainText(new RegExp(chains.map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")));
     await expect(latest.getByText(tPattern("reports.digest", { hash: "[0-9a-f]{10}…[0-9a-f]{6}" }))).toBeVisible();
 
     // Share with a lender: limited scope and time, and a fresh code.
