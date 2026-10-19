@@ -200,27 +200,27 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 
 | WP | Status | Branch | Tests | Notes |
 | --- | --- | --- | --- | --- |
-| WP-00 | done | main | 237 backend + 34 web + 4 e2e | contracts v1.0.0 (58 models), synthetic universe, CI |
-| WP-01 | done | merged | 101 | fact store, registry, provenance, API (merged 18 Oct 05:55) |
-| WP-02 | not started | — | 0 | |
-| WP-03 | done (4/4) | merged | 80 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; built by the orchestrator |
+| WP-00 | done | merged + PR #15 | 248 backend + 34 web + 4 e2e | contracts v1.1.0 (58 models), synthetic universe, CI, Mission control (issue #8); app-wide hooks (`app/<area>/app_hooks.py`) + `api_routes()` for WP-11 (PR #15) |
+| WP-01 | done | merged | 143 | fact store, registry, provenance, API; fixes merged 18 Oct: ledger revisions (no stale figures), caller-scoped + masked explain/facts, race-safe inserts, rows endpoint, record_computed, profile facts + snapshot |
+| WP-02 | done | merged | 294 | parsers (bKash/Nagad/bank/ledger/registers, CSV+XLSX), Bangla/Banglish normaliser + Bengali calendar, dedupe, party clustering, OCR drafts (Tesseract ben+eng), preview/commit with keyed digest, API |
+| WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
-| WP-06 | in progress (7/8) | wp-06-financing | 123 | engine + real BD catalogue done; API waits for WP-01 |
+| WP-06 | in progress (7/8) | merged | 123 | engine + real BD catalogue done; API (milestone 8) waits for WP-11 principal + step-up |
 | WP-07 | not started | — | 0 | |
-| WP-08 | in progress (5/8) | wp-08-mesh | 83 | engine, consent, attestations, anchor done; API waits for WP-01/11 |
+| WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API waits for WP-11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |
-| WP-11 | not started | — | 0 | |
+| WP-11 | done (7/7) | wp-11-security | 400 | auth (argon2id, TOTP step-up, strict cookies, lockout), roles + consented lender access, tier policy + approvals, hash-chained audit + daily anchor, multilingual injection guard, web hardening, self-assessment draft; installed app-wide through `app/security/app_hooks.py` |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
-| WP-14 | done (12/12) | wp-14-web | 208 web (174 new) | all 12 milestones: 11 screens + public verify page, provenance drawer on every number, copilot panel + upload flow, offline mock API (live/mock/auto), EN/BN/ZH, PWA, axe WCAG 2.1 AA clean |
+| WP-14 | done (12/12) | wp-14-web | 210 web (176 new) | all 12 milestones: 11 screens + public verify page, provenance drawer on every number, copilot panel + upload flow, offline mock API (live/mock/auto), EN/BN/ZH, PWA, axe WCAG 2.1 AA clean |
 | WP-15 | not started | — | 0 | |
-| WP-16 | not started | — | 0 | needs P3 approval |
-| WP-17 | in progress (2/4) | merged | 6 | notebooks 01-04 + corpus merged; 02 done; CPU baseline classifier run; Labib runs 01/03/04 on Kaggle |
-| WP-18 | in progress (4/6) | wp-18-infra | 14 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; China checks + mirror pending |
+| WP-16 | not started | — | 0 | P3 approved |
+| WP-17 | in progress (2/4) | merged | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families; Labib runs 01/03/04 on Kaggle |
+| WP-18 | in progress (4/6) | merged + PR #14 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only; secret scan scoped to the tested commit (PR #14, all-refs scan before going public); China checks + mirror pending |
 | WP-19 | not started | — | — | |
-| WP-20 | not started | — | — | needs P7 approval |
+| WP-20 | in progress | wp-20-data | — | P7 approved; Labib at shops 18 Oct 10:00–14:00; anonymiser ready (PR #12) |
 
 ## 9. Submission (the 6 official deliverables)
 

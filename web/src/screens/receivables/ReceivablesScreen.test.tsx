@@ -54,9 +54,11 @@ describe("Receivables screen", () => {
     const cards = await within(reminders).findAllByRole("article");
     expect(cards).toHaveLength(3);
     expect(cards[2]).toHaveTextContent("Send a friendly reminder before the due date");
-    await user.click(within(cards[1] as HTMLElement).getByRole("button", { name: "Approve draft" }));
-    expect(await within(cards[1] as HTMLElement).findByText("Approved. It is recorded in the audit log.")).toBeInTheDocument();
-    expect(db.approvals[0]?.action_card_id).toBe("act-remind-customer-10");
+    // A reminder whose draft is not written yet opens Messages instead of approving blind.
+    expect(within(cards[1] as HTMLElement).getByRole("button", { name: "Review in Messages" })).toBeInTheDocument();
+    await user.click(within(cards[2] as HTMLElement).getByRole("button", { name: "Approve draft" }));
+    expect(await within(cards[2] as HTMLElement).findByText("Approved. It is recorded in the audit log.")).toBeInTheDocument();
+    expect(db.drafts.find((d) => d.id === "msg-predue-11")?.status).toBe("approved");
   });
 
   it("flags chronic late payers with a stop-credit suggestion and shows each limit", async () => {

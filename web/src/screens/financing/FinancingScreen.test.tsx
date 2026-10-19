@@ -88,8 +88,10 @@ describe("Financing screen", () => {
     const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
     await user.type(within(dialog).getByLabelText("6-digit code"), "246810");
     await user.click(within(dialog).getByRole("button", { name: "Approve" }));
-    expect(await within(application).findByText("Approved. It is recorded in the audit log.")).toBeInTheDocument();
-    expect(db.approvals[0]).toMatchObject({ action_card_id: "act-apply-bb-refinance", step_up_verified: true });
+    expect(await within(application).findByText("Approved and carried out. It is recorded in the audit log.")).toBeInTheDocument();
+    // The accountant's earlier request is the one approved: no duplicate request is created.
+    expect(db.approvals.filter((r) => r.card.id === "act-apply-bb-refinance")).toHaveLength(1);
+    expect(db.approvals[0]?.approval).toMatchObject({ status: "executed", step_up_verified: true });
   });
 
   it("refuses an amount that is not taka, without calling the server", async () => {

@@ -120,7 +120,7 @@ export const CARD_PREDUE_11: ActionCard = {
   title_key: "action.send_pre_due_reminder",
   action_type: "send_reminder",
   tier: "DRAFT",
-  payload: { counterparty_label: "Customer 11", due_date: "2026-10-02", invoice_count: "1" },
+  payload: { counterparty_label: "Customer 11", due_date: "2026-10-02", invoice_count: "1", draft_id: "msg-predue-11" },
   impact: figure("fig-act-predue11-impact", "action.expected_collection", "2911.00", "BDT", { formula_id: "receivables.open_sum" }),
 };
 

@@ -72,8 +72,13 @@ async function request<T>(path: string, method: "GET" | "POST", body: unknown, o
     } catch {
       errorBody = null;
     }
-    if (response.status === 401) unauthorizedListeners.forEach((listener) => listener());
-    throw new ApiRequestError(response.status, isApiError(errorBody) ? errorBody : null);
+    const apiError = isApiError(errorBody) ? errorBody : null;
+    // Only a lost session signs the user out. A 401 for a wrong password, TOTP or step-up code
+    // (error.invalid_step_up, ...) is an answer to that one request, shown where it was asked.
+    if (response.status === 401 && (apiError === null || apiError.code === "not_authenticated")) {
+      unauthorizedListeners.forEach((listener) => listener());
+    }
+    throw new ApiRequestError(response.status, apiError);
   }
   if (response.status === 204) return undefined as T;
   const text = await response.text();

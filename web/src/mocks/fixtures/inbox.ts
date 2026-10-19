@@ -1,7 +1,7 @@
 // Mock WP-11/12/13/16 data: approval queue, message drafts, Trust Passport, audit chain,
 // abstention log and audit drill. All synthetic.
 import type { AuditEvent, MessageDraft, PassportVersion, ShareGrant } from "../../api/contracts";
-import type { AbstentionLogEntry, AuditDrill, AuditVerification, UserSettings } from "../../api/types";
+import type { AbstentionLogEntry, AuditAnchor, AuditDrill, ChainReport, UserSettings } from "../../api/types";
 import { NOW, TENANT, figure } from "./common";
 
 export function initialDrafts(): MessageDraft[] {
@@ -90,14 +90,31 @@ export function initialShares(): ShareGrant[] {
   ];
 }
 
-export function auditVerification(): AuditVerification {
+export function auditVerification(): ChainReport {
   return {
+    tenant_id: TENANT,
     valid: true,
     length: 1284,
     head_hash: "f0e1d2c3b4a5968778695a4b3c2d1e0f1a2b3c4d5e6f708192a3b4c5d6e7f809",
-    anchor: { chain: "sepolia", digest: "f0e1d2c3b4a5968778695a4b3c2d1e0f1a2b3c4d5e6f708192a3b4c5d6e7f809", tx_hash: "0x2b4d6f8a0c1e3a5c7e9a1c3e5a7c9e1a3c5e7a9c1e3a5c7e9a1c3e5a7c9e1a3c", block_number: 6612400, explorer_url: null, anchored_at: "2026-09-30T23:59:00Z" },
-    broken_at_seq: null,
+    first_bad_seq: null,
+    reason: null,
+    anchors_checked: 1,
   };
+}
+
+export function auditAnchors(): AuditAnchor[] {
+  return [
+    {
+      day: "2026-09-30",
+      digest: "f0e1d2c3b4a5968778695a4b3c2d1e0f1a2b3c4d5e6f708192a3b4c5d6e7f809",
+      chain: "sepolia",
+      tx_hash: "0x2b4d6f8a0c1e3a5c7e9a1c3e5a7c9e1a3c5e7a9c1e3a5c7e9a1c3e5a7c9e1a3c",
+      block_number: 6612400,
+      explorer_url: null,
+      anchored_at: "2026-09-30T23:59:00Z",
+      heads: 1,
+    },
+  ];
 }
 
 export function auditEvents(): AuditEvent[] {

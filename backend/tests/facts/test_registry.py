@@ -41,10 +41,10 @@ def test_ledger_metric_matches_hand_computed_value(metric: str):
         ("gross_profit", {"net_sales": "3000", "purchases": "3500"}, SEP, "-500.00"),
         ("gross_margin", {"net_sales": "3000", "purchases": "2000"}, SEP, "0.3333"),
         ("gross_margin", {"net_sales": "3", "purchases": "1"}, SEP, "0.6667"),
-        ("dso", {"receivables": "2500", "net_sales": "3000"}, SEP, "25.0"),
-        ("dso", {"receivables": "1000", "net_sales": "3000"},
+        ("dso", {"receivables": "2500", "credit_sales": "2000"}, SEP, "37.5"),
+        ("dso", {"receivables": "1000", "credit_sales": "3000"},
          Period(start=date(2026, 2, 1), end=date(2026, 2, 28)), "9.3"),
-        ("dpo", {"payables": "1200", "purchases": "1500"}, SEP, "24.0"),
+        ("dpo", {"payables": "1200", "credit_purchases": "1500"}, SEP, "24.0"),
     ],
     ids=["net-sales", "negative-net-flow", "closing", "gross-loss", "margin-round-down",
          "margin-round-half-up", "dso-30-days", "dso-28-day-month", "dpo"],
@@ -58,8 +58,8 @@ def test_derived_metric_matches_hand_computed_value(metric, inputs, period, expe
     ("metric", "inputs"),
     [
         ("gross_margin", {"net_sales": "0", "purchases": "10"}),
-        ("dso", {"receivables": "10", "net_sales": "0"}),
-        ("dpo", {"payables": "10", "purchases": "0"}),
+        ("dso", {"receivables": "10", "credit_sales": "0"}),
+        ("dpo", {"payables": "10", "credit_purchases": "0"}),
     ],
 )
 def test_zero_denominator_abstains_instead_of_guessing(metric, inputs):
@@ -85,9 +85,27 @@ def test_opening_balance_refuses_a_period_before_the_initial_balance():
         REGISTRY.get("opening_balance").compute_ledger(data)
 
 
-def test_ledger_metric_reports_exactly_the_rows_it_used():
-    refs = REGISTRY.get("operating_expenses").compute_ledger(LEDGER).source_refs
-    assert refs == ("bkash.csv#L4", "bkash.csv#L5")  # rent and salary only
+def test_ledger_metric_cites_exactly_the_records_it_used():
+    rows = REGISTRY.get("operating_expenses").compute_ledger(LEDGER).rows
+    assert rows == ("txn:tenant_a-T4", "txn:tenant_a-T5")  # rent and salary only
+
+
+def test_receivables_cite_only_the_invoices_still_owed():
+    rows = REGISTRY.get("receivables").compute_ledger(LEDGER).rows
+    assert rows == ("inv:tenant_a:INV-1", "inv:tenant_a:INV-2")  # INV-3 was settled in August
+
+
+def test_zero_receivables_cite_the_settled_invoices_as_evidence():
+    settled = LedgerInputs(period=SEP, invoices=(INVOICES[2],))
+    result = REGISTRY.get("receivables").compute_ledger(settled)
+    assert (result.value, result.rows) == (Decimal("0.00"), ("inv:tenant_a:INV-3",))
+
+
+def test_abstentions_carry_an_i18n_reason_key():
+    with pytest.raises(NotComputable) as err:
+        REGISTRY.get("dso").compute_derived({"receivables": Decimal(1),
+                                             "credit_sales": Decimal(0)}, SEP)
+    assert err.value.reason_key == "facts.zero_denominator"
 
 
 @pytest.mark.parametrize(

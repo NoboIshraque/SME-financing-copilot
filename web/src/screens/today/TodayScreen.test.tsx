@@ -86,7 +86,7 @@ describe("Today screen", () => {
     expect(within(actions).getByText(/Supplier 2 has refused new dates before/)).toBeInTheDocument();
   });
 
-  it("approves an EXECUTE card only with the step-up code, sent with an idempotency key", async () => {
+  it("approves and executes an EXECUTE card through WP-11 approvals, with the code and idempotency keys", async () => {
     const { user, db, fetchMock } = renderApp("/");
     const retime = await screen.findByRole("article", { name: "Pay a supplier later, within terms" });
     expect(within(retime).getByText("Supplier 2 · due 31 Oct · new date 10 Nov")).toBeInTheDocument();
@@ -96,29 +96,34 @@ describe("Today screen", () => {
     await user.type(within(dialog).getByLabelText("6-digit code"), "246810");
     await user.click(within(dialog).getByRole("button", { name: "Approve" }));
 
-    expect(await within(retime).findByText("Approved. It is recorded in the audit log.")).toBeInTheDocument();
-    expect(db.approvals).toHaveLength(1);
-    expect(db.approvals[0]).toMatchObject({ action_card_id: "act-retime-supplier-2", step_up_verified: true });
-    const call = fetchMock.mock.calls.find(([path]) => String(path).endsWith("/act-retime-supplier-2/approve"));
-    const headers = (call?.[1] as RequestInit).headers as Record<string, string>;
-    expect(headers["X-Step-Up-Code"]).toBe("246810");
-    expect(headers["X-Idempotency-Key"]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(await within(retime).findByText("Approved and carried out. It is recorded in the audit log.")).toBeInTheDocument();
+    const record = db.approvals.find((r) => r.card.id === "act-retime-supplier-2");
+    expect(record?.approval).toMatchObject({ status: "executed", step_up_verified: true });
+    const headersOf = (suffix: string) => {
+      const call = fetchMock.mock.calls.find(([path]) => String(path).endsWith(suffix));
+      return (call?.[1] as RequestInit).headers as Record<string, string>;
+    };
+    expect(headersOf("/api/approvals")["X-Idempotency-Key"]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(headersOf("/approve")["X-Step-Up-Code"]).toBe("246810");
+    expect(headersOf("/execute")["X-Idempotency-Key"]).toMatch(/^[0-9a-f-]{36}$/);
   });
 
-  it("approves a DRAFT card in one tap, without a code", async () => {
+  it("approves a DRAFT card's message draft in one tap, without a code", async () => {
     const { user, db } = renderApp("/");
     const remind = await screen.findByRole("article", { name: "Send a payment reminder" });
     await user.click(within(remind).getByRole("button", { name: "Approve draft" }));
     expect(await within(remind).findByText("Approved. It is recorded in the audit log.")).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(db.approvals[0]).toMatchObject({ tier: "DRAFT", step_up_verified: false });
+    expect(db.drafts.find((d) => d.id === "msg-overdue-9")?.status).toBe("approved");
   });
 
-  it("shows an accountant the EXECUTE card without a way to approve it", async () => {
-    renderApp("/", { signedInAs: ACCOUNTANT });
+  it("lets an accountant only ask the owner to approve an EXECUTE card", async () => {
+    const { user, db } = renderApp("/", { signedInAs: ACCOUNTANT });
     const retime = await screen.findByRole("article", { name: "Pay a supplier later, within terms" });
-    expect(within(retime).getByText("Only the owner can approve this.")).toBeInTheDocument();
     expect(within(retime).queryByRole("button", { name: "Approve with code" })).not.toBeInTheDocument();
+    await user.click(within(retime).getByRole("button", { name: "Ask the owner to approve" }));
+    expect(await within(retime).findByText("Sent to the owner for approval.")).toBeInTheDocument();
+    expect(db.approvals.find((r) => r.card.id === "act-retime-supplier-2")?.approval).toMatchObject({ status: "pending", requested_by: "u-accountant" });
     expect(within(card(/Send a payment reminder/)).getByRole("button", { name: "Approve draft" })).toBeEnabled();
   });
 

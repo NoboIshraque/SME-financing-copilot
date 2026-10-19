@@ -13,6 +13,7 @@ import { Icon } from "../../components/Icon";
 import { ErrorState, QueryView } from "../../components/States";
 import { TierBadge } from "../../components/TierBadge";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
+import { useFormat } from "../../i18n/useFormat";
 
 function DraftCard({ draft }: { draft: MessageDraft }) {
   const { t } = useTranslation();
@@ -85,8 +86,9 @@ function DraftCard({ draft }: { draft: MessageDraft }) {
 
 export function MessagesScreen() {
   const { t } = useTranslation();
+  const format = useFormat();
   useDocumentTitle(t("nav.messages"));
-  const pending = useQuery({ queryKey: ["approvals", "pending"], queryFn: api.actions.pending });
+  const pending = useQuery({ queryKey: ["approvals", "pending"], queryFn: api.approvals.pending });
   const drafts = useQuery({ queryKey: ["messages", "drafts"], queryFn: api.messages.drafts });
   return (
     <section aria-labelledby="h-messages" className="space-y-6">
@@ -96,8 +98,13 @@ export function MessagesScreen() {
         <QueryView query={pending} isEmpty={(list) => list.length === 0} empty={t("messages.nothingPending")}>
           {(list) => (
             <ul className="space-y-3">
-              {list.map(({ card }) => (
-                <li key={card.id}><ActionCardView card={card} /></li>
+              {list.map(({ approval, card }) => (
+                <li key={approval.id}>
+                  <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
+                    {t("messages.requestedBy", { who: approval.requested_by, when: format.dateTime(approval.created_at) })}
+                  </p>
+                  <ActionCardView card={card} approvalId={approval.id} />
+                </li>
               ))}
             </ul>
           )}

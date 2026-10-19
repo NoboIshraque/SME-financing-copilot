@@ -1,17 +1,29 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { renderApp } from "../../test/render";
 
 describe("Messages & approvals inbox", () => {
-  it("queues every DRAFT and EXECUTE card for a decision, and drops one once approved", async () => {
-    const { user } = renderApp("/messages");
+  it("shows the owner what the accountant asked to approve, and clears it once approved with the code", async () => {
+    const { user, db } = renderApp("/messages");
     const queue = await screen.findByRole("region", { name: "Waiting for your approval" });
-    const cards = await within(queue).findAllByRole("article");
-    expect(cards).toHaveLength(5);
-    const reminder = within(queue).getAllByRole("article", { name: "Send a payment reminder" })[0] as HTMLElement;
-    await user.click(within(reminder).getByRole("button", { name: "Approve draft" }));
-    await waitFor(() => expect(within(queue).getAllByRole("article")).toHaveLength(4));
+    const request = await within(queue).findByRole("article", { name: "Draft a loan application" });
+    expect(within(queue).getByText(/^Requested by u-accountant/)).toBeInTheDocument();
+    await user.click(within(request).getByRole("button", { name: "Approve with code" }));
+    const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
+    await user.type(within(dialog).getByLabelText("6-digit code"), "246810");
+    await user.click(within(dialog).getByRole("button", { name: "Approve" }));
+
+    expect(await within(queue).findByText("Nothing is waiting for approval.")).toBeInTheDocument();
+    expect(db.approvals[0]?.approval.status).toBe("executed");
+  });
+
+  it("tells the accountant a requested approval is waiting for the owner", async () => {
+    renderApp("/messages", { signedInAs: "accountant@hishab.demo" });
+    const queue = await screen.findByRole("region", { name: "Waiting for your approval" });
+    const request = await within(queue).findByRole("article", { name: "Draft a loan application" });
+    expect(within(request).getByText("Waiting for the owner's approval.")).toBeInTheDocument();
+    expect(within(request).queryByRole("button", { name: /Approve|Ask the owner/ })).not.toBeInTheDocument();
   });
 
   it("approves a Bangla draft, then copies exactly the approved text", async () => {

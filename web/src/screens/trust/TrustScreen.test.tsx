@@ -9,7 +9,8 @@ describe("Trust & audit screen", () => {
     renderApp("/trust");
     const chain = await screen.findByRole("region", { name: "Audit log" });
     expect(await within(chain).findByText("Intact: 1,284 entries, each linked to the one before.")).toBeInTheDocument();
-    expect(chain).toHaveTextContent("Anchored on Ethereum Sepolia (testnet)");
+    expect(await within(chain).findByText(/Anchored on Ethereum Sepolia \(testnet\)/)).toBeInTheDocument();
+    expect(chain).toHaveTextContent("Transaction 0x2b4d6f8a");
     const drill = screen.getByRole("region", { name: "Nightly audit drill" });
     expect(await within(drill).findByText("90%")).toBeInTheDocument();
     expect(drill).toHaveTextContent("caught 18 of 20 planted errors");
@@ -29,8 +30,9 @@ describe("Trust & audit screen", () => {
   });
 
   it("says where the chain broke when it was tampered with", async () => {
-    renderApp("/trust", { overrides: { "GET /api/audit/verify": { body: { ...auditVerification(), valid: false, broken_at_seq: 812 } } } });
+    renderApp("/trust", { overrides: { "GET /api/audit/verify": { body: { ...auditVerification(), valid: false, first_bad_seq: 812, reason: "hash mismatch at seq 812" } } } });
     const chain = await screen.findByRole("region", { name: "Audit log" });
     expect(await within(chain).findByText("Broken at entry 812: something was changed or removed.")).toBeInTheDocument();
+    expect(within(chain).getByText("hash mismatch at seq 812")).toBeInTheDocument();
   });
 });

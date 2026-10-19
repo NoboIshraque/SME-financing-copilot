@@ -1,11 +1,13 @@
 // One pre-checked action (P9 "rails, not chat"): what it does, its effect and cost, its permission
-// tier, and a single button. EXECUTE asks for a fresh TOTP code; DENY never shows a button.
-import { useId, useState } from "react";
+// tier, and a single button. EXECUTE goes through WP-11 approvals (the owner approves with a fresh
+// TOTP code; an accountant can only ask); DRAFT approves the message draft it carries; DENY never
+// shows a button.
+import { useId, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { abilityFor } from "../actions/permissions";
-import { useApproveAction } from "../actions/useApproveAction";
+import { useApproveAndExecute, useApproveDraft, useRequestApproval } from "../actions/useApproveAction";
 import type { ActionCard } from "../api/contracts";
 import { StepUpDialog } from "../auth/StepUpDialog";
 import { useRequiredSession } from "../auth/session";
@@ -26,14 +28,25 @@ function targetScreen(card: ActionCard): Screen {
   return (SCREENS as readonly string[]).includes(screen ?? "") ? (screen as Screen) : "today";
 }
 
-export function ActionCardView({ card, primary = false }: { card: ActionCard; primary?: boolean }) {
+interface ActionCardViewProps {
+  card: ActionCard;
+  primary?: boolean;
+  /** An approval already requested for this card (approvals inbox): approve it, don't re-request. */
+  approvalId?: string;
+}
+
+export function ActionCardView({ card, primary = false, approvalId }: ActionCardViewProps) {
   const { t } = useTranslation();
   const text = useServerText();
   const format = useFormat();
   const navigate = useNavigate();
   const session = useRequiredSession();
-  const approve = useApproveAction(card);
+  const draftId = payloadText(card, "draft_id");
+  const execute = useApproveAndExecute(card, approvalId);
+  const request = useRequestApproval(card);
+  const approveDraft = useApproveDraft(draftId);
   const [stepUpOpen, setStepUpOpen] = useState(false);
+  const [markedDone, setMarkedDone] = useState(false);
   const ability = abilityFor(card.tier, session.principal.role);
   const title = text(card.title_key);
   const titleId = useId();
@@ -49,25 +62,65 @@ export function ActionCardView({ card, primary = false }: { card: ActionCard; pr
     newDate && t("actionCard.newDate", { date: format.date(newDate) }),
   ].filter(Boolean);
 
-  const buttonLabel =
-    card.tier === "READ"
-      ? t("actionCard.open")
-      : card.tier === "EXECUTE"
-        ? t("actionCard.approveWithCode")
-        : card.tier === "DRAFT"
-          ? t("actionCard.approveDraft")
-          : t("actionCard.markDone");
-
-  const onPress = () => {
-    if (card.tier === "READ") navigate(screenPath(targetScreen(card)));
-    else if (card.tier === "EXECUTE") setStepUpOpen(true);
-    else approve.mutate(undefined);
-  };
-
-  const error = approve.isError && card.tier !== "EXECUTE" ? describeError(approve.error) : null;
+  const done = execute.isSuccess || approveDraft.isSuccess || markedDone;
+  const outcome = execute.isSuccess
+    ? t("actionCard.executed")
+    : approveDraft.isSuccess
+      ? t("actionCard.approved")
+      : markedDone
+        ? t("actionCard.markedDone")
+        : request.isSuccess
+          ? t("actionCard.requested")
+          : null;
+  const inlineError = request.error ?? approveDraft.error;
+  const error = inlineError ? describeError(inlineError) : null;
   const buttonStyle = primary
     ? "bg-teal-700 text-white hover:bg-teal-800"
     : "border border-teal-700 text-teal-800 hover:bg-teal-50 dark:border-teal-400 dark:text-teal-200 dark:hover:bg-teal-950";
+  const button = (label: string, onClick: () => void, busy = false) => (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={busy}
+      aria-describedby={titleId}
+      className={`w-full rounded-xl px-4 py-3 font-semibold disabled:opacity-60 sm:w-auto ${buttonStyle}`}
+    >
+      {label}
+    </button>
+  );
+
+  let control: ReactNode;
+  if (outcome) {
+    control = (
+      <p className="flex items-center gap-2 font-medium text-emerald-800 dark:text-emerald-300">
+        <Icon name="check" />
+        {outcome}
+      </p>
+    );
+  } else if (ability === "never") {
+    control = <p className="text-sm font-medium text-red-800 dark:text-red-300">{t("actionCard.never")}</p>;
+  } else if (ability === "owner_only" || ability === "role_cannot") {
+    control = (
+      <p className="text-sm text-slate-600 dark:text-slate-400">
+        {ability === "owner_only" ? t("actionCard.ownerOnly") : t("actionCard.roleCannot")}
+      </p>
+    );
+  } else if (card.tier === "READ") {
+    control = button(t("actionCard.open"), () => navigate(screenPath(targetScreen(card))));
+  } else if (card.tier === "EXECUTE") {
+    control =
+      ability === "request"
+        ? approvalId
+          ? <p className="text-sm text-slate-600 dark:text-slate-400">{t("actionCard.waitingForOwner")}</p>
+          : button(t("actionCard.askOwner"), () => request.mutate(), request.isPending)
+        : button(t("actionCard.approveWithCode"), () => setStepUpOpen(true), execute.isPending);
+  } else if (card.tier === "DRAFT") {
+    control = draftId
+      ? button(t("actionCard.approveDraft"), () => approveDraft.mutate(), approveDraft.isPending)
+      : button(t("actionCard.reviewDraft"), () => navigate(screenPath("messages")));
+  } else {
+    control = button(t("actionCard.markDone"), () => setMarkedDone(true));
+  }
 
   return (
     <article
@@ -76,7 +129,7 @@ export function ActionCardView({ card, primary = false }: { card: ActionCard; pr
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <TierBadge tier={card.tier} />
-        {card.expires_at && !approve.isSuccess && (
+        {card.expires_at && !done && (
           <span className="text-xs text-slate-500 dark:text-slate-400">
             {t("actionCard.expires", { when: format.dateTime(card.expires_at) })}
           </span>
@@ -109,28 +162,7 @@ export function ActionCardView({ card, primary = false }: { card: ActionCard; pr
       )}
 
       <div className="mt-4">
-        {approve.isSuccess ? (
-          <p className="flex items-center gap-2 font-medium text-emerald-800 dark:text-emerald-300">
-            <Icon name="check" />
-            {t("actionCard.approved")}
-          </p>
-        ) : ability === "never" ? (
-          <p className="text-sm font-medium text-red-800 dark:text-red-300">{t("actionCard.never")}</p>
-        ) : ability === "owner_only" || ability === "role_cannot" ? (
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            {ability === "owner_only" ? t("actionCard.ownerOnly") : t("actionCard.roleCannot")}
-          </p>
-        ) : (
-          <button
-            type="button"
-            onClick={onPress}
-            disabled={approve.isPending}
-            aria-describedby={titleId}
-            className={`w-full rounded-xl px-4 py-3 font-semibold disabled:opacity-60 sm:w-auto ${buttonStyle}`}
-          >
-            {buttonLabel}
-          </button>
-        )}
+        {control}
         {error && (
           <p role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">
             {text(error.key, error.values)}
@@ -146,7 +178,7 @@ export function ActionCardView({ card, primary = false }: { card: ActionCard; pr
             {details.length > 0 && <p>{details.join(" · ")}</p>}
           </>
         }
-        onConfirm={(code) => approve.mutateAsync(code)}
+        onConfirm={(code) => execute.mutateAsync(code)}
         onClose={() => setStepUpOpen(false)}
       />
     </article>

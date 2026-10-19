@@ -51,3 +51,16 @@ def test_forecast_backtest_report_is_well_formed_when_present():
     assert report["data_mode"] == "public" and report["chosen_model"] in report["models"]
     for model in report["models"].values():
         assert 0 <= model["coverage_80_mean"] <= 1
+
+
+INJECTION_METRICS = sorted(ART.glob("injection_metrics*.json"))
+
+
+@pytest.mark.parametrize("path", INJECTION_METRICS, ids=[p.name for p in INJECTION_METRICS])
+def test_injection_threshold_is_chosen_off_the_test_split(path):
+    # Picking the threshold (or the checkpoint) on test would make test recall a given, not a
+    # measurement. Notebook 03 picks both on held-out training families.
+    metrics = json.loads(path.read_text(encoding="utf-8"))
+    assert "validation" in metrics["threshold_rule"]
+    assert set(metrics["validation_families"]).isdisjoint(metrics["test_families"])
+    assert metrics["validation"]["recall"] >= 0.95  # the rule held where it was applied

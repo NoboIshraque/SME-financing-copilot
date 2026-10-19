@@ -22,3 +22,17 @@ def test_a_successful_job_runs_once():
     calls = []
     run_safely(Job(name="ok", func=lambda: calls.append(1)))
     assert calls == [1]
+
+
+def test_the_worker_entry_point_accepts_the_repos_real_jobs():
+    # Runs exactly like the container (`python -m app.worker`), where the module is `__main__`:
+    # a jobs module importing `Job` from `app.worker` must still pass discovery.
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    backend = Path(__file__).resolve().parents[2]
+    result = subprocess.run([sys.executable, "-m", "app.worker", "--list"], cwd=backend,
+                            capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stderr
+    assert "security.anchor_audit_heads" in result.stdout

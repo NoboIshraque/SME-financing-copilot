@@ -1,8 +1,8 @@
 // One typed function per backend route. Screens call these, never fetch() directly.
 import { apiGet, apiPost } from "./client";
 import type {
+  ActionCard,
   Alert,
-  Approval,
   CashGap,
   Explanation,
   FinancingNeed,
@@ -20,8 +20,10 @@ import type {
 } from "./contracts";
 import type {
   AbstentionLogEntry,
+  ApprovalView,
+  AuditAnchor,
   AuditDrill,
-  AuditVerification,
+  ChainReport,
   CashForecast,
   DemoAccount,
   FinancingMatch,
@@ -34,7 +36,6 @@ import type {
   MeshGraph,
   NegotiationPlan,
   NegotiationRequest,
-  PendingApproval,
   ReceivableRow,
   ReceivablesOverview,
   ReceivablesPlan,
@@ -110,10 +111,15 @@ export const api = {
     ask: (question: string) => apiPost<Recommendation>("/api/copilot/ask", { question }),
     abstentions: () => apiGet<AbstentionLogEntry[]>("/api/copilot/abstentions"),
   },
-  actions: {
-    /** WP-11: approve an action card. EXECUTE needs the step-up code; the key makes retries safe. */
-    approve: (cardId: string, step: Step) => apiPost<Approval>(`/api/actions/${id(cardId)}/approve`, {}, step),
-    pending: () => apiGet<PendingApproval[]>("/api/approvals?status=pending"),
+  approvals: {
+    /** WP-11: ask for an EXECUTE card to be approved; the key makes a retried request a replay. */
+    request: (card: ActionCard, idempotencyKey: string) => apiPost<ApprovalView>("/api/approvals", { card }, { idempotencyKey }),
+    /** The owner approves with a fresh TOTP code. */
+    approve: (approvalId: string, stepUpCode: string) =>
+      apiPost<ApprovalView>(`/api/approvals/${id(approvalId)}/approve`, {}, { stepUpCode }),
+    execute: (approvalId: string, idempotencyKey: string) =>
+      apiPost<ApprovalView>(`/api/approvals/${id(approvalId)}/execute`, {}, { idempotencyKey }),
+    pending: () => apiGet<ApprovalView[]>("/api/approvals?status=pending"),
   },
   messages: {
     drafts: () => apiGet<MessageDraft[]>("/api/messages/drafts"),
@@ -130,7 +136,8 @@ export const api = {
     verify: (passportId: string) => apiGet<VerifyResult>(`/api/verify/${id(passportId)}`),
   },
   trust: {
-    auditVerify: () => apiGet<AuditVerification>("/api/audit/verify"),
+    auditVerify: () => apiGet<ChainReport>("/api/audit/verify"),
+    auditAnchors: () => apiGet<AuditAnchor[]>("/api/audit/anchors"),
     auditEvents: () => apiGet<AuditEvent[]>("/api/audit/events?limit=20"),
     drill: () => apiGet<AuditDrill>("/api/trust/drill"),
   },

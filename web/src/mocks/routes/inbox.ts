@@ -1,46 +1,13 @@
 // Mocks of the approval queue (WP-11), messaging (WP-12), reports and passport (WP-13), audit and
 // trust (WP-11/16), and settings (WP-12).
-import type { ActionCard, ShareGrant } from "../../api/contracts";
-import type { PendingApproval, UserSettings } from "../../api/types";
+import type { ShareGrant } from "../../api/contracts";
+import type { UserSettings } from "../../api/types";
 import { callerRole, DEMO_TOTP_CODE } from "../db";
 import { NOW, TENANT } from "../fixtures/common";
-import { abstentions, auditDrill, auditEvents, auditVerification } from "../fixtures/inbox";
+import { abstentions, auditAnchors, auditDrill, auditEvents, auditVerification } from "../fixtures/inbox";
 import { apiError, field, ok, type MockRoute } from "../http";
-import { CARD_SOURCES } from "./actions";
-
-function pendingCards(decided: Set<string>): ActionCard[] {
-  const seen = new Map<string, ActionCard>();
-  for (const source of CARD_SOURCES) {
-    for (const card of source()) {
-      if ((card.tier === "DRAFT" || card.tier === "EXECUTE") && !decided.has(card.id)) seen.set(card.id, card);
-    }
-  }
-  return [...seen.values()];
-}
 
 export const inboxRoutes: MockRoute[] = [
-  {
-    method: "GET",
-    pattern: "/api/approvals",
-    handler: (_req, db) => {
-      const decided = new Set(db.approvals.map((approval) => approval.action_card_id));
-      const pending: PendingApproval[] = pendingCards(decided).map((card) => ({
-        card,
-        approval: {
-          id: `pending-${card.id}`,
-          tenant_id: TENANT,
-          action_card_id: card.id,
-          tier: card.tier,
-          requested_by: "copilot",
-          status: "pending",
-          idempotency_key: `queue-${card.id}`,
-          created_at: NOW,
-          expires_at: "2026-10-01T18:00:00Z",
-        },
-      }));
-      return ok(pending);
-    },
-  },
   { method: "GET", pattern: "/api/messages/drafts", handler: (_req, db) => ok(db.drafts) },
   {
     method: "POST",
@@ -128,6 +95,7 @@ export const inboxRoutes: MockRoute[] = [
     },
   },
   { method: "GET", pattern: "/api/audit/verify", handler: () => ok(auditVerification()) },
+  { method: "GET", pattern: "/api/audit/anchors", handler: () => ok(auditAnchors()) },
   { method: "GET", pattern: "/api/audit/events", handler: () => ok(auditEvents()) },
   { method: "GET", pattern: "/api/copilot/abstentions", handler: () => ok(abstentions()) },
   { method: "GET", pattern: "/api/trust/drill", handler: () => ok(auditDrill()) },

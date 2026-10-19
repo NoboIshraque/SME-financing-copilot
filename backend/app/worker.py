@@ -5,6 +5,7 @@ Jobs are discovered like routers: any module `app/<area>/jobs.py` (or deeper) th
 daily audit-chain anchor (WP-08/WP-11), nightly audit drill (WP-16). Times are Asia/Dhaka.
 
 Run: `python -m app.worker` (the `worker` service in infra/docker-compose.yml).
+`python -m app.worker --list` loads and validates every job, prints them and exits.
 """
 
 from __future__ import annotations
@@ -52,14 +53,20 @@ def run_safely(job: Job) -> None:
         log.exception("job %s failed", job.name)
 
 
-def main() -> None:  # pragma: no cover - long-running process
+def main(argv: list[str] | None = None) -> None:  # pragma: no cover - long-running process
+    import sys
+
+    jobs = discover_jobs()
+    if "--list" in (sys.argv[1:] if argv is None else argv):
+        print("\n".join(f"{j.name} {j.cron}" for j in jobs) or "no jobs")
+        return
+
     from apscheduler.schedulers.blocking import BlockingScheduler
 
     from app.settings import get_settings
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     scheduler = BlockingScheduler(timezone=get_settings().timezone)
-    jobs = discover_jobs()
     for job in jobs:
         scheduler.add_job(run_safely, "cron", args=[job], id=job.name, coalesce=True,
                           max_instances=1, misfire_grace_time=600, **job.cron)
@@ -68,4 +75,9 @@ def main() -> None:  # pragma: no cover - long-running process
 
 
 if __name__ == "__main__":  # pragma: no cover
-    main()
+    # `python -m app.worker` runs this file as `__main__`; jobs modules import `Job` from
+    # `app.worker`, a second copy of this file with its own `Job` class, and the isinstance
+    # check in discover_jobs would reject every job. Run from the canonical module instead.
+    import app.worker as _worker
+
+    _worker.main()

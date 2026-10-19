@@ -47,7 +47,7 @@ describe("mock API", () => {
 
     const wrong = await post(fetchMock, "/api/auth/login/totp", { code: "000000" });
     expect(wrong.status).toBe(401);
-    expect((await wrong.json()).message_key).toBe("error.invalid_code");
+    expect((await wrong.json()).message_key).toBe("error.invalid_totp");
 
     const right = await post(fetchMock, "/api/auth/login/totp", { code: DEMO_TOTP_CODE });
     expect((await right.json()).principal.role).toBe("owner");

@@ -114,7 +114,24 @@
     "input_quarantined": "这条消息疑似试图绕过 Hishab 的安全规则，已被拦截并记录。",
     "empty_question": "请先输入问题。",
     "no_file": "请选择要上传的文件。",
-    "digest_mismatch": "预览后文件已变更，请重新上传。"
+    "digest_mismatch": "预览后文件已变更，请重新上传。",
+    "invalid_totp": "验证码不正确，请查看应用后重试。",
+    "invalid_step_up": "验证码未通过，因此没有批准任何操作。",
+    "step_up_required": "请输入身份验证器中的验证码以批准。",
+    "totp_not_enrolled": "请先开启两步登录，然后才能批准付款。",
+    "approval_not_needed": "此操作不需要店主批准。",
+    "idempotency_key_required": "请求缺少安全密钥，请重试。",
+    "approval_pending": "此事项仍在等待批准。",
+    "approval_approved": "此事项已被批准。",
+    "approval_rejected": "此事项已被拒绝。",
+    "approval_expired": "批准已过期，请重新申请。",
+    "approval_executed": "此事项已执行。",
+    "card_changed": "操作在批准后发生了变化，因此未执行。",
+    "policy_changed": "批准后规则发生了变化，因此未执行。",
+    "approver_inactive": "批准人已不再拥有访问权限。",
+    "rate_limited": "请求过多，请稍后再试。",
+    "weak_password": "请设置更长、更难猜的密码。",
+    "invalid_card": "无法读取此操作，请刷新页面。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -176,7 +193,13 @@
     "dueDate": "到期日 {{date}}",
     "newDate": "新日期 {{date}}",
     "invoices_one": "{{count}} 张发票",
-    "invoices_other": "{{count}} 张发票"
+    "invoices_other": "{{count}} 张发票",
+    "executed": "已批准并执行，已记入审计日志。",
+    "markedDone": "已标记为完成。",
+    "requested": "已发送给店主审批。",
+    "askOwner": "请店主批准",
+    "waitingForOwner": "正在等待店主批准。",
+    "reviewDraft": "在消息中查看"
   },
   "action": {
     "view": "打开",
@@ -654,7 +677,8 @@
       "lender_update": "给贷款方的更新",
       "netting_invitation": "轧差结算邀请",
       "sale_memo": "销售备忘"
-    }
+    },
+    "requestedBy": "{{who}} 于 {{when}} 申请"
   },
   "reports": {
     "passportTitle": "信任护照",

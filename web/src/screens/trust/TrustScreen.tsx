@@ -19,6 +19,8 @@ export function TrustScreen() {
   const format = useFormat();
   useDocumentTitle(t("nav.trust"));
   const chain = useQuery({ queryKey: ["trust", "audit"], queryFn: api.trust.auditVerify });
+  const anchors = useQuery({ queryKey: ["trust", "anchors"], queryFn: api.trust.auditAnchors });
+  const latestAnchor = anchors.data?.[0];
   const events = useQuery({ queryKey: ["trust", "events"], queryFn: api.trust.auditEvents });
   const abstentions = useQuery({ queryKey: ["trust", "abstentions"], queryFn: api.copilot.abstentions });
   const drill = useQuery({ queryKey: ["trust", "drill"], queryFn: api.trust.drill });
@@ -32,10 +34,16 @@ export function TrustScreen() {
           {(data) => (
             <>
               <p className={`mt-2 text-lg font-semibold ${data.valid ? "text-emerald-700 dark:text-emerald-300" : "text-red-700 dark:text-red-300"}`}>
-                {data.valid ? t("trust.chainValid", { count: data.length, value: format.number(String(data.length), 0) }) : t("trust.chainBroken", { seq: data.broken_at_seq ?? "?" })}
+                {data.valid ? t("trust.chainValid", { count: data.length, value: format.number(String(data.length), 0) }) : t("trust.chainBroken", { seq: data.first_bad_seq ?? "?" })}
               </p>
               <p className="mt-1 break-all font-mono text-xs text-slate-600 dark:text-slate-400">{t("trust.head", { hash: data.head_hash })}</p>
-              {data.anchor && <p className="mt-1 text-sm">{t(`mesh.chain.${data.anchor.chain}`)} · {format.dateTime(data.anchor.anchored_at)}</p>}
+              {!data.valid && data.reason && <p className="mt-1 text-sm">{data.reason}</p>}
+              {latestAnchor && (
+                <p className="mt-1 text-sm">
+                  {t(`mesh.chain.${latestAnchor.chain}`)} · {format.dateTime(latestAnchor.anchored_at)}
+                  {latestAnchor.tx_hash && <span className="block break-all font-mono text-xs">{t("mesh.tx", { hash: latestAnchor.tx_hash })}</span>}
+                </p>
+              )}
               <button type="button" onClick={() => void chain.refetch()} className="mt-3 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium dark:border-slate-600">
                 {t("trust.verifyAgain")}
               </button>

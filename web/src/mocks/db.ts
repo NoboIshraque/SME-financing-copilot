@@ -1,7 +1,8 @@
 // In-memory state of the offline mock API. Every value is synthetic (CLAUDE.md rule 8).
-import type { Approval, MessageDraft, NettingRound, PassportVersion, Role, ShareGrant } from "../api/contracts";
+import type { ActionCard, Approval, MessageDraft, NettingRound, PassportVersion, Role, ShareGrant } from "../api/contracts";
 import type { Session, UserSettings } from "../api/types";
 import { DEFAULT_SETTINGS, initialDrafts, initialPassports, initialShares } from "./fixtures/inbox";
+import { CARD_APPLY } from "./fixtures/financing";
 import { initialRounds } from "./fixtures/mesh";
 
 export const DEMO_PASSWORD = "hishab-demo";
@@ -21,12 +22,40 @@ export interface MockUser {
   failedLogins: number;
 }
 
+/** An approval with the card it was requested for, and its execution result once executed. */
+export interface ApprovalRecord {
+  approval: Approval;
+  card: ActionCard;
+  result?: Record<string, string> | null;
+}
+
+/** The accountant already asked the owner to approve the loan application. */
+function seededApprovals(): ApprovalRecord[] {
+  return [
+    {
+      card: CARD_APPLY,
+      approval: {
+        id: "ap-seed-apply",
+        tenant_id: "sme_grocery",
+        action_card_id: CARD_APPLY.id,
+        tier: "EXECUTE",
+        requested_by: "u-accountant",
+        status: "pending",
+        step_up_verified: false,
+        idempotency_key: "seed-apply",
+        created_at: "2026-09-30T17:00:00Z",
+        expires_at: "2026-10-01T17:00:00Z",
+      },
+    },
+  ];
+}
+
 export interface MockDb {
   users: MockUser[];
   session: Session | null;
   /** Email of a user who passed the password step and still owes a TOTP code. */
   pendingTotp: string | null;
-  approvals: Approval[];
+  approvals: ApprovalRecord[];
   /** Invoice id -> dispute reason, for invoices disputed in this session. */
   disputes: Record<string, string>;
   rounds: NettingRound[];
@@ -98,7 +127,7 @@ export function createMockDb(options: { signedInAs?: string } = {}): MockDb {
     users,
     session: null,
     pendingTotp: null,
-    approvals: [],
+    approvals: seededApprovals(),
     disputes: {},
     rounds: initialRounds(),
     drafts: initialDrafts(),

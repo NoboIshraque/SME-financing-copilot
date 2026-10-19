@@ -226,18 +226,39 @@ export interface NegotiationPlan {
 
 // ---- Messages, approvals, reports, trust, settings (WP-11/12/13/16) -------------------------
 
-/** GET /api/approvals?status=pending: cards waiting for a decision. */
-export interface PendingApproval {
+/** WP-11 approvals for EXECUTE cards: POST /api/approvals {card} (X-Idempotency-Key) -> pending;
+ *  POST /api/approvals/{id}/approve (X-Step-Up-Code, owner) -> approved;
+ *  POST /api/approvals/{id}/execute (X-Idempotency-Key) -> executed, with `result`.
+ *  GET /api/approvals?status=pending lists the same view. */
+export interface ApprovalView {
   approval: Approval;
+  action_type: ActionCard["action_type"];
   card: ActionCard;
+  result?: Record<string, string> | null;
+  replayed?: boolean;
 }
 
-export interface AuditVerification {
+/** GET /api/audit/verify (WP-11): the tenant's hash chain, recomputed. */
+export interface ChainReport {
+  tenant_id: string;
   valid: boolean;
   length: number;
   head_hash: string;
-  anchor: AnchorReceipt | null;
-  broken_at_seq?: number | null;
+  first_bad_seq?: number | null;
+  reason?: string | null;
+  anchors_checked?: number;
+}
+
+/** GET /api/audit/anchors (WP-11): daily anchors of the chain head, newest first. */
+export interface AuditAnchor {
+  day: string;
+  digest: string;
+  chain: AnchorReceipt["chain"];
+  tx_hash: string | null;
+  block_number: number | null;
+  explorer_url: string | null;
+  anchored_at: string;
+  heads: number;
 }
 
 export interface AbstentionLogEntry {

@@ -7,9 +7,9 @@ Mobile). Done something? Tick it in your head and comment "done: <item>" on the 
 <!-- section: nobo -->
 ## Nobo (@NoboIshraque) — PC-1 and PC-2
 
+- [ ] **Now, 2 min: merge #14 then #15** (tell the orchestrator "merge #14 and #15" or tap merge): **#14** turns `main` green again (the secret scan was failing on a false positive in A1's `wp-02-ingest` branch, which holds up Deploy); **#15** gives WP-11 its `app_hooks.py` so B2 never needs to edit `main.py`.
 - [ ] **Now, 5 min:** repo → Settings → Collaborators → *Add people* → `amdad1203` and `lab-af` (Write access).
-- [ ] **Now:** PC-2 has not started yet. Start **B1 on WP-14** (`C:\hishab\repo`, branch `wp-14-web`) and **B2 on WP-11** (`C:\hishab\repo-b2`, branch `wp-11-security`) with the RUNBOOK §4 start prompt. (WP-03 privacy is now built by the orchestrator, so B2 skips it.)
-- [ ] **Now:** A1 on PC-1: `/clear`, then `git switch main; git pull; git switch -c wp-02-ingest` and paste the start prompt with **WP-02**.
+- [ ] **Now:** start **B2 on WP-11** (`C:\hishab\repo-b2`, branch `wp-11-security`) with the RUNBOOK §4 start prompt, after #15 is merged (WP-11.md milestone 6 says how to hook security in without touching `main.py`; milestone 7 may write `docs/submission/security-self-assessment.md`).
 - [ ] **Keys, 10 min (never in chat or in git):** repo → Settings → Secrets and variables → Actions → *New repository secret*: `GEMINI_API_KEY`, `GROQ_API_KEY`. Do **not** add the MetaMask key to GitHub; it goes only into the server's `.env` (Amdad's step) .
 - [ ] **Keys on your PCs:** in every repo folder (`C:\hishab\repo`, `C:\hishab\repo-b2`) copy `backend\.env.example` to `backend\.env` and fill `GEMINI_API_KEY` and `GROQ_API_KEY` only. Leave `LLM_MODE=fixtures`.
 - [ ] Install **GitHub Mobile** → sign in → open the repo → *Watch* → *Custom* → **Issues** → allow notifications.
@@ -30,5 +30,6 @@ Mobile). Done something? Tick it in your head and comment "done: <item>" on the 
 
 - [ ] Accept the GitHub invite, install **GitHub Mobile**, *Watch → Custom → Issues*.
 - [ ] **10:00–14:00 shops (WP-20):** consent → statement export → baki-khata photos → 5-minute interview. Raw files only in the private Drive folder.
+- [ ] **After each shop, anonymise (10 min):** type the baki photos into a sheet, put `known_names.txt` (owner/shop/staff names) in the shop's raw folder, then in `C:\hishab\repo` (branch `wp-20-data`): `uv --directory backend run python -m app.privacy.shopfiles "G:\My Drive\hishab-raw\shop01" --shop shop01-grocery` (change the path to that shop's raw folder; next shop: `shop02-pharmacy` etc.). Check `data\real_anonymised\shop01-grocery\` by eye, then commit and push. Full steps: `docs/packages/WP-20.md` → "Anonymise".
 - [ ] **Afternoon: Kaggle notebooks 01, 03, 04** (table in `docs/team/LABIB.md`, now on `main`). Download AgriPriceBD first: https://data.mendeley.com/datasets/bkmxnrn3hn
 - [ ] PC-4 hourly jobs (LABIB.md "PC-4 always-on jobs") if not running yet.

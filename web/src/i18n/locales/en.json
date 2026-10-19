@@ -114,7 +114,24 @@
     "input_quarantined": "This message looked like an attempt to override Hishab's safety rules, so it was blocked and logged.",
     "empty_question": "Type a question first.",
     "no_file": "Choose a file to upload.",
-    "digest_mismatch": "The file changed since the preview. Please upload it again."
+    "digest_mismatch": "The file changed since the preview. Please upload it again.",
+    "invalid_totp": "That code is not right. Check the app and try again.",
+    "invalid_step_up": "The code was not accepted, so nothing was approved.",
+    "step_up_required": "Enter the code from your authenticator app to approve this.",
+    "totp_not_enrolled": "Set up two-step sign-in first, then you can approve payments.",
+    "approval_not_needed": "This action does not need an owner approval.",
+    "idempotency_key_required": "The request was missing its safety key. Please try again.",
+    "approval_pending": "This is still waiting for approval.",
+    "approval_approved": "This was already approved.",
+    "approval_rejected": "This was rejected.",
+    "approval_expired": "This approval expired. Ask for it again.",
+    "approval_executed": "This was already carried out.",
+    "card_changed": "The action changed after it was approved, so it was not carried out.",
+    "policy_changed": "The rules changed since approval, so it was not carried out.",
+    "approver_inactive": "The person who approved this no longer has access.",
+    "rate_limited": "Too many requests. Wait a moment and try again.",
+    "weak_password": "Choose a longer, harder-to-guess password.",
+    "invalid_card": "This action could not be read. Please refresh."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -176,7 +193,13 @@
     "dueDate": "due {{date}}",
     "newDate": "new date {{date}}",
     "invoices_one": "{{count}} invoice",
-    "invoices_other": "{{count}} invoices"
+    "invoices_other": "{{count}} invoices",
+    "executed": "Approved and carried out. It is recorded in the audit log.",
+    "markedDone": "Marked as done.",
+    "requested": "Sent to the owner for approval.",
+    "askOwner": "Ask the owner to approve",
+    "waitingForOwner": "Waiting for the owner's approval.",
+    "reviewDraft": "Review in Messages"
   },
   "action": {
     "view": "Open",
@@ -654,7 +677,8 @@
       "lender_update": "Update for your lender",
       "netting_invitation": "Invitation to a netting round",
       "sale_memo": "Sale memo"
-    }
+    },
+    "requestedBy": "Requested by {{who}}, {{when}}"
   },
   "reports": {
     "passportTitle": "Trust Passport",

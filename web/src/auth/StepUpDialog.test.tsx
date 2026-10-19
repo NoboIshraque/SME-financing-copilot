@@ -39,7 +39,7 @@ describe("step-up dialog", () => {
     const user = userEvent.setup();
     const onConfirm = vi
       .fn()
-      .mockRejectedValue(new ApiRequestError(403, { code: "step_up_failed", message_key: "error.step_up_failed" }));
+      .mockRejectedValue(new ApiRequestError(401, { code: "invalid_step_up", message_key: "error.invalid_step_up" }));
     render(<Harness onConfirm={onConfirm} />);
     await user.click(screen.getByRole("button", { name: "Approve payment" }));
     await user.type(screen.getByLabelText("6-digit code"), "111111");

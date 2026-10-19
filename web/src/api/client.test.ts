@@ -78,6 +78,16 @@ describe("api client", () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
+  it("does not sign the user out for a wrong step-up code (WP-11 answers 401 invalid_step_up)", async () => {
+    mockFetch(401, { code: "invalid_step_up", message_key: "error.invalid_step_up" });
+    const listener = vi.fn();
+    const stop = onUnauthorized(listener);
+    const error = (await apiPost("/api/approvals/ap-1/approve", {}, { stepUpCode: "000000" }).catch((e: unknown) => e)) as ApiRequestError;
+    expect(error.body?.code).toBe("invalid_step_up");
+    expect(listener).not.toHaveBeenCalled();
+    stop();
+  });
+
   it("refuses paths outside /api/ so nothing calls third-party hosts", async () => {
     await expect(apiGet("https://example.com/x")).rejects.toThrow("/api/");
   });

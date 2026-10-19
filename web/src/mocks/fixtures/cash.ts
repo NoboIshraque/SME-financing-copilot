@@ -102,7 +102,7 @@ export const CARD_REMIND: ActionCard = {
   title_key: "action.send_reminder",
   action_type: "send_reminder",
   tier: "DRAFT",
-  payload: { counterparty_label: "Customer 9", due_date: "2026-09-21", invoice_count: "4" },
+  payload: { counterparty_label: "Customer 9", due_date: "2026-09-21", invoice_count: "4", draft_id: "msg-overdue-9" },
   impact: figure("fig-act-remind-impact", "action.expected_collection", "8208.00", "BDT", {
     formula_id: "receivables.overdue_sum",
     source_row_ids: ["baki_register.csv#L688", "baki_register.csv#L692", "baki_register.csv#L697", "baki_register.csv#L700"],

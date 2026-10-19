@@ -45,7 +45,7 @@ export const authRoutes: MockRoute[] = [
     handler: (req, db) => {
       const account = db.users.find((u) => u.email === db.pendingTotp);
       if (!account) return apiError(401, "not_authenticated", "error.not_authenticated");
-      if (field(req.body, "code") !== DEMO_TOTP_CODE) return apiError(401, "invalid_code", "error.invalid_code");
+      if (field(req.body, "code") !== DEMO_TOTP_CODE) return apiError(401, "invalid_totp", "error.invalid_totp");
       db.pendingTotp = null;
       db.session = sessionFor(account);
       return ok(db.session);
