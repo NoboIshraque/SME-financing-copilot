@@ -1,0 +1,6 @@
+# Hosted e2e evidence (WP-15). Committed: summary.md, summary.json and the screenshots.
+# Traces, videos and the HTML report run to hundreds of MB per run: they stay on the machine that
+# ran it (for the evidence bundle) and in the CI artifact "e2e-hosted-evidence", not in git.
+report/
+artifacts/**/*.zip
+artifacts/**/*.webm

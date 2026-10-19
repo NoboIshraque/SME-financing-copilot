@@ -289,11 +289,13 @@ def _dso_rising(sim: Simulation, invoices: Sequence[Invoice], evidence: Evidence
 def _top_customers(invoices: Sequence[Invoice], as_of: date) -> list[str]:
     since = as_of - timedelta(days=TOP_WINDOW_DAYS - 1)
     volume: dict[str, Decimal] = {}
+    first: dict[str, str] = {}  # equal volumes break on the first invoice id, never the name
     for inv in invoices:
         if since <= inv.issue_date <= as_of:
-            volume[inv.counterparty_token] = volume.get(inv.counterparty_token, ZERO) + \
-                inv.amount.amount
-    return sorted(volume, key=lambda t: (-volume[t], t))[:TOP_CUSTOMERS]
+            token = inv.counterparty_token
+            volume[token] = volume.get(token, ZERO) + inv.amount.amount
+            first[token] = min(first.get(token, inv.id), inv.id)
+    return sorted(volume, key=lambda t: (-volume[t], first[t]))[:TOP_CUSTOMERS]
 
 
 def _slowing(sim: Simulation, invoices: Sequence[Invoice], evidence: Evidence) -> list[Signal]:
