@@ -172,6 +172,21 @@ def test_commit_rechecks_duplicates_against_the_ledger_as_it_is_now(service):
     assert len(_ledger(service)) == 2
 
 
+def test_rows_a_committed_statement_pinned_match_later_uploads_by_their_trxid_only(service):
+    """The service remembers which ledger rows came with a TrxID. Another TrxID with the same
+    look is a new payment; a typed-in row with that look (no TrxID) absorbs it."""
+    line = "01/10/2026 10:00:00,Payment Received,01711000001,100,0,0,SALE-1"
+    first = service.preview(bkash(f"A1,{line}"), _opts(), reference=TODAY)
+    service.commit(T, first.preview_id, first.file_digest)
+    later = bkash(f"A2,{line}")
+    assert len(service.preview(later, _opts(), reference=TODAY).transactions) == 1
+    typed = first.transactions[0].model_copy(update={"id": f"{T}:typed:1",
+                                                     "source_ref": "typed#1"})
+    FactStore(service.session).add_transactions([typed])
+    again = service.preview(later, _opts(), reference=TODAY)
+    assert (again.transactions, again.duplicates_skipped) == ((), 1)
+
+
 def test_party_links_learnt_from_a_register_carry_to_later_uploads(service):
     register = csv_bytes(["number,party,phone,issue_date,due_date,amount,amount_paid,status",
                           "INV-1,Green Traders,01830296422,2026-09-01,2026-09-10,900,0,open"])
