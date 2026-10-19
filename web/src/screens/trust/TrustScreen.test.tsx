@@ -25,7 +25,8 @@ describe("Trust & audit screen", () => {
     expect(rows[1]?.querySelector("[data-tier]")).toHaveAttribute("data-tier", "DENY");
     const log = screen.getByRole("region", { name: "When Hishab said \"I don't know\"" });
     const first = (await within(log).findAllByRole("listitem"))[0];
-    expect(first).toHaveTextContent("“How big a loan can I safely take for Eid stock?”");
+    expect(first).toHaveTextContent("How big a loan can I safely take for Eid stock?");
+    expect(first?.querySelector("q")).toHaveTextContent("How big a loan can I safely take for Eid stock?");
     expect(first).toHaveTextContent("Missing: last year's Eid-ul-Adha sales (only 5 months of history)");
   });
 

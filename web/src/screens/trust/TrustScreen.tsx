@@ -108,7 +108,7 @@ export function TrustScreen() {
               {list.map((entry) => (
                 <li key={entry.id} className={card}>
                   <p className="text-xs text-slate-500 dark:text-slate-400">{format.dateTime(entry.at)}</p>
-                  <p className="font-medium">“{entry.question}”</p>
+                  <p className="font-medium"><q>{entry.question}</q></p>
                   <p className="mt-1 text-sm">{text(entry.abstention.message_key)}</p>
                   {entry.abstention.missing && entry.abstention.missing.length > 0 && (
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t("trust.missing", { items: entry.abstention.missing.join("; ") })}</p>
