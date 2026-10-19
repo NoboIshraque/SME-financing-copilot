@@ -7,8 +7,8 @@ balance(day) = opening balance + expected inflows - expected outflows, where
            + collections on invoices not yet issued: recent credit-sales rate x the share of
              invoices paid within that many days of issue
 - outflows = recurring obligations on their schedule (rent, salary, EMI, utilities, ...)
-           + open bills when the business usually pays that supplier, never after the due date
-             (overdue ones tomorrow)
+           + open bills when the business usually pays that supplier (its median delay; the
+             due date without history; overdue ones no earlier than tomorrow)
            + bills not yet issued: recent credit-purchase rate x the share paid within that many
              days of issue
            + cash purchases and other running costs at their recent daily rate (categories
@@ -172,11 +172,12 @@ def obligation_days(obligation: RecurringObligation, start: date, end: date) -> 
 
 
 def bill_pay_day(bill: Bill, as_of: date, delays: DelayTable) -> date:
-    """When the forecast pays an open bill: on the due date, or earlier when the business
-    usually pays this supplier early (its median delay is negative); never in the past."""
-    typical = delays.typical_delay(bill.counterparty_token)
-    due = bill.due_date + timedelta(days=min(typical or 0, 0))
-    return max(due, as_of + timedelta(days=1))
+    """When the forecast pays an open bill: when the business usually pays this supplier
+    (due date + its median delay, early or late; the due date without history), never in the
+    past. The walk-forward backtest showed that paying everything on the due date biases the
+    balance low by about a day of supplier payments."""
+    typical = delays.typical_delay(bill.counterparty_token) or 0
+    return max(bill.due_date + timedelta(days=typical), as_of + timedelta(days=1))
 
 
 def daily_totals(items: Iterable[Transaction | Invoice | Bill], as_of: date,

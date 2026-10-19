@@ -68,7 +68,7 @@ def _settled_bill(number, due, delay, party):
                 paid_date=due + timedelta(days=delay), party=party)
 
 
-def test_an_open_bill_is_paid_when_the_business_usually_pays_that_supplier_never_later():
+def test_an_open_bill_is_paid_when_the_business_usually_pays_that_supplier():
     early = [_settled_bill(f"E{n}", date(2026, 8, 25) + timedelta(days=n), -5, "PARTY_supp_early")
              for n in range(3)]  # this supplier is always paid 5 days before the due date
     late = [_settled_bill(f"L{n}", date(2026, 8, 25) + timedelta(days=n), 3, "PARTY_supp_late")
@@ -77,9 +77,9 @@ def test_an_open_bill_is_paid_when_the_business_usually_pays_that_supplier_never
                   bill("B2", date(2026, 9, 25), date(2026, 10, 20), 400, party="PARTY_supp_late")]
     base = _baseline(bills=[*early, *late, *open_bills])
     assert sorted(_flows(base, FlowKind.bill)) == [(date(2026, 10, 15), D("900.00")),
-                                                   (date(2026, 10, 20), D("400.00"))]
+                                                   (date(2026, 10, 23), D("400.00"))]
     assert [(ob.bill.id, ob.pay_day) for ob in base.open_bills] == [
-        (f"{T}:B1", date(2026, 10, 15)), (f"{T}:B2", date(2026, 10, 20))]
+        (f"{T}:B1", date(2026, 10, 15)), (f"{T}:B2", date(2026, 10, 23))]
 
 
 def test_the_run_rates_are_the_mean_of_the_daily_history_the_simulation_resamples():
