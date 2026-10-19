@@ -131,7 +131,8 @@
     "approver_inactive": "The person who approved this no longer has access.",
     "rate_limited": "Too many requests. Wait a moment and try again.",
     "weak_password": "Choose a longer, harder-to-guess password.",
-    "invalid_card": "This action could not be read. Please refresh."
+    "invalid_card": "This action could not be read. Please refresh.",
+    "tenant_required": "Choose your business first."
   },
   "today": {
     "asOf": "As of {{date}}",

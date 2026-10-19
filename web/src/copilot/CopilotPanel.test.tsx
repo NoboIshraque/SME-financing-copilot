@@ -83,7 +83,9 @@ describe("upload flow", () => {
     await user.click(within(dialog).getByRole("button", { name: "Add 3 rows to my records" }));
     expect(await within(dialog).findByText("Added 3 rows to your records.")).toBeInTheDocument();
     const call = fetchMock.mock.calls.find(([path]) => String(path) === "/api/ingest/commit");
-    expect(JSON.parse(String((call?.[1] as RequestInit).body))).toMatchObject({ preview_id: "pv-csv-1", file_digest: "b".repeat(64) });
+    expect(JSON.parse(String((call?.[1] as RequestInit).body))).toEqual({ tenant_id: "sme_grocery", preview_id: "pv-csv-1", file_digest: "b".repeat(64), confirm: [] });
+    const preview = fetchMock.mock.calls.find(([path]) => String(path) === "/api/ingest/preview");
+    expect(((preview?.[1] as RequestInit).body as FormData).get("tenant_id")).toBe("sme_grocery");
   });
 
   it("never auto-commits a low-confidence OCR row from a ledger photo", async () => {
@@ -96,6 +98,6 @@ describe("upload flow", () => {
     await user.click(within(dialog).getByRole("button", { name: "Add 2 rows to my records" }));
     await within(dialog).findByText("Added 2 rows to your records.");
     const call = fetchMock.mock.calls.find(([path]) => String(path) === "/api/ingest/commit");
-    expect(JSON.parse(String((call?.[1] as RequestInit).body)).confirmed_rows).toEqual(["line1", "line2"]);
+    expect(JSON.parse(String((call?.[1] as RequestInit).body)).confirm).toEqual(["line1", "line2"]);
   });
 });

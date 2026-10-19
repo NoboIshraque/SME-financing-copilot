@@ -288,14 +288,21 @@ export interface UserSettings {
   email_alerts: boolean;
 }
 
-/** POST /api/ingest/commit (WP-02). */
+/** POST /api/ingest/commit (WP-02): parsed rows commit with the file; OCR drafts only when their
+ *  row_ref is in `confirm`. The digest must be the previewed file's. */
 export interface IngestCommitRequest {
+  tenant_id: string;
   preview_id: string;
   file_digest: string;
-  confirmed_rows: string[];
+  confirm: string[];
 }
 
 export interface IngestCommitResult {
-  committed: number;
-  skipped: number;
+  preview_id: string;
+  transactions: number;
+  invoices: number;
+  bills: number;
+  drafts_confirmed: number;
+  duplicates_skipped: number;
+  committed_at: string;
 }

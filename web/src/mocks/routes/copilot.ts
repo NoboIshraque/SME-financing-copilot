@@ -112,10 +112,19 @@ export const copilotRoutes: MockRoute[] = [
     method: "POST",
     pattern: "/api/ingest/commit",
     handler: (req) => {
-      const body = req.body as { preview_id?: string; file_digest?: string; confirmed_rows?: unknown };
-      if (!body.preview_id || !body.file_digest) return apiError(422, "digest_mismatch", "error.digest_mismatch");
-      const confirmed = Array.isArray(body.confirmed_rows) ? body.confirmed_rows.length : 0;
-      return ok({ committed: confirmed, skipped: body.preview_id === "pv-csv-1" ? 1 : 0 });
+      const body = req.body as { tenant_id?: string; preview_id?: string; file_digest?: string; confirm?: unknown };
+      if (!body.tenant_id) return apiError(422, "tenant_required", "error.tenant_required");
+      if (!body.preview_id || !/^[0-9a-f]{64}$/.test(body.file_digest ?? "")) return apiError(422, "digest_mismatch", "error.digest_mismatch");
+      const csv = body.preview_id === "pv-csv-1";
+      return ok({
+        preview_id: body.preview_id,
+        transactions: csv ? 3 : 0,
+        invoices: 0,
+        bills: 0,
+        drafts_confirmed: Array.isArray(body.confirm) ? body.confirm.length : 0,
+        duplicates_skipped: csv ? 1 : 0,
+        committed_at: NOW,
+      });
     },
   },
 ];

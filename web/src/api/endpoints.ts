@@ -146,9 +146,11 @@ export const api = {
     save: (body: UserSettings) => apiPost<UserSettings>("/api/settings", body),
   },
   ingest: {
-    preview: (file: File) => {
+    /** WP-02: multipart file + tenant_id (until the principal carries the tenant). */
+    preview: (file: File, tenantId: string) => {
       const form = new FormData();
       form.append("file", file);
+      form.append("tenant_id", tenantId);
       return apiPost<IngestPreview>("/api/ingest/preview", form);
     },
     commit: (body: IngestCommitRequest) => apiPost<IngestCommitResult>("/api/ingest/commit", body),

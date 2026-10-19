@@ -131,7 +131,8 @@
     "approver_inactive": "批准人已不再拥有访问权限。",
     "rate_limited": "请求过多，请稍后再试。",
     "weak_password": "请设置更长、更难猜的密码。",
-    "invalid_card": "无法读取此操作，请刷新页面。"
+    "invalid_card": "无法读取此操作，请刷新页面。",
+    "tenant_required": "请先选择您的企业。"
   },
   "today": {
     "asOf": "截至 {{date}}",
