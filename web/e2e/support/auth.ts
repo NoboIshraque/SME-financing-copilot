@@ -12,7 +12,7 @@ export const SAVED_ROLES = ["owner", "staff", "lender_viewer"] as const satisfie
 export type SavedRole = (typeof SAVED_ROLES)[number];
 
 /** Playwright storage state (session cookie) for a role on this run's target. */
-export function sessionFile(role: SavedRole): string {
+export function sessionFile(role: SavedRole | "critical_owner"): string {
   return join(WEB_DIR, "e2e", ".auth", `${TARGET}-${role}.json`);
 }
 

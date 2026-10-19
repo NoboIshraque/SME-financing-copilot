@@ -14,13 +14,11 @@ const THEMES = ["light", "dark"] as const;
 
 // Known, found by this suite (WP-15.md, Notes), as "<theme> <rule>" per screen and viewport. The
 // assertion is exact, so a fix fails it too: then take the entry out.
-//  - today: the Watch tier badge, white on sky-600, is 4.02:1 (AA needs 4.5:1 for small text).
 //  - cash: the forecast chart is aria-hidden but its SVG keeps focusable elements.
 //  - mesh, reports, settings (desktop) in dark: slate-500 small text on slate-900 is 3.74:1.
 //  - trust on a phone: the audit table scrolls sideways in a box the keyboard cannot reach.
 const BOTH_THEMES = (rule: string) => [`dark ${rule}`, `light ${rule}`];
 const KNOWN: Record<string, { desktop?: string[]; phone?: string[] }> = {
-  today: { desktop: BOTH_THEMES("color-contrast"), phone: BOTH_THEMES("color-contrast") },
   cash: { desktop: BOTH_THEMES("aria-hidden-focus"), phone: BOTH_THEMES("aria-hidden-focus") },
   mesh: { desktop: ["dark color-contrast"], phone: ["dark color-contrast"] },
   reports: { desktop: ["dark color-contrast"], phone: ["dark color-contrast"] },

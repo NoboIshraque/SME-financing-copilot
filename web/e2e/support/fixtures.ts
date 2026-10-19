@@ -1,9 +1,11 @@
 // The `test` every journey imports: Playwright's, plus `app` (moving around the signed-in shell
 // the way a person does, on a phone or a desktop) and `foreignHosts` (every third-party host the
 // page contacted: the China-reachability audit, WP-18 milestone 4).
-import { test as base, expect, type Locator, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 
-import { homeAccount, type DemoAccount, type Role } from "./accounts";
+import { test as base, expect, type BrowserContext, type Locator, type Page } from "@playwright/test";
+
+import { demoAccounts, homeAccount, type DemoAccount, type Role } from "./accounts";
 import { signInThroughApi } from "./auth";
 import { t, type Language } from "./i18n";
 import { routeIsLive } from "./target";
@@ -101,6 +103,22 @@ export class App {
   /** Sign this browser context in as `account` (API sign-in; the cookie lands in the context). */
   async signInAs(account: DemoAccount): Promise<void> {
     await signInThroughApi(this.page.request, account);
+  }
+
+  /** Put a saved session (support/auth.ts) into this browser context. */
+  async useSession(file: string): Promise<void> {
+    const state = JSON.parse(readFileSync(file, "utf8")) as { cookies: Parameters<BrowserContext["addCookies"]>[0] };
+    await this.page.context().addCookies(state.cookies);
+  }
+
+  /** The demo account this context is signed in as. */
+  async signedInAccount(): Promise<DemoAccount> {
+    const me = (await (await this.page.request.get("/api/auth/me")).json()) as { business_name: string; principal: { role: Role } };
+    const account = (await demoAccounts(this.page.request)).find(
+      (candidate) => candidate.role === me.principal.role && candidate.business_name === me.business_name,
+    );
+    if (!account) throw new Error(`no demo ${me.principal.role} for ${me.business_name}`);
+    return account;
   }
 
   stepUpDialog(): Locator {

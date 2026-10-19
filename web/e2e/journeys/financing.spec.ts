@@ -1,18 +1,17 @@
-// Journey: financing match -> open the provenance of the best option's true cost -> the drafted
-// application waits behind a step-up code (WP-06 through WP-14's financing screen).
-//
-// Approving the application is not part of this journey yet: WP-11's policy gives the owner only
-// DRAFT on draft_loan_application while the application card is EXECUTE, so the approval API
-// refuses it (question open in WP-06.md). The journey checks the draft is offered and that nothing
-// is sent until the owner confirms with a code.
+// Journey: financing match -> open the provenance of the best option's true cost -> the
+// pre-filled application, which leaves only after the owner approves it with a step-up code
+// (WP-06 match + submit_loan_application through WP-11 approvals) -> the audit log.
 import { sessionFile } from "../support/auth";
 import { expect, test } from "../support/fixtures";
+import { tPattern } from "../support/i18n";
 import { needsRoutes } from "../support/target";
 
 test.use({ storageState: sessionFile("owner") });
 
-test("the owner matches financing, opens how the true cost was calculated, and finds the application drafted", async ({ app, page }) => {
-  await needsRoutes(["POST /api/financing/match"]);
+test("the owner matches financing, opens how the true cost was calculated, and submits the application with a code", async ({ app, page }) => {
+  test.setTimeout(180_000);
+  await needsRoutes(["POST /api/financing/match", "POST /api/approvals", "POST /api/approvals/probe/approve"]);
+  const owner = await app.account("owner");
 
   await app.start("financing");
   await page.getByRole("button", { name: app.t("financing.find") }).click();
@@ -39,19 +38,31 @@ test("the owner matches financing, opens how the true cost was calculated, and f
 
   // The application is pre-filled for the best option the business qualifies for.
   await expect(page.getByText(app.t("financing.applicationHelp"))).toBeVisible();
-  const application = page.getByRole("article").filter({ hasText: app.t("action.draft_loan_application") });
+  const application = page.getByRole("article").filter({ hasText: app.t("action.submit_loan_application") });
   await expect(application).toContainText(app.t("tier.EXECUTE"));
+  const approve = application.getByRole("button", { name: app.t("actionCard.approveWithCode") });
 
   // Nothing leaves without a fresh code: cancelling the step-up sends nothing.
   let sent = false;
-  page.on("request", (request) => {
+  const watch = (request: { method(): string; url(): string }) => {
     if (request.method() === "POST" && /\/api\/approvals/.test(request.url())) sent = true;
-  });
-  await application.getByRole("button", { name: app.t("actionCard.approveWithCode") }).click();
-  const stepUp = app.stepUpDialog();
-  await expect(stepUp).toContainText(app.t("stepUp.help"));
-  await stepUp.getByRole("button", { name: app.t("common.cancel") }).click();
-  await expect(stepUp).toBeHidden();
-  await expect(application.getByRole("button", { name: app.t("actionCard.approveWithCode") })).toBeVisible();
+  };
+  page.on("request", watch);
+  await approve.click();
+  await app.stepUpDialog().getByRole("button", { name: app.t("common.cancel") }).click();
+  await expect(app.stepUpDialog()).toBeHidden();
   expect(sent).toBe(false);
+  page.off("request", watch);
+
+  // With the code it goes through: requested, approved with step-up, executed, and on record.
+  const requested = page.waitForResponse((response) => /\/api\/approvals$/.test(response.url()) && response.request().method() === "POST");
+  await approve.click();
+  await app.confirmStepUp(owner);
+  await expect(application).toContainText(app.t("actionCard.executed"));
+  const approval = (await (await requested).json()) as { approval: { id: string; tier: string }; action_type: string };
+  expect(approval).toMatchObject({ approval: { tier: "EXECUTE" }, action_type: "submit_loan_application" });
+
+  await app.open("trust");
+  await expect(page.getByRole("table", { name: app.t("trust.eventsTitle") })).toContainText(approval.approval.id);
+  await expect(page.getByText(tPattern("trust.chainValid", { value: "[\\d,]+" }))).toBeVisible();
 });

@@ -24,6 +24,8 @@ const projects: Project[] = [
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "./test-results",
+  // Local: the synthetic universe is loaded into the dev database first (idempotent).
+  globalSetup: "./e2e/global-setup.ts",
   // A journey that needs a fresh TOTP code may wait for the next 30-second step (e2e/support/totp.ts).
   timeout: 120_000,
   expect: { timeout: 15_000 },
