@@ -8,7 +8,7 @@ import { TARGET, WEB_DIR } from "./target";
 import { withFreshCode } from "./totp";
 
 /** Roles signed in once per run by e2e/auth.setup.ts. */
-export const SAVED_ROLES = ["owner", "lender_viewer"] as const satisfies readonly Role[];
+export const SAVED_ROLES = ["owner", "staff", "lender_viewer"] as const satisfies readonly Role[];
 export type SavedRole = (typeof SAVED_ROLES)[number];
 
 /** Playwright storage state (session cookie) for a role on this run's target. */

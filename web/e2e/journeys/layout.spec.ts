@@ -8,8 +8,10 @@ test.use({ storageState: sessionFile("owner") });
 
 // Known, found by this suite (WP-15.md, Notes): on a phone the Trust screen is 31-57 px too wide
 // in every language. TierBadge's visually hidden help text is absolutely positioned and escapes
-// the audit table's scroll box (no positioned ancestor inside it), so the page itself overflows.
-// When WP-14 fixes it this list must be emptied: the assertion fails until then.
+// the audit table's scroll box (no positioned ancestor inside it), so the page itself overflows,
+// the fixed bottom bar is laid out wider than the screen ("More" partly off it) and, in Chromium's
+// phone emulation, the bar takes no taps. Once WP-14 fixes it, this assertion fails until the
+// list is emptied.
 const KNOWN_TOO_WIDE_ON_PHONES = ["trust"];
 
 test("no screen is wider than the device", async ({ app, page }) => {

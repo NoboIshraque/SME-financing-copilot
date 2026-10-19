@@ -5,8 +5,8 @@ import { sessionFile } from "../support/auth";
 import { expect, SCREENS, test, type App } from "../support/fixtures";
 import { untranslatedTells, type Language } from "../support/i18n";
 
-// Trust last: on a phone it is wider than the screen (known WP-14 bug, see layout.spec.ts), which
-// pushes the bottom bar's "More" partly off-screen; the language switch in the header still works.
+// Trust last, and each language starts from a fresh load: on a phone Trust is wider than the
+// screen (known WP-14 bug, see layout.spec.ts) and its fixed bottom bar then takes no taps.
 const WALK = [...SCREENS.filter((screen) => screen !== "trust"), "trust" as const];
 
 async function expectTranslated(app: App, language: Language, where: string): Promise<void> {
@@ -21,8 +21,8 @@ test.describe("signed in", () => {
   test.use({ storageState: sessionFile("owner") });
 
   test("every signed-in screen reads in Bangla and in Chinese", async ({ app, page, foreignHosts }) => {
-    await app.start("today");
     for (const language of ["bn", "zh"] as const) {
+      await app.start("today");
       await app.switchLanguage(language);
       for (const screen of WALK) {
         await app.open(screen);
