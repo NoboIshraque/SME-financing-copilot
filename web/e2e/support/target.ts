@@ -60,14 +60,19 @@ async function probeRoute(route: string): Promise<boolean> {
 
 /**
  * Declare the backend routes a journey depends on. Hosted: skip when any is not deployed, naming
- * them. Local: record which ones the offline mock answers, so the report says so.
+ * them. Local: record which ones the offline mock answers, so the report says so, or skip when
+ * the journey needs what the mock cannot do (`mockCannot` says what).
  */
-export async function needsRoutes(routes: readonly string[]): Promise<Record<string, boolean>> {
+export async function needsRoutes(
+  routes: readonly string[],
+  { mockCannot }: { mockCannot?: string } = {},
+): Promise<Record<string, boolean>> {
   const live: Record<string, boolean> = {};
   for (const route of routes) live[route] = await routeIsLive(route);
   const missing = routes.filter((route) => !live[route]);
   if (missing.length > 0) {
     if (TARGET === "hosted") test.skip(true, `Not deployed on ${BASE_URL}: ${missing.join(", ")}`);
+    if (mockCannot) test.skip(true, `Needs the real router (${missing.join(", ")}): the offline mock cannot ${mockCannot}`);
     test.info().annotations.push({ type: "offline mock", description: missing.join(", ") });
   }
   return live;

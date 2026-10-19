@@ -25,6 +25,23 @@ function lookup(tree: Tree, key: string): string | undefined {
   return typeof node === "string" ? node : undefined;
 }
 
+/**
+ * The whole text of `key` (any plural form), with each {{slot}} matched by the given regex
+ * source, e.g. tPattern("trust.chainValid", { value: "[\\d,]+" }).
+ */
+export function tPattern(key: string, slots: Record<string, string>, lang: Language = "en"): RegExp {
+  const forms = [key, `${key}_one`, `${key}_other`].filter((form) => lookup(locales[lang], form) !== undefined);
+  if (forms.length === 0) throw new Error(`missing ${lang} string: ${key}`);
+  const markers = Object.fromEntries(Object.keys(slots).map((name) => [name, `\u0001${name}\u0001`]));
+  const sources = forms.map((form) =>
+    t(form, markers, lang)
+      .split(/\u0001(\w+)\u0001/)
+      .map((part, index) => (index % 2 === 1 ? `(?:${slots[part] ?? ""})` : part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
+      .join(""),
+  );
+  return new RegExp(`^(?:${sources.join("|")})$`);
+}
+
 /** `key` in `lang`, with {{name}} filled in (and Bangla digits in Bangla, as the app writes them). */
 export function t(key: string, values: Record<string, string | number> = {}, lang: Language = "en"): string {
   const plural = typeof values.count === "number" ? `${key}_${values.count === 1 ? "one" : "other"}` : null;
