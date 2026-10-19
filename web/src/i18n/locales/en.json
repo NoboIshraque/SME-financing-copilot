@@ -207,6 +207,7 @@
     "send_reminder": "Send a payment reminder",
     "send_message": "Send a message",
     "draft_loan_application": "Draft a loan application",
+    "submit_loan_application": "Submit the loan application",
     "retime_payable": "Pay a supplier later, within terms",
     "request_advance": "Ask a buyer for an advance",
     "offer_early_pay_discount": "Offer an early-payment discount",

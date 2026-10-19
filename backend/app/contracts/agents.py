@@ -107,6 +107,7 @@ class ActionType(StrEnum):
     send_reminder = "send_reminder"
     send_message = "send_message"
     draft_loan_application = "draft_loan_application"
+    submit_loan_application = "submit_loan_application"  # sends the pack to the lender
     retime_payable = "retime_payable"
     request_advance = "request_advance"
     offer_early_pay_discount = "offer_early_pay_discount"

@@ -1,6 +1,6 @@
 // Mock WP-04 output for the grocery: a 13-week band, headline figures, alerts and their fixes.
 import type { ActionCard, Alert, ForecastBand, ForecastPoint } from "../../api/contracts";
-import type { CashForecast } from "../../api/types";
+import type { CashForecast, CashGaps } from "../../api/types";
 import { AS_OF, NOW, SEED, TENANT, dayAfterAsOf, figure, money } from "./common";
 
 export const BUFFER = 100000;
@@ -182,6 +182,12 @@ export function alerts(): Alert[] {
 
 export function gaps() {
   return alerts().flatMap((alert) => (alert.gap ? [alert.gap] : []));
+}
+
+/** The live WP-04 envelope around the gaps (no indicators in the mock). */
+export function cashGaps(): CashGaps {
+  const band = forecastBand();
+  return { as_of: band.as_of, buffer: band.buffer, gaps: gaps(), indicators: [], sweep: null, data_mode: band.data_mode };
 }
 
 function pct(value: unknown): number {

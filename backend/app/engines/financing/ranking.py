@@ -135,7 +135,7 @@ def match(
         params = {"product_id": product.id, "principal": str(need.amount.amount),
                   "tenor_days": str(need.tenor_days)}
         figures = (
-            _figure(f"{product.id}:ear", "financing.effective_annual_rate",
+            _figure(f"{product.id}:ear", "financing.effective_apr",
                     result.effective_annual_rate, Unit.percent, cost_mod.FORMULA_ID, params,
                     product.data_mode),
             _figure(f"{product.id}:total_cost", "financing.total_cost", result.total_cost.amount,

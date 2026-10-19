@@ -3,7 +3,6 @@ import { apiGet, apiPost } from "./client";
 import type {
   ActionCard,
   Alert,
-  CashGap,
   Explanation,
   FinancingNeed,
   IngestPreview,
@@ -25,6 +24,7 @@ import type {
   AuditDrill,
   ChainReport,
   CashForecast,
+  CashGaps,
   DemoAccount,
   FinancingMatch,
   Health,
@@ -69,7 +69,8 @@ export const api = {
     /** WP-04: alerts, highest tier first. */
     alerts: () => apiGet<Alert[]>("/api/cash/alerts"),
     forecast: () => apiGet<CashForecast>("/api/cash/forecast"),
-    gaps: () => apiGet<CashGap[]>("/api/cash/gaps"),
+    /** The gaps ahead; the indicators and sweep in the same answer are not shown yet. */
+    gaps: () => apiGet<CashGaps>("/api/cash/gaps").then((answer) => answer.gaps),
     whatIf: (body: WhatIfRequest) => apiPost<CashForecast>("/api/cash/whatif", body),
   },
   receivables: {

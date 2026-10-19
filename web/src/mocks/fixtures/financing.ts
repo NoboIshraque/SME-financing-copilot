@@ -148,8 +148,8 @@ export function lenderProfiles(): LenderProfile[] {
 
 export const CARD_APPLY: ActionCard = {
   id: "act-apply-bb-refinance",
-  title_key: "action.draft_loan_application",
-  action_type: "draft_loan_application",
+  title_key: "action.submit_loan_application",
+  action_type: "submit_loan_application",
   tier: "EXECUTE",
   payload: { counterparty_label: "CMSME working capital refinance fund", product_id: "bd-bb-cmsme-wc-refinance-2026" },
   cost: figure("fig-apply-cost", "financing.total_cost", "6250.00", "BDT", { formula_id: "financing.total_cost", parameters: { amount: "200000.00", tenor_days: "180" } }),

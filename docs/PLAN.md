@@ -73,7 +73,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | WP-12 | Messaging & automation: templates, approval queue, email + in-app (N2; P10 cut) | Worker C* | 2 | 40 |
 | WP-13 | Reports + Trust Passport + verify page (N4, Q4) | Orchestrator | 3 | 30 |
 | WP-14 | Frontend: all screens, provenance drawer, i18n, PWA, a11y (P6, P9, P12) | B1 | 1–3 | 110 (Vitest) |
-| WP-15 | in progress (2/3) | wp-15-e2e | 66 e2e (33 x desktop + phone) + 3 setup | journeys on the local target (real auth, approvals, guard, ingest; labelled mock for routers not landed); found: lender reads ledger facts/uploads (WP-01/02), Bangla injection phrasings pass the guard (WP-11), Trust too wide on phones + 4 axe issues (WP-14); hosted run waits for WP-18's server |
+| WP-15 | E2E Playwright on local + hosted | B1 | 3 | 45 |
 | WP-16 | Eval harness: ≥ 100 tasks, adversarial multilingual, nightly audit drill (P3, P8) | B2 | 3 | 100 tasks |
 | WP-17 | ML on Kaggle/Colab: forecaster backtest, delay model, injection classifier (N15, P5) | Human PC-4 + notebooks from orchestrator | 1–2 | 20 |
 | WP-18 | Infra & deploy: Docker, Caddy, SG server, CI/CD, China tests (P6) | Orchestrator + Amdad | 2–3 | 15 |
@@ -200,13 +200,13 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 
 | WP | Status | Branch | Tests | Notes |
 | --- | --- | --- | --- | --- |
-| WP-00 | done | merged + PR #15 | 248 backend + 34 web + 4 e2e | contracts v1.1.0 (58 models), synthetic universe, CI, Mission control (issue #8); app-wide hooks (`app/<area>/app_hooks.py`) + `api_routes()` for WP-11 (PR #15); `/api/docs` only in development/test (PR #18) |
+| WP-00 | done | merged + PR #15 | 248 backend + 34 web + 4 e2e | contracts v1.2.0 (1.2: `ActionType.submit_loan_application`, PR #23), synthetic universe, CI, Mission control (issue #8); app-wide hooks (`app/<area>/app_hooks.py`) + `api_routes()` for WP-11 (PR #15); `/api/docs` only in development/test (PR #18) |
 | WP-01 | done | merged | 143 | fact store, registry, provenance, API; fixes merged 18 Oct: ledger revisions (no stale figures), caller-scoped + masked explain/facts, race-safe inserts, rows endpoint, record_computed, profile facts + snapshot; facts + ingest APIs take the signed-in principal (PR #17) |
 | WP-02 | done | merged | 294 | parsers (bKash/Nagad/bank/ledger/registers, CSV+XLSX), Bangla/Banglish normaliser + Bengali calendar, dedupe, party clustering, OCR drafts (Tesseract ben+eng), preview/commit with keyed digest, API |
 | WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
-| WP-04 | not started | — | 0 | |
+| WP-04 | done (8/8) | merged (PR #19) | 191 | forecast (seasonality incl. festivals, per-customer delays, supplier habits), Monte Carlo (1,000 seeded integer paths, block bootstrap, common random numbers), gaps + 5 leading indicators, Q1 alert tiers with dedupe/cooldown, 6 measured levers as action cards (WP-06/WP-08 interfaces), buffer target + surplus sweep, walk-forward backtest, API (forecast/gaps/alerts/what-if) + daily alert scan |
 | WP-05 | not started | — | 0 | |
-| WP-06 | in progress (7/8) | merged | 123 | engine + real BD catalogue done; API (milestone 8) unblocked: WP-11 principal + step-up merged |
+| WP-06 | done (8/8) | merged (PR #20, #22, #23) | 147 | engine + real BD catalogue; API: match (web FinancingMatch shape: lenders + application draft), lender check, application draft; application card is `submit_loan_application` (EXECUTE, owner approves with step-up; PR #23). Fit still waits for the WP-04 band to be wired in |
 | WP-07 | not started | — | 0 | |
 | WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API (milestone 8) unblocked by WP-11 |
 | WP-09 | not started | — | 0 | |
@@ -214,8 +214,8 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-11 | done (7/7) | merged (PR #16) | 400 | auth (argon2id, TOTP step-up, strict cookies, lockout), roles + consented lender access, tier policy + approvals, hash-chained audit + daily anchor, multilingual injection guard, web hardening, self-assessment draft; installed app-wide through `app/security/app_hooks.py` |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
-| WP-14 | done (12/12) | wp-14-web | 210 web (176 new) | all 12 milestones: 11 screens + public verify page, provenance drawer on every number, copilot panel + upload flow, offline mock API (live/mock/auto), EN/BN/ZH, PWA, axe WCAG 2.1 AA clean |
-| WP-15 | in progress (1/3) | wp-15-e2e | 6 e2e + 2 setup | config: local + hosted targets, desktop + phone projects, sign-in setup with shared TOTP lock, route probes (hosted skips undeployed journeys), `e2e.yml` on PRs |
+| WP-14 | done (12/12) | merged (PR #21) | 210 web (176 new) | all 12 milestones: 11 screens + public verify page, provenance drawer on every number, copilot panel + upload flow, offline mock API (live/mock/auto), EN/BN/ZH, PWA, axe WCAG 2.1 AA clean |
+| WP-15 | in progress (2/3) | wp-15-e2e | 66 e2e (33 x desktop + phone) + 3 setup | journeys on the local target (real auth, approvals, guard, ingest; labelled mock for routers not landed); found: lender reads ledger facts/uploads (WP-01/02), Bangla injection phrasings pass the guard (WP-11), Trust too wide on phones + 4 axe issues (WP-14); hosted run waits for WP-18's server |
 | WP-16 | not started | — | 0 | P3 approved |
 | WP-17 | in progress (2/4) | merged | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families; Labib runs 01/03/04 on Kaggle |
 | WP-18 | in progress (4/6) | merged + PR #14 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only; secret scan scoped to the tested commit (PR #14, all-refs scan before going public); China checks + mirror pending |
