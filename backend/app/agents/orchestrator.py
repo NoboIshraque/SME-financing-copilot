@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
+from app.agents import abstention as abstain
 from app.agents import agreement as agreement_mod
 from app.agents import claims as claims_mod
 from app.agents import critic as critic_mod
@@ -50,7 +51,6 @@ from app.agents.tools import (
 from app.agents.toolset import REGISTRY
 from app.contracts import (
     Abstention,
-    AbstentionReason,
     ActionCard,
     CheckResult,
     CheckStatus,
@@ -68,6 +68,7 @@ from app.security import policy
 from app.security.guard import Source, screen
 
 MAX_CARDS = 3
+QUARANTINED = "[quarantined: see the quarantine list]"  # never echo an injection attempt
 CARD_SOURCES = ("cash.gaps", "financing.match", "mesh.propose")
 
 
@@ -173,21 +174,14 @@ def abstention_for(errors: Mapping[str, ToolError]) -> Abstention:
     """The most specific reason among the failed tools, naming exactly what is missing."""
     missing = [m for e in errors.values() if isinstance(e, InsufficientData) for m in e.missing]
     if missing:
-        return Abstention(reason=AbstentionReason.insufficient_data,
-                          missing=tuple(dict.fromkeys(missing)),
-                          message_key="abstain.insufficient_data")
-    if any(isinstance(e, BudgetExhausted) for e in errors.values()):
-        return Abstention(reason=AbstentionReason.budget_exhausted,
-                          missing=tuple(n for n, e in errors.items()
-                                        if isinstance(e, BudgetExhausted)),
-                          message_key="abstain.budget_exhausted")
+        return abstain.insufficient_data(missing)
+    refused = [n for n, e in errors.items() if isinstance(e, BudgetExhausted)]
+    if refused:
+        return abstain.budget_exhausted(refused)
     engines = [e.engine for e in errors.values() if isinstance(e, ToolUnavailable)]
     if engines:
-        return Abstention(reason=AbstentionReason.out_of_scope,
-                          missing=tuple(dict.fromkeys(engines)),
-                          message_key="abstain.engine_unavailable")
-    return Abstention(reason=AbstentionReason.unverifiable, message_key="abstain.tool_failed",
-                      detail="; ".join(sorted(str(e) for e in errors.values()))[:500])
+        return abstain.out_of_scope(engines, detail="engine_unavailable")
+    return abstain.unverifiable(detail="; ".join(sorted(str(e) for e in errors.values())))
 
 
 class Orchestrator:
@@ -265,17 +259,14 @@ class Orchestrator:
                       started, ",".join(verdict.rule_ids))
             if not verdict.allowed:
                 plan = Plan((), (), language or rules.language_of(question), "none")
-                abstention = Abstention(reason=AbstentionReason.policy,
-                                        message_key="abstain.quarantined",
-                                        detail=verdict.quarantine_id)
-                return self._finish(ctx, rec_id, question, plan, abstention=abstention,
-                                    budget=budget, trace=trace)
+                abstention = abstain.policy(detail=f"quarantined:{verdict.quarantine_id}")
+                return self._finish(ctx, rec_id, QUARANTINED, plan, abstention=abstention,
+                                    actor=actor, budget=budget, trace=trace)
         plan = self._plan(ctx, question, language, private, names, budget, trace)
         if not plan.understood:
-            abstention = Abstention(reason=AbstentionReason.out_of_scope,
-                                    message_key="abstain.out_of_scope")
-            return self._finish(ctx, rec_id, question, plan, abstention=abstention,
-                                budget=budget, trace=trace)
+            return self._finish(ctx, rec_id, question, plan,
+                                abstention=abstain.out_of_scope(detail="not_understood"),
+                                actor=actor, budget=budget, trace=trace)
         runner = ToolRunner(self.registry, ctx, budget, plan.params, trace)
         subagents = plan.subagents()
         with ThreadPoolExecutor(max_workers=max(1, min(len(subagents), self.max_workers)),
@@ -289,20 +280,18 @@ class Orchestrator:
         composed = claims_mod.compose(results, plan.tools, plan.language)
         if primary_errors or not composed:
             abstention = abstention_for(primary_errors or errors) if (primary_errors or errors) \
-                else Abstention(reason=AbstentionReason.unverifiable,
-                                message_key="abstain.nothing_to_report")
+                else abstain.unverifiable(detail="nothing_to_report")
             return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
-                                abstention=abstention, budget=budget, trace=trace)
+                                abstention=abstention, actor=actor, budget=budget, trace=trace)
         checker = Checker(ctx, results)
         statements, checks = self.verify(checker, composed, ctx, rec_id, trace)
         cards, dropped = self.verified_cards(checker, self.cards(results, role, limit=None))
         if not statements:
-            abstention = Abstention(reason=AbstentionReason.unverifiable,
-                                    message_key="abstain.unverifiable",
-                                    detail="; ".join(sorted({c.reason or "" for c in checks})))
+            abstention = abstain.unverifiable(
+                detail="; ".join(sorted({c.reason or "" for c in checks})))
             return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
-                                abstention=abstention, checks=checks, budget=budget,
-                                trace=trace)
+                                abstention=abstention, checks=checks, actor=actor,
+                                budget=budget, trace=trace)
         answer, narrator = self._narrate(statements, plan, private, budget, trace)
         stakes = assess(plan.intents, cards)
         objection = None
@@ -324,11 +313,13 @@ class Orchestrator:
             if stability is not None:
                 trace.add("selfloop", judgement.kind, f"score {stability.score}", started,
                           ",".join(stability.what_would_flip))
+        # N17: withhold the answer when the checks do not back it, at the stakes' threshold
+        withheld = abstain.after_checks(stakes, checks, agreement, stability)
         return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
                             statements=statements, answer=answer, cards=cards, checks=checks,
                             dropped_cards=dropped, stakes=stakes, objection=objection,
-                            agreement=agreement, stability=stability, budget=budget,
-                            trace=trace)
+                            agreement=agreement, stability=stability, abstention=withheld,
+                            actor=actor, budget=budget, trace=trace)
 
     def family(self, slot: str) -> str:
         provider = self.gateway.table.get(slot)
@@ -412,8 +403,8 @@ class Orchestrator:
                 checks: tuple[CheckResult, ...] = (), dropped_cards: tuple[str, ...] = (),
                 stakes: Stakes | None = None, objection: Objection | None = None,
                 agreement: AgreementOutcome | None = None,
-                stability: StabilityReport | None = None, budget: Budget,
-                trace: Trace) -> Run:
+                stability: StabilityReport | None = None, actor: str = "copilot",
+                budget: Budget, trace: Trace) -> Run:
         results = results or {}
         statements = statements or []
         figures: dict[str, Figure] = {s.figure.id: s.figure for s in statements}
@@ -435,6 +426,11 @@ class Orchestrator:
             abstention=abstention, tools_used=tuple(n for n in plan.tools if n in results),
             data_mode=most_cautious(modes) if modes else DataMode.synthetic,
             created_at=ctx.now)
+        if abstention is not None:  # every abstention is logged and audited
+            with ctx.db() as store:
+                abstain.record(store.session, tenant_id=ctx.tenant_id,
+                               recommendation_id=rec_id, question=question,
+                               abstention=abstention, stakes=stakes, actor=actor, now=ctx.now)
         return Run(recommendation=recommendation, plan=plan, statements=tuple(statements),
                    results=dict(results), skipped=dict(skipped or {}), checks=checks,
                    dropped_cards=dropped_cards, stakes=stakes, objection=objection,

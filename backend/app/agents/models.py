@@ -1,4 +1,4 @@
-"""Tables of the agents (WP-10): claims the checker refused."""
+"""Tables of the agents (WP-10): claims the checker refused, abstentions."""
 
 from __future__ import annotations
 
@@ -25,4 +25,22 @@ class RejectedClaimRow(Base):
     claimed: Mapped[str | None] = mapped_column(String(64), nullable=True)
     recomputed: Mapped[str | None] = mapped_column(String(64), nullable=True)
     reason: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AbstentionRow(Base):
+    """Every time the copilot said "I don't know" (FEATURES N17): why, and what is missing.
+    The question is the tenant's own and is shown only to that tenant."""
+
+    __tablename__ = "agents_abstentions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    recommendation_id: Mapped[str] = mapped_column(String(64), index=True)
+    question: Mapped[str] = mapped_column(Text)
+    reason: Mapped[str] = mapped_column(String(32))
+    message_key: Mapped[str] = mapped_column(String(64))
+    missing: Mapped[str] = mapped_column(Text, default="[]")  # JSON list
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+    stakes: Mapped[str | None] = mapped_column(String(16), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
