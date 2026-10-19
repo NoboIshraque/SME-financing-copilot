@@ -103,3 +103,19 @@ def test_tests_cannot_reach_the_network():
             sock.connect(("93.184.216.34", 443))
     finally:
         sock.close()
+
+
+@pytest.mark.parametrize(("app_env", "served"), [("development", True), ("test", True),
+                                                 ("demo", False), ("production", False)])
+def test_interactive_docs_are_served_only_where_developers_run_the_app(settings, app_env, served):
+    from fastapi.testclient import TestClient
+
+    from app.main import create_app
+
+    # Only app_env matters here; the rest stays the in-memory test configuration.
+    env = settings.model_copy(update={"app_env": AppEnv(app_env)})
+    with TestClient(create_app(env)) as client:
+        codes = {path: client.get(path).status_code
+                 for path in ("/api/docs", "/api/redoc", "/api/openapi.json")}
+    assert codes == dict.fromkeys(codes, 200 if served else 404)
+
