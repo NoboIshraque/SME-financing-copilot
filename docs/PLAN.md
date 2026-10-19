@@ -211,7 +211,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API waits for WP-11 |
 | WP-09 | not started | — | 0 | |
 | WP-10 | not started | — | 0 | |
-| WP-11 | not started | — | 0 | B2 (PC-2) |
+| WP-11 | done (7/7) | wp-11-security | 400 | auth (argon2id, TOTP step-up, strict cookies, lockout), roles + consented lender access, tier policy + approvals, hash-chained audit + daily anchor, multilingual injection guard, web hardening, self-assessment draft; installed app-wide through `app/security/app_hooks.py` |
 | WP-12 | not started | — | 0 | |
 | WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
 | WP-14 | in progress (0/11) | wp-14-web | — | B1 (PC-2) started 18 Oct ~11:00 |
