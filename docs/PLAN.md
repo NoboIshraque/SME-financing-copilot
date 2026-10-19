@@ -206,7 +206,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
 | WP-04 | not started | — | 0 | |
 | WP-05 | not started | — | 0 | |
-| WP-06 | in progress (7/8) | merged | 123 | engine + real BD catalogue done; API (milestone 8) unblocked: WP-11 principal + step-up merged |
+| WP-06 | done (8/8) | merged (PR #20) | 142 | engine + real BD catalogue; API (PR #20): match, lender check, application draft. Open: application card tier vs WP-11 policy (WP-06.md Questions); fit waits for WP-04 forecast |
 | WP-07 | not started | — | 0 | |
 | WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API (milestone 8) unblocked by WP-11 |
 | WP-09 | not started | — | 0 | |
