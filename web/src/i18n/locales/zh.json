@@ -586,6 +586,7 @@
     "stepUpSummary": "共支付 {{net}}，清偿 {{gross}} 债务"
   },
   "market": {
+    "preview": "预览（示例数据）：此版本不含实时市场价格。",
     "alertsTitle": "价格预警",
     "noAlerts": "今天没有明显的价格变动。",
     "rose": "{{commodity}}上涨",

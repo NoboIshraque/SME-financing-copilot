@@ -1,10 +1,9 @@
 // Trust & audit (P2, P8, N17): the hash-chained audit log and its verification, recent events,
-// every abstention with what was missing, and the nightly audit drill score.
+// every abstention with what was missing.
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { api } from "../../api/endpoints";
-import { FigureValue } from "../../components/FigureValue";
 import { QueryView } from "../../components/States";
 import { TierBadge } from "../../components/TierBadge";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
@@ -23,7 +22,6 @@ export function TrustScreen() {
   const latestAnchor = anchors.data?.[0];
   const events = useQuery({ queryKey: ["trust", "events"], queryFn: api.trust.auditEvents });
   const abstentions = useQuery({ queryKey: ["trust", "abstentions"], queryFn: api.copilot.abstentions });
-  const drill = useQuery({ queryKey: ["trust", "drill"], queryFn: api.trust.drill });
   return (
     <section aria-labelledby="h-trust" className="space-y-6">
       <h2 id="h-trust" className="text-xl font-semibold">{t("nav.trust")}</h2>
@@ -48,20 +46,6 @@ export function TrustScreen() {
                 {t("trust.verifyAgain")}
               </button>
             </>
-          )}
-        </QueryView>
-      </section>
-
-      <section aria-labelledby="h-drill" className={card}>
-        <h3 id="h-drill" className="text-lg font-semibold">{t("trust.drillTitle")}</h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400">{t("trust.drillHelp")}</p>
-        <QueryView query={drill}>
-          {(data) => (
-            <p className="mt-2">
-              <FigureValue figure={data.catch_rate} className="text-3xl font-bold" />{" "}
-              <span>{t("trust.drillCaught", { caught: data.caught, planted: data.planted })}</span>
-              <span className="block text-xs text-slate-500 dark:text-slate-400">{t("trust.drillRun", { when: format.dateTime(data.run_at) })}</span>
-            </p>
           )}
         </QueryView>
       </section>
