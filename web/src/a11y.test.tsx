@@ -27,7 +27,7 @@ describe("WCAG 2.1 AA (axe)", () => {
     ["Market", "/market", OWNER, "Onion is up"],
     ["Messages", "/messages", OWNER, "Overdue reminder · Customer 9"],
     ["Reports", "/reports", OWNER, "Version 2 · 30 September 2026"],
-    ["Trust & audit", "/trust", OWNER, "caught 18 of 20 planted errors"],
+    ["Trust & audit", "/trust", OWNER, "Intact: 1,284 entries, each linked to the one before."],
     ["Settings", "/settings", OWNER, "Mirpur Mudi Store"],
     ["public verify", "/verify/pp-grocery-2", null, "Verify a Trust Passport"],
   ])("%s screen has no violations", async (_name, path, signedInAs, ready) => {

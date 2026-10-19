@@ -179,15 +179,16 @@ def _delays(values: tuple[int, ...], rng: np.random.Generator, shape: tuple[int,
 
 
 def _customer_order(baseline: Baseline) -> list[str]:
-    """Customers by what they owe (most first), then first issue date: an order that renaming
-    parties or reordering rows cannot change (ties fall back to the token)."""
+    """Customers by what they owe (most first), then first issue date, then their first open
+    invoice's id: an order that renaming parties or reordering rows cannot change. Ties never
+    fall back to the token, or a renamed customer would draw another customer's lateness."""
     owed: dict[str, Decimal] = {}
-    first: dict[str, date] = {}
+    first: dict[str, tuple[date, str]] = {}
     for inv, amount in baseline.open_invoices:
         token = inv.counterparty_token
         owed[token] = owed.get(token, ZERO) + amount
-        first[token] = min(first.get(token, inv.issue_date), inv.issue_date)
-    return sorted(owed, key=lambda t: (-owed[t], first[t], t))
+        first[token] = min(first.get(token, (inv.issue_date, inv.id)), (inv.issue_date, inv.id))
+    return sorted(owed, key=lambda t: (-owed[t], first[t]))
 
 
 def draw(baseline: Baseline, seed: int = SEED, paths: int = PATHS) -> Draws:

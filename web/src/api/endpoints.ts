@@ -1,5 +1,16 @@
 // One typed function per backend route. Screens call these, never fetch() directly.
-import { apiGet, apiPost } from "./client";
+import { ApiRequestError, apiGet, apiPost } from "./client";
+
+type MarketSample = typeof import("../mocks/fixtures/market");
+
+/** A route the server does not have (FastAPI's bare 404/405, no ApiError body) -> sample data. */
+function orSample<T>(call: Promise<T>, pick: (sample: MarketSample) => T): Promise<T> {
+  return call.catch((error: unknown) => {
+    const missing = error instanceof ApiRequestError && error.body === null && (error.status === 404 || error.status === 405);
+    if (!missing) throw error;
+    return import("../mocks/fixtures/market").then(pick);
+  });
+}
 import type {
   ActionCard,
   Alert,
@@ -99,13 +110,18 @@ export const api = {
     approve: (roundId: string, step: Step) => apiPost<NettingRound>(`/api/mesh/rounds/${id(roundId)}/approve`, {}, step),
     verify: (roundId: string) => apiGet<RoundVerification>(`/api/mesh/rounds/${id(roundId)}/verify`),
   },
+  /** WP-09 was cut (19 Oct): no market router is deployed. When the server has no such route,
+   *  the Market screen falls back to the bundled sample data (labelled a preview on screen). */
   market: {
-    prices: () => apiGet<WatchItem[]>("/api/market/prices"),
-    alerts: () => apiGet<MarketAlert[]>("/api/market/alerts"),
+    prices: () => orSample(apiGet<WatchItem[]>("/api/market/prices"), (m) => m.watchlist()),
+    alerts: () => orSample(apiGet<MarketAlert[]>("/api/market/alerts"), (m) => m.marketAlerts()),
     rankVendors: (commodity: string, quantity: string) =>
-      apiPost<VendorRank[]>("/api/market/vendors/rank", { commodity, quantity }),
-    negotiate: (body: NegotiationRequest) => apiPost<NegotiationPlan>("/api/market/negotiate", body),
+      orSample(apiPost<VendorRank[]>("/api/market/vendors/rank", { commodity, quantity }),
+        (m) => m.vendorRanking(commodity)),
+    negotiate: (body: NegotiationRequest) =>
+      orSample(apiPost<NegotiationPlan>("/api/market/negotiate", body), (m) => m.negotiationPlan(body)),
   },
+
   copilot: {
     /** WP-10: today's recommendation, with at most 3 pre-checked action cards (P9). */
     today: () => apiGet<Recommendation>("/api/copilot/today"),

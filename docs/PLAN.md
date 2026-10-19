@@ -205,22 +205,22 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-02 | done | merged | 294 | parsers (bKash/Nagad/bank/ledger/registers, CSV+XLSX), Bangla/Banglish normaliser + Bengali calendar, dedupe, party clustering, OCR drafts (Tesseract ben+eng), preview/commit with keyed digest, API |
 | WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
 | WP-04 | done (8/8) | merged (PR #19) | 191 | forecast (seasonality incl. festivals, per-customer delays, supplier habits), Monte Carlo (1,000 seeded integer paths, block bootstrap, common random numbers), gaps + 5 leading indicators, Q1 alert tiers with dedupe/cooldown, 6 measured levers as action cards (WP-06/WP-08 interfaces), buffer target + surplus sweep, walk-forward backtest, API (forecast/gaps/alerts/what-if) + daily alert scan |
-| WP-05 | not started | — | 0 | |
+| WP-05 | done (reduced: 1, 2, 4, 7) | merged (PR #31) | 25 | aging, empirical risk with top-3 factors, reminder ladder (EXECUTE `send_reminder`, recorded on approval), API; limits/disputes/early-pay cut |
 | WP-06 | done (8/8) | merged (PR #20, #22, #23) | 147 | engine + real BD catalogue; API: match (web FinancingMatch shape: lenders + application draft), lender check, application draft; application card is `submit_loan_application` (EXECUTE, owner approves with step-up; PR #23). Fit still waits for the WP-04 band to be wired in |
-| WP-07 | not started | — | 0 | |
-| WP-08 | in progress (7/8) | merged | 100 | engine, consent, attestations, anchor, residual-gap routing (cheapest eligible), lender events from peer-verified loans; API (milestone 8) unblocked by WP-11 |
-| WP-09 | not started | — | 0 | |
-| WP-10 | not started | — | 0 | |
+| WP-07 | done (6/6) | merged (PR #24) | 134 | statements (cash-basis P&L, cash flow, balance-sheet-lite); 13 ratios with provenance and stated abstentions; expected vs reality (immutable weekly/quarterly snapshots, ranked variances, accuracy, correction fed to WP-04); scenarios (6 decisions under 40 macro states on WP-04's paths, risk-adjusted pick); stability score (6 stresses + 4 noises, what would flip it, noise flips = unreliable); API + nightly snapshot freeze. Note for WP-04 in WP-07.md (customer tie-break by token) |
+| WP-08 | done (8/8) | merged (PR #26) | 113 | engine, consent, attestations, anchor, residual-gap routing, lender events; API (PR #26): obligations, rounds, propose, approve (owner + step-up, last approval settles + anchors), reject, verify |
+| WP-09 | CUT (19 Oct, PR #25) | — | — | market watch, vendors, negotiation (N3, N19) cut; Market screen to be hidden or labelled |
+| WP-10 | done (9/9) | merged (PR #29) | — | gateway, tools, orchestrator, checker, critic, agreement, self-loops, abstention, API |
 | WP-11 | done (7/7) | merged (PR #16) | 400 | auth (argon2id, TOTP step-up, strict cookies, lockout), roles + consented lender access, tier policy + approvals, hash-chained audit + daily anchor, multilingual injection guard, web hardening, self-assessment draft; installed app-wide through `app/security/app_hooks.py` |
-| WP-12 | not started | — | 0 | |
-| WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07 |
+| WP-12 | sending channels CUT (19 Oct, PR #25) | — | 0 | N2 keeps drafts in the approval queue; no email/SMS sending |
+| WP-13 | in progress (3/5) | merged | 26 | passport, sharing, verify, state adapter merged; report waits for WP-07; lender report cut (Tuesday only if time; PR #25) |
 | WP-14 | done (12/12) | merged (PR #21) | 210 web (176 new) | all 12 milestones: 11 screens + public verify page, provenance drawer on every number, copilot panel + upload flow, offline mock API (live/mock/auto), EN/BN/ZH, PWA, axe WCAG 2.1 AA clean |
-| WP-15 | not started | — | 0 | |
-| WP-16 | not started | — | 0 | P3 approved |
-| WP-17 | in progress (2/4) | merged | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families; Labib runs 01/03/04 on Kaggle |
-| WP-18 | in progress (4/6) | merged + PR #14 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only; secret scan scoped to the tested commit (PR #14, all-refs scan before going public); China checks + mirror pending |
+| WP-15 | in progress (2/3) | wp-15-e2e | 24 e2e (12 flows x desktop + phone) + setup/teardown | the 12 most important flows, green locally against the live auth, approvals, guard, ingest, cash (WP-04) and financing (WP-06) APIs, labelled mock for the rest; every run lists the known bugs it observes (WP-01/02/11 security, WP-14 layout/a11y); hosted evidence pipeline ready, waits for WP-18's server + seeded demo (WP-15.md Questions); cut to ~12 flows (PR #25) |
+| WP-16 | not started | — | 0 | P3 approved; cut to ~40 tasks, no mutation score (PR #25) |
+| WP-17 | in progress (2/4) | merged | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families; Labib runs 01/03/04 on Kaggle; GPU injection run (notebook 03) and market backtest (04) cut; only 01 left (PR #25) |
+| WP-18 | in progress (4/6) | merged + PR #14 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only; secret scan scoped to the tested commit (PR #14, all-refs scan before going public); China checks + mirror pending; Vercel mirror cut (PR #25) |
 | WP-19 | not started | — | — | |
-| WP-20 | in progress | wp-20-data | — | P7 approved; Labib at shops 18 Oct 10:00–14:00; anonymiser ready (PR #12) |
+| WP-20 | in progress | wp-20-data | — | P7 approved; Labib at shops 18 Oct 10:00–14:00; anonymiser ready (PR #12); field data replaced by public real datasets listed in WP-20.md; field data only if it arrives (PR #25) |
 
 ## 9. Submission (the 6 official deliverables)
 

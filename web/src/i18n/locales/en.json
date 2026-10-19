@@ -586,6 +586,7 @@
     "stepUpSummary": "Clear {{gross}} of debt by paying {{net}} in total"
   },
   "market": {
+    "preview": "Preview with sample data: live market prices are not part of this version.",
     "alertsTitle": "Price alerts",
     "noAlerts": "No big price moves today.",
     "rose": "{{commodity}} is up",
