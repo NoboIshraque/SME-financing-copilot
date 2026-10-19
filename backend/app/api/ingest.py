@@ -9,20 +9,20 @@
 A preview writes nothing to the ledger. A commit needs the preview's keyed digest and commits
 drafts only when the owner confirms them. Errors are `ApiError` bodies.
 
-Until WP-11 lands, the caller comes from the `current_caller` stub: the tenant from the request
-and the role `owner` only in development and test. Committing writes the shop's ledger, so it
-is allowed only for the owner or accountant; anywhere else the stub caller may preview but not
-commit. WP-11 replaces the dependency with the authenticated principal.
+The caller is the signed-in principal (WP-11 `current_principal`): without a session every
+route answers 401. The tenant always comes from the principal; a `tenant_id` in the form, query
+or body is optional and must then name the caller's own tenant (403 otherwise). Committing
+writes the shop's ledger, so it is allowed only for the owner or accountant.
 """
 
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.contracts import ApiError, Channel, IngestPreview, Principal, Role
@@ -34,14 +34,15 @@ from app.ingest.parties import mask_excerpt
 from app.ingest.preview import MAX_UPLOAD_BYTES, IngestError, IngestService
 from app.ingest.tabular import TableError, read_sheets
 from app.main import get_session
-from app.settings import AppEnv
+from app.security.deps import current_principal
+from app.security.errors import ProblemRoute
 
-router = APIRouter(tags=["ingest"])
+router = APIRouter(tags=["ingest"], route_class=ProblemRoute)
 COMMIT_ROLES = frozenset({Role.owner, Role.accountant})
 
 
 class CommitRequest(BaseModel):
-    tenant_id: str = Field(min_length=1, max_length=64)
+    tenant_id: str | None = Field(default=None, max_length=64)  # optional; must be the caller's
     preview_id: str = Field(min_length=1, max_length=64)
     file_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     confirm: list[str] = Field(default_factory=list, max_length=5000)
@@ -74,18 +75,11 @@ class ColumnsView(BaseModel):
     suggested: dict[str, str]
 
 
-def current_caller(request: Request, tenant_id: str) -> Principal | None:
-    """Stub until WP-11 (see module docstring)."""
-    if not tenant_id:
-        return None
-    local = request.app.state.settings.app_env in (AppEnv.development, AppEnv.test)
-    try:
-        if local:
-            return Principal(user_id="stub", tenant_id=tenant_id, role=Role.owner)
-        return Principal(user_id="stub", tenant_id=tenant_id, role=Role.lender_viewer,
-                         expires_at=datetime.now(UTC) + timedelta(minutes=15))
-    except ValidationError:
-        return None
+def _tenant(principal: Principal, requested: str | None) -> str | JSONResponse:
+    """The caller's tenant; a requested tenant_id must be that same tenant."""
+    if requested and requested != principal.tenant_id:
+        return _error(403, "forbidden", reason="tenant")
+    return principal.tenant_id
 
 
 def _error(status: int, code: str, **detail: str) -> JSONResponse:
@@ -133,14 +127,16 @@ async def preview(
     day_first: str | None = Form(None),
     default_channel: str | None = Form(None),
     mapping: str | None = Form(None),
+    principal: Principal = Depends(current_principal),
     session: Session = Depends(get_session),
 ) -> IngestPreview | JSONResponse:
-    if current_caller(request, tenant_id) is None:
-        return _error(422, "tenant_required")
+    tenant = _tenant(principal, tenant_id)
+    if isinstance(tenant, JSONResponse):
+        return tenant
     data = await _read(file)
     if isinstance(data, JSONResponse):
         return data
-    opts = _options(tenant_id, file.filename or "upload", document_kind, day_first,
+    opts = _options(tenant, file.filename or "upload", document_kind, day_first,
                     default_channel, mapping)
     if isinstance(opts, JSONResponse):
         return opts
@@ -157,9 +153,11 @@ async def columns(
     request: Request,
     file: UploadFile = File(...),
     tenant_id: str = Form(""),
+    principal: Principal = Depends(current_principal),
 ) -> ColumnsView | JSONResponse:
-    if current_caller(request, tenant_id) is None:
-        return _error(422, "tenant_required")
+    tenant = _tenant(principal, tenant_id)
+    if isinstance(tenant, JSONResponse):
+        return tenant
     data = await _read(file)
     if isinstance(data, JSONResponse):
         return data
@@ -180,15 +178,16 @@ async def columns(
 def commit(
     request: Request,
     body: CommitRequest,
+    principal: Principal = Depends(current_principal),
     session: Session = Depends(get_session),
 ) -> CommitResponse | JSONResponse:
-    caller = current_caller(request, body.tenant_id)
-    if caller is None:
-        return _error(422, "tenant_required")
-    if caller.role not in COMMIT_ROLES:
+    tenant = _tenant(principal, body.tenant_id)
+    if isinstance(tenant, JSONResponse):
+        return tenant
+    if principal.role not in COMMIT_ROLES:
         return _error(403, "not_permitted")
     try:
-        result = _service(request, session).commit(body.tenant_id, body.preview_id,
+        result = _service(request, session).commit(tenant, body.preview_id,
                                                    body.file_digest, confirm=body.confirm,
                                                    amounts=body.amounts)
     except IngestError as exc:
@@ -201,15 +200,17 @@ def history(
     request: Request,
     tenant_id: str = "",
     limit: str = "50",
+    principal: Principal = Depends(current_principal),
     session: Session = Depends(get_session),
 ) -> list[HistoryItem] | JSONResponse:
-    if current_caller(request, tenant_id) is None:
-        return _error(422, "tenant_required")
+    tenant = _tenant(principal, tenant_id)
+    if isinstance(tenant, JSONResponse):
+        return tenant
     try:
         size = int(limit)
     except ValueError:
         size = 0
     if not 1 <= size <= 200:
         return _error(422, "invalid_limit")
-    entries = _service(request, session).history(tenant_id, size)
+    entries = _service(request, session).history(tenant, size)
     return [HistoryItem(**{**e.__dict__, "data_mode": e.data_mode.value}) for e in entries]
