@@ -11,11 +11,12 @@ test("the owner approves a reminder draft on Receivables and sends it from Messa
 
   await app.start("receivables");
   const reminders = page.getByRole("region", { name: app.t("receivables.remindersTitle") });
-  const reminder = reminders.getByRole("article").filter({ has: page.getByRole("button", { name: app.t("actionCard.approveDraft") }) }).first();
-  await expect(reminder).toContainText(app.t("tier.DRAFT"));
+  const first = reminders.getByRole("article").filter({ has: page.getByRole("button", { name: app.t("actionCard.approveDraft") }) }).first();
   // "Customer 9 · 4 invoices · due ...": the first detail is who the reminder goes to.
-  const recipient = (await reminder.locator("h4 + p").innerText()).split(" · ")[0]?.trim() ?? "";
+  const recipient = (await first.locator("h4 + p").innerText()).split(" · ")[0]?.trim() ?? "";
   expect(recipient).not.toBe("");
+  const reminder = reminders.getByRole("article").filter({ has: page.getByText(new RegExp(`^${recipient} · `)) });
+  await expect(reminder).toContainText(app.t("tier.DRAFT"));
 
   await reminder.getByRole("button", { name: app.t("actionCard.approveDraft") }).click();
   await expect(reminder).toContainText(app.t("actionCard.approved"));

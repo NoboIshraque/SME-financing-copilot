@@ -57,10 +57,10 @@ export function untranslatedTells(lang: Language): string[] {
 export function tPattern(key: string, slots: Record<string, string>, lang: Language = "en", whole = true): RegExp {
   const forms = [key, `${key}_one`, `${key}_other`].filter((form) => lookup(locales[lang], form) !== undefined);
   if (forms.length === 0) throw new Error(`missing ${lang} string: ${key}`);
-  const markers = Object.fromEntries(Object.keys(slots).map((name) => [name, `\u0001${name}\u0001`]));
+  const markers = Object.fromEntries(Object.keys(slots).map((name) => [name, `${name}`]));
   const sources = forms.map((form) =>
     t(form, markers, lang)
-      .split(/\u0001(\w+)\u0001/)
+      .split(/(\w+)/)
       .map((part, index) => (index % 2 === 1 ? `(?:${slots[part] ?? ""})` : part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
       .join(""),
   );
