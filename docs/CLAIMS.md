@@ -27,3 +27,4 @@ over. Set the old row to `taken over by orch-X` and add your own row.
 | Option A for the application tier: `submit_loan_application` (contract 1.2.0 + WP-11 policy + WP-06 card) | orch-C | orch-submit-application | done (merged) | 2026-10-19 12:20 | #23 |
 | WP-19 drafts for the Mon 21:00 insurance submission: technical doc, README, security self-assessment final, video script, evidence bundle, deck, claims check (not the sending: Nobo sends) | orch-A | wp-19-submission | active | 2026-10-19 15:55 | — |
 | WP-08 milestone 8: mesh API (obligations, propose, approve with step-up, verify) | orch-C | wp-08-api | active | 2026-10-19 13:15 | — |
+| Record the scope cuts Nobo approved 19 Oct 22:19 (WP-05/09/12/13/15/16/17/18 shortened or cut; WP-10 kept whole) in WP files + FEATURES.md; real-data substitute in WP-20.md | orch-A | docs-scope-cuts | active | 2026-10-19 22:30 | — |
