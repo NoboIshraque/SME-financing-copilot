@@ -20,17 +20,18 @@ non-loopback connection for the whole run, and the log reports how many were att
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import ipaddress
+import itertools
 import json
 import secrets
 import socket
 import subprocess
 import sys
 import time
-import uuid
 from collections.abc import Callable
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
@@ -342,14 +343,21 @@ def approval_view(v: dict[str, Any]) -> dict[str, Any]:
 
 def git(*args: str) -> str:
     try:
-        return subprocess.run(["git", "--no-optional-locks", *args], cwd=REPO, check=True,
-                              capture_output=True, text=True).stdout.strip()
+        # Fixed read-only git queries, no user input.
+        return subprocess.run(["git", "--no-optional-locks", *args],  # noqa: S603, S607
+                              cwd=REPO, check=True, capture_output=True,
+                              text=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         return "unknown"
 
 
+_IDEM = itertools.count(1)
+
+
 def idem() -> str:
-    return f"evidence-{uuid.uuid4().hex[:16]}"
+    # Readable and unique within a run (each run starts from an empty database). A random hex
+    # key would look like a credential to the secret scanner.
+    return f"evidence-request-{next(_IDEM)}"
 
 
 def owner_code(listing: list[dict[str, Any]]) -> str:
@@ -366,6 +374,17 @@ def bkash_sample() -> tuple[bytes, int]:
     lines = BKASH_FILE.read_text(encoding="utf-8").splitlines()
     sample = lines[: BKASH_ROWS + 1]  # header + the first data rows
     return ("\n".join(sample) + "\n").encode("utf-8"), len(sample) - 1
+
+
+def bkash_sample_keys() -> set[tuple[datetime, Decimal]]:
+    """(moment, amount) of the rows step 3 uploads, so the seed can hold them back."""
+    from zoneinfo import ZoneInfo
+
+    dhaka = ZoneInfo("Asia/Dhaka")
+    lines = BKASH_FILE.read_text(encoding="utf-8").splitlines()
+    rows = list(csv.DictReader(lines))[:BKASH_ROWS]
+    return {(datetime.strptime(r["Date Time"], "%d/%m/%Y %H:%M:%S").replace(tzinfo=dhaka),
+             Decimal(r["Amount (BDT)"])) for r in rows}
 
 
 def pct(value: str | float) -> str:
@@ -393,9 +412,23 @@ def run() -> dict[str, Any]:
         with app.state.session_factory() as session:
             store = FactStore(session)
             out = {}
+            held = bkash_sample_keys()
             for sme in universe.smes.values():
+                held_back = 0
+                if sme.id == "sme_grocery":
+                    # Step 3 uploads these bKash rows; they are in the ground truth too, and
+                    # ingest dedupes bKash rows by TrxID only, which the truth rows lack.
+                    kept = tuple(t for t in sme.transactions
+                                 if not (t.channel.value == "bkash"
+                                         and (t.occurred_at, t.amount.amount) in held))
+                    held_back = len(sme.transactions) - len(kept)
+                    if held_back != BKASH_ROWS:
+                        raise RuntimeError(f"expected to hold back {BKASH_ROWS} rows, "
+                                           f"matched {held_back}")
+                    sme = replace(sme, transactions=kept)
                 initial = load_sme_into(store, sme, universe.start, universe.as_of)
                 out[sme.id] = {"transactions": len(sme.transactions),
+                               "held_back_for_step_3": held_back,
                                "invoices": len(sme.invoices), "bills": len(sme.bills),
                                "obligations": len(sme.obligations),
                                "initial_balance": str(initial.value),
@@ -409,7 +442,9 @@ def run() -> dict[str, Any]:
            seed,
            shows=f"The five synthetic SMEs ({universe.start} to {universe.as_of}) are loaded "
                  "into the fact ledger the same way `python -m app.facts.seed` seeds a dev "
-                 "server; every record is labelled synthetic.",
+                 f"server, except the grocery's first {BKASH_ROWS} bKash rows, which step 3 "
+                 "uploads through the API (so after the import the ledger equals the ground "
+                 "truth); every record is labelled synthetic.",
            present=lambda r: {"settings": settings.public_view(), "seeded": r})
 
     client = TestClient(app)
@@ -473,20 +508,29 @@ def run() -> dict[str, Any]:
                         "drafts) and nothing is written yet; phone numbers are replaced by "
                         "counterparty tokens and the file gets a keyed digest the commit must "
                         "quote.")
-    committed = http(
+    http(
         client, "3.2", "Commit the preview", "POST", "/api/ingest/commit",
         json_body={"preview_id": preview["preview_id"], "file_digest": preview["file_digest"]},
         expect=200,
         shows=lambda b: f"The owner confirms: {b['transactions']} transactions written, "
                         f"{b['duplicates_skipped']} skipped as duplicates of rows already in "
                         "the ledger.")
-    http(client, "3.3", "Import history", "GET", "/api/ingest/history", expect=200,
+    http(
+        client, "3.3", "Upload the same file again", "POST", "/api/ingest/preview",
+        files={"file": (fname, data, "text/csv")}, expect=200,
+        trim=lambda b: {"preview_id": b["preview_id"], "file_digest": b["file_digest"],
+                        "transactions": len(b["transactions"]),
+                        "duplicates_skipped": b["duplicates_skipped"]},
+        shows=lambda b: f"Re-uploading the same statement finds {b['duplicates_skipped']} "
+                        f"duplicate(s) and {len(b['transactions'])} new transaction(s): rows "
+                        "already in the ledger are not counted twice.")
+    http(client, "3.4", "Import history", "GET", "/api/ingest/history", expect=200,
          shows=lambda b: f"The import is listed ({len(b)} entr{'y' if len(b) == 1 else 'ies'}) "
-                         "with its file name, format, digest and synthetic label.")
-    del committed
+                         "with its file name, format, digest and synthetic label; a preview "
+                         "alone is not an import.")
 
     # ------------------------------------------------------------ 4. cash
-    LOG.begin("4. Cash forecast, gaps and alerts")
+    LOG.begin("4. Cash forecast, gaps, alerts and a what-if")
 
     def forecast_trim(b: dict[str, Any]) -> dict[str, Any]:
         band = b["band"]
@@ -507,7 +551,15 @@ def run() -> dict[str, Any]:
                 f"{band['horizon_days']} days (seed {band['seed']}): buffer target Tk "
                 f"{f['cash.buffer_target']['value']}, runway {f['cash.runway_days']['value']} "
                 f"days, lowest likely balance Tk {f['cash.lowest_likely_balance']['value']}; "
-                "each figure names its formula and input fact.")
+                "each figure names its formula and input fact. " + truth_check(f))
+
+    def truth_check(f: dict[str, Any]) -> str:
+        truth = universe.smes["sme_grocery"].balance_on(universe.as_of).amount
+        closing = Decimal(f["cash.closing_balance"]["value"])
+        if closing == truth:
+            return (f"The closing balance equals the synthetic ground truth (Tk {truth}): the "
+                    "import neither lost nor double-counted a row.")
+        return f"The closing balance differs from the synthetic ground truth (Tk {truth})."
 
     forecast = http(client, "4.1", "Cash forecast", "GET", "/api/cash/forecast", expect=200,
                     trim=forecast_trim, shows=forecast_shows)
@@ -547,6 +599,22 @@ def run() -> dict[str, Any]:
                           "gap": gap(a["gap"]) if a.get("gap") else None,
                           "fixes": [card(c) for c in a["fixes"]]} for a in b],
          shows=alerts_shows)
+
+    base = {x["label_key"]: x["value"] for x in forecast["figures"]}
+
+    def whatif_shows(b: dict[str, Any]) -> str:
+        f = {x["label_key"]: x["value"] for x in b["figures"]}
+        return (f"Same seed and draws, only the shock differs: runway {base['cash.runway_days']}"
+                f" -> {f['cash.runway_days']} days, lowest likely balance Tk "
+                f"{base['cash.lowest_likely_balance']} -> Tk {f['cash.lowest_likely_balance']} "
+                f"against a buffer target of Tk {f['cash.buffer_target']}.")
+
+    http(client, "4.4", "What-if: sales down 20% and a Tk 3,00,000 one-off purchase", "POST",
+         "/api/cash/whatif",
+         json_body={"sales_change_pct": "-20", "cost_change_pct": "0",
+                    "collection_delay_days": 0,
+                    "one_off_cost": {"amount": "300000.00", "currency": "BDT"}},
+         expect=200, trim=forecast_trim, shows=whatif_shows)
 
     # ------------------------------------------------------------ 5. provenance
     LOG.begin("5. Provenance")
@@ -611,11 +679,12 @@ def run() -> dict[str, Any]:
         top = b["options"][0]
         best = next((o for o in b["options"] if o["eligibility"]["status"] == "pass"), None)
         text = (f"{len(b['options'])} priced products ranked for a Tk 2,00,000 / 180-day "
-                f"working-capital need; #1 is {top['product']['name']} ({top['product']['provider']}"
-                f") at a true yearly cost of {top['effective_apr']}% with fees, total cost Tk "
+                f"working-capital need; #1 is {top['product']['name']} "
+                f"({top['product']['provider']}) at a true yearly cost of "
+                f"{top['effective_apr']}% with fees, total cost Tk "
                 f"{top['total_cost']['amount']}, eligibility {top['eligibility']['status']}.")
-        if best is not None:
-            text += (f" Best passing option: {best['product']['name']} (rank {best['rank']}). ")
+        if best is not None and best is not top:
+            text += f" Best passing option: {best['product']['name']} (rank {best['rank']})."
         return text + (f" {len(b['facts_missing'])} fact(s) the ledger does not hold are "
                        "reported as missing, never assumed.")
 
@@ -774,11 +843,11 @@ def run() -> dict[str, Any]:
             {"id": o.id, "debtor": o.debtor_tenant, "creditor": o.creditor_tenant,
              "amount": str(o.amount.amount), "due_date": o.due_date.isoformat(),
              "data_mode": o.data_mode.value} for o in obligations],
-            "tenants": g.tenants(), "cycles": g.cycles(),
+            "tenants": g.tenants, "cycles": g.cycles(),
             "gross_debt": str(g.gross_total().amount),
             "net_positions": {t: str(m.amount) for t, m in g.positions().items()}},
         shows=lambda g: f"{len(obligations)} open synthetic obligations form "
-                        f"{len(g.cycles())} cycle(s) over {len(g.tenants())} firms; gross debt "
+                        f"{len(g.cycles())} cycle(s) over {len(g.tenants)} firms; gross debt "
                         f"Tk {g.gross_total().amount}.")
 
     def round_view(r: Any) -> dict[str, Any]:
@@ -971,7 +1040,8 @@ def _markdown(h: dict[str, Any]) -> str:
         f"- **Offline:** no network. A socket guard refused every non-loopback connection; "
         f"attempts blocked: {h['network_attempts_blocked']}.",
         "- **No real LLM:** `llm_mode=fixtures`, and none of the routes exercised here calls a "
-        "model. Every number below comes from a deterministic engine.",
+        "model. Every business figure below (balances, rates, costs, counts of rows or "
+        "obligations) comes from a deterministic engine; step timings come from this script.",
         "- **Chain:** offline anchorer; nothing was sent to Sepolia.",
         "- **How:** the real FastAPI app from `app.main.create_app` (test env, demo mode) driven "
         "with `fastapi.testclient.TestClient`, the same HTTP calls the web app makes. Section 10 "
