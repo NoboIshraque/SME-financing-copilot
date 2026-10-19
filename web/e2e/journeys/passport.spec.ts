@@ -1,4 +1,4 @@
-// Journey: Reports -> the Trust Passport -> the public verify page (WP-13 through WP-14), plus
+// Flow 8: Reports -> the Trust Passport -> the public verify page (WP-13 through WP-14), plus
 // sharing it with a lender behind a step-up code and revoking that share.
 import { sessionFile } from "../support/auth";
 import { expect, test, type StepUpCall } from "../support/fixtures";

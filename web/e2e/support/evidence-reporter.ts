@@ -116,7 +116,7 @@ export default class EvidenceReporter implements Reporter {
       "Each test ran on desktop Chrome and on a phone (Pixel 7) with a trace, a video and a final screenshot",
       "(`artifacts/`; open a trace with `npx playwright show-trace <file>`, or the HTML report in `report/`).",
       "",
-      `## Known bugs pinned by this run (${knownBugs.length})`,
+      `## Known bugs observed in this run (${knownBugs.length})`,
       "",
       ...(knownBugs.length ? knownBugs.map((bug) => `- ${bug.slice("known bug: ".length)}`) : ["None."]),
       "",

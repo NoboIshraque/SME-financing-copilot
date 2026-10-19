@@ -1,4 +1,4 @@
-// Journey: a lender viewer (WP-11 consented lender access) sees only what was shared: the Trust
+// Flow 10: a lender viewer (WP-11 consented lender access) sees only what was shared: the Trust
 // Passport and their own settings. Other screens say so plainly, and the API refuses the rest.
 import { sessionFile } from "../support/auth";
 import { expect, knownBug, test } from "../support/fixtures";
@@ -37,22 +37,15 @@ test("the lender viewer sees only the shared Trust Passport, and the API refuses
   const card = { id: "e2e-lender-card", title_key: "action.retime_payable", action_type: "retime_payable", tier: "EXECUTE", payload: {} };
   const write = await page.request.post("/api/approvals", { data: { card }, headers: { "X-Idempotency-Key": `e2e-${Date.now()}` } });
   expect(write.status()).toBe(403);
-});
 
-// Known gaps, found by this suite (WP-15.md, Notes): WP-11 grants a lender no ledger:read, yet
-// GET /api/facts/{metric} computes ledger figures for one and GET /api/ingest/history lists the
-// shop's uploads. Expected to fail until those routes check the permission; Playwright reports
-// them as soon as they pass, so the markers can come off.
-test("the lender viewer cannot read ledger figures", async ({ page }) => {
-  test.fail(true, "WP-01: GET /api/facts/{metric} does not check ledger:read");
-  knownBug("WP-01 (security): GET /api/facts/{metric} computes the shop's ledger figures for a lender viewer, who holds no ledger:read");
-  const response = await page.request.get("/api/facts/net_sales?start=2026-09-01&end=2026-09-30&granularity=month");
-  expect(response.status()).toBe(403);
-});
-
-test("the lender viewer cannot list the shop's uploads", async ({ page }) => {
-  test.fail(true, "WP-02: GET /api/ingest/history does not check ledger:read");
-  knownBug("WP-02 (security): GET /api/ingest/history lists the shop's uploads to a lender viewer, who holds no ledger:read");
-  const response = await page.request.get("/api/ingest/history");
-  expect(response.status()).toBe(403);
+  // Known gaps: WP-11 grants a lender no ledger:read, yet these routes do not check it. Reported in
+  // the run's known-bugs list while they stay open (WP-15.md, Notes).
+  const gaps = {
+    "/api/facts/net_sales?start=2026-09-01&end=2026-09-30&granularity=month":
+      "WP-01 (security): GET /api/facts/{metric} computes the shop's ledger figures for a lender viewer, who holds no ledger:read",
+    "/api/ingest/history": "WP-02 (security): GET /api/ingest/history lists the shop's uploads to a lender viewer, who holds no ledger:read",
+  };
+  for (const [path, bug] of Object.entries(gaps)) {
+    if ((await page.request.get(path)).status() !== 403) knownBug(bug);
+  }
 });

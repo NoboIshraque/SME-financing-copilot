@@ -1,4 +1,4 @@
-// Journey: a Critical cash alert is pinned on Today -> its ranked fixes on Cash -> the owner
+// Flow 3: a Critical cash alert is pinned on Today -> its ranked fixes on Cash -> the owner
 // approves an EXECUTE lever with a step-up code (WP-11 approvals: request, approve, execute)
 // -> the action is in the audit log and the chain still verifies.
 //

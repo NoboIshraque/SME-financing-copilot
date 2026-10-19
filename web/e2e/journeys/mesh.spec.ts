@@ -1,4 +1,4 @@
-// Journey: the liquidity mesh (WP-08 through WP-14's Mesh screen): the debt ring, the proposed
+// Flow 5: the liquidity mesh (WP-08 through WP-14's Mesh screen): the debt ring, the proposed
 // netting round, an owner's approval with a step-up code, and the testnet anchor of a settled
 // round checked against the chain.
 //

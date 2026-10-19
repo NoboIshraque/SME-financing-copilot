@@ -1,4 +1,4 @@
-// Journey: upload a bKash statement -> preview -> commit (WP-02 ingest through the copilot's
+// Flow 2: upload a bKash statement -> preview -> commit (WP-02 ingest through the copilot's
 // upload flow). The statement is generated per run with fresh transaction ids, so every run adds
 // new rows, and the re-upload proves duplicates are caught. Labelled synthetic (rule 8). It runs as
 // the owner of the second demo business, so the home business's demo figures stay as seeded.

@@ -1,4 +1,4 @@
-// Journey: a receivables reminder (WP-05 plan, WP-12 draft) approved in one tap on Receivables,
+// Flow 6: a receivables reminder (WP-05 plan, WP-12 draft) approved in one tap on Receivables,
 // then found approved in Messages and sent from there.
 import { sessionFile } from "../support/auth";
 import { expect, test } from "../support/fixtures";

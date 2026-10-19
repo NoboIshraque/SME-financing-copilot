@@ -162,7 +162,7 @@ export class App {
 }
 
 /**
- * Record that this test pins a known bug whose fix belongs to another work package: every run
+ * Record a known bug this test observed, whose fix belongs to another work package: every run
  * lists them at the end (support/known-bugs-reporter.ts), so a green run never hides them.
  */
 export function knownBug(description: string): void {

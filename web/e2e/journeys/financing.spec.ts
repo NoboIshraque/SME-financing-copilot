@@ -1,4 +1,4 @@
-// Journey: financing match -> open the provenance of the best option's true cost -> the
+// Flow 4: financing match -> open the provenance of the best option's true cost -> the
 // pre-filled application, which leaves only after the owner approves it with a step-up code
 // (WP-06 match + submit_loan_application through WP-11 approvals) -> the audit log.
 import { sessionFile } from "../support/auth";
