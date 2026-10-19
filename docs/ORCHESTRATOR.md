@@ -17,9 +17,9 @@ Session names: `orch-A`, `orch-C` (`orch-B` only in an emergency).
 | On duty | orch-C |
 | Since (Dhaka) | 2026-10-19 10:55 |
 | Merge authority | the on-duty orchestrator only |
-| Working on | WP-06 API merged (#20); next WP-08 milestone 8 |
+| Working on | web ↔ live API integration fixes (branch `orch-web-integration`) after merging #19 (WP-04) and #21 (WP-14) |
 | Next 3 steps | 1. Nobo decides the application-card tier question (WP-06.md, Questions), then a small PR. 2. WP-08 milestone 8 (mesh API). 3. Review PRs from A1/B1 as they come. |
-| Open PRs and their state | none (#20 merged 2026-10-19 11:47, all four CI checks green) |
+| Open PRs and their state | none open (#19, #20, #21 merged 19 Oct, all CI green) |
 | Waiting on (people / CI / limits) | Nobo: decision on the application-card tier (A: new submit action, owner-approved; B: draft only) |
 | Lives only in a sandbox (must be committed) | nothing (orch-A's CPU runner is on main since af37713) |
 | Off-duty orchestrator | orch-A (limit reset time not recorded) |
