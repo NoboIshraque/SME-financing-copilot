@@ -165,7 +165,7 @@ def test_owner_drafts_an_application_pack_from_ledger_facts(api: TestClient):
                    json={**NEED, "product_id": "bd-primebank-chalti"})
     assert res.status_code == 201
     card = res.json()
-    assert (card["action_type"], card["tier"]) == ("draft_loan_application", "EXECUTE")
+    assert (card["action_type"], card["tier"]) == ("submit_loan_application", "EXECUTE")
     assert card["payload"]["facts_provided"] == {"business_age_months": "74",
                                                  "trade_licence": "1"}
     assert card["payload"]["amount"] == "200000.00"

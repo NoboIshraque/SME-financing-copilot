@@ -7,7 +7,7 @@ describe("Messages & approvals inbox", () => {
   it("shows the owner what the accountant asked to approve, and clears it once approved with the code", async () => {
     const { user, db } = renderApp("/messages");
     const queue = await screen.findByRole("region", { name: "Waiting for your approval" });
-    const request = await within(queue).findByRole("article", { name: "Draft a loan application" });
+    const request = await within(queue).findByRole("article", { name: "Submit the loan application" });
     expect(within(queue).getByText(/^Requested by u-accountant/)).toBeInTheDocument();
     await user.click(within(request).getByRole("button", { name: "Approve with code" }));
     const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
@@ -21,7 +21,7 @@ describe("Messages & approvals inbox", () => {
   it("tells the accountant a requested approval is waiting for the owner", async () => {
     renderApp("/messages", { signedInAs: "accountant@hishab.demo" });
     const queue = await screen.findByRole("region", { name: "Waiting for your approval" });
-    const request = await within(queue).findByRole("article", { name: "Draft a loan application" });
+    const request = await within(queue).findByRole("article", { name: "Submit the loan application" });
     expect(within(request).getByText("Waiting for the owner's approval.")).toBeInTheDocument();
     expect(within(request).queryByRole("button", { name: /Approve|Ask the owner/ })).not.toBeInTheDocument();
   });

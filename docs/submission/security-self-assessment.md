@@ -37,6 +37,7 @@ against an independently written copy.
 | `view` | READ | READ | READ | READ | READ | READ |
 | `record_dispute` | DRAFT | DRAFT | DRAFT | DRAFT | DENY | DENY |
 | `draft_loan_application` | DRAFT | DRAFT | DRAFT | DENY | DENY | DENY |
+| `submit_loan_application` | EXECUTE | EXECUTE | DRAFT | DENY | DENY | DENY |
 | `propose_netting_round` | DRAFT | DRAFT | DRAFT | DENY | DENY | DENY |
 | `send_reminder` | EXECUTE | EXECUTE | DRAFT | DRAFT | DENY | DENY |
 | `send_message` | EXECUTE | EXECUTE | DRAFT | DRAFT | DENY | DENY |

@@ -15,9 +15,9 @@ reason `fit.no_forecast`. Until WP-08 stores verified loans, no lender has a tra
 `lender_events` is the one seam that supplies them. No lender licence registry is loaded yet, so
 licence status is reported as `unknown` (never assumed).
 
-Drafting an application is DRAFT tier (it stays inside Hishab). The card it returns is EXECUTE
-tier (submitting commits the business); WP-11's policy gives the owner only DRAFT on
-`draft_loan_application`, so that card cannot be approved yet (WP-06.md, Questions).
+Drafting an application is DRAFT tier (`draft_loan_application`: it stays inside Hishab). The
+card it returns is `submit_loan_application`, EXECUTE tier (sending it to the lender commits the
+business): it goes to the owner through `POST /api/approvals` and needs a step-up code.
 """
 
 from __future__ import annotations
