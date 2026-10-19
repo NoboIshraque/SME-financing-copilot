@@ -87,10 +87,12 @@ function OptionCard({ option, lender }: { option: FinancingOption; lender?: Lend
           <dt className="text-slate-600 dark:text-slate-400">{t("financing.speed")}</dt>
           <dd>{format.days(option.speed_days)}</dd>
         </div>
-        <div>
-          <dt className="text-slate-600 dark:text-slate-400">{t("financing.fit")}</dt>
-          <dd>{t("financing.breach", { chance: format.probability(option.p_buffer_breach) })}</dd>
-        </div>
+        {!option.reason_keys?.includes("fit.no_forecast") && (
+          <div>
+            <dt className="text-slate-600 dark:text-slate-400">{t("financing.fit")}</dt>
+            <dd>{t("financing.breach", { chance: format.probability(option.p_buffer_breach) })}</dd>
+          </div>
+        )}
       </dl>
       <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
         {t("financing.nominal", { rate: format.percent(product.nominal_rate_pa) })} · {t(`financing.rateBasis.${product.rate_basis ?? "published"}`)}
