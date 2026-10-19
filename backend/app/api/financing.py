@@ -1,16 +1,22 @@
 """Financing API (WP-06 milestone 8; FEATURES P1, N20, P14).
 
     POST /api/financing/match              {amount, needed_by, tenor_days, purpose_key?,
-                                            jurisdiction?}                 -> MatchResult
-    GET  /api/financing/lenders/{lender_id}                                -> LenderView
+                                            jurisdiction?, tenant_id?}     -> MatchResult
+    GET  /api/financing/lenders/{lender_id}                                -> LenderProfile
     POST /api/financing/applications       {product_id, ...the need}       -> ActionCard
 
-The caller is the signed-in principal (WP-11) and needs `ledger:read`; the tenant always comes
-from the principal, never from the body. Eligibility reads the tenant's typed facts as of today
-(Dhaka): a fact the ledger does not hold is passed on as missing, so the rule answers
-"not on record" instead of guessing. Every number in a response comes from the WP-06 engines.
+Shapes follow what the web expects (`web/src/api/types.ts` FinancingMatch): the match answer
+carries the lender profile of every provider ranked and the application draft for the best
+option that passes eligibility (null when none passes or the caller may not draft).
 
-Until WP-04 publishes a cash forecast, options are ranked without the fit term and carry the
+The caller is the signed-in principal (WP-11) and needs `ledger:read`; the tenant always comes
+from the principal. A `tenant_id` in the body is optional and must then be the caller's own
+(403 otherwise). `purpose_key` may carry the web's `purpose.` prefix. Eligibility reads the
+tenant's typed facts as of today (Dhaka): a fact the ledger does not hold is passed on as
+missing, so the rule answers "not on record" instead of guessing. Every number in a response
+comes from the WP-06 engines.
+
+The WP-04 forecast is not wired in yet: options are ranked without the fit term and carry the
 reason `fit.no_forecast`. Until WP-08 stores verified loans, no lender has a track record:
 `lender_events` is the one seam that supplies them. No lender licence registry is loaded yet, so
 licence status is reported as `unknown` (never assumed).
@@ -49,7 +55,7 @@ from app.contracts import (
 )
 from app.engines.financing.application import draft_application
 from app.engines.financing.catalogue import load_catalogue, load_unpriced
-from app.engines.financing.lenders import LenderEvent, build_profile, lender_score
+from app.engines.financing.lenders import LenderEvent, build_profile
 from app.engines.financing.ranking import match as rank_options
 from app.facts import FactStore
 from app.main import get_session
@@ -68,8 +74,9 @@ _MODE_ORDER = (DataMode.synthetic, DataMode.real_anonymised, DataMode.live, Data
 
 
 class NeedBody(BaseModel):
-    model_config = ConfigDict(extra="forbid")  # a tenant_id in the body is refused, not ignored
+    model_config = ConfigDict(extra="forbid")
 
+    tenant_id: str | None = Field(default=None, max_length=128)
     amount: Money
     needed_by: date
     tenor_days: int = Field(ge=1, le=3650)
@@ -98,15 +105,11 @@ class MatchResult(BaseModel):
     need: FinancingNeed
     as_of: date
     options: list[FinancingOption]
+    lenders: list[LenderProfile]
+    application: ActionCard | None
     ask_the_lender: list[AskTheLender]
     facts_missing: list[str]
     data_mode: DataMode
-
-
-class LenderView(BaseModel):
-    profile: LenderProfile
-    score: Decimal
-    product_ids: list[str]
 
 
 def lender_events() -> tuple[LenderEvent, ...]:
@@ -129,9 +132,11 @@ def _mode(modes: Iterable[DataMode]) -> DataMode:
 
 
 def _need(body: NeedBody, principal: Principal) -> FinancingNeed:
+    if body.tenant_id is not None and body.tenant_id != principal.tenant_id:
+        raise forbidden("tenant")
     return FinancingNeed(tenant_id=principal.tenant_id, amount=body.amount,
                          needed_by=body.needed_by, tenor_days=body.tenor_days,
-                         purpose_key=body.purpose_key)
+                         purpose_key=body.purpose_key.removeprefix("purpose."))
 
 
 def _facts(store: FactStore, tenant_id: str, products: Sequence[FinancingProduct],
@@ -147,10 +152,17 @@ def _facts(store: FactStore, tenant_id: str, products: Sequence[FinancingProduct
     return values, modes
 
 
+def _profile(lender_id: str, events: Sequence[LenderEvent],
+             products: Sequence[FinancingProduct]) -> LenderProfile:
+    own = [e for e in events if e.lender_id == lender_id]
+    # verified loans exist only in the synthetic mesh today
+    mode = DataMode.synthetic if own else _mode(p.data_mode for p in products)
+    return build_profile(lender_id, lender_id, LicenceStatus.unknown, own, data_mode=mode)
+
+
 def _profiles(events: Sequence[LenderEvent]) -> dict[str, LenderProfile]:
     """Profiles for lenders with a track record only (the rest rank as cold start)."""
-    mode = DataMode.synthetic  # verified loans exist only in the synthetic mesh today
-    return {lender: build_profile(lender, lender, LicenceStatus.unknown, events, data_mode=mode)
+    return {lender: _profile(lender, events, ())
             for lender in sorted({e.lender_id for e in events})}
 
 
@@ -182,17 +194,26 @@ def match(body: NeedBody,
     if (problem := _past(need, as_of)) is not None:
         return problem
     facts, candidates, mode = _rank(need, body, as_of, session, events)
+    options = [c.option for c in candidates]
+    providers = sorted({o.product.provider for o in options})
+    lenders = [_profile(provider, events, [o.product for o in options
+                                           if o.product.provider == provider])
+               for provider in providers]
+    best = next((o for o in options if o.eligibility.status is EligibilityStatus.pass_), None)
+    may_draft = policy.decide(principal.role, ActionType.draft_loan_application).allowed
+    draft = draft_application(best, need, facts, now=clock()) if best and may_draft else None
     unpriced = [AskTheLender(**vars(u)) for u in load_unpriced(jurisdiction=body.jurisdiction)]
-    return MatchResult(need=need, as_of=as_of, options=[c.option for c in candidates],
-                       ask_the_lender=unpriced,
+    return MatchResult(need=need, as_of=as_of, options=options, lenders=lenders,
+                       application=draft, ask_the_lender=unpriced,
                        facts_missing=sorted(m for m, v in facts.items() if v is None),
                        data_mode=mode)
 
 
-@router.get("/lenders/{lender_id}", response_model=LenderView)
+@router.get("/lenders/{lender_id}", response_model=LenderProfile)
 def lender(lender_id: str,
            _: Principal = Depends(require(Permission.ledger_read)),
-           events: tuple[LenderEvent, ...] = Depends(lender_events)) -> LenderView | JSONResponse:
+           events: tuple[LenderEvent, ...] = Depends(lender_events)
+           ) -> LenderProfile | JSONResponse:
     products = [p for j in ("bd", "cn") for p in load_catalogue(jurisdiction=j)
                 if p.provider == lender_id]
     unpriced = [u for u in load_unpriced(jurisdiction="bd") if u.provider == lender_id]
@@ -200,10 +221,7 @@ def lender(lender_id: str,
     if not (products or unpriced or own):
         return _error(404, "lender_not_found", "error.lender_not_found",
                       lender_id=lender_id[:128])
-    mode = DataMode.synthetic if own else _mode(p.data_mode for p in products)
-    profile = build_profile(lender_id, lender_id, LicenceStatus.unknown, own, data_mode=mode)
-    return LenderView(profile=profile, score=lender_score(profile),
-                      product_ids=sorted([p.id for p in products] + [u.id for u in unpriced]))
+    return _profile(lender_id, own, products)
 
 
 @router.post("/applications", response_model=ActionCard, status_code=201)

@@ -2,6 +2,7 @@ import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { formatCompactTaka } from "../../api/format";
+import { cashGaps } from "../../mocks/fixtures/cash";
 import { renderApp, requestedPaths } from "../../test/render";
 
 describe("Cash screen", () => {
@@ -26,7 +27,7 @@ describe("Cash screen", () => {
   });
 
   it("says so calmly when there is no gap", async () => {
-    renderApp("/cash", { overrides: { "GET /api/cash/gaps": { body: [] } } });
+    renderApp("/cash", { overrides: { "GET /api/cash/gaps": { body: { ...cashGaps(), gaps: [] } } } });
     expect(await screen.findByText("No gaps in the next 13 weeks.")).toBeInTheDocument();
   });
 

@@ -77,7 +77,7 @@ def test_every_option_says_it_was_ranked_without_a_forecast(api: TestClient):
 
 def test_figures_carry_their_formula(api: TestClient):
     option = _by_id(api.post("/api/financing/match", json=NEED).json())["bd-primebank-chalti"]
-    ear = next(f for f in option["figures"] if f["label_key"] == "financing.effective_annual_rate")
+    ear = next(f for f in option["figures"] if f["label_key"] == "financing.effective_apr")
     assert Decimal(ear["value"]) == Decimal(option["effective_apr"])
     assert ear["provenance"]["formula_id"] == "financing.effective_annual_rate"
     assert ear["provenance"]["parameters"]["principal"] == "200000.00"
@@ -98,7 +98,6 @@ def test_china_pack_is_ranked_as_modelled(api: TestClient):
 
 
 @pytest.mark.parametrize("change, code", [
-    ({"tenant_id": "sme_fabric"}, None),  # the tenant comes from the session, never the body
     ({"amount": {"amount": 200000.5}}, None),  # floats are refused for money
     ({"needed_by": "2026-09-30"}, "needed_by_in_past"),
     ({"jurisdiction": "us"}, None),
@@ -108,6 +107,52 @@ def test_match_refuses_bad_needs(api: TestClient, change: dict, code: str | None
     assert res.status_code == 422
     if code:
         assert res.json()["code"] == code
+
+
+def test_body_tenant_must_be_the_callers_own(api: TestClient):
+    own = api.post("/api/financing/match", json={**NEED, "tenant_id": "sme_grocery"})
+    other = api.post("/api/financing/match", json={**NEED, "tenant_id": "sme_fabric"})
+    assert (own.status_code, own.json()["need"]["tenant_id"]) == (200, "sme_grocery")
+    assert (other.status_code, other.json()["detail"]["reason"]) == (403, "tenant")
+
+
+def test_web_purpose_keys_reach_the_purpose_rules(api: TestClient):
+    def leasing(purpose: str) -> str:
+        body = api.post("/api/financing/match", json={**NEED, "purpose_key": purpose}).json()
+        return _by_id(body)["bd-bankasia-lease"]["eligibility"]["status"]
+    assert leasing("purpose.working_capital") == "fail"  # leasing funds equipment only
+    assert leasing("purpose.equipment") != "fail"
+
+
+def test_match_lists_a_profile_for_every_provider_ranked(api: TestClient):
+    body = api.post("/api/financing/match", json=NEED).json()
+    names = {lender["name"] for lender in body["lenders"]}
+    assert names == {o["product"]["provider"] for o in body["options"]}
+    prime = next(lender for lender in body["lenders"] if lender["name"] == "Prime Bank PLC")
+    assert (prime["events_count"], prime["licence_status"]) == (0, "unknown")
+
+
+def test_match_drafts_the_application_for_the_best_passing_option(api: TestClient):
+    body = api.post("/api/financing/match", json=NEED).json()
+    best = next(o for o in body["options"] if o["eligibility"]["status"] == "pass")
+    card = body["application"]
+    assert (card["tier"], card["payload"]["product_id"]) == ("EXECUTE", best["product"]["id"])
+
+
+def test_match_offers_staff_no_application(api: TestClient):
+    _as(api, Principal(user_id="u-staff", tenant_id="sme_grocery", role=Role.staff))
+    body = api.post("/api/financing/match", json=NEED).json()
+    assert body["options"] and body["application"] is None
+
+
+def test_without_facts_the_application_skips_options_not_on_record(api: TestClient):
+    _as(api, Principal(user_id="u-new", tenant_id="sme_new", role=Role.owner))
+    body = api.post("/api/financing/match", json=NEED).json()
+    chosen = _by_id(body)[body["application"]["payload"]["product_id"]]
+    assert chosen["eligibility"]["status"] == "pass"
+    assert any(o["eligibility"]["status"] == "not_on_record" and o["rank"] < chosen["rank"]
+               for o in body["options"])
+    assert body["application"]["payload"]["facts_provided"] == {}
 
 
 def test_match_needs_a_signed_in_caller_with_ledger_access(api: TestClient):
@@ -135,23 +180,20 @@ def test_track_record_changes_the_lender_term(api: TestClient):
 def test_lender_without_track_record_is_cold_start_with_unknown_licence(api: TestClient):
     res = api.get(f"/api/financing/lenders/{CITY}")
     assert res.status_code == 200
-    body = res.json()
-    assert (body["profile"]["events_count"], Decimal(body["score"])) == (0, Decimal(60))
-    assert body["profile"]["licence_status"] == "unknown"
-    assert body["product_ids"] == ["bd-citybank-bkash-loan"]
-    assert body["profile"]["data_mode"] == "public"
+    profile = res.json()
+    assert (profile["lender_id"], profile["name"], profile["events_count"]) == (CITY, CITY, 0)
+    assert profile["licence_status"] == "unknown"
+    assert profile["data_mode"] == "public"
 
 
 def test_lender_profile_reflects_hidden_fees(api: TestClient):
     _events(api, LenderEvent(CITY, Decimal("9"), Decimal("9"), 2, False, False),
             LenderEvent(CITY, Decimal("9"), Decimal("11"), 4, hidden_fee=True, disputed=False),
             LenderEvent("Someone Else", Decimal("9"), Decimal("30"), 9, True, True))
-    body = api.get(f"/api/financing/lenders/{CITY}").json()
-    profile = body["profile"]
+    profile = api.get(f"/api/financing/lenders/{CITY}").json()
     assert (profile["events_count"], profile["hidden_fee_incidents"]) == (2, 1)
     assert Decimal(profile["quoted_vs_realised_apr_gap"]) == Decimal("1.00")
-    # 100 - 50 x 1/2 hidden fees - 4 x 1.00 gap - 15 for an unknown licence
-    assert Decimal(body["score"]) == Decimal("56.00")
+    assert Decimal(profile["median_disbursal_days"]) == Decimal(3)
     assert profile["data_mode"] == "synthetic"
 
 
