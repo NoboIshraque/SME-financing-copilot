@@ -7,11 +7,15 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import { api } from "../api/endpoints";
 import { SESSION_KEY, useRequiredSession } from "../auth/session";
+import { CopilotPanel } from "../copilot/CopilotPanel";
 import { QUICK_SCREENS, SCREEN_ICONS, SCREENS, canSee, screenPath } from "../navigation";
 import { DemoBanner } from "./DemoBanner";
 import { Icon } from "./Icon";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
+
+// The copilot advises the business; external viewers (lender, compliance) only read.
+const COPILOT_ROLES = new Set(["owner", "accountant", "staff"]);
 
 function SignOutButton() {
   const { t } = useTranslation();
@@ -123,6 +127,7 @@ export function AppShell() {
         <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-4 pb-28 pt-4 outline-none md:px-8 md:pb-10">
           <Outlet />
         </main>
+        {COPILOT_ROLES.has(role) && <CopilotPanel />}
       </div>
 
       <nav

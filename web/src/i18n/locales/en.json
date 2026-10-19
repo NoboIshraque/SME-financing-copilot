@@ -109,7 +109,11 @@
     "not_approved": "Approve the message before sending it.",
     "invalid_share": "Name the lender, pick what they can see, and choose up to 30 days.",
     "passport_not_found": "No passport with that ID.",
-    "no_evidence": "Add statements before issuing a passport."
+    "no_evidence": "Add statements before issuing a passport.",
+    "input_quarantined": "This message looked like an attempt to override Hishab's safety rules, so it was blocked and logged.",
+    "empty_question": "Type a question first.",
+    "no_file": "Choose a file to upload.",
+    "digest_mismatch": "The file changed since the preview. Please upload it again."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -785,5 +789,66 @@
     "parameters": "Settings used",
     "recordedOnly": "The detailed breakdown is not available yet. This is the provenance recorded with the number.",
     "codeComputes": "Computed by Hishab's engines from your records. No AI model produced this number."
+  },
+  "copilot": {
+    "open": "Ask Hishab",
+    "title": "Ask Hishab",
+    "subtitle": "Answers come as decision cards. Every number is computed from your records.",
+    "tryAsking": "Try asking:",
+    "ask": "Your question",
+    "placeholder": "Ask in English, বাংলা or 中文",
+    "send": "Ask",
+    "thinking": "Checking your numbers…",
+    "suggest": {
+      "salary": "Can I pay salaries on 31 October?",
+      "chase": "Which customer should I chase first?",
+      "loan": "How big a loan can I safely take?"
+    },
+    "abstained": "I won't guess on this.",
+    "claims": "Statements checked against your records",
+    "check": {
+      "verified": "verified",
+      "rejected": "rejected",
+      "unverifiable": "could not be checked"
+    },
+    "agreement": "{{agree}} of {{total}} models agree ({{rate}})",
+    "threshold": "Needed: {{threshold}} for {{stakes}}-stakes advice",
+    "votes": "See each model's vote",
+    "stakes": {
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    }
+  },
+  "upload": {
+    "open": "Add a statement or photo",
+    "title": "Add a statement or ledger photo",
+    "help": "bKash, Nagad or bank statements (CSV or Excel), or a photo of your baki khata. Nothing is saved until you confirm. Photos are read on our server, never sent to an AI model.",
+    "choose": "Choose a file",
+    "reading": "Reading the file…",
+    "format": {
+      "bkash_statement": "bKash statement",
+      "nagad_statement": "Nagad statement",
+      "bank_csv": "Bank statement",
+      "ledger_csv": "Ledger (CSV)",
+      "ledger_xlsx": "Ledger (Excel)",
+      "ledger_photo": "Ledger photo",
+      "unknown": "Unknown format"
+    },
+    "transactions_one": "{{count}} new transaction found",
+    "transactions_other": "{{count}} new transactions found",
+    "duplicates_one": "{{count}} duplicate skipped",
+    "duplicates_other": "{{count}} duplicates skipped",
+    "unparsed": "Rows we could not read",
+    "confirmRows": "Confirm each row read from the photo",
+    "confidence": "{{value}} sure",
+    "checkThis": "please check",
+    "commit_one": "Add {{count}} row to my records",
+    "commit_other": "Add {{count}} rows to my records",
+    "done_one": "Added {{count}} row to your records.",
+    "done_other": "Added {{count}} rows to your records."
+  },
+  "ingest": {
+    "bad_date": "the date is not a real date"
   }
 }
