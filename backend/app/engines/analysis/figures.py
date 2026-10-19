@@ -113,6 +113,18 @@ _EXPRESSIONS = {
                            "the business uses up per 30 days before new loans or owner money",
     "analysis.ratio.runway": "cash / burn x 30: days until the cash runs out at that burn",
     "analysis.ratio.top_customer_share": "top_customer_receipts / revenue x 100",
+    # ---- expected vs reality (variance.py)
+    "analysis.variance.expected": "what the frozen forecast snapshot expected for the line over "
+                                  "the period (WP-04 baseline, rows dated up to its as_of only)",
+    "analysis.variance.actual": "sum of the period's transactions in the line (transfers between "
+                                "own accounts in their own line), in the line's own direction",
+    "analysis.variance.accuracy": "max(0, 1 - sum(|actual - expected|) / sum(|actual|)) x 100 "
+                                  "over the snapshot's cash-flow lines (1 - weighted absolute "
+                                  "percentage error)",
+    "analysis.variance.correction_pct": "(1 + n / (n + 4) x (sum(actual) / sum(expected) - 1) - "
+                                        "1) x 100 over the last n checks, kept within +/-50%: "
+                                        "sales lines for sales, purchases and other costs for "
+                                        "costs",
 }
 FORMULAS: dict[str, FormulaRef] = {
     formula_id: FormulaRef(formula_id=formula_id, version=1, expression=expression)
