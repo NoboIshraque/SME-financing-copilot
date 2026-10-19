@@ -14,7 +14,7 @@ function key(): Record<string, string> {
 test.describe("staff", () => {
   test.use({ storageState: sessionFile("staff") });
 
-  test("staff see the day's actions but cannot approve one that moves money; nobody can request a DENY action", async ({ app, page }) => {
+  test("staff see the day's actions but get no control to approve one that moves money", async ({ app, page }) => {
     await needsRoutes(["GET /api/copilot/today"]);
 
     await app.start("today");
@@ -27,8 +27,11 @@ test.describe("staff", () => {
     // Staff work on sales and collections; cash planning stays with the owner and accountant.
     const nav = app.isPhone ? page.getByRole("navigation", { name: app.t("nav.quick") }) : app.mainNav();
     await expect(nav.getByRole("link", { name: app.t("nav.cash"), exact: true })).toHaveCount(0);
+  });
 
-    // The API agrees: staff cannot even ask for the approval.
+  test("the API refuses staff an approval request, and refuses a DENY action even to the owner", async ({ page }) => {
+    await needsRoutes(["POST /api/approvals"]);
+    // Staff may only suggest a payable's new date (WP-11 policy), so they cannot even ask for it.
     const asked = await page.request.post("/api/approvals", { data: { card: RETIME }, headers: key() });
     expect(asked.status()).toBe(403);
 

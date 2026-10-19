@@ -18,6 +18,9 @@ interface Row {
   attachments: string[];
 }
 
+const EXPECTED_FAILURE = "failed as expected (known bug)";
+const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
 function dhaka(date: Date): string {
   return `${date.toLocaleString("sv-SE", { timeZone: "Asia/Dhaka" })} Dhaka`;
 }
@@ -49,12 +52,14 @@ export default class EvidenceReporter implements Reporter {
     const notes = [...test.annotations, ...result.annotations]
       .filter((annotation) => annotation.description)
       .map((annotation) => `${annotation.type}: ${annotation.description}`);
-    if (result.error?.message) notes.push(`error: ${result.error.message.split("\n")[0]}`);
+    if (result.error?.message) notes.push(`error: ${result.error.message.replace(ANSI, "").split("\n")[0]}`);
+    const outcome = test.outcome();
     this.rows.set(test.id, {
       project: test.parent.project()?.name ?? "",
       file: relative(this.config?.rootDir ?? "", test.location.file).replace(/\\/g, "/"),
       title: test.titlePath().slice(3).join(" › ") || test.title,
-      outcome: test.outcome(),
+      // An expected failure pins a known bug: say so rather than a bare "expected".
+      outcome: test.expectedStatus === "failed" && outcome === "expected" ? EXPECTED_FAILURE : outcome,
       durationMs: result.duration,
       notes: [...new Set(notes)],
       attachments: result.attachments.filter((item) => item.path).map((item) => relative(this.dir, item.path ?? "").replace(/\\/g, "/")),
@@ -80,7 +85,13 @@ export default class EvidenceReporter implements Reporter {
       commit: commit(),
       playwright: this.config?.version,
       health,
-      totals: { expected: count("expected"), unexpected: count("unexpected"), flaky: count("flaky"), skipped: count("skipped") },
+      totals: {
+        passed: count("expected"),
+        knownBugFailures: count(EXPECTED_FAILURE),
+        unexpected: count("unexpected"),
+        flaky: count("flaky"),
+        skipped: count("skipped"),
+      },
       tests: rows.sort((a, b) => a.file.localeCompare(b.file) || a.title.localeCompare(b.title) || a.project.localeCompare(b.project)),
     };
     mkdirSync(this.dir, { recursive: true });
@@ -92,9 +103,9 @@ export default class EvidenceReporter implements Reporter {
       "",
       `Target **${baseURL}** · ${dhaka(this.started)} · commit \`${summary.commit}\` · Playwright ${summary.playwright} · overall **${result.status}**`,
       "",
-      "| Expected (passed or expected-to-fail) | Unexpected | Flaky | Skipped |",
-      "| --- | --- | --- | --- |",
-      `| ${summary.totals.expected} | ${summary.totals.unexpected} | ${summary.totals.flaky} | ${summary.totals.skipped} |`,
+      "| Passed | Failed as expected (known bug) | Failed unexpectedly | Flaky | Skipped (not deployed) |",
+      "| --- | --- | --- | --- | --- |",
+      `| ${summary.totals.passed} | ${summary.totals.knownBugFailures} | ${summary.totals.unexpected} | ${summary.totals.flaky} | ${summary.totals.skipped} |`,
       "",
       "What the target reported about itself (`GET /api/health`):",
       "",

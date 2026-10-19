@@ -1,8 +1,10 @@
 name: E2E
 
-# Playwright journeys (WP-15), desktop and phone. The local target boots the dev stack on the
-# runner (API + web in API mode "auto": routers that have not landed yet are answered by the
-# labelled offline mock). Runs on PRs that touch the app, and on demand.
+# Playwright journeys (WP-15), desktop and phone.
+#   local   boots the dev stack on the runner (API + web in API mode "auto": routers that have not
+#           landed yet are answered by the labelled offline mock). On PRs that touch the app.
+#   hosted  drives the deployed demo and keeps its evidence (traces, videos, screenshots, summary)
+#           as the artifact "e2e-hosted-evidence". After every successful deploy, or on demand.
 on:
   pull_request:
     paths:
@@ -10,10 +12,24 @@ on:
       - "backend/app/**"
       - "data/synthetic/**"
       - ".github/workflows/e2e.yml"
+  workflow_run:
+    workflows: ["Deploy"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      target:
+        description: "local (dev stack on the runner) or hosted"
+        type: choice
+        options: [local, hosted]
+        default: local
+      base_url:
+        description: "Hosted URL (empty: https://<DEPLOY_DOMAIN>)"
+        required: false
+        default: ""
 
 concurrency:
-  group: e2e-${{ github.ref }}
+  group: e2e-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -22,6 +38,7 @@ permissions:
 jobs:
   local:
     name: Playwright (local target)
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.target == 'local')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -45,7 +62,7 @@ jobs:
       - name: Install Chromium
         working-directory: web
         run: npx playwright install --with-deps chromium
-      - name: Journeys (starts `npm run dev`)
+      - name: Journeys (seeds the dev database, starts `npm run dev`)
         working-directory: web
         run: npx playwright test
       - uses: actions/upload-artifact@v4
@@ -58,3 +75,56 @@ jobs:
             web/test-results/artifacts/
             web/test-results/known-bugs.json
           retention-days: 14
+
+  hosted:
+    name: Playwright (hosted target, evidence)
+    if: (github.event_name == 'workflow_dispatch' && inputs.target == 'hosted') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DEPLOY_DOMAIN: ${{ secrets.DEPLOY_DOMAIN }}
+      BASE_URL_INPUT: ${{ inputs.base_url }}
+    steps:
+      - name: Target
+        id: target
+        run: |
+          url="${BASE_URL_INPUT:-}"
+          if [ -z "$url" ] && [ -n "$DEPLOY_DOMAIN" ]; then url="https://$DEPLOY_DOMAIN"; fi
+          if [ -z "$url" ]; then
+            echo "No hosted URL (input or DEPLOY_DOMAIN secret) - skipping." >> "$GITHUB_STEP_SUMMARY"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=$url" >> "$GITHUB_OUTPUT"
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.target.outputs.ready == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        if: steps.target.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        if: steps.target.outputs.ready == 'true'
+        working-directory: web
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Journeys against ${{ steps.target.outputs.url }}
+        if: steps.target.outputs.ready == 'true'
+        working-directory: web
+        env:
+          E2E_BASE_URL: ${{ steps.target.outputs.url }}
+        run: npx playwright test
+      - name: Summary
+        if: always() && steps.target.outputs.ready == 'true'
+        run: cat docs/submission/evidence/e2e/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.target.outputs.ready == 'true'
+        with:
+          name: e2e-hosted-evidence
+          path: docs/submission/evidence/e2e/
+          retention-days: 30
