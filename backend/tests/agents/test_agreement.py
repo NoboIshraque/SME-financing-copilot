@@ -4,6 +4,7 @@ from decimal import Decimal
 import pytest
 
 from app.agents import checker as checker_cache
+from app.agents import selfloop
 from app.agents.agreement import Judgement, agree, judgement_for, tally
 from app.agents.planning import build_plan
 from app.agents.stakes import Stakes
@@ -122,12 +123,14 @@ def test_the_rules_never_vote_so_no_agreement_is_claimed(settings, clock, mode):
 def ledger(universe):
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
     engine, session, store = seeded_store(universe, shops=("sme_hardware", "sme_grocery"))
     yield store
     session.close()
     engine.dispose()
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
 
 
 def plan(intents, planner="gemini_flash"):

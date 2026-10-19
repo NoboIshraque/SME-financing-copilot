@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from app.agents import checker as checker_cache
 from app.agents import orchestrator as orchestrator_mod
+from app.agents import selfloop
 from app.agents.budget import Budget
 from app.agents.checker import unverified_numbers
 from app.agents.models import RejectedClaimRow
@@ -30,12 +31,14 @@ LOAN_Q = "Will I run out of cash, and should I take a loan?"
 def ledger(universe):
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
     engine, session, store = seeded_store(universe)
     yield store
     session.close()
     engine.dispose()
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
 
 
 @pytest.fixture
@@ -364,3 +367,19 @@ def test_low_stakes_answers_take_no_vote(orch, ledger):
     run = ask(orch, ledger, "How is my business doing? Profit and margin please",
               tenant="sme_grocery")
     assert run.agreement is None and not any(e.step == "vote" for e in run.trace)
+
+
+# --- milestone 7: self-loops inside the run -----------------------------------------------
+
+def test_a_high_stakes_answer_is_stressed_before_it_is_shown(orch, ledger):
+    run = ask(orch, ledger, CASH_Q)
+    report = run.recommendation.stability
+    assert report.recommendation_id == run.recommendation.id
+    assert len(report.results) == 4 and not report.unreliable
+    assert any(e.step == "selfloop" for e in run.trace)
+
+
+def test_an_information_only_answer_is_not_stressed(orch, ledger):
+    run = ask(orch, ledger, "How is my business doing? Profit and margin please",
+              tenant="sme_grocery")
+    assert run.recommendation.stability is None

@@ -36,6 +36,7 @@ from app.agents.checker import Checker, log_rejections, unverified_numbers
 from app.agents.claims import Statement
 from app.agents.critic import Objection
 from app.agents.planning import DEPENDS, Plan, build_plan
+from app.agents.selfloop import self_loop
 from app.agents.stakes import Stakes, assess
 from app.agents.tools import (
     InsufficientData,
@@ -57,6 +58,7 @@ from app.contracts import (
     Figure,
     Recommendation,
     Role,
+    StabilityReport,
 )
 from app.llm import LLMGateway, LLMRequest, LLMResponse, NoProviderAvailable
 from app.llm import deterministic as rules
@@ -311,16 +313,22 @@ class Orchestrator:
                 lambda request, what: self.llm(request, what, budget, trace), answer,
                 statements, found, language=plan.language,
                 brain_families=(self.family(plan.planner), narrator), private=private)
-        agreement = None
-        if stakes.needs_agreement:  # N9: other models vote on the judgement code made
-            judgement = agreement_mod.judgement_for(plan, results, cards, plan.asked)
-            if judgement is not None:
-                agreement = agreement_mod.agree(self.vote_call(budget, trace), judgement,
-                                                stakes, private=private)
+        agreement = stability = None
+        judgement = (agreement_mod.judgement_for(plan, results, cards, plan.asked)
+                     if stakes.needs_agreement else None)
+        if judgement is not None:  # N9: other models vote on the judgement code made
+            agreement = agreement_mod.agree(self.vote_call(budget, trace), judgement, stakes,
+                                            private=private)
+            started = time.perf_counter()  # N10: the engines re-make it under stress
+            stability = self_loop(ctx, judgement, stakes, results, rec_id)
+            if stability is not None:
+                trace.add("selfloop", judgement.kind, f"score {stability.score}", started,
+                          ",".join(stability.what_would_flip))
         return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
                             statements=statements, answer=answer, cards=cards, checks=checks,
                             dropped_cards=dropped, stakes=stakes, objection=objection,
-                            agreement=agreement, budget=budget, trace=trace)
+                            agreement=agreement, stability=stability, budget=budget,
+                            trace=trace)
 
     def family(self, slot: str) -> str:
         provider = self.gateway.table.get(slot)
@@ -403,7 +411,8 @@ class Orchestrator:
                 cards: tuple[ActionCard, ...] = (), abstention: Abstention | None = None,
                 checks: tuple[CheckResult, ...] = (), dropped_cards: tuple[str, ...] = (),
                 stakes: Stakes | None = None, objection: Objection | None = None,
-                agreement: AgreementOutcome | None = None, budget: Budget,
+                agreement: AgreementOutcome | None = None,
+                stability: StabilityReport | None = None, budget: Budget,
                 trace: Trace) -> Run:
         results = results or {}
         statements = statements or []
@@ -422,6 +431,7 @@ class Orchestrator:
             figures=tuple(figures.values()) if abstention is None else (),
             critic_objection=objection.text if objection and abstention is None else None,
             agreement=agreement.report if agreement is not None else None,
+            stability=stability,
             abstention=abstention, tools_used=tuple(n for n in plan.tools if n in results),
             data_mode=most_cautious(modes) if modes else DataMode.synthetic,
             created_at=ctx.now)

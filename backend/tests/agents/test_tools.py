@@ -4,6 +4,7 @@ import pytest
 from pydantic import BaseModel
 
 from app.agents import checker as checker_cache
+from app.agents import selfloop
 from app.agents.tools import (
     BadParameters,
     InsufficientData,
@@ -39,12 +40,14 @@ INTERNAL_TOOLS = {"analysis.stability"}  # used by the self-loops, never planned
 def ledger(universe):
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
     engine, session, store = seeded_store(universe)
     yield store
     session.close()
     engine.dispose()
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
 
 
 def ctx(store, tenant="sme_hardware") -> ToolContext:

@@ -4,6 +4,7 @@ import json
 import pytest
 
 from app.agents import checker as checker_cache
+from app.agents import selfloop
 from app.agents.claims import compose
 from app.agents.critic import RISKS, critique, risk, risks, strongest
 from app.agents.stakes import Stakes, assess
@@ -22,12 +23,14 @@ OBJECTION = json.dumps({"objection": "The advance depends on a customer who alre
 def ledger(universe):
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
     engine, session, store = seeded_store(universe, shops=("sme_hardware", "sme_grocery"))
     yield store
     session.close()
     engine.dispose()
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
 
 
 def tool_run(ledger, tenant, tools):

@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from app.agents import checker as checker_cache
+from app.agents import selfloop
 from app.agents.checker import (
     Checker,
     formula_expression,
@@ -44,12 +45,14 @@ TEMPLATES = (
 def ledger(universe):
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
     engine, session, store = seeded_store(universe, shops=("sme_hardware",))
     yield store
     session.close()
     engine.dispose()
     cash_api.clear_cache()
     checker_cache.clear_cache()
+    selfloop.clear_cache()
 
 
 @pytest.fixture(scope="module")
