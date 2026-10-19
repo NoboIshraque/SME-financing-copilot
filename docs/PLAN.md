@@ -204,7 +204,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-01 | done | merged | 143 | fact store, registry, provenance, API; fixes merged 18 Oct: ledger revisions (no stale figures), caller-scoped + masked explain/facts, race-safe inserts, rows endpoint, record_computed, profile facts + snapshot; facts + ingest APIs take the signed-in principal (PR #17) |
 | WP-02 | done | merged | 294 | parsers (bKash/Nagad/bank/ledger/registers, CSV+XLSX), Bangla/Banglish normaliser + Bengali calendar, dedupe, party clustering, OCR drafts (Tesseract ben+eng), preview/commit with keyed digest, API |
 | WP-03 | done (5/5) | merged | 105 | detectors (EN/BN, Bangla digits), HMAC token vault + AES-GCM + SQL store, anonymiser (relative dates, P11 amount scaling), fail-closed gate; shop-file anonymiser for WP-20; built by the orchestrator |
-| WP-04 | not started | — | 0 | |
+| WP-04 | done (8/8), PR #19 open for the on-duty orchestrator | wp-04-cash | 191 | forecast (seasonality incl. festivals, per-customer delays, supplier habits), Monte Carlo (1,000 seeded integer paths, block bootstrap, common random numbers), gaps + 5 leading indicators, Q1 alert tiers with dedupe/cooldown, 6 measured levers as action cards (WP-06/WP-08 interfaces), buffer target + surplus sweep, walk-forward backtest, API (forecast/gaps/alerts/what-if) + daily alert scan |
 | WP-05 | not started | — | 0 | |
 | WP-06 | done (8/8) | merged (PR #20) | 142 | engine + real BD catalogue; API (PR #20): match, lender check, application draft. Open: application card tier vs WP-11 policy (WP-06.md Questions); fit waits for WP-04 forecast |
 | WP-07 | not started | — | 0 | |
