@@ -73,7 +73,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | WP-12 | Messaging & automation: templates, approval queue, email + in-app (N2; P10 cut) | Worker C* | 2 | 40 |
 | WP-13 | Reports + Trust Passport + verify page (N4, Q4) | Orchestrator | 3 | 30 |
 | WP-14 | Frontend: all screens, provenance drawer, i18n, PWA, a11y (P6, P9, P12) | B1 | 1–3 | 110 (Vitest) |
-| WP-15 | E2E Playwright on local + hosted | B1 | 3 | 45 |
+| WP-15 | in progress (2/3) | wp-15-e2e | 66 e2e (33 x desktop + phone) + 3 setup | journeys on the local target (real auth, approvals, guard, ingest; labelled mock for routers not landed); found: lender reads ledger facts/uploads (WP-01/02), Bangla injection phrasings pass the guard (WP-11), Trust too wide on phones + 4 axe issues (WP-14); hosted run waits for WP-18's server |
 | WP-16 | Eval harness: ≥ 100 tasks, adversarial multilingual, nightly audit drill (P3, P8) | B2 | 3 | 100 tasks |
 | WP-17 | ML on Kaggle/Colab: forecaster backtest, delay model, injection classifier (N15, P5) | Human PC-4 + notebooks from orchestrator | 1–2 | 20 |
 | WP-18 | Infra & deploy: Docker, Caddy, SG server, CI/CD, China tests (P6) | Orchestrator + Amdad | 2–3 | 15 |
