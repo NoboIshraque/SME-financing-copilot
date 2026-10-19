@@ -17,9 +17,9 @@ Session names: `orch-A`, `orch-C` (`orch-B` only in an emergency).
 | On duty | orch-C |
 | Since (Dhaka) | 2026-10-19 10:55 |
 | Merge authority | the on-duty orchestrator only |
-| Working on | — (#22 and #23 merged; main green: backend 1694, web 210) |
-| Next 3 steps | 1. Wire the WP-04 forecast band into financing fit. 2. WP-08 milestone 8 (mesh API). 3. Review PRs from A1/B1 as they come. |
-| Open PRs and their state | none open |
+| Working on | #29 (WP-10), #30 (web demo fixes), #31 (WP-05) merged 20 Oct ~00:10 |
+| Next 3 steps | 1. Lender-viewer leaks on facts/ingest (e2e known bugs). 2. Wire the WP-04 band into financing fit. 3. Merge WP-16 / orch-A PRs as they come. |
+| Open PRs and their state | none of orch-C's; WP-16 (B2) and orch-A demo fixes expected |
 | Waiting on (people / CI / limits) | — |
 | Lives only in a sandbox (must be committed) | nothing (orch-A's CPU runner is on main since af37713) |
 | Off-duty orchestrator | orch-A (limit reset time not recorded) |

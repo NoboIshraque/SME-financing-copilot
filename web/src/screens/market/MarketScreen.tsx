@@ -169,6 +169,7 @@ export function MarketScreen() {
   return (
     <section aria-labelledby="h-market" className="space-y-6">
       <h2 id="h-market" className="text-xl font-semibold">{t("nav.market")}</h2>
+      <p role="note" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-100">{t("market.preview")}</p>
 
       <section aria-labelledby="h-price-alerts" className="space-y-2">
         <h3 id="h-price-alerts" className="text-lg font-semibold">{t("market.alertsTitle")}</h3>
