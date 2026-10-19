@@ -5,7 +5,7 @@ import { expect, test } from "../support/fixtures";
 import { apiContext, needsRoutes } from "../support/target";
 
 const RETIME = { id: "e2e-tier-retime", title_key: "action.retime_payable", action_type: "retime_payable", tier: "EXECUTE", payload: {} };
-const MOVE_MONEY = { id: "e2e-tier-move-money", title_key: "action.move_money", action_type: "move_money", tier: "EXECUTE", payload: {} };
+const BANK_CHANGE = { id: "e2e-tier-bank-change", title_key: "action.change_bank_details", action_type: "change_bank_details", tier: "EXECUTE", payload: {} };
 
 function key(): Record<string, string> {
   return { "X-Idempotency-Key": `e2e-${Date.now()}-${Math.random().toString(36).slice(2)}` };
@@ -32,10 +32,10 @@ test.describe("staff", () => {
     const asked = await page.request.post("/api/approvals", { data: { card: RETIME }, headers: key() });
     expect(asked.status()).toBe(403);
 
-    // DENY: not even the owner may request it (the owner's saved session, outside this page).
+    // DENY: not even the owner may ask to change a supplier's bank details (classic invoice fraud).
     const owner = await apiContext(sessionFile("owner"));
     try {
-      const denied = await owner.post("/api/approvals", { data: { card: MOVE_MONEY }, headers: key() });
+      const denied = await owner.post("/api/approvals", { data: { card: BANK_CHANGE }, headers: key() });
       expect(denied.status()).toBe(403);
       expect(((await denied.json()) as { code: string }).code).toBe("action_denied");
     } finally {
