@@ -1,0 +1,34 @@
+<section id="copilot" data-transition="fade" style="background:#F5F3EC;color:#12211D;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:64px;font-weight:600;line-height:1.15;color:#12211D">A copilot that checks itself, and says “I don’t know”</h2>
+<div style="display:flex;flex-direction:row;align-items:stretch;gap:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:24px;border:1px solid #E2DED2;border-radius:16px">
+<p style="font-size:30px;font-weight:600;color:#12211D">1 Guard</p>
+<p style="font-size:24px;line-height:1.4;color:#3D4A46">Screened for prompt injection in four languages</p>
+</div>
+<x-connector head="end" style="width:56px;height:2px;align-self:center;color:#12211D;border-width:3px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:24px;border:1px solid #E2DED2;border-radius:16px">
+<p style="font-size:30px;font-weight:600;color:#12211D">2 Plan</p>
+<p style="font-size:24px;line-height:1.4;color:#3D4A46">A model proposes steps; code drops anything unknown</p>
+</div>
+<x-connector head="end" style="width:56px;height:2px;align-self:center;color:#12211D;border-width:3px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:24px;border:1px solid #E2DED2;border-radius:16px">
+<p style="font-size:30px;font-weight:600;color:#12211D">3 Check</p>
+<p style="font-size:24px;line-height:1.4;color:#3D4A46">Every number recomputed independently; mismatches removed</p>
+</div>
+<x-connector head="end" style="width:56px;height:2px;align-self:center;color:#12211D;border-width:3px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:24px;border:1px solid #E2DED2;border-radius:16px">
+<p style="font-size:30px;font-weight:600;color:#12211D">4 Challenge</p>
+<p style="font-size:24px;line-height:1.4;color:#3D4A46">Another model family argues against; others vote</p>
+</div>
+<x-connector head="end" style="width:56px;height:2px;align-self:center;color:#12211D;border-width:3px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#12211D;padding:24px;border-radius:16px">
+<p style="font-size:30px;font-weight:600;color:#F5F3EC">5 Answer or abstain</p>
+<p style="font-size:24px;line-height:1.4;color:#C9D6D1">Withheld when checks fail, naming what is missing</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#E9E5D9;padding:28px 36px;border-radius:16px">
+<p style="font-size:30px;line-height:1.4;color:#12211D"><b>“How big a loan can I safely take?”</b> 14 of 14 numbers recomputed and verified, 3 action cards, and a warning that the lender may ask for facts Hishab does not hold.</p>
+<p style="font-size:24px;line-height:1.4;color:#3D4A46">Run offline with no model, so no model agreement is claimed. Each question has a budget of tool and model calls; agent tools can never execute an action.</p>
+</div>
+<aside>The copilot is where most AI products cut corners, so we built five steps around the model. First, every question is screened for prompt injection in four languages. Second, a model proposes a plan, and code removes anything it does not recognise. Third, every number the answer states is recomputed by an independent path: the engine again, a fresh simulation, or a symbolic check of the formula. Fourth, a model from a different family argues the case against, and other models vote on the judgement. Fifth, if checks fail or votes disagree, Hishab says “I don’t know” and names what is missing. In our example, all fourteen numbers checked out.</aside>
+</section>
