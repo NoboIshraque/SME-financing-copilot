@@ -1,0 +1,317 @@
+"""Orchestrator and sub-agents (WP-10 milestone 3; FEATURES N8, P9, P13).
+
+    run = Orchestrator(gateway).ask(ctx, "Will I run out of cash next month?")
+    run.recommendation          # answer + claims + figures + up to 3 action cards, or abstain
+
+1. Guard: the question passes WP-11's injection guard before any model sees it.
+2. Plan: the brain proposes intents and tools from the anonymised question; code repairs the
+   plan (planning.py). If the gate still finds personal data, the rules plan locally.
+3. Dispatch: one sub-agent per intent, in parallel threads. A tool two sub-agents need runs
+   once (memoised); dependencies run first; every call is charged to the run's budget.
+4. Compose: every number becomes a Claim (claims.py); the brain narrates the claim texts; at
+   most three action cards the caller's role may act on are attached (P9: rails, not chat).
+
+A failure in the primary intent's tools abstains with exactly what is missing; a failure in a
+secondary intent is reported in `Run.skipped` while the rest is answered.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import secrets
+import threading
+import time
+from collections.abc import Iterable, Mapping
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
+
+from app.agents import claims as claims_mod
+from app.agents.budget import Budget
+from app.agents.claims import Statement
+from app.agents.planning import DEPENDS, Plan, build_plan
+from app.agents.tools import (
+    InsufficientData,
+    ToolContext,
+    ToolError,
+    ToolRegistry,
+    ToolResult,
+    ToolUnavailable,
+    most_cautious,
+)
+from app.agents.toolset import REGISTRY
+from app.contracts import (
+    Abstention,
+    AbstentionReason,
+    ActionCard,
+    DataMode,
+    Figure,
+    Recommendation,
+    Role,
+)
+from app.llm import LLMGateway, LLMRequest, LLMResponse
+from app.llm import deterministic as rules
+from app.llm.prompts import narrate_request, plan_request
+from app.privacy import PrivacyViolation, TokenVault, anonymise
+from app.security import policy
+from app.security.guard import Source, screen
+
+MAX_CARDS = 3
+CARD_SOURCES = ("cash.gaps", "financing.match", "mesh.propose")
+
+
+class BudgetExhausted(ToolError):
+    def __init__(self, tool: str) -> None:
+        self.tool = tool
+        super().__init__(f"{tool}: the run's tool budget is used up")
+
+
+@dataclass(frozen=True)
+class TraceEvent:
+    step: str  # guard | plan | tool | narrate | ...
+    name: str
+    outcome: str
+    ms: int
+    detail: str = ""
+
+
+class Trace:
+    def __init__(self) -> None:
+        self._events: list[TraceEvent] = []
+        self._lock = threading.Lock()
+
+    def add(self, step: str, name: str, outcome: str, started: float, detail: str = "") -> None:
+        ms = round((time.perf_counter() - started) * 1000)
+        with self._lock:
+            self._events.append(TraceEvent(step, name, outcome, ms, detail))
+
+    def events(self) -> tuple[TraceEvent, ...]:
+        with self._lock:
+            return tuple(self._events)
+
+
+class ToolRunner:
+    """Runs each tool at most once per run, dependencies first, charged to the budget."""
+
+    def __init__(self, registry: ToolRegistry, ctx: ToolContext, budget: Budget,
+                 params: Mapping[str, Mapping[str, Any]], trace: Trace) -> None:
+        self.registry, self.ctx, self.budget = registry, ctx, budget
+        self.params, self.trace = params, trace
+        self._done: dict[str, ToolResult | ToolError] = {}
+        self._locks: dict[str, threading.Lock] = {}
+        self._guard = threading.Lock()
+
+    def _lock_for(self, name: str) -> threading.Lock:
+        with self._guard:
+            return self._locks.setdefault(name, threading.Lock())
+
+    def call(self, name: str) -> ToolResult | ToolError:
+        for dependency in DEPENDS.get(name, ()):
+            self.call(dependency)
+        with self._lock_for(name):
+            if name in self._done:
+                return self._done[name]
+            started = time.perf_counter()
+            outcome: ToolResult | ToolError
+            if not self.budget.take_tool(name):
+                outcome = BudgetExhausted(name)
+            else:
+                try:
+                    outcome = self.registry.run(name, self.ctx, self.params.get(name))
+                except ToolError as exc:
+                    outcome = exc
+            self._done[name] = outcome
+            label = "ok" if isinstance(outcome, ToolResult) else type(outcome).__name__
+            self.trace.add("tool", name, label, started,
+                           "" if isinstance(outcome, ToolResult) else str(outcome))
+            return outcome
+
+    def run_all(self, tools: Iterable[str]) -> None:
+        for name in tools:
+            self.call(name)
+
+    def results(self) -> dict[str, ToolResult]:
+        return {n: r for n, r in self._done.items() if isinstance(r, ToolResult)}
+
+    def errors(self) -> dict[str, ToolError]:
+        return {n: e for n, e in self._done.items() if isinstance(e, ToolError)}
+
+
+@dataclass(frozen=True)
+class Run:
+    recommendation: Recommendation
+    plan: Plan
+    statements: tuple[Statement, ...] = ()
+    results: Mapping[str, ToolResult] = field(default_factory=dict)
+    skipped: Mapping[str, str] = field(default_factory=dict)  # tool -> why (secondary intents)
+    budget: Mapping[str, object] = field(default_factory=dict)
+    trace: tuple[TraceEvent, ...] = ()
+
+
+def recommendation_id(tenant_id: str, question: str, now: datetime) -> str:
+    digest = hashlib.sha256(f"{tenant_id}|{question}|{now.isoformat()}".encode()).hexdigest()
+    return f"rec_{digest[:20]}"
+
+
+def abstention_for(errors: Mapping[str, ToolError]) -> Abstention:
+    """The most specific reason among the failed tools, naming exactly what is missing."""
+    missing = [m for e in errors.values() if isinstance(e, InsufficientData) for m in e.missing]
+    if missing:
+        return Abstention(reason=AbstentionReason.insufficient_data,
+                          missing=tuple(dict.fromkeys(missing)),
+                          message_key="abstain.insufficient_data")
+    if any(isinstance(e, BudgetExhausted) for e in errors.values()):
+        return Abstention(reason=AbstentionReason.budget_exhausted,
+                          missing=tuple(n for n, e in errors.items()
+                                        if isinstance(e, BudgetExhausted)),
+                          message_key="abstain.budget_exhausted")
+    engines = [e.engine for e in errors.values() if isinstance(e, ToolUnavailable)]
+    if engines:
+        return Abstention(reason=AbstentionReason.out_of_scope,
+                          missing=tuple(dict.fromkeys(engines)),
+                          message_key="abstain.engine_unavailable")
+    return Abstention(reason=AbstentionReason.unverifiable, message_key="abstain.tool_failed",
+                      detail="; ".join(sorted(str(e) for e in errors.values()))[:500])
+
+
+class Orchestrator:
+    def __init__(self, gateway: LLMGateway, registry: ToolRegistry = REGISTRY, *,
+                 vault: TokenVault | None = None, max_workers: int = 3,
+                 guard: bool = True) -> None:
+        self.gateway = gateway
+        self.registry = registry
+        # Tokens only label text for one request; originals are never restored from here.
+        self.vault = vault or TokenVault(secrets.token_bytes(32))
+        self.max_workers = max_workers
+        self.guard = guard
+
+    # ------------------------------------------------------------------ model calls
+
+    def llm(self, request: LLMRequest, what: str, budget: Budget, trace: Trace) -> LLMResponse:
+        """A model call charged to the budget; past the budget only the rules answer."""
+        started = time.perf_counter()
+        allowed = budget.take_llm(what)
+        reply = self.gateway.complete(request, slots=None if allowed else [])
+        budget.spend_tokens(reply.tokens_in + reply.tokens_out)
+        trace.add(what, reply.slot, "cached" if reply.cached else "ok", started,
+                  ",".join(f"{a.slot}={a.outcome.value}" for a in reply.attempts))
+        return reply
+
+    def _plan(self, ctx: ToolContext, question: str, language: str | None, private: bool,
+              party_names: tuple[str, ...], budget: Budget, trace: Trace) -> Plan:
+        anon = anonymise(question, vault=self.vault, tenant=ctx.tenant_id, anchor=ctx.as_of,
+                         party_names=party_names)
+        try:
+            reply = self.llm(plan_request(anon.text, private=private, party_names=party_names),
+                             "plan", budget, trace)
+            return build_plan(reply.data, question, self.registry, planner=reply.slot,
+                              language=language)
+        except PrivacyViolation as exc:
+            # Something the anonymiser missed: plan locally, nothing leaves the server.
+            trace.add("plan", "deterministic", "privacy_blocked", time.perf_counter(),
+                      ",".join(k.value for k in exc.kinds))
+            return build_plan(rules.plan(question), question, self.registry,
+                              planner="deterministic", language=language)
+
+    # ------------------------------------------------------------------ the run
+
+    def ask(self, ctx: ToolContext, question: str, *, language: str | None = None,
+            role: Role = Role.owner, actor: str = "copilot", private: bool = False,
+            party_names: Iterable[str] = (), budget: Budget | None = None) -> Run:
+        budget = budget or Budget()
+        trace = Trace()
+        rec_id = recommendation_id(ctx.tenant_id, question, ctx.now)
+        names = tuple(party_names)
+        if self.guard:
+            started = time.perf_counter()
+            with ctx.db() as store:
+                verdict = screen(store.session, ctx.tenant_id, actor, question,
+                                 Source.user_message, ctx.now)
+            trace.add("guard", "injection", "allowed" if verdict.allowed else "quarantined",
+                      started, ",".join(verdict.rule_ids))
+            if not verdict.allowed:
+                plan = Plan((), (), language or rules.language_of(question), "none")
+                abstention = Abstention(reason=AbstentionReason.policy,
+                                        message_key="abstain.quarantined",
+                                        detail=verdict.quarantine_id)
+                return self._finish(ctx, rec_id, question, plan, abstention=abstention,
+                                    budget=budget, trace=trace)
+        plan = self._plan(ctx, question, language, private, names, budget, trace)
+        if not plan.understood:
+            abstention = Abstention(reason=AbstentionReason.out_of_scope,
+                                    message_key="abstain.out_of_scope")
+            return self._finish(ctx, rec_id, question, plan, abstention=abstention,
+                                budget=budget, trace=trace)
+        runner = ToolRunner(self.registry, ctx, budget, plan.params, trace)
+        subagents = plan.subagents()
+        with ThreadPoolExecutor(max_workers=max(1, min(len(subagents), self.max_workers)),
+                                thread_name_prefix="subagent") as pool:
+            for future in [pool.submit(runner.run_all, tools) for _, tools in subagents]:
+                future.result()
+        results, errors = runner.results(), runner.errors()
+        primary = set(subagents[0][1]) if subagents else set()
+        primary_errors = {n: e for n, e in errors.items() if n in primary}
+        skipped = {n: str(e) for n, e in errors.items() if n not in primary}
+        statements = claims_mod.compose(results, plan.tools, plan.language)
+        if primary_errors or not statements:
+            abstention = abstention_for(primary_errors or errors) if (primary_errors or errors) \
+                else Abstention(reason=AbstentionReason.unverifiable,
+                                message_key="abstain.nothing_to_report")
+            return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
+                                abstention=abstention, budget=budget, trace=trace)
+        answer = self._narrate(statements, plan, private, budget, trace)
+        cards = self.cards(results, role)
+        return self._finish(ctx, rec_id, question, plan, results=results, skipped=skipped,
+                            statements=statements, answer=answer, cards=cards, budget=budget,
+                            trace=trace)
+
+    def _narrate(self, statements: list[Statement], plan: Plan, private: bool, budget: Budget,
+                 trace: Trace) -> str:
+        texts = [s.claim.text for s in statements]
+        reply = self.llm(narrate_request(texts, language=plan.language, private=private),
+                         "narrate", budget, trace)
+        text = (reply.data or {}).get("text")
+        return text if isinstance(text, str) and text.strip() else " ".join(texts)
+
+    @staticmethod
+    def cards(results: Mapping[str, ToolResult], role: Role) -> tuple[ActionCard, ...]:
+        """At most three cards, in plan priority, that the caller's role may at least draft
+        (the approval flow decides who executes)."""
+        out: list[ActionCard] = []
+        for name in CARD_SOURCES:
+            result = results.get(name)
+            for card in result.cards if result is not None else ():
+                if card.id in {c.id for c in out}:
+                    continue
+                if policy.decide(role, card.action_type, card.tier).allowed or \
+                        policy.may_request(role, card.action_type):
+                    out.append(card)
+        return tuple(out[:MAX_CARDS])
+
+    def _finish(self, ctx: ToolContext, rec_id: str, question: str, plan: Plan, *,
+                results: Mapping[str, ToolResult] | None = None,
+                skipped: Mapping[str, str] | None = None,
+                statements: list[Statement] | None = None, answer: str | None = None,
+                cards: tuple[ActionCard, ...] = (), abstention: Abstention | None = None,
+                budget: Budget, trace: Trace) -> Run:
+        results = results or {}
+        statements = statements or []
+        figures: dict[str, Figure] = {s.figure.id: s.figure for s in statements}
+        for card in cards:
+            for fig in (*card.figures, card.impact, card.cost):
+                if fig is not None:
+                    figures.setdefault(fig.id, fig)
+        modes = [r.data_mode for r in results.values()] or [ctx.data_mode]
+        recommendation = Recommendation(
+            id=rec_id, tenant_id=ctx.tenant_id, question=question,
+            answer_text=answer if abstention is None else None,
+            claims=tuple(s.claim for s in statements) if abstention is None else (),
+            action_cards=cards if abstention is None else (),
+            figures=tuple(figures.values()) if abstention is None else (),
+            abstention=abstention, tools_used=tuple(n for n in plan.tools if n in results),
+            data_mode=most_cautious(modes) if modes else DataMode.synthetic,
+            created_at=ctx.now)
+        return Run(recommendation=recommendation, plan=plan, statements=tuple(statements),
+                   results=dict(results), skipped=dict(skipped or {}), budget=budget.report(),
+                   trace=trace.events())

@@ -175,7 +175,8 @@ def scenarios(ctx: ToolContext, params: ScenarioParams) -> ToolResult:
     return ToolResult("analysis.scenarios", figures=(*before, *after),
                       facts=_cited(ctx, (analysis.closing,)),
                       payload={"scenario": scenario, "before": before, "after": after,
-                               "band": shocked.band(level, ctx.now), "as_of": analysis.as_of},
+                               "band": shocked.band(level, ctx.now), "as_of": analysis.as_of,
+                               "buffer": level},
                       data_mode=analysis.baseline.data_mode)
 
 
