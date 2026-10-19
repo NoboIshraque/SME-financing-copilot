@@ -11,6 +11,16 @@ test("the owner approves a reminder draft on Receivables and sends it from Messa
 
   await app.start("receivables");
   const reminders = page.getByRole("region", { name: app.t("receivables.remindersTitle") });
+  await expect(reminders.getByRole("article").first()).toBeVisible();
+  // Live WP-05: a reminder leaves Hishab, so each card is EXECUTE and waits in the owner's approval
+  // queue (WP-12 sending was cut 19 Oct; N2 keeps drafts there). The draft-in-Messages half below
+  // runs only against the labelled mock plan.
+  const live = reminders.getByRole("article").filter({ hasText: app.t("tier.EXECUTE") });
+  if ((await live.count()) > 0) {
+    await expect(live.first().getByRole("button", { name: app.t("actionCard.approveWithCode") })).toBeVisible();
+    test.info().annotations.push({ type: "live plan", description: "EXECUTE reminders; Messages half not run" });
+    return;
+  }
   const first = reminders.getByRole("article").filter({ has: page.getByRole("button", { name: app.t("actionCard.approveDraft") }) }).first();
   // "Customer 9 · 4 invoices · due ...": the first detail is who the reminder goes to.
   const recipient = (await first.locator("h4 + p").innerText()).split(" · ")[0]?.trim() ?? "";

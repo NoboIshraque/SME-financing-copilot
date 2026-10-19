@@ -43,8 +43,9 @@ from app.facts.provenance import ProvenanceIncomplete, explain, explain_rows
 from app.facts.provenance import compute as compute_fact
 from app.facts.registry import REGISTRY, NotComputable
 from app.main import get_session
-from app.security.deps import current_principal
+from app.security.deps import current_principal, require
 from app.security.errors import ProblemRoute, forbidden
+from app.security.roles import Permission
 
 router = APIRouter(tags=["facts"], route_class=ProblemRoute)
 MAX_PAGE = 500
@@ -74,6 +75,13 @@ def current_caller(principal: Principal = Depends(current_principal),
     if tenant_id is not None and tenant_id != principal.tenant_id:
         raise forbidden("tenant")
     return principal
+
+
+def ledger_reader(principal: Principal = Depends(require(Permission.ledger_read)),
+                  tenant_id: str | None = None) -> Principal:
+    """`current_caller` for routes that compute ledger figures: needs `ledger:read`, so a
+    lender viewer (passport and reports only) is refused. Explain stays open to them, masked."""
+    return current_caller(principal, tenant_id)
 
 
 def _error(status: int, code: str, message_key: str, **detail: str) -> JSONResponse:
@@ -133,7 +141,7 @@ def get_fact(
     granularity: str = "month",
     entity: str | None = None,
     compute: str = "true",
-    caller: Principal = Depends(current_caller),
+    caller: Principal = Depends(ledger_reader),
     session: Session = Depends(get_session),
 ) -> Fact | JSONResponse:
     period = _period(start, end, granularity)

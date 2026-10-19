@@ -20,10 +20,15 @@ test("staff cannot approve what moves money, and nobody may request a DENY actio
   if (TARGET === "local" || (await routeIsLive("GET /api/copilot/today"))) {
     await app.start("today");
     const actions = page.getByRole("region", { name: app.t("today.actionsTitle") });
-    const execute = actions.getByRole("article").filter({ hasText: app.t("tier.EXECUTE") }).first();
-    await expect(execute).toContainText(app.t("actionCard.ownerOnly"));
-    for (const action of ["actionCard.approveWithCode", "actionCard.askOwner"]) {
-      await expect(execute.getByRole("button", { name: app.t(action) })).toHaveCount(0);
+    await expect(actions).toBeVisible();
+    // The live copilot offers staff only cards their role may act on (WP-10, P9); any money-moving
+    // card that does show must still be owner-only, with no control for staff.
+    const execute = actions.getByRole("article").filter({ hasText: app.t("tier.EXECUTE") });
+    for (const card of await execute.all()) {
+      await expect(card).toContainText(app.t("actionCard.ownerOnly"));
+      for (const action of ["actionCard.approveWithCode", "actionCard.askOwner"]) {
+        await expect(card.getByRole("button", { name: app.t(action) })).toHaveCount(0);
+      }
     }
     // Staff work on sales and collections; cash planning stays with the owner and accountant.
     const nav = app.isPhone ? page.getByRole("navigation", { name: app.t("nav.quick") }) : app.mainNav();
