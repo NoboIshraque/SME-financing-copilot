@@ -136,6 +136,9 @@ _EXPRESSIONS = {
     "analysis.scenario.risk_adjusted": "(expected_outcome + worst_5pct_outcome) / 2",
     "analysis.scenario.cost": "what the decision costs beyond moving cash in time: interest and "
                               "fees (WP-06 total cost), or the discount given; 0 otherwise",
+    # ---- decision stability (stability.py)
+    "analysis.stability.score": "variations in which the decision held / variations run "
+                                "(economic stress and irrelevant noise)",
 }
 FORMULAS: dict[str, FormulaRef] = {
     formula_id: FormulaRef(formula_id=formula_id, version=1, expression=expression)
