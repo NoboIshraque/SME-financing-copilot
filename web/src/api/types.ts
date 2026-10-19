@@ -6,12 +6,14 @@ import type {
   ActionCard,
   AnchorReceipt,
   Approval,
+  CashGap,
   DataMode,
   Figure,
   FinancingNeed,
   FinancingOption,
   ForecastBand,
   Invoice,
+  LeadingIndicator,
   LenderProfile,
   MeshObligation,
   Money,
@@ -68,6 +70,16 @@ export interface DemoAccount {
 export interface CashForecast {
   band: ForecastBand;
   figures: Figure[];
+}
+
+/** GET /api/cash/gaps (WP-04): the gaps ahead plus leading indicators and the surplus sweep. */
+export interface CashGaps {
+  as_of: string;
+  buffer: Money;
+  gaps: CashGap[];
+  indicators: { indicator: LeadingIndicator; figures: Figure[]; reference_id?: string | null }[];
+  sweep?: ActionCard | null;
+  data_mode: DataMode;
 }
 
 /** POST /api/cash/whatif body (WP-04): shocks applied to the same seeded simulation.
