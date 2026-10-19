@@ -1,13 +1,14 @@
 // Journey: upload a bKash statement -> preview -> commit (WP-02 ingest through the copilot's
 // upload flow). The statement is generated per run with fresh transaction ids, so every run adds
-// new rows, and the re-upload proves duplicates are caught. Labelled synthetic (rule 8).
+// new rows, and the re-upload proves duplicates are caught. Labelled synthetic (rule 8). It runs as
+// the owner of the second demo business, so the home business's demo figures stay as seeded.
 import { randomBytes } from "node:crypto";
 
-import { sessionFile } from "../support/auth";
+import { demoAccounts, HOME_TENANT_INDEX } from "../support/accounts";
 import { expect, test } from "../support/fixtures";
 import { needsRoutes } from "../support/target";
 
-test.use({ storageState: sessionFile("owner") });
+test.use({ storageState: { cookies: [], origins: [] } });
 
 const HEADER = "TrxID,Date Time,Transaction Type,From/To,Amount (BDT),Fee,Balance,Reference,Data Mode";
 
@@ -25,7 +26,13 @@ function bkashStatement(rows: number): { name: string; mimeType: string; buffer:
 }
 
 test("the owner uploads a bKash statement, checks the preview and commits it; a re-upload is caught as duplicates", async ({ app, page }) => {
+  test.setTimeout(180_000); // the owner's sign-in may wait for a fresh TOTP step
   await needsRoutes(["POST /api/ingest/preview", "POST /api/ingest/commit"], { mockCannot: "parse a real file" });
+  const accounts = await demoAccounts(page.request);
+  const home = accounts[HOME_TENANT_INDEX]?.business_name;
+  const owner = accounts.find((account) => account.role === "owner" && account.business_name !== home);
+  if (!owner) throw new Error("no second demo business");
+  await app.signInAs(owner);
   const statement = bkashStatement(3);
 
   await app.start("today");

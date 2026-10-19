@@ -41,6 +41,8 @@ export const APPROVE_CALL: StepUpCall = { route: "POST /api/approvals/probe/appr
 
 export class App {
   language: Language = "en";
+  /** Set once signInAs started a session here: the fixture signs it out after the test. */
+  signedIn = false;
 
   constructor(readonly page: Page) {}
 
@@ -102,6 +104,7 @@ export class App {
 
   /** Sign this browser context in as `account` (API sign-in; the cookie lands in the context). */
   async signInAs(account: DemoAccount): Promise<void> {
+    this.signedIn = true;
     await signInThroughApi(this.page.request, account);
   }
 
@@ -168,7 +171,10 @@ export function knownBug(description: string): void {
 
 export const test = base.extend<{ app: App; foreignHosts: string[] }>({
   app: async ({ page }, provide) => {
-    await provide(new App(page));
+    const app = new App(page);
+    await provide(app);
+    // A session this test started ends with it (its cookie may sit in a trace).
+    if (app.signedIn) await page.request.post("/api/auth/logout").catch(() => undefined);
   },
   foreignHosts: async ({ page, baseURL }, provide) => {
     const own = new URL(baseURL ?? "http://localhost:5173").host;
