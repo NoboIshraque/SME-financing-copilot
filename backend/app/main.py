@@ -28,7 +28,7 @@ from fastapi.routing import APIRoute
 import app as app_pkg
 from app import api as api_pkg
 from app.db import init_db, make_engine, session_factory
-from app.settings import Settings, get_settings
+from app.settings import AppEnv, Settings, get_settings
 
 
 def discover_routers() -> list[tuple[str, APIRouter]]:
@@ -91,11 +91,16 @@ def discover_app_hooks(package: ModuleType = app_pkg) -> list[tuple[str, AppHook
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
+    local = settings.app_env in (AppEnv.development, AppEnv.test)
     application = FastAPI(
         title="Hishab - SME Finance Copilot API",
         version="0.1.0",
-        docs_url="/api/docs",
-        openapi_url="/api/openapi.json",
+        # Interactive docs only where developers run the app: Swagger UI loads from a
+        # third-party CDN (may be blocked in China, needs a relaxed CSP). The API contract is
+        # published as docs/api/contracts.json.
+        docs_url="/api/docs" if local else None,
+        redoc_url="/api/redoc" if local else None,
+        openapi_url="/api/openapi.json" if local else None,
     )
     application.state.settings = settings
     engine = make_engine(settings.database_url)
