@@ -4,12 +4,12 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useDeferredValue, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { ActionCard, ForecastBand } from "../../api/contracts";
+import type { ActionCard, ForecastBand, Provenance } from "../../api/contracts";
 import { api } from "../../api/endpoints";
 import { findFigure } from "../../api/figures";
 import type { CashForecast } from "../../api/types";
 import { ActionCardView } from "../../components/ActionCardView";
-import { FigureValue } from "../../components/FigureValue";
+import { FigureValue, Num } from "../../components/FigureValue";
 import { EmptyState, ErrorState, LoadingState, QueryView } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
 import { useServerText } from "../../i18n/serverText";
@@ -31,6 +31,15 @@ const SLIDERS: Array<{ key: keyof Shocks; min: number; max: number; step: number
   { key: "delay", min: 0, max: 30, step: 5 },
   { key: "oneOff", min: 0, max: 200000, step: 10000 },
 ];
+
+/** A band value is explained by the simulation that produced it: same seed, same paths. */
+function bandProvenance(band: ForecastBand, day: string, series: string): Provenance {
+  return {
+    formula_id: `cash.forecast_${series}`,
+    formula_version: 1,
+    parameters: { day, seed: String(band.seed), paths: String(band.paths), as_of: band.as_of, generated_at: band.generated_at },
+  };
+}
 
 function WeeklyTable({ band }: { band: ForecastBand }) {
   const { t } = useTranslation();
@@ -57,10 +66,14 @@ function WeeklyTable({ band }: { band: ForecastBand }) {
                 <th scope="row" className="py-1 text-left font-normal">
                   {t("cash.weekN", { n: i + 1, date: format.date(point.day) })}
                 </th>
-                <td>{format.money(point.p10)}</td>
-                <td className="font-semibold">{format.money(point.p50)}</td>
-                <td>{format.money(point.p90)}</td>
-                <td>{format.probability(point.p_below_buffer)}</td>
+                {(["p10", "p50", "p90"] as const).map((band_) => (
+                  <td key={band_} className={band_ === "p50" ? "font-semibold" : ""}>
+                    <Num value={point[band_].amount} unit="BDT" label={`${t(`cash.${band_}`)} · ${format.date(point.day)}`} provenance={bandProvenance(band, point.day, band_)} dataMode={band.data_mode} />
+                  </td>
+                ))}
+                <td>
+                  <Num value={point.p_below_buffer} unit="probability" label={`${t("cash.chanceBelow")} · ${format.date(point.day)}`} provenance={bandProvenance(band, point.day, "p_below_buffer")} dataMode={band.data_mode} />
+                </td>
               </tr>
             ))}
           </tbody>

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import type { Alert, AlertTier } from "../../api/contracts";
 import { findFigure } from "../../api/figures";
-import { FigureValue } from "../../components/FigureValue";
+import { FigureValue, Num } from "../../components/FigureValue";
 import { AlertTierBadge } from "../../components/TierBadge";
 import { useServerText } from "../../i18n/serverText";
 import { useFormat } from "../../i18n/useFormat";
@@ -73,7 +73,13 @@ export function AlertCard({ alert, level }: { alert: Alert; level: 3 | 4 | 5 }) 
             {gap.drivers.map((driver) => (
               <li key={`${driver.kind}-${driver.label_key}`} className="flex justify-between gap-3">
                 <span>{text(driver.label_key)}</span>
-                <span className="tabular-nums">{format.money(driver.amount)}</span>
+                <Num
+                  value={driver.amount.amount}
+                  unit="BDT"
+                  label={text(driver.label_key)}
+                  provenance={{ formula_id: "raw.source_row", formula_version: 1, source_row_ids: driver.reference_id ? [driver.reference_id] : [] }}
+                  dataMode={alert.data_mode}
+                />
               </li>
             ))}
           </ul>

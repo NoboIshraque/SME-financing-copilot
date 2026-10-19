@@ -488,7 +488,10 @@
     "net_sales": "净销售额",
     "collections": "回款",
     "purchases": "采购",
-    "closing_balance": "月末现金"
+    "closing_balance": "月末现金",
+    "opening_balance": "期初现金",
+    "cash_in": "现金流入",
+    "cash_out": "现金流出"
   },
   "decision": {
     "retime_supplier": "发薪日后再付供应商",
@@ -767,5 +770,20 @@
       "auto": "真实后端，缺失部分用模拟"
     },
     "reloadNeeded": "重新加载后生效。"
+  },
+  "provenance": {
+    "title": "计算过程",
+    "open": "{{label}}：{{value}}。查看计算过程",
+    "close": "关闭",
+    "formula": "公式",
+    "formulaId": "{{id}}，第 {{version}} 版",
+    "inputs": "输入",
+    "noInputs": "该数字没有单独的输入项。",
+    "sources": "来源记录",
+    "noRows": "该数字没有来源记录。",
+    "masked": "根据您的角色，部分来源记录已隐藏。",
+    "parameters": "使用的参数",
+    "recordedOnly": "详细分解暂不可用，以下是随数字记录的来源信息。",
+    "codeComputes": "由 Hishab 的计算引擎根据您的记录算出，没有任何 AI 模型生成这个数字。"
   }
 }

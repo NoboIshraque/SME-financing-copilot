@@ -74,7 +74,7 @@ describe("Receivables screen", () => {
     const reminders = await screen.findByRole("region", { name: "Reminders to send" });
     const cards = await within(reminders).findAllByRole("article");
     expect(within(cards[0] as HTMLElement).getByText("Your role can't approve this.")).toBeInTheDocument();
-    expect(within(reminders).queryByRole("button")).not.toBeInTheDocument();
+    expect(within(reminders).queryByRole("button", { name: "Approve draft" })).not.toBeInTheDocument();
   });
 
   it("has an empty state when nobody owes money", async () => {

@@ -118,7 +118,7 @@ describe("Today screen", () => {
     renderApp("/", { signedInAs: ACCOUNTANT });
     const retime = await screen.findByRole("article", { name: "Pay a supplier later, within terms" });
     expect(within(retime).getByText("Only the owner can approve this.")).toBeInTheDocument();
-    expect(within(retime).queryByRole("button")).not.toBeInTheDocument();
+    expect(within(retime).queryByRole("button", { name: "Approve with code" })).not.toBeInTheDocument();
     expect(within(card(/Send a payment reminder/)).getByRole("button", { name: "Approve draft" })).toBeEnabled();
   });
 

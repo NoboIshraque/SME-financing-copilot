@@ -488,7 +488,10 @@
     "net_sales": "Net sales",
     "collections": "Collections",
     "purchases": "Purchases",
-    "closing_balance": "Cash at month end"
+    "closing_balance": "Cash at month end",
+    "opening_balance": "Cash at start",
+    "cash_in": "Money in",
+    "cash_out": "Money out"
   },
   "decision": {
     "retime_supplier": "Pay the supplier after salary day",
@@ -767,5 +770,20 @@
       "auto": "Real, mock for missing parts"
     },
     "reloadNeeded": "Reload to apply."
+  },
+  "provenance": {
+    "title": "How this was calculated",
+    "open": "{{label}}: {{value}}. Show how this was calculated",
+    "close": "Close",
+    "formula": "Formula",
+    "formulaId": "{{id}}, version {{version}}",
+    "inputs": "Inputs",
+    "noInputs": "This figure has no separate inputs.",
+    "sources": "Source rows",
+    "noRows": "No source rows for this figure.",
+    "masked": "Some source rows are hidden for your role.",
+    "parameters": "Settings used",
+    "recordedOnly": "The detailed breakdown is not available yet. This is the provenance recorded with the number.",
+    "codeComputes": "Computed by Hishab's engines from your records. No AI model produced this number."
   }
 }

@@ -9,7 +9,7 @@ import { api } from "../../api/endpoints";
 import type { ReceivableRow, ReceivablesOverview } from "../../api/types";
 import { ActionCardView } from "../../components/ActionCardView";
 import { Dialog } from "../../components/Dialog";
-import { FigureValue } from "../../components/FigureValue";
+import { FigureValue, Num } from "../../components/FigureValue";
 import { EmptyState, QueryView } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
 import { describeError, useServerText } from "../../i18n/serverText";
@@ -97,7 +97,15 @@ function InvoiceRow({ row, onDispute }: { row: ReceivableRow; onDispute: (row: R
             {row.days_overdue > 0 && <> · {t("receivables.late", { days: format.days(row.days_overdue) })}</>}
           </p>
         </div>
-        <p className="text-lg font-semibold tabular-nums">{format.money(row.invoice.amount)}</p>
+        <p className="text-lg font-semibold">
+          <Num
+            value={row.invoice.amount.amount}
+            unit="BDT"
+            label={`${row.counterparty_label} · ${number}`}
+            provenance={{ formula_id: "raw.source_row", formula_version: 1, source_row_ids: [row.invoice.source_ref] }}
+            dataMode={row.invoice.data_mode}
+          />
+        </p>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
         <span className={`rounded-full px-2 py-0.5 font-semibold ${RISK_STYLE[level]}`}>

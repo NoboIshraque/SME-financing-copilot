@@ -4,6 +4,7 @@ import { createBrowserRouter, createMemoryRouter, RouterProvider } from "react-r
 
 import { onUnauthorized } from "./api/client";
 import { SESSION_KEY } from "./auth/session";
+import { ProvenanceProvider } from "./components/ProvenanceDrawer";
 import { routes } from "./routes";
 
 export function App({ initialPath, queryClient }: { initialPath?: string; queryClient?: QueryClient }) {
@@ -17,7 +18,9 @@ export function App({ initialPath, queryClient }: { initialPath?: string; queryC
 
   return (
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
+      <ProvenanceProvider>
+        <RouterProvider router={router} />
+      </ProvenanceProvider>
     </QueryClientProvider>
   );
 }
