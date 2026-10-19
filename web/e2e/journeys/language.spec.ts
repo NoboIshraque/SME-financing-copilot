@@ -17,7 +17,9 @@ const WALK = [...SCREENS.filter((screen) => screen !== "trust"), "trust" as cons
 async function expectTranslated(app: App, language: Language, where: string): Promise<void> {
   const page = app.page;
   await expect(page.locator("[aria-busy='true']")).toHaveCount(0);
-  const text = await page.locator("main").innerText();
+  // What the owner typed (quoted in <q>, e.g. a question in the abstention log) is theirs, not UI.
+  let text = await page.locator("main").innerText();
+  for (const quoted of await page.locator("main q").allInnerTexts()) text = text.replace(quoted, "");
   const leftovers = untranslatedTells(language).filter((sentence) => text.includes(sentence));
   expect(leftovers, `English left on ${where} in ${language}`).toEqual([]);
 }
