@@ -125,6 +125,17 @@ _EXPRESSIONS = {
                                         "1) x 100 over the last n checks, kept within +/-50%: "
                                         "sales lines for sales, purchases and other costs for "
                                         "costs",
+    # ---- scenarios (scenarios.py)
+    "analysis.scenario.expected_outcome": "mean over the Monte Carlo paths of the balance at the "
+                                          "end of the horizon, net of what the decision still "
+                                          "owes or is owed after it",
+    "analysis.scenario.worst_5pct_outcome": "mean of the lowest 5% of path outcomes (nearest "
+                                            "rank)",
+    "analysis.scenario.p_buffer_breach": "paths whose balance falls below the buffer on any "
+                                         "day of the horizon / paths",
+    "analysis.scenario.risk_adjusted": "(expected_outcome + worst_5pct_outcome) / 2",
+    "analysis.scenario.cost": "what the decision costs beyond moving cash in time: interest and "
+                              "fees (WP-06 total cost), or the discount given; 0 otherwise",
 }
 FORMULAS: dict[str, FormulaRef] = {
     formula_id: FormulaRef(formula_id=formula_id, version=1, expression=expression)
