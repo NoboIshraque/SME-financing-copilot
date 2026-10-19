@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 
 import pytest
@@ -199,9 +200,11 @@ def test_forecast_figures_are_explainable_and_cite_the_closing_balance(ledger, h
     labels = [f.label_key for f in result.figures]
     assert labels == ["cash.closing_balance", "cash.buffer_target", "cash.runway_days",
                       "cash.lowest_likely_balance"]
+    # Cash at the close of the last ledger day = WP-01 opening_balance of the next day (it needs
+    # no cash in and out on the last day, so a shop whose last day held only payments works too).
     closing = result.facts[0]
-    assert closing.metric == "closing_balance"
-    assert {f.metric for f in result.facts[1:]} == {"opening_balance", "cash_in", "cash_out"}
+    assert closing.metric == "opening_balance"
+    assert closing.period.start == result.payload["as_of"] + timedelta(days=1)
     for fig in result.figures[1:]:
         assert fig.provenance.input_fact_ids == (closing.id,)
         assert ledger.get_figure(fig.id, "sme_hardware")[1] == fig  # /api/explain can open it
