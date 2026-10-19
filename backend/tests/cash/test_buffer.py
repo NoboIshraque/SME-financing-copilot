@@ -123,7 +123,7 @@ def test_following_the_sweep_plan_keeps_the_buffer_in_19_of_20_paths(universe):
                                               flows=tuple((s.day, -s.increment) for s in plan)))
     first = (plan[0].day - AS_OF).days
     breached = (swept.balances[:, first - 1:].min(axis=1) < int(target * 100)).sum()
-    assert 0 < sum(s.increment for s in plan) and breached <= 50
+    assert sum(s.increment for s in plan) > 0 and breached <= 50
 
 
 def test_the_first_sweep_is_an_approval_card_that_moves_money():
