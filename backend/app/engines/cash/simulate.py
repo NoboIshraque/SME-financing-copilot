@@ -107,6 +107,9 @@ class Scenario:
     flows: tuple[tuple[date, Decimal], ...] = ()  # extra signed flows: + in, - out
     bill_payments: Mapping[str, tuple[tuple[date, Decimal], ...]] = field(default_factory=dict)
     invoice_changes: Mapping[str, InvoiceChange] = field(default_factory=dict)
+    # (first day, last day, percent, days later): that share of the purchases made in those
+    # days (cash and on credit) is made the given number of days later instead
+    defer_purchases: tuple[tuple[date, date, Decimal, int], ...] = ()
 
     def __post_init__(self) -> None:
         if not Decimal(-100) <= self.sales_change_pct <= Decimal(500):
@@ -115,6 +118,9 @@ class Scenario:
             raise ValueError("cost_change_pct must be between -100 and 500")
         if not 0 <= self.collection_delay_days <= 366:
             raise ValueError("collection_delay_days must be between 0 and 366")
+        for first, last, percent, days in self.defer_purchases:
+            if first > last or not Decimal(0) <= percent <= Decimal(100) or days < 1:
+                raise ValueError("a deferral needs first <= last, 0-100 percent, days >= 1")
 
 
 BASE = Scenario()
@@ -134,7 +140,8 @@ class Draws:
     new_invoice_delay: np.ndarray  # (paths, H) days from issue to payment, or NEVER
     new_bill: np.ndarray
     new_bill_delay: np.ndarray
-    cost: np.ndarray  # (paths, H) paisa: cash purchases + running costs
+    purchase: np.ndarray  # (paths, H) paisa of cash purchases
+    running: np.ndarray  # (paths, H) paisa of other running costs
 
 
 def _ratios_bp(residuals: tuple[Decimal, ...]) -> np.ndarray:
@@ -215,12 +222,13 @@ def draw(baseline: Baseline, seed: int = SEED, paths: int = PATHS) -> Draws:
     spend_days = _blocks(spend_rng, RUN_RATE_DAYS, shape)
     new_bill = _history_paisa(baseline, FlowKind.new_bills)[spend_days]
     new_bill_delay = _delays(baseline.bill_delays.issue_to_paid, delay_rng, shape)
-    cost = _history_paisa(baseline, FlowKind.purchases, FlowKind.running_cost)[spend_days]
+    purchase = _history_paisa(baseline, FlowKind.purchases)[spend_days]
+    running = _history_paisa(baseline, FlowKind.running_cost)[spend_days]
 
     return Draws(seed=seed, paths=paths, invoice_ids=tuple(inv.id for inv, _o in invoices),
                  sales_ratio=sales_ratio, invoice_day=invoice_day, new_invoice=new_invoice,
                  new_invoice_delay=new_invoice_delay, new_bill=new_bill,
-                 new_bill_delay=new_bill_delay, cost=cost)
+                 new_bill_delay=new_bill_delay, purchase=purchase, running=running)
 
 
 # ---------------------------------------------------------------- assembly
@@ -344,9 +352,18 @@ def run(baseline: Baseline, draws: Draws, scenario: Scenario = BASE) -> Simulati
         np.add.at(net, (np.nonzero(hit)[0], day[hit] + shift - 1), paisa)
     _scatter(net, _scale(draws.new_invoice, sales_bp), draws.new_invoice_delay, shift)
 
-    net -= _scale(draws.cost, cost_bp)
+    purchase = _scale(draws.purchase, cost_bp)
+    billed = _scale(draws.new_bill, cost_bp)
+    for first, last, percent, days in scenario.defer_purchases:
+        lo, hi = _day_index(baseline, first), min(_day_index(baseline, last), horizon - 1)
+        for spend in (purchase, billed):
+            moved = _scale(spend[:, lo:hi + 1], _percent_bp(percent - 100))
+            spend[:, lo:hi + 1] -= moved
+            if lo + days < horizon:
+                spend[:, lo + days:hi + 1 + days] += moved[:, :horizon - lo - days]
+    net -= purchase + _scale(draws.running, cost_bp)
     spent = np.zeros_like(net)
-    _scatter(spent, _scale(draws.new_bill, cost_bp), draws.new_bill_delay, 0)
+    _scatter(spent, billed, draws.new_bill_delay, 0)
     net -= spent
     net += _known(baseline, scenario)[None, :]
 

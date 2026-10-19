@@ -45,6 +45,12 @@ _EXPRESSIONS = {
     "cash.sales_vs_norm": "actual sales over the last 14 days; norm = what the seasonal model "
                           "fitted before them expected",
     "cash.p50_on_due_day": "likely (P50) end-of-day balance on the day a salary or EMI is due",
+    "cash.lever_gap_reduction": "expected shortfall in the gap without the lever - with it, "
+                                "on the same seeded paths",
+    "cash.lever_probability_after": "paths below the buffer on at least one day of the gap "
+                                    "with the lever / paths",
+    "cash.lever_cost": "what the lever costs beyond moving cash in time: the discount given, "
+                       "or the loan's interest and fees (WP-06 total cost); 0 for a re-timing",
 }
 FORMULAS: dict[str, FormulaRef] = {
     formula_id: FormulaRef(formula_id=formula_id, version=1, expression=expression)
