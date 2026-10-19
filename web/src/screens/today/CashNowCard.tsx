@@ -26,9 +26,9 @@ export function CashNowCard({ query }: { query: UseQueryResult<CashForecast> }) 
           return (
             <>
               {balance && <FigureValue figure={balance} className="mt-1 block text-4xl font-bold tracking-tight" />}
-              <dl className="mt-4 space-y-3 text-sm">
+              <dl className="mt-4 grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
                 {runway && (
-                  <div>
+                  <div className="col-span-2">
                     <dt className="text-slate-600 dark:text-slate-400">{t("today.runway")}</dt>
                     <dd>
                       {clear ? (
@@ -42,7 +42,6 @@ export function CashNowCard({ query }: { query: UseQueryResult<CashForecast> }) 
                     </dd>
                   </div>
                 )}
-                <div className="flex flex-wrap gap-x-8 gap-y-3">
                   {buffer && (
                     <div>
                       <dt className="text-slate-600 dark:text-slate-400">{t("today.buffer")}</dt>
@@ -59,7 +58,6 @@ export function CashNowCard({ query }: { query: UseQueryResult<CashForecast> }) 
                       </dd>
                     </div>
                   )}
-                </div>
               </dl>
               <Link to="/cash" className="mt-4 inline-block text-sm font-medium text-teal-800 underline dark:text-teal-300">
                 {t("today.seeForecast")}
