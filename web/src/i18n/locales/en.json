@@ -315,7 +315,7 @@
     "insufficient_data": "I don't have enough data to advise on this safely.",
     "low_agreement": "The models disagreed, so I won't guess.",
     "unverifiable": "I couldn't verify the numbers, so I won't give advice.",
-    "out_of_scope": "I didn't understand that question. I can help with cash and upcoming payments, loans, money owed to you, profit, and what-ifs.",
+    "out_of_scope": "I didn't understand that question. I can help with cash and upcoming payments, loans, money owed to you, profit, what-ifs and market prices.",
     "policy": "This needs a person. I can't do it.",
     "budget_exhausted": "I reached my work limit for this question. Try a narrower one.",
     "market_unavailable": "Market prices and vendor negotiation are not part of this version yet. I can help with cash, upcoming payments, loans, money owed to you, profit and what-ifs.",
@@ -995,7 +995,8 @@
         "loans": "How big a loan you can safely repay, and the cheapest options",
         "health": "Profit, margins and other ratios",
         "whatif": "What-ifs: sales drop, costs rise, customers pay late",
-        "debts": "Settling circular debts with other shops"
+        "debts": "Settling circular debts with other shops",
+        "prices": "Today's Dhaka market prices, and the least you should accept when selling on credit"
       }
     },
     "payables_count": "Payments due",
@@ -1004,7 +1005,8 @@
     "receivables_open": "Owed to you",
     "receivables_overdue": "Overdue",
     "customer_owes": "Customer owes",
-    "safe_loan": "Largest safe loan"
+    "safe_loan": "Largest safe loan",
+    "market_price": "Market price (TCB)"
   },
   "upload": {
     "open": "Add a statement or photo",

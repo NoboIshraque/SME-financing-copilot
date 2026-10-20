@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any
 
+from app.agents import marketwords
 from app.agents.tools import ToolRegistry
 from app.llm.deterministic import INTENT_TOOLS, MAX_INTENTS, UNKNOWN, language_of
 
@@ -22,10 +23,10 @@ from app.llm.deterministic import INTENT_TOOLS, MAX_INTENTS, UNKNOWN, language_o
 DEPENDS: dict[str, tuple[str, ...]] = {"financing.match": ("cash.gaps",)}
 TOOL_ORDER = ("cash.forecast", "cash.gaps", "payables.upcoming", "analysis.scenarios",
               "analysis.ratios", "receivables.plan", "financing.match", "mesh.propose",
-              "market.prices", "market.negotiate", "messaging.draft")
+              "market.prices", "market.negotiate")
 # The tool whose result answers the intent's question, stated before the context it needs
 # ("how big a loan?" leads with the loan, then the cash gap it was sized on).
-LEAD_TOOL = {"find_financing": "financing.match"}
+LEAD_TOOL = {"find_financing": "financing.match", "negotiate": "market.negotiate"}
 # "How big / how much / which is best": size the largest loan the forecast can carry. A plain
 # "should I take a loan?" with no gap is not sized: no loan is pushed when none is needed.
 _LOAN_SIZE = re.compile(r"how (?:big|much|large)|max(?:imum)?|largest|biggest|safe(?:ly)?|"
@@ -126,6 +127,12 @@ def build_plan(proposal: Mapping[str, Any] | None, question: str, registry: Tool
         params["analysis.scenarios"], notes = what_if_params(question)
     if "financing.match" in ordered and _LOAN_SIZE.search(question.casefold()):
         params["financing.match"] = {"safe_size": True}
+    named = marketwords.commodities(question)
+    if "market.prices" in ordered and named:
+        params["market.prices"] = {"commodities": named}
+    if "market.negotiate" in ordered:
+        params["market.negotiate"] = {**marketwords.deal_terms(question),
+                                      **({"commodity": named[0]} if named else {})}
     proposed_language = proposal.get("language")
     lang = language or (proposed_language if proposed_language in LANGUAGES
                         else language_of(question))

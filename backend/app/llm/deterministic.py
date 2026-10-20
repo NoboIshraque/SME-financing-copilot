@@ -52,8 +52,9 @@ MAX_INTENTS = 3
 # or listed in BANGLA_WHOLE_WORDS, which match only as a word with a case ending (বিল, বিলের,
 # বিলগুলো: "bill"; never বিলম্ব "delay"). Chinese has no spaces between words, so Chinese
 # keywords match anywhere (see _CJK_NOT_AFTER for compounds).
-# Ties keep the table order: an explicit what-if outranks the topic it is about, and a bill or
-# "who do I pay next" outranks the general cash question that comes with it.
+# Ties keep the table order: an explicit what-if outranks the topic it is about, a bill or
+# "who do I pay next" outranks the general cash question that comes with it, and a deal to
+# negotiate outranks the price of the item in it.
 KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
     "what_if": {
         "latin": ("what if", "what happens if", "happens if", "what would happen", "suppose",
@@ -108,15 +109,21 @@ KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
                   "mitano"),
         "script": ("কাটাকাটি", "নিষ্পত্তি", "抵消", "轧差", "清算", "三角债"),
     },
-    "market_prices": {
-        "latin": ("price", "prices", "market rate", "wholesale", "vendor", "vendors",
-                  "cheaper", "dam", "dor", "bazar"),
-        "script": ("দাম", "বাজার দর", "বাজার", "价格", "市场价", "批发", "供应商"),
-    },
     "negotiate": {
-        "latin": ("negotiate", "negotiation", "bargain", "better terms", "dordam",
-                  "dor koshakoshi"),
+        "latin": ("negotiate", "negotiation", "bargain", "better terms", "walk away",
+                  "walk-away", "accept the offer", "accept this offer", "counter offer",
+                  "dordam", "dor koshakoshi"),
         "script": ("দরদাম", "দর কষাকষি", "谈判", "砍价", "议价"),
+    },
+    "market_prices": {
+        # Items on TCB's Dhaka list name a market question too ("how much is rice today?").
+        "latin": ("price", "prices", "market rate", "wholesale", "vendor", "vendors",
+                  "cheaper", "dam", "dor", "bazar", "rice", "flour", "atta", "soybean",
+                  "lentil", "lentils", "chickpeas", "sugar", "onion", "onions", "potato",
+                  "potatoes", "eggs", "garlic", "salt"),
+        "script": ("দাম", "বাজার দর", "বাজার", "চাল", "আটা", "তেল", "ডাল", "ছোলা", "চিনি",
+                   "পেঁয়াজ", "পিঁয়াজ", "আলু", "ডিম", "রসুন", "লবণ", "价格", "市场价", "批发",
+                   "供应商", "大米", "面粉", "豆油", "白糖", "洋葱", "土豆", "鸡蛋", "大蒜"),
     },
     "draft_message": {
         "latin": ("draft", "write a message", "write a", "message to", "send a reminder",
@@ -125,7 +132,9 @@ KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
         "script": ("বার্তা", "মেসেজ", "লিখে দাও", "তাগাদা", "起草", "短信", "消息"),
     },
 }
-BANGLA_WHOLE_WORDS = frozenset({"বিল"})
+# Short words that start unrelated ones: বিল (bill; বিলম্ব "delay"), চাল (rice; চালান "invoice"),
+# তেল (oil; তেলাপিয়া), ডাল, ডিম, আলু, আটা (আটক "detained").
+BANGLA_WHOLE_WORDS = frozenset({"বিল", "চাল", "তেল", "ডাল", "ডিম", "আলু", "আটা"})
 # Case endings and classifiers a whole Bangla word may carry: বিলের, বিলে, বিলটা, বিলগুলো.
 _BANGLA_ENDINGS = ("গুলোর", "গুলোতে", "গুলো", "গুলির", "গুলি", "টার", "টির", "টা", "টি",
                    "ের", "এর", "ে", "র")
@@ -175,12 +184,20 @@ def language_of(text: str) -> str:
     return "en"
 
 
+# Words that set the scene rather than name the topic count half, so "how much is rice today?"
+# is a price question and "what needs my attention today?" still a cash check-in.
+WEAK_WORDS = frozenset({"today", "today's", "summary", "attention", "আজকের", "আজকে", "今天"})
+_WEAK = {id(p) for intent, words in KEYWORDS.items()
+         for p, w in zip(_PATTERNS[intent], (*words["latin"], *words["script"]), strict=True)
+         if w in WEAK_WORDS}
+
+
 def classify(question: str) -> list[str]:
     """Matched intents, strongest first (ties keep the table order); [] if none match."""
     text = unicodedata.normalize("NFC", question).casefold()
-    scores: dict[str, int] = {}
+    scores: dict[str, float] = {}
     for intent, patterns in _PATTERNS.items():
-        score = sum(1 for pattern in patterns if pattern.search(text))
+        score = sum(0.5 if id(p) in _WEAK else 1 for p in patterns if p.search(text))
         if score:
             scores[intent] = score
     order = list(KEYWORDS)

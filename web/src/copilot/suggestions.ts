@@ -21,7 +21,7 @@ export const UPLOAD_SUGGESTION: Record<Role, boolean> = {
   lender_viewer: false,
 };
 
-export const HELP_TOPICS = ["cash", "payments", "owed", "loans", "health", "whatif", "debts"] as const;
+export const HELP_TOPICS = ["cash", "payments", "owed", "loans", "health", "whatif", "debts", "prices"] as const;
 
 export function suggestionsFor(role: Role): readonly string[] {
   return SUGGESTIONS[role] ?? [];

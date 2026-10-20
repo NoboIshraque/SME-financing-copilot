@@ -14,6 +14,9 @@ from the ledger gives exactly the claimed value:
     money due       upcoming payments and money owed, re-read from the ledger's bills,
                     obligations and invoices (the cited rows must be exactly the ones found)
     safe loan size  the amount is re-checked: safe on the run's forecast, one step more is not
+    WP-09 market    the TCB point re-read from the saved lists; the change re-derived from the
+                    watchlist; negotiation prices re-made from that point and the financing
+                    product's own effective APR for the deal
 
 A mismatch is `rejected`; no recomputation path is `unverifiable`. Either way the claim is
 removed from the answer and logged (`RejectedClaimRow`). The narration check then makes sure
@@ -38,7 +41,9 @@ from app.agents import ledgerdue, loansize
 from app.agents.claims import Statement, render
 from app.agents.models import RejectedClaimRow
 from app.agents.tools import ToolContext, ToolResult
+from app.agents.toolset import TCB_PRICE
 from app.api import cash as cash_api
+from app.api import market as market_api
 from app.contracts import CheckResult, CheckStatus, Claim, Fact, Figure, Money, Unit
 from app.engines.cash.buffer import headline_figures, target_figure
 from app.engines.cash.figures import FORMULAS as CASH_FORMULAS
@@ -47,6 +52,8 @@ from app.engines.cash.simulate import BASE, Scenario, draw, run
 from app.engines.financing import cost as cost_mod
 from app.engines.financing import fit as fit_mod
 from app.engines.financing.catalogue import load_catalogue
+from app.engines.market import negotiate as negotiate_mod
+from app.engines.market import tcb, watch
 from app.engines.mesh.graph import build_graph
 from app.engines.mesh.netting import FORMULA_ID as NETTING_FORMULA
 from app.engines.mesh.netting import propose_rounds
@@ -213,6 +220,10 @@ class Checker:
             return self._receivables(figure)
         if formula == loansize.FORMULA_ID:
             return self._safe_loan(figure)
+        if formula == TCB_PRICE or formula in watch.EXPRESSIONS:
+            return self._market(figure)
+        if formula in negotiate_mod.EXPRESSIONS:
+            return self._negotiation(figure)
         raise Unverifiable(f"no recomputation for formula {formula}")
 
     # ------------------------------------------------------------------ WP-01 metrics
@@ -372,6 +383,48 @@ class Checker:
                                 params.get("purpose_key", "working_capital")):
             raise FormulaMismatch("the amount is not the largest safe loan on this forecast")
         return figure.value
+
+    # ------------------------------------------------------------------ WP-09 market
+
+    @staticmethod
+    def _observation(ref: str) -> tcb.Observation:
+        found = next((o for o in market_api.observations() if o.ref == ref), None)
+        if found is None:
+            raise Unverifiable("the TCB list this price was read from is not on record")
+        return found
+
+    def _market(self, figure: Figure) -> Decimal:
+        latest = self._observation(figure.provenance.source_row_ids[0])
+        point = latest.point
+        if figure.provenance.formula_id == TCB_PRICE:
+            return point.price.amount
+        rows = watch.watchlist(market_api.observations(), point.observed_on)
+        row = next((r for r in rows if r.commodity == point.commodity), None)
+        change = watch.change_figure(row) if row is not None else None
+        if change is None or change.provenance.formula_id != figure.provenance.formula_id:
+            raise Unverifiable("no baseline for this price on record")
+        return change.value
+
+    def _negotiation(self, figure: Figure) -> Decimal:
+        rows = figure.provenance.source_row_ids
+        params = figure.provenance.parameters
+        point = self._observation(rows[0]).point
+        product = {p.id: p for p in load_catalogue()}.get(rows[1].removeprefix("financing:"))
+        if product is None:
+            raise Unverifiable("the financing product behind the cost of money is gone")
+        offer, quantity = Decimal(params["offer"]), Decimal(params["quantity"])
+        days = int(params["payment_days"])
+        deal = Money.of((offer * quantity).quantize(Decimal("0.01")))
+        apr = cost_mod.true_cost(product, deal, max(days, 30)).effective_annual_rate
+        plan = negotiate_mod.plan(market=point, market_ref=rows[0], offer=offer,
+                                  quantity=quantity, payment_days=days, apr_percent=apr,
+                                  apr_ref=rows[1], data_mode=figure.data_mode)
+        made = {f.provenance.formula_id: f.value for step in plan.steps for f in step.figures}
+        made |= {plan.walk_away.provenance.formula_id: plan.walk_away.value,
+                 plan.target.provenance.formula_id: plan.target.value}
+        if figure.provenance.formula_id not in made:
+            raise Unverifiable(f"no recomputation for {figure.label_key}")
+        return made[figure.provenance.formula_id]
 
     # ------------------------------------------------------------------ ledger: money due
 

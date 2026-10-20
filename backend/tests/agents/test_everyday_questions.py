@@ -15,7 +15,8 @@ from app.llm import deterministic
 
 CASH, PAY, OWED, LOAN = "cash_outlook", "upcoming_payments", "collect_receivables", "find_financing"
 HEALTH, WHAT_IF, MESH, DRAFT = "business_health", "what_if", "settle_debts", "draft_message"
-MARKET, HELP, UNKNOWN = "market_prices", "help", "unknown"
+MARKET, NEGOTIATE = "market_prices", "negotiate"
+HELP, UNKNOWN = "help", "unknown"
 
 EVERYDAY = [
     # cash on hand, salaries, rent
@@ -87,8 +88,14 @@ EVERYDAY = [
     ("What's today's summary?", CASH),
     ("What needs my attention today?", CASH),
     ("আজকের অবস্থা কী?", CASH),
-    # market (cut from this version: must be recognised, then declined politely)
+    # market prices (TCB's Dhaka lists) and pricing a sale on credit
     ("What's the wholesale price of rice?", MARKET),
+    ("How much is rice today?", MARKET),
+    ("চালের দাম কত?", MARKET),
+    ("peyaj er dam koto?", MARKET),
+    ("鸡蛋多少钱？", MARKET),
+    ("A buyer offers Tk 60 per kg for 500 kg of rice, paying in 30 days. Accept the offer?",
+     NEGOTIATE),
     # greetings and "what can you do"
     ("hi", HELP),
     ("Hello!", HELP),
@@ -100,6 +107,7 @@ EVERYDAY = [
 
 PRECISION = [
     ("বিলম্ব হলে জরিমানা কত?", PAY),  # বিলম্ব (delay) starts with বিল (bill)
+    ("চালান কবে আসবে?", MARKET),  # চালান (consignment) starts with চাল (rice)
     ("Tell me a joke", CASH),
     ("Hi, will I run out of cash next month?", HELP),  # a real question is not a greeting
     ("我们的毛利率是多少？", LOAN),  # 毛利率 contains 利率 (interest rate)
