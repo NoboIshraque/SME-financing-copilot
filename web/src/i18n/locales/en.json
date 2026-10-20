@@ -291,7 +291,7 @@
     "insufficient_data": "I don't have enough data to advise on this safely.",
     "low_agreement": "The models disagreed, so I won't guess.",
     "unverifiable": "I couldn't verify the numbers, so I won't give advice.",
-    "out_of_scope": "This is outside what I can help with.",
+    "out_of_scope": "I can't answer that one yet. I can help with cash and upcoming payments, loans, money owed to you, profit, and what-ifs. Try: “Can I pay salaries this month?”",
     "policy": "This needs a person. I can't do it.",
     "budget_exhausted": "I reached my work limit for this question. Try a narrower one."
   },
