@@ -657,9 +657,11 @@ Files: `backend/app/privacy/`. Feature spec: FEATURES N6, N18, P11.
 4. **Gate** (`gate.py`): `assert_safe(payload)` runs every detector on the serialised payload and
    raises if any fires. The error names only kinds and counts, never values.
 
-The WP-10 gateway (`backend/app/llm/gateway.py`) anonymises with `prepare_messages()` (one label
-set across all messages, so "Customer 1" means the same party everywhere) and runs the gate on the
-messages *and* the structured context before any provider is tried. If a detector fires, the
+In WP-10 the orchestrator anonymises the owner's question before the planner sees it, and the
+narrator and critic receive only verified claim texts (figures, product names, party labels, no
+personal data; amounts are not scaled for these calls). `prepare_messages()` offers one label set
+across several messages for callers that need it. The gateway (`backend/app/llm/gateway.py`) runs
+the gate on the messages *and* the structured context before any provider is tried. If a detector fires, the
 request is refused and counted, never sent. Model answers come back with labels, which are mapped
 to tokens; numbers in them are never used (§3.8). For field data (WP-20) the
 shop-file anonymiser (`python -m app.privacy.shopfiles`) tokenises CSV/XLSX columns, refuses any
@@ -845,7 +847,9 @@ traces with `python -m app.llm.live_check` (keys required); the evidence index l
   (11 of 12 were still contained, and approval held in all 12). We then widened each attack
   family's rules to intent level, with no new false alarms on the 96 benign corpus texts, and
   the 12 are now caught. Because we saw them while doing so, 12/12 is a regression result, not
-  proof of generalisation; a fresh held-out set is part of the final audit.
+  proof of generalisation. On the final audit's fresh held-out set (24 attacks and 24 innocent
+  look-alikes in four languages, never seen while widening) the rules caught 15 of 24 attacks and
+  wrongly quarantined 10 of 24 innocent questions (`docs/handover/fresh_injection_result.txt`).
 - **Cut** (roadmap only): market watch and negotiation (WP-09: N3, N19), the nightly audit drill
   (P8), the lender report (WP-13), the GPU injection-classifier run and the market backtest
   (WP-17), the Vercel mirror (WP-18).
@@ -977,7 +981,10 @@ The evaluation harness (WP-16) runs offline with `npm run eval` and writes its s
    but they were written with sight of that corpus. On 12 new attacks written without reading the
    rules they caught 3 (the copilot still acted on none, and no approval was granted). We widened
    the rules per family afterwards; they now catch those 12 with no new false alarms, but that is
-   a regression result too. Generalisation needs a fresh held-out set.
+   a regression result too. On a fresh held-out set they caught 15 of 24 attacks and wrongly
+   blocked 10 of 24 innocent questions that use the same words: the guard slows an attacker down,
+   and the approval rules (owner plus a fresh code for anything that leaves DecisionGuard) are what
+   keep money safe.
 5. **Fit is the highest daily breach probability over the forecast, an approximation.** It uses
    the tenant's WP-04 band (normal approximation from P10/P90). When the riskiest day falls
    before the first repayment, every option gets the same fit and fit does not change the order
