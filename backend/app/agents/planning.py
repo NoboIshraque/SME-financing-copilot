@@ -20,9 +20,17 @@ from app.llm.deterministic import INTENT_TOOLS, MAX_INTENTS, UNKNOWN, language_o
 
 # A tool listed here runs after the tools it reads (financing is sized to the cash gap).
 DEPENDS: dict[str, tuple[str, ...]] = {"financing.match": ("cash.gaps",)}
-TOOL_ORDER = ("cash.forecast", "cash.gaps", "analysis.scenarios", "analysis.ratios",
-              "receivables.plan", "financing.match", "mesh.propose", "market.prices",
-              "market.negotiate", "messaging.draft")
+TOOL_ORDER = ("cash.forecast", "cash.gaps", "payables.upcoming", "analysis.scenarios",
+              "analysis.ratios", "receivables.plan", "financing.match", "mesh.propose",
+              "market.prices", "market.negotiate", "messaging.draft")
+# The tool whose result answers the intent's question, stated before the context it needs
+# ("how big a loan?" leads with the loan, then the cash gap it was sized on).
+LEAD_TOOL = {"find_financing": "financing.match"}
+# "How big / how much / which is best": size the largest loan the forecast can carry. A plain
+# "should I take a loan?" with no gap is not sized: no loan is pushed when none is needed.
+_LOAN_SIZE = re.compile(r"how (?:big|much|large)|max(?:imum)?|largest|biggest|safe(?:ly)?|"
+                        r"afford|best|which loan|cheapest|koto|kon lon|কত|কতো|সর্বোচ্চ|"
+                        r"নিরাপদ|কোন ঋণ|কোন লোন|সবচেয়ে ভালো|多少|多大|最多|最高|安全|哪个|最好")
 LANGUAGES = ("en", "bn", "zh")
 DEFAULT_SALES_SHOCK = Decimal(-20)  # a what-if with no number stresses sales by 20%
 
@@ -58,6 +66,13 @@ class Plan:
     @property
     def understood(self) -> bool:
         return bool(self.tools)
+
+    def answer_order(self) -> tuple[str, ...]:
+        """Tools in the order their statements are told: the primary intent's lead first."""
+        lead = LEAD_TOOL.get(self.intents[0]) if self.intents else None
+        if lead not in self.tools:
+            return self.tools
+        return (lead, *(t for t in self.tools if t != lead))
 
     def subagents(self) -> list[tuple[str, tuple[str, ...]]]:
         """(intent, tools) per sub-agent; a shared tool runs once and both read the result."""
@@ -109,6 +124,8 @@ def build_plan(proposal: Mapping[str, Any] | None, question: str, registry: Tool
     notes: tuple[str, ...] = ()
     if "analysis.scenarios" in ordered:
         params["analysis.scenarios"], notes = what_if_params(question)
+    if "financing.match" in ordered and _LOAN_SIZE.search(question.casefold()):
+        params["financing.match"] = {"safe_size": True}
     proposed_language = proposal.get("language")
     lang = language or (proposed_language if proposed_language in LANGUAGES
                         else language_of(question))

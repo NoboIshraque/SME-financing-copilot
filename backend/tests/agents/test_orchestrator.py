@@ -135,15 +135,16 @@ def test_off_topic_question_is_out_of_scope(orch, ledger):
 
 
 def test_primary_intent_without_an_engine_abstains_with_the_engine_name(orch, ledger):
-    rec = ask(orch, ledger, "Who owes me money? Collect the baki").recommendation
+    rec = ask(orch, ledger, "What is the wholesale price of rice?").recommendation
     assert rec.abstention.reason is AbstentionReason.out_of_scope
-    assert rec.abstention.missing == ("WP-05 receivables engine",)
+    assert rec.abstention.message_key == "abstain.market_unavailable"  # cut, said politely
+    assert rec.abstention.missing == ("WP-09 market engine",)
 
 
 def test_secondary_intent_without_an_engine_is_skipped_not_fatal(orch, ledger):
-    run = ask(orch, ledger, "Will I run out of cash? Also who owes me?")
+    run = ask(orch, ledger, "Will I run out of cash? Also the wholesale price of rice?")
     assert run.recommendation.abstention is None
-    assert "receivables.plan" in run.skipped
+    assert "market.prices" in run.skipped
     assert run.recommendation.tools_used == ("cash.forecast", "cash.gaps")
 
 

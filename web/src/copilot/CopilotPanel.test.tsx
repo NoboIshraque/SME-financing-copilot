@@ -1,10 +1,14 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { LENDER, renderApp } from "../test/render";
+import type { MockOverrides } from "../mocks/mockApi";
+import { ACCOUNTANT, LENDER, renderApp } from "../test/render";
 
-async function openPanel(path = "/") {
-  const view = renderApp(path);
+const STAFF = "staff@hishab.demo";
+const COMPLIANCE = "compliance@hishab.demo";
+
+async function openPanel(path = "/", signedInAs?: string, overrides?: MockOverrides) {
+  const view = renderApp(path, { ...(signedInAs ? { signedInAs } : {}), overrides });
   await view.user.click(await screen.findByRole("button", { name: "Ask DecisionGuard" }));
   return { ...view, panel: screen.getByRole("dialog", { name: "Ask DecisionGuard" }) };
 }
@@ -30,14 +34,15 @@ describe("copilot panel", () => {
 
   it("shows the stability bar on advice that went through the stress loop", async () => {
     const { user, panel } = await openPanel();
-    await user.click(within(panel).getByRole("button", { name: "Can I pay salaries on 31 October?" }));
+    await user.click(within(panel).getByRole("button", { name: "Can I pay salaries on the 31st?" }));
     expect(await within(panel).findByRole("meter", { name: "Decision stability" })).toHaveAttribute("aria-valuenow", "80");
     expect(within(panel).getByText("2 of 3 models agree (67%)")).toBeInTheDocument();
   });
 
   it("abstains clearly, naming exactly what is missing", async () => {
     const { user, panel } = await openPanel();
-    await user.click(within(panel).getByRole("button", { name: "How big a loan can I safely take?" }));
+    await user.type(within(panel).getByLabelText("Your question"), "How big a loan can I safely take?");
+    await user.click(within(panel).getByRole("button", { name: "Ask" }));
     const note = await within(panel).findByRole("note");
     expect(note).toHaveTextContent("I won't guess on this.");
     expect(within(note).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
@@ -56,6 +61,74 @@ describe("copilot panel", () => {
     await user.click(within(panel).getByRole("button", { name: "Ask" }));
     expect(await within(panel).findByRole("alert")).toHaveTextContent("blocked and logged");
     expect(within(panel).queryByRole("article")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["owner", undefined, ["How much cash will I have this month?", "Can I pay salaries on the 31st?", "Which loan is best for me?", "Which customer should I chase first?"]],
+    ["accountant", ACCOUNTANT, ["How are profit and ratios this quarter?", "Which invoices are overdue?", "Which bills are due this month?", "Upload a bank statement"]],
+    ["staff", STAFF, ["What is today's cash position?", "Who owes us money?", "Draft a payment reminder for the customer who owes the most"]],
+  ])("suggests the questions a %s asks", async (_role, email, expected) => {
+    const { panel } = await openPanel("/", email);
+    const list = within(panel).getByText("Try asking:").nextElementSibling as HTMLElement;
+    expect(within(list).getAllByRole("button").map((button) => button.textContent)).toEqual(expected);
+  });
+
+  it("sends a suggestion as the question, in the user's words", async () => {
+    const { user, panel, fetchMock } = await openPanel("/", STAFF);
+    await user.click(within(panel).getByRole("button", { name: "Who owes us money?" }));
+    await within(panel).findByText(/Chase Customer 10 first/);
+    const call = fetchMock.mock.calls.find(([path]) => String(path) === "/api/copilot/ask");
+    expect(JSON.parse(String((call?.[1] as RequestInit).body))).toEqual({ question: "Who owes us money?" });
+  });
+
+  it("opens the upload dialog from the accountant's upload suggestion", async () => {
+    const { user, panel } = await openPanel("/", ACCOUNTANT);
+    await user.click(within(panel).getByRole("button", { name: "Upload a bank statement" }));
+    expect(await screen.findByRole("dialog", { name: "Add a statement or ledger photo" })).toBeInTheDocument();
+  });
+
+  it("answers a greeting with what it can do and the role's questions, not a refusal", async () => {
+    const help = { id: "rec-hi", tenant_id: "sme_grocery", question: "hi", created_at: "2026-09-30T18:00:00Z", data_mode: "synthetic",
+      abstention: { reason: "out_of_scope", message_key: "copilot.help.intro", missing: [], detail: "help" } };
+    const { user, panel } = await openPanel("/", undefined, { "POST /api/copilot/ask": { body: help } });
+    await user.type(within(panel).getByLabelText("Your question"), "hi");
+    await user.click(within(panel).getByRole("button", { name: "Ask" }));
+    const note = await within(panel).findByRole("note");
+    expect(note).toHaveTextContent("Here's what I can do");
+    expect(note).toHaveTextContent("Bills and payments due next, soonest first");
+    expect(note).not.toHaveTextContent("I won't guess");
+    expect(within(note).getAllByRole("button")).toHaveLength(3);
+  });
+
+  it("says plainly what it did not understand and offers questions that work", async () => {
+    const unknown = { id: "rec-joke", tenant_id: "sme_grocery", question: "Tell me a joke", created_at: "2026-09-30T18:00:00Z", data_mode: "synthetic",
+      abstention: { reason: "out_of_scope", message_key: "abstain.out_of_scope", missing: [], detail: "not_understood" } };
+    const { user, panel, fetchMock } = await openPanel("/", undefined, { "POST /api/copilot/ask": { body: unknown } });
+    await user.type(within(panel).getByLabelText("Your question"), "Tell me a joke");
+    await user.click(within(panel).getByRole("button", { name: "Ask" }));
+    const note = await within(panel).findByRole("note");
+    expect(note).toHaveTextContent("I can't help with that one yet.");
+    expect(note).toHaveTextContent("I didn't understand that question.");
+    await user.click(within(note).getByRole("button", { name: "Which loan is best for me?" }));
+    const asked = fetchMock.mock.calls.filter(([path]) => String(path) === "/api/copilot/ask");
+    expect(JSON.parse(String((asked.at(-1)?.[1] as RequestInit).body))).toEqual({ question: "Which loan is best for me?" });
+  });
+
+  it("declines a market question politely, without listing an engine as 'missing'", async () => {
+    const market = { id: "rec-rice", tenant_id: "sme_grocery", question: "rice price?", created_at: "2026-09-30T18:00:00Z", data_mode: "synthetic",
+      abstention: { reason: "out_of_scope", message_key: "abstain.market_unavailable", missing: ["WP-09 market engine"], detail: "engine_unavailable" } };
+    const { user, panel } = await openPanel("/", undefined, { "POST /api/copilot/ask": { body: market } });
+    await user.type(within(panel).getByLabelText("Your question"), "rice price?");
+    await user.click(within(panel).getByRole("button", { name: "Ask" }));
+    const note = await within(panel).findByRole("note");
+    expect(note).toHaveTextContent("Market prices and vendor negotiation are not part of this version yet.");
+    expect(note).not.toHaveTextContent("WP-09");
+  });
+
+  it("is not offered to a compliance officer, who cannot ask the copilot", async () => {
+    renderApp("/trust", { signedInAs: COMPLIANCE });
+    await screen.findByRole("heading", { level: 2 });
+    expect(screen.queryByRole("button", { name: "Ask DecisionGuard" })).not.toBeInTheDocument();
   });
 
   it("is not offered to a lender viewer", async () => {
