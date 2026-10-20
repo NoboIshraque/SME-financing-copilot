@@ -158,3 +158,27 @@ def test_today_is_the_cash_check_in_the_asked_language(owner):
     assert rec["question"].startswith("আগামী তিন মাসে")
     assert "cash.gaps" in rec["tools_used"]
     assert rec["abstention"] is None and "টাকা" in rec["answer_text"]
+
+
+# Session A: questions that got "won't guess" on the hosted site, through the real API.
+@pytest.mark.parametrize(("question", "tools", "lead"), [
+    ("সামনে কবে বিল দিব", ("payables.upcoming",), "claim:copilot.payables_count:"),
+    ("How big a loan can I safely take?", ("cash.gaps", "financing.match"),
+     "claim:copilot.no_safe_loan_gap:"),  # this shop has a cash gap ahead
+    ("Which customer should I chase first?", ("receivables.plan",),
+     "claim:copilot.receivables_open:"),
+], ids=["bn-bills", "loan-size", "chase"])
+def test_everyday_questions_answer_through_the_api(owner, question, tools, lead):
+    res = owner.post("/api/copilot/ask", json={"question": question})
+    assert res.status_code == 200, res.text
+    rec = Recommendation.model_validate(res.json())
+    assert rec.abstention is None and rec.tools_used == tools
+    assert rec.claims[0].id.startswith(lead)
+    verified = {c.claim_id for c in rec.checks if c.status.value == "verified"}
+    assert {c.id for c in rec.claims} <= verified
+
+
+def test_a_greeting_through_the_api_gets_the_menu_not_an_abstention_log_entry(owner):
+    rec = owner.post("/api/copilot/ask", json={"question": "hi"}).json()
+    assert rec["abstention"]["message_key"] == "copilot.help.intro"
+    assert rec["id"] not in {e["id"] for e in owner.get("/api/copilot/abstentions").json()}

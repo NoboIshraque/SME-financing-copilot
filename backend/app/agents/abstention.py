@@ -59,6 +59,31 @@ def out_of_scope(missing: Iterable[str] = (), detail: str | None = None) -> Abst
     return _make(R.out_of_scope, missing, detail)
 
 
+# Market prices and negotiation were cut from this version (19 Oct): said plainly, not "won't
+# guess". Any other engine that is not installed gets the general "not in this version".
+CUT_TOOLS = frozenset({"market.prices", "market.negotiate"})
+HELP_KEY = "copilot.help.intro"
+
+
+def not_in_this_version(tools: Iterable[str], engines: Iterable[str]) -> Abstention:
+    names = set(tools)
+    key = "abstain.market_unavailable" if names and names <= CUT_TOOLS \
+        else "abstain.engine_unavailable"
+    return Abstention(reason=R.out_of_scope, missing=(), message_key=key,
+                      detail=("engine_unavailable: " + ", ".join(dict.fromkeys(engines)))[:500])
+
+
+def help_menu() -> Abstention:
+    """A greeting or "what can you do?": the web shows the copilot's menu for the user's role
+    (i18n keys only, no numbers). Carried as an out-of-scope abstention with its own key so
+    no tool runs and nothing numeric is shown; it is not logged as an abstention."""
+    return Abstention(reason=R.out_of_scope, missing=(), message_key=HELP_KEY, detail="help")
+
+
+def is_help(abstention: Abstention) -> bool:
+    return abstention.message_key == HELP_KEY
+
+
 def unverifiable(missing: Iterable[str] = (), detail: str | None = None) -> Abstention:
     return _make(R.unverifiable, missing, detail)
 

@@ -178,9 +178,10 @@ def abstention_for(errors: Mapping[str, ToolError]) -> Abstention:
     refused = [n for n, e in errors.items() if isinstance(e, BudgetExhausted)]
     if refused:
         return abstain.budget_exhausted(refused)
-    engines = [e.engine for e in errors.values() if isinstance(e, ToolUnavailable)]
-    if engines:
-        return abstain.out_of_scope(engines, detail="engine_unavailable")
+    unavailable = {n: e for n, e in errors.items() if isinstance(e, ToolUnavailable)}
+    if unavailable:
+        return abstain.not_in_this_version(sorted(unavailable),
+                                           [e.engine for e in unavailable.values()])
     return abstain.unverifiable(detail="; ".join(sorted(str(e) for e in errors.values())))
 
 
@@ -232,8 +233,14 @@ class Orchestrator:
         try:
             reply = self.llm(plan_request(anon.text, private=private, party_names=party_names),
                              "plan", budget, trace)
-            return build_plan(reply.data, question, self.registry, planner=reply.slot,
+            plan = build_plan(reply.data, question, self.registry, planner=reply.slot,
                               language=language, asked=anon.text)
+            if plan.understood or reply.deterministic:
+                return plan
+            # A model that found nothing to do: the rules may still know the question (local).
+            trace.add("plan", "deterministic", "model_plan_empty", time.perf_counter())
+            return build_plan(rules.plan(question), question, self.registry,
+                              planner="deterministic", language=language, asked=anon.text)
         except PrivacyViolation as exc:
             # Something the anonymiser missed: plan locally, nothing leaves the server.
             trace.add("plan", "deterministic", "privacy_blocked", time.perf_counter(),
@@ -263,6 +270,9 @@ class Orchestrator:
                 return self._finish(ctx, rec_id, QUARANTINED, plan, abstention=abstention,
                                     actor=actor, budget=budget, trace=trace)
         plan = self._plan(ctx, question, language, private, names, budget, trace)
+        if not plan.understood and rules.is_help(question):
+            return self._finish(ctx, rec_id, question, plan, abstention=abstain.help_menu(),
+                                actor=actor, budget=budget, trace=trace)
         if not plan.understood:
             return self._finish(ctx, rec_id, question, plan,
                                 abstention=abstain.out_of_scope(detail="not_understood"),
@@ -277,7 +287,7 @@ class Orchestrator:
         primary = set(subagents[0][1]) if subagents else set()
         primary_errors = {n: e for n, e in errors.items() if n in primary}
         skipped = {n: str(e) for n, e in errors.items() if n not in primary}
-        composed = claims_mod.compose(results, plan.tools, plan.language)
+        composed = claims_mod.compose(results, plan.answer_order(), plan.language)
         if primary_errors or not composed:
             abstention = abstention_for(primary_errors or errors) if (primary_errors or errors) \
                 else abstain.unverifiable(detail="nothing_to_report")
@@ -426,7 +436,8 @@ class Orchestrator:
             abstention=abstention, tools_used=tuple(n for n in plan.tools if n in results),
             data_mode=most_cautious(modes) if modes else DataMode.synthetic,
             created_at=ctx.now)
-        if abstention is not None:  # every abstention is logged and audited
+        if abstention is not None and not abstain.is_help(abstention):
+            # every abstention is logged and audited (the help menu is an answer, not one)
             with ctx.db() as store:
                 abstain.record(store.session, tenant_id=ctx.tenant_id,
                                recommendation_id=rec_id, question=question,

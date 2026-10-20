@@ -112,11 +112,9 @@ def test_parameters_are_validated_before_the_engine_runs(ledger, name, params, f
 
 
 @pytest.mark.parametrize(("name", "engine"), [
-    ("receivables.plan", "WP-05"),
     ("analysis.stability", "WP-07"),
     ("market.prices", "WP-09"),
     ("market.negotiate", "WP-09"),
-    ("messaging.draft", "WP-12"),
 ])
 def test_tools_without_an_engine_are_known_but_unavailable(ledger, name, engine):
     assert name in REGISTRY and name not in REGISTRY.names(available_only=True)
@@ -233,11 +231,24 @@ def test_financing_is_sized_to_the_first_gap_and_uses_the_forecast(hardware):
     assert card.payload["product_id"] == result.payload["options"][0].product.id
 
 
-def test_financing_without_a_gap_says_so(ledger):
+def test_financing_without_a_gap_prices_the_largest_safe_loan(ledger):
     context = ctx(ledger, "sme_grocery")
     REGISTRY.run("cash.gaps", context)
     result = REGISTRY.run("financing.match", context)
-    assert result.notes == ("financing.no_gap",) and result.figures == ()
+    (size, figure), *_ = result.payload["safe"]
+    assert figure.label_key == "copilot.safe_loan" and figure.value == size.amount > 0
+    assert figure.provenance.parameters["product_id"] == size.product.id
+    # the need is the safe size, priced with the product that allows it
+    assert result.payload["need"].amount.amount == size.amount
+    assert result.payload["options"][0].product.id == size.product.id
+
+
+def test_financing_says_so_when_no_loan_size_is_safe(ledger):
+    context = ctx(ledger, "sme_hardware")  # a cash gap ahead: no repayment fits
+    REGISTRY.run("cash.gaps", context)
+    result = REGISTRY.run("financing.match", context, {"safe_size": True})
+    assert result.payload["safe"] == () and "financing.no_safe_amount" in result.notes
+    assert result.payload["options"]  # the gap-sized options are still there
 
 
 def test_financing_needs_an_amount_or_a_gap_analysis(ledger):

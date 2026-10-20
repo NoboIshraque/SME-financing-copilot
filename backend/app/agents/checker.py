@@ -11,6 +11,9 @@ from the ledger gives exactly the claimed value:
                     through the engine's own figure functions (levers: its alert pipeline)
     WP-06 costs     the catalogue product's cash flows for the figure's principal and tenor
     WP-08 netting   the netting round recomputed from the cited obligations
+    money due       upcoming payments and money owed, re-read from the ledger's bills,
+                    obligations and invoices (the cited rows must be exactly the ones found)
+    safe loan size  the amount is re-checked: safe on the run's forecast, one step more is not
 
 A mismatch is `rejected`; no recomputation path is `unverifiable`. Either way the claim is
 removed from the answer and logged (`RejectedClaimRow`). The narration check then makes sure
@@ -25,12 +28,13 @@ import threading
 import unicodedata
 from collections import OrderedDict
 from collections.abc import Iterable, Mapping, Sequence
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
 import sympy
 
+from app.agents import ledgerdue, loansize
 from app.agents.claims import Statement, render
 from app.agents.models import RejectedClaimRow
 from app.agents.tools import ToolContext, ToolResult
@@ -203,6 +207,12 @@ class Checker:
             return self._financing(figure)
         if formula == NETTING_FORMULA:
             return self._netting(figure)
+        if formula == ledgerdue.PAYABLES_FORMULA:
+            return self._payables(figure)
+        if formula == ledgerdue.RECEIVABLES_FORMULA:
+            return self._receivables(figure)
+        if formula == loansize.FORMULA_ID:
+            return self._safe_loan(figure)
         raise Unverifiable(f"no recomputation for formula {formula}")
 
     # ------------------------------------------------------------------ WP-01 metrics
@@ -343,6 +353,75 @@ class Checker:
             if need is None or band is None or str(need.amount.amount) != params["principal"]:
                 raise Unverifiable("the forecast this fit was measured on is not in the run")
             return fit_mod.breach_probability(result, need.needed_by, band)
+        raise Unverifiable(f"no recomputation for {figure.label_key}")
+
+    def _safe_loan(self, figure: Figure) -> Decimal:
+        """Not re-searched: the claimed amount must be safe and one step more must not be."""
+        params = figure.provenance.parameters
+        product = {p.id: p for p in load_catalogue()}.get(params.get("product_id", ""))
+        if product is None:
+            raise Unverifiable("product not in the catalogue")
+        match = self.results.get("financing.match")
+        source = self.results.get("cash.gaps") or self.results.get("cash.forecast")
+        band = source.payload.get("band") if source is not None else None
+        if match is None or band is None:
+            raise Unverifiable("the forecast this loan was sized on is not in the run")
+        facts = {f.metric: f.value for f in match.facts}
+        if not loansize.confirm(product, figure.value, int(params["tenor_days"]),
+                                date.fromisoformat(params["start"]), band, facts,
+                                params.get("purpose_key", "working_capital")):
+            raise FormulaMismatch("the amount is not the largest safe loan on this forecast")
+        return figure.value
+
+    # ------------------------------------------------------------------ ledger: money due
+
+    def _rows(self, figure: Figure) -> tuple[date, dict[str, str]]:
+        params = figure.provenance.parameters
+        try:
+            return date.fromisoformat(params["as_of"]), dict(params)
+        except (KeyError, ValueError):
+            raise Unverifiable("no as-of day on record for this figure") from None
+
+    def _payables(self, figure: Figure) -> Decimal:
+        as_of, params = self._rows(figure)
+        with self.ctx.db() as store:
+            due = ledgerdue.upcoming(store.bills(self.ctx.tenant_id),
+                                     store.obligations(self.ctx.tenant_id), as_of,
+                                     int(params.get("days", ledgerdue.WINDOW_DAYS)))
+        part = params.get("part")
+        if part == "item":
+            item = next((d for d in due if d.ref == params.get("ref")), None)
+            if item is None:
+                raise Unverifiable("the payment is no longer due in the window")
+            return item.amount
+        if part in ("count", "total") and due and \
+                set(figure.provenance.source_row_ids) != {d.ref for d in due}:
+            raise Unverifiable("the cited payments are not the ones on record")
+        if part == "count":
+            return Decimal(len(due))
+        if part == "total":
+            return sum((d.amount for d in due), Decimal(0))
+        raise Unverifiable(f"no recomputation for {figure.label_key}")
+
+    def _receivables(self, figure: Figure) -> Decimal:
+        as_of, params = self._rows(figure)
+        with self.ctx.db() as store:
+            found = ledgerdue.owed(store.invoices(self.ctx.tenant_id), as_of)
+        part = params.get("part")
+        cited = set(figure.provenance.source_row_ids)
+        if part == "customer":
+            customer = next((c for c in found.customers if c.token == params.get("token")), None)
+            if customer is None or set(customer.invoice_ids) != cited:
+                raise Unverifiable("the customer's open invoices are not the ones on record")
+            return customer.amount
+        if part == "open":
+            if found.open_ids and set(found.open_ids) != cited:
+                raise Unverifiable("the cited invoices are not the open ones on record")
+            return found.open_total
+        if part == "overdue":
+            if found.overdue_ids and set(found.overdue_ids) != cited:
+                raise Unverifiable("the cited invoices are not the overdue ones on record")
+            return found.overdue_total
         raise Unverifiable(f"no recomputation for {figure.label_key}")
 
     # ------------------------------------------------------------------ WP-08 netting

@@ -8,14 +8,18 @@ input facts they cite.
     cash.forecast      WP-04  P10/P50/P90 balance band, runway, buffer target
     cash.gaps          WP-04  gaps (breach day, shortfall, drivers) and the cheapest fixes
     analysis.scenarios WP-04  the forecast replayed with shocks (what-if, same seeded draws)
-    financing.match    WP-06  options ranked by true cost and fit, sized to the cash gap
+    financing.match    WP-06  options ranked by true cost and fit, sized to the cash gap; with
+                              no gap (or when asked how big), the largest loan whose
+                              repayments keep the cautious forecast above the buffer
     analysis.ratios    WP-01  ledger ratios from the metric registry (WP-07 adds more)
     mesh.propose       WP-08  a netting round over the circular debt the shop is part of
+    payables.upcoming  ledger bills and recurring obligations due in the next 31 days
+    receivables.plan   WP-05  what customers owe, overdue, and who to chase first
 
 Tools whose engine has not landed are registered without a runner, so the planner knows them
-and the agent abstains with the engine's name instead of improvising: receivables.plan
-(WP-05), analysis.stability (WP-07), market.prices and market.negotiate (WP-09),
-messaging.draft (WP-12).
+and the agent abstains with the engine's name instead of improvising: analysis.stability
+(WP-07), market.prices and market.negotiate (WP-09, cut from this version). Reminder drafts
+(WP-12) are built from the receivables plan, so the drafting intent reads receivables.plan.
 """
 
 from __future__ import annotations
@@ -25,6 +29,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.agents import ledgerdue, loansize
 from app.agents.tools import (
     InsufficientData,
     NoParams,
@@ -54,6 +59,7 @@ from app.engines.cash.buffer import headline_figures, target_figure
 from app.engines.cash.simulate import SEED, Scenario, run
 from app.engines.financing.application import draft_application
 from app.engines.financing.catalogue import load_catalogue
+from app.engines.financing.eligibility import evaluate
 from app.engines.financing.ranking import match as rank_options
 from app.engines.mesh.graph import build_graph
 from app.engines.mesh.netting import FORMULA_ID as NETTING_FORMULA
@@ -68,6 +74,8 @@ RATIO_METRICS = ("net_sales", "gross_profit", "gross_margin", "operating_expense
                  "net_cash_flow", "dso", "dpo")
 TOP_OPTIONS = 3
 TOP_FIXES = 3
+TOP_DUE = 4  # upcoming payments named one by one (all of them are counted and totalled)
+TOP_CUSTOMERS = 3
 DEFAULT_TENOR_DAYS = 90
 FINANCING_EXTRA_FACTS = ("collateral_available",)  # read by approval likelihood (WP-06 API)
 
@@ -92,6 +100,11 @@ class FinancingParams(_Params):
     needed_by: date | None = Field(default=None, description="default: the gap's first day")
     tenor_days: int = Field(default=DEFAULT_TENOR_DAYS, ge=1, le=3650)
     purpose_key: str = Field(default="working_capital", max_length=64)
+    safe_size: bool = Field(default=False, description="also size the largest safe loan")
+
+
+class DueParams(_Params):
+    days: int = Field(default=ledgerdue.WINDOW_DAYS, ge=1, le=92)
 
 
 class RatioParams(_Params):
@@ -201,12 +214,7 @@ def _need(ctx: ToolContext, params: FinancingParams) -> FinancingNeed | None:
                          tenor_days=params.tenor_days, purpose_key=params.purpose_key)
 
 
-def financing_match(ctx: ToolContext, params: FinancingParams) -> ToolResult:
-    need = _need(ctx, params)
-    if need is None:
-        return ToolResult("financing.match", notes=("financing.no_gap",),
-                          data_mode=ctx.results["cash.gaps"].data_mode)
-    products = load_catalogue()
+def _financing_facts(ctx: ToolContext, products) -> tuple[dict[str, Decimal | None], list[Fact]]:
     metrics = sorted({r.metric for p in products for r in p.rules} | set(FINANCING_EXTRA_FACTS))
     facts: dict[str, Decimal | None] = {}
     cited: list[Fact] = []
@@ -216,24 +224,76 @@ def financing_match(ctx: ToolContext, params: FinancingParams) -> ToolResult:
             facts[metric] = fact.value if fact is not None else None
             if fact is not None:
                 cited.append(fact)
+    return facts, cited
+
+
+def safe_sizes(products, facts: dict[str, Decimal | None], start: date, band,
+               tenor_days: int, purpose: str) -> list[loansize.SafeSize]:
+    """Largest safe loan per product, fully eligible products first, then by size and cost."""
+    found = [s for s in (loansize.safe_amount(p, tenor_days, start, band, facts, purpose)
+                         for p in products) if s is not None]
+    status = {s.product.id: evaluate(s.product, facts, Money.of(s.amount), tenor_days,
+                                     purpose).status for s in found}
+    return sorted(found, key=lambda s: (status[s.product.id] is not EligibilityStatus.pass_,
+                                        -s.amount, s.product.nominal_rate_pa, s.product.id))
+
+
+def _safe_figure(size: loansize.SafeSize, start: date, tenor_days: int, purpose: str,
+                 mode: DataMode) -> Figure:
+    return Figure(id=f"{size.product.id}:safe:{size.amount}", label_key="copilot.safe_loan",
+                  value=size.amount, unit=Unit.BDT, data_mode=mode,
+                  provenance=Provenance(formula_id=loansize.FORMULA_ID,
+                                        formula_version=loansize.FORMULA_VERSION,
+                                        parameters={"product_id": size.product.id,
+                                                    "start": start.isoformat(),
+                                                    "tenor_days": str(tenor_days),
+                                                    "purpose_key": purpose,
+                                                    "step": str(loansize.STEP)}))
+
+
+def financing_match(ctx: ToolContext, params: FinancingParams) -> ToolResult:
+    need = _need(ctx, params)
     source = ctx.results.get("cash.gaps") or ctx.results.get("cash.forecast")
     band = source.payload.get("band") if source is not None else None
-    ranked = rank_options(need, products, facts, start=need.needed_by, band=band)
-    usable = [c.option for c in ranked if c.option.eligibility.status is not EligibilityStatus.fail]
-    top = usable[:TOP_OPTIONS]
-    figures = tuple(f for option in top for f in option.figures)
-    cards = (draft_application(top[0], need, facts, now=ctx.now),) if top else ()
-    notes = tuple(dict.fromkeys(k for o in top for k in o.reason_keys))
-    if not top:
-        notes = ("financing.no_eligible_option",)
+    products = load_catalogue()
+    facts, cited = _financing_facts(ctx, products)
     modes = [p.data_mode for p in products] + [f.data_mode for f in cited]
     if source is not None:
         modes.append(source.data_mode)
+    mode = most_cautious(modes)
+    safe: list[loansize.SafeSize] = []
+    sizing = band is not None and (need is None or params.safe_size)
+    if sizing:
+        start = params.needed_by or ctx.as_of + timedelta(days=1)
+        safe = safe_sizes(products, facts, start, band, params.tenor_days, params.purpose_key)
+        if need is None and safe:  # no gap: price the loan the shop can safely repay
+            need = FinancingNeed(tenant_id=ctx.tenant_id, amount=Money.of(safe[0].amount),
+                                 needed_by=start, tenor_days=params.tenor_days,
+                                 purpose_key=params.purpose_key)
+    safe_figures = tuple(_safe_figure(s, need.needed_by if need else ctx.as_of, params.tenor_days,
+                                      params.purpose_key, mode) for s in safe[:TOP_OPTIONS])
+    safe_notes = () if safe or not sizing else ("financing.no_safe_amount",)
+    if need is None:
+        return ToolResult("financing.match", notes=("financing.no_gap", *safe_notes),
+                          payload={"safe": (), "sized": sizing},
+                          data_mode=ctx.results["cash.gaps"].data_mode)
+    if safe and need.amount.amount == safe[0].amount:
+        products = [safe[0].product]  # priced at its own safe size (others: safe size only)
+    ranked = rank_options(need, products, facts, start=need.needed_by, band=band)
+    usable = [c.option for c in ranked if c.option.eligibility.status is not EligibilityStatus.fail]
+    top = usable[:TOP_OPTIONS]
+    figures = (*safe_figures, *(f for option in top for f in option.figures))
+    cards = (draft_application(top[0], need, facts, now=ctx.now),) if top else ()
+    notes = tuple(dict.fromkeys(k for o in top for k in o.reason_keys)) + safe_notes
+    if not top:
+        notes = ("financing.no_eligible_option", *safe_notes)
     return ToolResult("financing.match", figures=figures, facts=tuple(cited), cards=cards,
                       payload={"need": need, "options": tuple(top),
+                               "safe": tuple(zip(safe[:TOP_OPTIONS], safe_figures, strict=True)),
+                               "sized": sizing,
                                "facts_missing": tuple(sorted(m for m, v in facts.items()
                                                              if v is None))},
-                      notes=notes, data_mode=most_cautious(modes))
+                      notes=notes, data_mode=mode)
 
 
 # ---------------------------------------------------------------- WP-01 metric registry
@@ -305,6 +365,70 @@ def mesh_propose(ctx: ToolContext, params: NoParams) -> ToolResult:
                       payload={"round": round_}, data_mode=mode)
 
 
+# ---------------------------------------------------------------- ledger: money due
+
+
+def _due_figure(fig_id: str, label: str, value: Decimal, unit: Unit, formula: str,
+                rows: tuple[str, ...], params: dict[str, str], mode: DataMode) -> Figure:
+    return Figure(id=fig_id, label_key=label, value=value, unit=unit, data_mode=mode,
+                  provenance=Provenance(formula_id=formula,
+                                        formula_version=ledgerdue.FORMULA_VERSION,
+                                        source_row_ids=rows, parameters=params))
+
+
+def payables_upcoming(ctx: ToolContext, params: DueParams) -> ToolResult:
+    with ctx.db() as store:
+        bills = store.bills(ctx.tenant_id)
+        obligations = store.obligations(ctx.tenant_id)
+    as_of = ctx.as_of
+    due = ledgerdue.upcoming(bills, obligations, as_of, params.days)
+    mode = most_cautious([*(b.data_mode for b in bills), *(o.data_mode for o in obligations)]) \
+        if bills or obligations else ctx.data_mode
+    base = {"as_of": as_of.isoformat(), "days": str(params.days)}
+    key = f"{ctx.tenant_id}:payables:{as_of.isoformat()}:{params.days}"
+    rows = tuple(d.ref for d in due) or (f"ledger:{ctx.tenant_id}",)
+    figures = [
+        _due_figure(f"{key}:count", "copilot.payables_count", Decimal(len(due)), Unit.count,
+                    ledgerdue.PAYABLES_FORMULA, rows, {**base, "part": "count"}, mode),
+        _due_figure(f"{key}:total", "copilot.payables_total", sum((d.amount for d in due),
+                                                                  Decimal(0)),
+                    Unit.BDT, ledgerdue.PAYABLES_FORMULA, rows, {**base, "part": "total"}, mode)]
+    for item in due[:TOP_DUE]:
+        figures.append(_due_figure(f"{key}:{item.ref}", "copilot.payable_item", item.amount,
+                                   Unit.BDT, ledgerdue.PAYABLES_FORMULA, (item.ref,),
+                                   {**base, "part": "item", "ref": item.ref}, mode))
+    suppliers = ledgerdue.labels((b.counterparty_token for b in bills), "Supplier")
+    return ToolResult("payables.upcoming", figures=tuple(figures),
+                      payload={"due": tuple(due), "as_of": as_of, "suppliers": suppliers},
+                      notes=() if due else ("payables.none_due",), data_mode=mode)
+
+
+def receivables_plan(ctx: ToolContext, params: NoParams) -> ToolResult:
+    with ctx.db() as store:
+        invoices = store.invoices(ctx.tenant_id)
+    as_of = ctx.as_of
+    found = ledgerdue.owed(invoices, as_of)
+    mode = most_cautious(i.data_mode for i in invoices) if invoices else ctx.data_mode
+    base = {"as_of": as_of.isoformat()}
+    key = f"{ctx.tenant_id}:owed:{as_of.isoformat()}"
+    whole = found.open_ids or (f"ledger:{ctx.tenant_id}",)
+    figures = [
+        _due_figure(f"{key}:open", "copilot.receivables_open", found.open_total, Unit.BDT,
+                    ledgerdue.RECEIVABLES_FORMULA, whole, {**base, "part": "open"}, mode),
+        _due_figure(f"{key}:overdue", "copilot.receivables_overdue", found.overdue_total,
+                    Unit.BDT, ledgerdue.RECEIVABLES_FORMULA, found.overdue_ids or whole,
+                    {**base, "part": "overdue"}, mode)]
+    for customer in found.customers[:TOP_CUSTOMERS]:
+        figures.append(_due_figure(
+            f"{key}:{customer.token}", "copilot.customer_owes", customer.amount, Unit.BDT,
+            ledgerdue.RECEIVABLES_FORMULA, customer.invoice_ids,
+            {**base, "part": "customer", "token": customer.token}, mode))
+    customers = ledgerdue.labels((i.counterparty_token for i in invoices), "Customer")
+    return ToolResult("receivables.plan", figures=tuple(figures),
+                      payload={"owed": found, "as_of": as_of, "customers": customers},
+                      notes=() if found.open_ids else ("receivables.none_open",), data_mode=mode)
+
+
 # ---------------------------------------------------------------- the registry
 
 
@@ -329,15 +453,16 @@ def build_registry() -> ToolRegistry:
              history_label="at least 4 weeks of transactions", run=ratios),
         Tool("mesh.propose", "A netting round that settles circular debt with the least cash",
              "WP-08 liquidity mesh", tier=Tier.DRAFT, run=mesh_propose),
-        Tool("receivables.plan", "Who owes what, how late, and a collection plan",
-             "WP-05 receivables engine"),
+        Tool("payables.upcoming", "Bills and regular payments (rent, salaries, utilities, "
+             "loan instalments) due in the next 31 days, soonest first, and overdue bills",
+             "ledger bills and obligations", DueParams, run=payables_upcoming),
+        Tool("receivables.plan", "What customers owe, how much is overdue, and who to chase "
+             "first", "WP-05 receivables engine", run=receivables_plan),
         Tool("analysis.stability", "Whether a recommendation holds under stressed inputs",
              "WP-07 analysis engine"),
         Tool("market.prices", "Wholesale prices and cheaper vendors", "WP-09 market engine"),
         Tool("market.negotiate", "A negotiation script with the numbers behind each step",
              "WP-09 market engine"),
-        Tool("messaging.draft", "A message draft (reminder, request) for the owner to approve",
-             "WP-12 messaging", tier=Tier.DRAFT),
     ])
 
 
