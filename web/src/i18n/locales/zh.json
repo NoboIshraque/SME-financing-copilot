@@ -144,7 +144,9 @@
     "invalid_email": "请输入有效的邮箱地址。",
     "signup_closed": "本演示服务器已停止创建新店铺。",
     "opening_needs_both": "请同时填写期初余额和日期。",
-    "date_in_future": "该日期在未来。"
+    "date_in_future": "该日期在未来。",
+    "invalid_offer": "请输入买家的每单位出价，例如 62。",
+    "not_enough_data": "记录中的数据还不足以回答这个问题。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -705,7 +707,9 @@
     "sampleNote": "示例数据：计划中功能的预览，不是实时价格。服务器上还没有市场价格。",
     "sampleLabel": "示例数据：计划中功能的预览，不是实时价格",
     "addQuote": "添加供应商报价以比较供应商。示例供应商不会显示为您的供应商。",
-    "change_vs_previous": "与上一期价格表相比的变化"
+    "change_vs_previous": "与上一期价格表相比的变化",
+    "cost_of_money": "您的资金成本（您符合条件的最优贷款）",
+    "priceUsed": "使用的市场价格：{{price}} / {{unit}}，TCB，发布于 {{date}}"
   },
   "commodity": {
     "onion": "洋葱（本地）",

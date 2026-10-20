@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ApiRequestError } from "../../api/client";
 import { compareDecimal } from "../../api/decimal";
 import { api } from "../../api/endpoints";
 import type { NegotiationRequest, WatchItem } from "../../api/types";
@@ -34,7 +35,12 @@ function SampleLabel() {
 
 const field = "w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-slate-600 dark:bg-slate-800";
 
-function VendorRanking({ commodities }: { commodities: string[] }) {
+/** The server has no supplier quote on record for this shop (a self-service shop). */
+function noQuotes(error: unknown): boolean {
+  return error instanceof ApiRequestError && error.body?.detail?.missing === "supplier_quote";
+}
+
+function VendorRanking({ commodities, live }: { commodities: string[]; live: boolean }) {
   const { t } = useTranslation();
   // A self-service shop's own data is live: sample vendors are never shown to it as its own.
   const ownShop = useSession().data?.data_mode === "live";
@@ -47,7 +53,7 @@ function VendorRanking({ commodities }: { commodities: string[] }) {
   return (
     <section aria-labelledby="h-vendors" className={card}>
       <h3 id="h-vendors" className="text-lg font-semibold">{t("market.vendorsTitle")}</h3>
-      <SampleLabel />
+      {(rank.data ? rank.data.length > 0 && !rank.data.every((v) => v.source) : !live) && <SampleLabel />}
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <div>
           <label htmlFor={ids.commodity} className="mb-1 block text-sm font-medium">{t("market.commodity")}</label>
@@ -65,7 +71,11 @@ function VendorRanking({ commodities }: { commodities: string[] }) {
           </button>
         </div>
       </div>
-      {rank.isError && <div className="mt-3"><ErrorState error={rank.error} /></div>}
+      {rank.isError && (noQuotes(rank.error) ? (
+        <div className="mt-3"><EmptyState>{t("market.addQuote")}</EmptyState></div>
+      ) : (
+        <div className="mt-3"><ErrorState error={rank.error} /></div>
+      ))}
       {rank.data && ownShop && (
         <div className="mt-3"><EmptyState>{t("market.addQuote")}</EmptyState></div>
       )}
@@ -101,9 +111,10 @@ function VendorRanking({ commodities }: { commodities: string[] }) {
   );
 }
 
-function Negotiation({ commodities }: { commodities: string[] }) {
+function Negotiation({ commodities, live }: { commodities: string[]; live: boolean }) {
   const { t } = useTranslation();
   const text = useServerText();
+  const format = useFormat();
   const ids = { commodity: useId(), quantity: useId(), price: useId(), days: useId(), error: useId() };
   const [commodity, setCommodity] = useState(commodities.includes("rice_coarse") ? "rice_coarse" : (commodities[0] ?? ""));
   const [quantity, setQuantity] = useState("500");
@@ -120,7 +131,7 @@ function Negotiation({ commodities }: { commodities: string[] }) {
   return (
     <section aria-labelledby="h-negotiate" className={card}>
       <h3 id="h-negotiate" className="text-lg font-semibold">{t("market.negotiateTitle")}</h3>
-      <SampleLabel />
+      {(plan.data ? !plan.data.cost_of_money : !live) && <SampleLabel />}
       <p className="text-sm text-slate-600 dark:text-slate-400">{t("market.negotiateHelp")}</p>
       <form onSubmit={submit} noValidate className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
@@ -161,6 +172,17 @@ function Negotiation({ commodities }: { commodities: string[] }) {
               <dd className="text-xl font-semibold"><FigureValue figure={plan.data.target} /></dd>
             </div>
           </dl>
+          {plan.data.cost_of_money && plan.data.market_price && (
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {t("market.priceUsed", {
+                price: format.money(plan.data.market_price.price),
+                unit: text(`unit.${plan.data.market_price.unit}`),
+                date: format.date(plan.data.market_price.observed_on),
+              })}
+              {" · "}
+              {t("market.cost_of_money")}: <FigureValue figure={plan.data.cost_of_money} className="font-semibold" />
+            </p>
+          )}
           {compareDecimal(plan.data.target.value, plan.data.walk_away.value) < 0 && (
             <p role="alert" className="text-sm font-medium text-red-700 dark:text-red-300">{t("market.belowWalkAway")}</p>
           )}
@@ -271,8 +293,8 @@ export function MarketScreen() {
         </QueryView>
       </section>
 
-      {commodities.length > 0 && <VendorRanking commodities={commodities} />}
-      {commodities.length > 0 && <Negotiation commodities={commodities} />}
+      {commodities.length > 0 && <VendorRanking commodities={commodities} live={live} />}
+      {commodities.length > 0 && <Negotiation commodities={commodities} live={live} />}
     </section>
   );
 }

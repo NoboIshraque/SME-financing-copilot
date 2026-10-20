@@ -144,7 +144,9 @@
     "invalid_email": "Enter a valid email address.",
     "signup_closed": "New shops are closed on this demo server.",
     "opening_needs_both": "Enter the opening balance and its date together.",
-    "date_in_future": "That date is in the future."
+    "date_in_future": "That date is in the future.",
+    "invalid_offer": "Enter the buyer's offer per unit, for example 62.",
+    "not_enough_data": "Not enough data on record to answer this yet."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -705,7 +707,9 @@
     "sampleNote": "Sample data: a preview of a planned feature, not live prices. The server has no market prices yet.",
     "sampleLabel": "Sample data: a preview of a planned feature, not live prices",
     "addQuote": "Add a supplier quote to compare vendors. Sample vendors are not shown as yours.",
-    "change_vs_previous": "Change vs the previous list"
+    "change_vs_previous": "Change vs the previous list",
+    "cost_of_money": "Your cost of money (best loan you qualify for)",
+    "priceUsed": "Market price used: {{price}} / {{unit}}, TCB, published {{date}}"
   },
   "commodity": {
     "onion": "Onion (local)",

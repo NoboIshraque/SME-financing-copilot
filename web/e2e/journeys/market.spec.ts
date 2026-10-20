@@ -18,4 +18,15 @@ test("the Market screen names TCB's list and its publication date instead of the
   await expect(watch.getByRole("row").nth(1)).toContainText(app.t("market.source.tcb"));
   await expect(watch.getByText(app.t("market.sampleLabel"))).toHaveCount(0);
   await expect(page.getByText(app.t("market.sampleNote"))).toHaveCount(0);
+
+  // Vendors (the shop's own ledger suppliers, synthetic quotes) and the negotiation plan are live too.
+  const vendors = page.getByRole("region", { name: app.t("market.vendorsTitle") });
+  await vendors.getByRole("button", { name: app.t("market.rank") }).click();
+  await expect(vendors.getByRole("listitem").first()).toContainText(/Supplier \d+/);
+  await expect(vendors.getByText(app.t("market.sampleLabel"))).toHaveCount(0);
+  const negotiate = page.getByRole("region", { name: app.t("market.negotiateTitle") });
+  await negotiate.getByRole("button", { name: app.t("market.makePlan") }).click();
+  await expect(negotiate.getByText(app.t("market.walkAway"))).toBeVisible();
+  await expect(negotiate).toContainText(app.t("market.cost_of_money"));
+  await expect(negotiate.getByText(app.t("market.sampleLabel"))).toHaveCount(0);
 });

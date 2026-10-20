@@ -251,6 +251,8 @@ export interface VendorRank {
   quote: VendorQuote;
   landed_cost: Figure;
   breakdown: Figure[];
+  /** Server only (WP-09): generated quotes from the shop's own ledger suppliers. */
+  source?: "ledger_supplier";
 }
 
 export interface NegotiationRequest {
@@ -270,6 +272,9 @@ export interface NegotiationPlan {
   walk_away: Figure;
   target: Figure;
   steps: NegotiationStep[];
+  /** Server only (WP-09): the APR used (best eligible financing) and the TCB price used. */
+  cost_of_money?: Figure;
+  market_price?: PricePoint;
 }
 
 // ---- Messages, approvals, reports, trust, settings (WP-11/12/13/16) -------------------------
