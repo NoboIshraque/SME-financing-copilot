@@ -18,6 +18,11 @@ with the guard's held-out result (15/24 attacks caught, 10/24 false alarms); `vi
 State at 20 Oct 01:00 (orch-C): every work package is merged or cut; the product is now
 **DecisionGuard**. Submission files: `docs/submission/` (PDFs in `docs/submission/pdf/`).
 
+**Session B (20 Oct afternoon):** first demo owner sign-in fixed (PR #51), Market back on TCB's published Dhaka prices with alerts, vendor ranking and negotiation (PRs #53, #54), cash slider sends one request when it rests (PR #55), docs/evidence/PDFs refreshed.
+
+- [ ] **Redeploy both Render services** (**decisionguard-api** and **decisionguard-web** → Manual Deploy → Deploy latest commit), then run the 5-minute check in `docs/handover/FREE_SERVER.md` §5a (sign in as each demo role, own shop, slider, Market).
+- [ ] **Tell Session A** the market API is merged: it can register the market tools (`GET /api/market/prices`, `GET /api/market/alerts`, `POST /api/market/vendors/rank`, `POST /api/market/negotiate`) for the copilot.
+- [ ] **Video:** Market can now be shown live; say "TCB's list, published 19 October", never "live prices"; vendor quotes are synthetic.
 - [ ] **Deck:** the Slides artifact lives on orch-A's claude.ai account and still says Hishab. Either republish it from `docs/submission/deck/` or send `docs/submission/pdf/deck.pdf`.
 - [ ] **Video (≤ 5 min):** record from `docs/submission/video-script.md` (`npm run dev`, demo shop `sme_hardware`, owner@hardware.hishab.test); save as `DecisionGuard_TopicE_BUP_demo.mp4`; run `npm run evidence` once more after recording.
 - [ ] **Send** (PLAN §9): deck, technical doc, security self-assessment, evidence bundle, video, repo link (source zip while the repo is private) to wangyr@pbcsf.tsinghua.edu.cn.

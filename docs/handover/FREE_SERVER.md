@@ -80,12 +80,36 @@ to set up an approval code there with any authenticator app.
 | --- | --- | --- |
 | The page loads but sign-in says "origin not allowed" (403) | `CORS_ORIGINS` does not match the web address | Step 3.4 |
 | Every screen errors, or `/api/health` gives 404 on the web address | The `/api/*` rewrite points at the wrong API name | Step 3.3 |
-| The first visit takes about a minute | The free API sleeps after 15 minutes without visitors and wakes on the next request | Normal. Open the link 2 minutes before you record or before judges look |
+| The first visit takes about a minute | The free API sleeps after 15 minutes without visitors and wakes on the next request | Normal. Open the link 2 minutes before you record or before judges look. Sign-in now says "The server is waking up… try again" instead of a generic error |
+| The owner's demo code is refused | Before 20 Oct the page showed the code from when it was opened; a code lives 30 s (plus one step) | Fixed (PR #51): the code step fetches the current code and refreshes it every 20 s. Redeploy **both** services if it still happens |
+| "Too many attempts. Try again in 15 minutes" | 5 wrong passwords or codes lock that account for 15 minutes | Wait, or sign in as another demo role. The error now says so after a wrong try |
+| Market says "Sample data" on every card | The API is older than PR #53/#54 | **decisionguard-api** → Manual Deploy → Deploy latest commit |
 | Today says there is not enough data | The demo shops did not load | API → **Logs**: look for the `seeded …` lines. **Manual Deploy** → **Restart service** reloads them |
 | API build fails | Render build error | API → **Events** → open the failed deploy, copy the last 30 log lines, and give them to the orchestrator |
 
 Health check: `<API address>/api/health` should show `"status":"ok"`, `"app_env":"demo"` and
 `"database":"postgresql"`.
+
+## 5a. Test it after each redeploy (5 min)
+
+Redeploy both services first (**decisionguard-api** and **decisionguard-web** → **Manual Deploy**
+→ **Deploy latest commit**), then on the web address:
+
+1. Open the sign-in page and **wait one minute**, then **Try the demo → Sign in as Owner**
+   (Mirpur Mudi Store): the code shown must be accepted. Sign out and sign in as the owner again
+   straight away: the code shown is a new one and works too.
+2. Sign in as each other demo role (accountant, staff, lender, compliance): each lands on its
+   home screen; the lender sees only Reports and Settings.
+3. **Create your own shop** from the sign-in page, set the opening balance, upload the example
+   file: Today and Cash show its numbers with no synthetic banner. On Market → Rank vendors it
+   says "Add a supplier quote" (no sample vendors shown as its own).
+4. As the grocery owner, **Cash → What if…**: drag Sales change quickly from 0 to -30. The
+   slider moves at once, "Updating…" shows, and one result arrives about a second after you
+   stop (one request, not one per step).
+5. **Market**: the note says "TCB's daily retail price list for Dhaka, published 19 October 2026"
+   with a link to the list; no "Sample data" label on any card; chickpea shows a price alert;
+   **Rank vendors** lists Supplier N rows; **Make my plan** shows the walk-away, the target, the
+   TCB price and your cost of money.
 
 ## 6. Our own domain (optional, 10 min + DNS wait; better for China)
 
@@ -111,6 +135,9 @@ gateway; numbers still come from the engines.
 ## 8. Limits to know (say them if asked)
 
 - Free API: 512 MB memory, sleeps when idle, wakes in about a minute.
+- Market prices are TCB's lists as published (saved 10 to 19 October in
+  `data/public/prices/tcb/`), not fetched on a schedule: say "published on", never "live". To
+  refresh, follow that folder's README and redeploy the API.
 - Free database: Render deletes free databases after a fixed period (30 days at our last check;
   the dashboard shows the date). Enough for judging; after that, the demo shops reload into a new
   database by creating it again from the Blueprint.
