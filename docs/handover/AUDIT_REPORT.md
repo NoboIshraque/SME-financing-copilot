@@ -15,7 +15,7 @@ three-owner mesh round with verify. The weak points are the **submission documen
 overstate or misstate several things, the **injection guard's generalisation**, and three broken
 or unwired demo paths.
 
-Findings: **2 Critical, 7 High, 15 Medium, 11 Low** (35 in total). Fixed on this branch, each with a
+Findings: **2 Critical, 7 High, 16 Medium, 12 Low** (37 open). Fixed on this branch, each with a
 test that failed before the fix: ingest preview/columns now require `ingest:upload` (self-assessment
 R2), the Today alert lists every gap driver (duplicate React key), and Today asks the copilot in
 the reader's language (BN/ZH users got English). Evidence counts were regenerated to match.
@@ -71,6 +71,7 @@ a deliverable, a11y serious; Low = polish.
 | M13 | Medium | a11y (serious), WP-15 known bug 4 | Reports, Settings (dark theme) | `slate-500` small text at 3.74:1 in dark mode. | e2e known-bug list (the sweep ran in light mode). | not fixed (WP-14) - recommendation: `dark:text-slate-400`. |
 | M14 | Medium | i18n: English in BN/ZH | backend label keys vs `web/src/i18n/locales/*.json` | 95 keys the backend emits (`driver.*`, `interpretation.*`, `ratio.missing.*`, `rule.*`, `error.*`, `auth.*` audit actions, `alert.*`) have no translation in any locale, so `useServerText` shows a humanised English fallback ("Disputed invoice", "Dio", "Password ok", "Totp failed") on the Bangla and Chinese screens. The audit table also shows raw user ids (`u-a6b6…`). | `docs/handover/missing_i18n_keys.txt`; BN Today and Trust phone screenshots. en/bn/zh parity itself is perfect (730 keys each). | not fixed (WP-14) - recommendation: add the visible ones (driver, ratio, interpretation, auth, error) to all three locales. |
 | M15 | Medium | Hash display, WP-15 known bug 5 | Trust "Latest hash" | In Bangla mode the digits inside the audit hash become Bangla digits, so the hash cannot be compared with the API or the verify page. | BN Trust screenshot. | not fixed (WP-14) - recommendation: render hashes in a `lang="en"` / `translate="no"` span and skip `banglaDigits`. |
+| M16 | Medium | Role navigation vs API | `web/src/navigation.ts:43-48` | The accountant's navigation includes Trust (all screens), but the accountant has no `audit:read`, so both audit cards show "Your role can't do this". Compliance's Trust shows an error for the abstention log (`/api/copilot/abstentions` needs `copilot:ask`). | Sweep: accountant Trust → `403 /api/audit/events`, `/verify`, `/anchors`; compliance Trust → `403 /api/copilot/abstentions`. Screenshot. | not fixed (WP-14/WP-11) - recommendation: drop Trust from the accountant's screens (or hide the audit cards without `audit:read`), and let `audit:read` read abstentions or hide that card for compliance. |
 | L1 | Low | Lender scope | `backend/app/api/reports.py:171-175` | A lender viewer (scope `passport:read`) can list every share grant of the tenant, including other lenders' labels. | Live: lender `GET /api/reports/shares` → 200 with two other grants. | not fixed - recommendation: filter to grants naming that lender, or require `approvals:decide`. |
 | L2 | Low | Public verify ids | `backend/app/api/reports.py:220`; ids `pp-<tenant>-v<n>` | Passport ids are guessable, so the public verify route confirms which tenants exist and how many versions they issued. | `GET /api/verify/pp-sme_grocery-v1` without a session → 200. | not fixed - recommendation: random ids, or accept as by design and list it in the SSA. |
 | L3 | Low | Global anchor trigger | `backend/app/api/auth.py:568-577` | A compliance user of one tenant can run `POST /api/audit/anchor`, which anchors every tenant's chain head (with Sepolia on, that spends gas); `GET /api/audit/anchors` shows the global head count. | Live: compliance `POST /api/audit/anchor` → 200; anchors list `heads: 4`. | not fixed - recommendation: restrict manual anchoring to the system job, or accept and list it. |
@@ -82,12 +83,13 @@ a deliverable, a11y serious; Low = polish.
 | L9 | Low | Engines and the database | `backend/app/engines/{cash,analysis}/jobs.py`, `*/store.py`, `*/models.py`, `mesh/store.py` | Persistence adapters live inside engine packages and import the DB. The calculation modules are pure (no DB, no network); the mesh settlement takes an injected anchorer. Fine for the rule's intent, but the layout invites a future breach. | `grep sqlalchemy app/engines`. | not fixed - recommendation: none before the deadline. |
 | L10 | Low | Copilot Today in Chinese | `backend/app/agents/claims.py` amount rendering | Chinese narration groups amounts the Bangladeshi way ("4,27,842 塔卡"). | Live `GET /api/copilot/today?language=zh`. | not fixed - recommendation: optional; the web formats its own figures correctly. |
 | L11 | Low | Messages drafts in Bangla | `web/src/api/endpoints.ts:142` | The web never passes `language` to `GET /api/messages/drafts`, so Bangla readers only see English drafts although the API renders Bangla. | Code read. | not fixed - recommendation: pass `language=bn` when the UI is Bangla (zh has no template; keep en). |
+| L12 | Low | Copilot coverage offline | grocery tenant, Trust abstention log | In `fixtures` mode "Which customer should I chase first?" abstains as out of scope, although a receivables intent exists. Only questions with recorded plans or rule matches are answered offline. | Abstention log entry seen in the sweep. | not fixed - recommendation: rehearse the video's exact copilot questions in the mode the demo will run. |
 | F1 | (fixed) High | Role check: ingest | `backend/app/api/ingest.py:122-160` | `/ingest/preview` and `/ingest/columns` checked only the session, so a lender viewer or compliance reviewer could upload and parse files (SSA risk R2). | New tests `test_roles_without_ingest_upload_may_not_upload[*]` failed 4/4 before the fix. | **Fixed in `f4e585f`** (require `ingest:upload`; staff still may preview, tested). |
 | F2 | (fixed) Medium | Today alert drivers | `web/src/screens/today/AlertCard.tsx:74-75` | Two drivers of the same kind (the hardware shop's two supplier bills) shared a React key, so React warned and may drop or duplicate a row on update. | Console error on every Today view in the sweep; new Vitest test failed before the fix. | **Fixed in `d29a20d`**. |
 | F3 | (fixed) Medium | Today in BN/ZH | `web/src/api/endpoints.ts:128-129`, `TodayScreen.tsx`, `AnalysisScreen.tsx` | The web never sent `?language=` to `/api/copilot/today`, so Bangla and Chinese readers got the daily advice in English. | BN Today screenshot; new Vitest test failed before the fix; live `?language=bn` returns Bangla. | **Fixed in `c0e63c1`**. |
 
 (F1–F3 are counted in the totals above as fixed, not as open findings: open = 2 Critical, 7 High,
-15 Medium, 11 Low.)
+16 Medium, 12 Low.)
 
 ### 2.1 Fresh injection set (written before opening the guard rules or the eval tasks)
 
@@ -196,7 +198,21 @@ compliance. Languages: en, bn, zh. Sizes: 1920×1080 and Pixel 7. axe with WCAG 
 tags. API mode set to Real backend through Settings. Screenshots are in
 `web/test-results/audit/shots/` in the audit sandbox (git-ignored).
 
-SWEEP_RESULTS
+| Account | Views | Synthetic banner | Mock banner | Untranslated keys | Horizontal scroll (phone) | Foreign hosts | axe serious/critical | Console errors |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| owner@hardware | 66 | 66/66 | 0 | 0 | Trust in en/bn/zh (45-69 px, M12) | 0 | Cash `aria-hidden-focus` (M11), Today Watch badge contrast (M10), Trust `scrollable-region-focusable` (M12) | duplicate key on Today (F2, fixed); 404s from Analysis stability (H3), Settings (M8), Market (falls back to its labelled sample) |
+| accountant@grocery | 66 | 66/66 | 0 | 0 | none | 0 | Cash `aria-hidden-focus` | 403 on Trust's audit cards (M16); same 404s |
+| staff@grocery | 36 | 36/36 | 0 | 0 | none | 0 | none | Settings and Market 404s |
+| lender@grocery | 18 | 18/18 | 0 | 0 | none | 0 | none | none |
+| compliance@grocery | 30 | 30/30 | 0 | 0 | none | 0 | Trust `scrollable-region-focusable` | 403 on Trust's abstention log (M16); Settings 404 |
+| public `/verify` (phone) | 1 | n/a | 0 | 0 | none | 0 | none | none |
+
+Hidden routes are gated correctly: staff on `/cash` sees "Not available for your role"; the lender
+and compliance land on their home screen. English text in BN/ZH that the sweep's string check
+can see came only from stored user questions in the abstention log (data, not UI). The humanised
+fallbacks in M14 are invisible to that check and were found in the screenshots. One
+`422 /api/copilot/today` was seen once while the dev server hot-reloaded the F3 change; it did
+not reproduce (`?language=en|bn|zh` and no parameter all answer 200).
 
 ## 4. Commands run
 
