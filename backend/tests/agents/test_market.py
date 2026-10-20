@@ -70,7 +70,9 @@ def test_a_price_question_states_the_tcb_price_of_the_items_named(orch, ledger, 
     assert {c.status for c in rec.checks} == {CheckStatus.verified}
     stated = {c.value for c in rec.claims}
     for commodity in commodities:
-        assert tcb_row(commodity).latest.point.price.amount in stated
+        row = tcb_row(commodity)
+        assert row.latest.point.price.amount in stated
+        assert row.change_pct in stated  # and how it moved against its baseline
     assert run.results["market.prices"].data_mode is DataMode.public  # TCB's public lists
     assert rec.data_mode is DataMode.synthetic  # ...answered to a synthetic demo shop
 
