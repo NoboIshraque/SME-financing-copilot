@@ -19,6 +19,10 @@
 	}
 
 	handle /api/* {
+		# Cap request bodies before they reach the API (known risk R13; the API caps them too).
+		request_body {
+			max_size 12MB
+		}
 		reverse_proxy api:8000 {
 			health_uri /api/health
 			health_interval 15s

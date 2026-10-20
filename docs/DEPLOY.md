@@ -42,16 +42,29 @@ Every push to `main` that passes CI is shipped by `.github/workflows/deploy.yml`
 the exact commit to `~/hishab/releases/<sha>`, rebuilds, checks
 `https://<DEPLOY_DOMAIN>/api/health`, promotes it to `~/hishab/current`, and **rolls back**
 to the previous release if the check fails. Repository secrets: `DEPLOY_HOST`, `DEPLOY_USER`,
-`DEPLOY_SSH_KEY`, `DEPLOY_DOMAIN`.
+`DEPLOY_SSH_KEY`, `DEPLOY_DOMAIN`, and optionally `DEPLOY_KNOWN_HOSTS` (the output of
+`ssh-keyscan <server IP>` run once from your own machine) so the server's host key is pinned
+instead of trusted on every run.
 
 ## 5. Backups
 
 `infra/backup.sh` runs hourly from cron (installed by each deploy) and keeps 48 `pg_dump`
-files in `~/hishab/backups`. Restore:
+files in `~/hishab/backups`. Create the encryption key once, and keep a copy of it somewhere
+other than the server (a password manager):
 
 ```bash
-docker exec -i hishab-db-1 pg_restore -U hishab -d hishab --clean < ~/hishab/backups/<file>.dump
+openssl rand -hex 32 > ~/hishab/shared/backup.key && chmod 600 ~/hishab/shared/backup.key
 ```
+
+Restore an encrypted dump (`.dump.enc`):
+
+```bash
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass file:$HOME/hishab/shared/backup.key \
+  < ~/hishab/backups/<file>.dump.enc | docker exec -i hishab-db-1 pg_restore -U hishab -d hishab --clean
+```
+
+A plain `.dump` (written when the key file is missing) restores with
+`docker exec -i hishab-db-1 pg_restore -U hishab -d hishab --clean < ~/hishab/backups/<file>.dump`.
 
 ## 6. Reachability from mainland China
 
