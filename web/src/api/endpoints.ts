@@ -141,7 +141,8 @@ export const api = {
     pending: () => apiGet<ApprovalView[]>("/api/approvals?status=pending"),
   },
   messages: {
-    drafts: () => apiGet<MessageDraft[]>("/api/messages/drafts"),
+    /** Drafts exist in English and Bangla (no Chinese template); asking in Bangla adds the Bangla ones. */
+    drafts: (language: "en" | "bn" = "en") => apiGet<MessageDraft[]>(`/api/messages/drafts?language=${language}`),
     approve: (draftId: string, step: Step) => apiPost<MessageDraft>(`/api/messages/${id(draftId)}/approve`, {}, step),
     send: (draftId: string, step: Step) => apiPost<MessageDraft>(`/api/messages/${id(draftId)}/send`, {}, step),
   },

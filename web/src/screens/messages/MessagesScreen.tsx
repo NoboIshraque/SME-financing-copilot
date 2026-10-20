@@ -25,7 +25,7 @@ function DraftCard({ draft }: { draft: MessageDraft }) {
   const [stepUpOpen, setStepUpOpen] = useState(false);
   const recipient = draft.variables?.recipient_label ?? draft.recipient_token;
   const update = (next: MessageDraft) =>
-    queryClient.setQueryData<MessageDraft[]>(["messages", "drafts"], (list) => list?.map((d) => (d.id === next.id ? next : d)));
+    queryClient.setQueriesData<MessageDraft[]>({ queryKey: ["messages", "drafts"] }, (list) => list?.map((d) => (d.id === next.id ? next : d)));
   // A message leaves DecisionGuard (EXECUTE): the owner approves it with a fresh code.
   const approve = useMutation({
     mutationFn: (stepUpCode: string) =>
@@ -95,11 +95,12 @@ function DraftCard({ draft }: { draft: MessageDraft }) {
 }
 
 export function MessagesScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const format = useFormat();
   useDocumentTitle(t("nav.messages"));
   const pending = useQuery({ queryKey: ["approvals", "pending"], queryFn: api.approvals.pending });
-  const drafts = useQuery({ queryKey: ["messages", "drafts"], queryFn: api.messages.drafts });
+  const draftLanguage = i18n.language === "bn" ? "bn" : "en";
+  const drafts = useQuery({ queryKey: ["messages", "drafts", draftLanguage], queryFn: () => api.messages.drafts(draftLanguage) });
   return (
     <section aria-labelledby="h-messages" className="space-y-6">
       <h2 id="h-messages" className="text-xl font-semibold">{t("nav.messages")}</h2>
