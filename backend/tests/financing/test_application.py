@@ -7,7 +7,7 @@ from app.contracts import ActionType, DataMode, EligibilityRule, Role, Tier
 from app.engines.financing.application import draft_application
 from app.engines.financing.ranking import match
 from app.security.accounts import Accounts, principal_of
-from app.security.approvals import ApprovalProblem, Approvals
+from app.security.approvals import ApprovalProblem, Approvals, issue_cards
 from tests.financing.helpers import START, need, product
 
 NOW = datetime(2026, 10, 1, 10, tzinfo=UTC)
@@ -54,6 +54,7 @@ def test_owner_approves_and_executes_the_application_an_accountant_requested(cli
             tenant_id="sme_grocery", display_name=role.value, now=NOW))
             for role in (Role.owner, Role.accountant)}
         approvals = Approvals(db)
+        issue_cards(db, "sme_grocery", (c,), NOW)  # as POST /api/financing/applications does
         row, _ = approvals.request(people[Role.accountant], c, "idem-apply-1", NOW)
         with pytest.raises(ApprovalProblem) as refused:
             approvals.approve(people[Role.accountant], row.id, step_up_verified=True, now=NOW)

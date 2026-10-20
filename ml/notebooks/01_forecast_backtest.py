@@ -42,6 +42,11 @@ SEED = 20261020
 np.random.seed(SEED)
 
 DATA_PATH = os.environ.get("HISHAB_RETAIL_PATH", "")  # set to override discovery
+# Optional second dataset: a two-column daily series (date, value), e.g. the Bangladeshi
+# retailer's daily sales 2013-2017 (Mendeley 10.17632/xwmbk7n3c8.1, CC BY 4.0, copy in
+# data/public/retail_bd/). Its outputs are named forecast_backtest_bd.*.
+DAILY_PATH = os.environ.get("HISHAB_DAILY_PATH", "")
+STEM = "forecast_backtest_bd" if DAILY_PATH else "forecast_backtest"
 OUT = Path(os.environ.get("HISHAB_OUT", "/kaggle/working/hishab_ml" if Path("/kaggle").exists()
                           else "hishab_ml"))
 OUT.mkdir(parents=True, exist_ok=True)
@@ -89,11 +94,22 @@ def load(path: str) -> pd.DataFrame:
     return df
 
 
-raw = load(find_data())
-daily = raw.groupby(raw["InvoiceDate"].dt.normalize())["amount"].sum()
+def load_daily(path: str) -> pd.Series:
+    table = pd.read_csv(path) if path.endswith(".csv") else pd.read_excel(path)
+    table = table.loc[:, ~table.columns.astype(str).str.startswith("Unnamed")]  # a row-number column
+    days, values = pd.to_datetime(table.iloc[:, 0]).dt.normalize(), table.iloc[:, 1].astype(float)
+    return values.groupby(days).sum()
+
+
+if DAILY_PATH:
+    raw = None
+    daily = load_daily(DAILY_PATH)
+else:
+    raw = load(find_data())
+    daily = raw.groupby(raw["InvoiceDate"].dt.normalize())["amount"].sum()
 daily = daily.reindex(pd.date_range(daily.index.min(), daily.index.max(), freq="D"), fill_value=0)
 daily.name = "cash_in"
-print(f"{len(raw):,} rows -> {len(daily)} days, {daily.index.min().date()} .. {daily.index.max().date()}")
+print(f"{len(raw) if raw is not None else len(daily):,} rows -> {len(daily)} days, {daily.index.min().date()} .. {daily.index.max().date()}")
 print(daily.describe().round(0))
 
 
@@ -191,10 +207,11 @@ def worst_case_cumulative(p10: np.ndarray, p50: np.ndarray, p90: np.ndarray) -> 
 # ## 4. Walk forward (checkpointed after every origin)
 
 # %%
-ckpt = OUT / "forecast_backtest_ckpt.pkl"
+ckpt = OUT / f"{STEM}_ckpt.pkl"
 results = pickle.loads(ckpt.read_bytes()) if ckpt.exists() else []
 done = {(r["origin"], r["model"]) for r in results}
-origins = pd.date_range("2011-03-01", daily.index[-1] - pd.Timedelta(days=HORIZON), freq=f"{STEP}D")
+first_origin = daily.index[0] + pd.Timedelta(days=365) if DAILY_PATH else "2011-03-01"
+origins = pd.date_range(first_origin, daily.index[-1] - pd.Timedelta(days=HORIZON), freq=f"{STEP}D")
 print(f"{len(origins)} origins x {len(MODELS)} models; {len(done)} already done")
 
 for origin in origins:
@@ -265,7 +282,9 @@ for name, g in df.groupby("model"):
     }
 best = min(summary, key=lambda m: summary[m]["pinball_mean"])
 report = {
-    "dataset": "UCI Online Retail II (CC BY 4.0), daily net cash-in",
+    "dataset": ("Bangladeshi retailer daily sales 2013-2017 (Mendeley 10.17632/xwmbk7n3c8.1, "
+                "CC BY 4.0), units sold per day as a stand-in for daily inflow" if DAILY_PATH
+                else "UCI Online Retail II (CC BY 4.0), daily net cash-in"),
     "data_mode": "public",
     "period": [str(daily.index.min().date()), str(daily.index.max().date())],
     "horizon_days": HORIZON, "origin_step_days": STEP, "seed": SEED,
@@ -275,6 +294,6 @@ report = {
                 "above the expected low point",
     "models": summary, "chosen_model": best,
 }
-(OUT / "forecast_backtest.json").write_text(json.dumps(report, indent=2))
-df.to_csv(OUT / "forecast_backtest_origins.csv", index=False)
+(OUT / f"{STEM}.json").write_text(json.dumps(report, indent=2))
+df.to_csv(OUT / f"{STEM}_origins.csv", index=False)
 print(json.dumps(report, indent=2))

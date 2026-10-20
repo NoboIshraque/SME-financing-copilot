@@ -246,3 +246,15 @@ def test_no_application_for_a_product_the_business_fails(api: TestClient):
 def test_application_for_an_unknown_product_is_not_found(api: TestClient):
     res = api.post("/api/financing/applications", json={**NEED, "product_id": "bd-nope"})
     assert (res.status_code, res.json()["code"]) == (404, "product_not_found")
+
+
+def test_the_application_card_from_match_can_be_put_to_the_owner(api: TestClient):
+    """The web submits the draft that /match returns; the server must know it issued it (R3)."""
+    card = api.post("/api/financing/match", json=NEED).json()["application"]
+    res = api.post("/api/approvals", headers={"X-Idempotency-Key": "idem-match-1"},
+                   json={"card": card})
+    assert res.status_code == 201, res.text
+    forged = {**card, "payload": {**card["payload"], "amount": "1.00"}}
+    res = api.post("/api/approvals", headers={"X-Idempotency-Key": "idem-match-2"},
+                   json={"card": forged})
+    assert res.json()["code"] == "card_not_issued"

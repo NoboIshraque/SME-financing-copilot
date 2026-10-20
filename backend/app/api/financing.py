@@ -63,6 +63,7 @@ from app.engines.financing.ranking import match as rank_options
 from app.facts import FactStore
 from app.main import get_session
 from app.security import policy
+from app.security.approvals import issue_cards
 from app.security.clock import Clock
 from app.security.deps import get_clock, require
 from app.security.errors import ProblemRoute, forbidden
@@ -217,6 +218,8 @@ def match(body: NeedBody,
     best = next((o for o in options if o.eligibility.status is EligibilityStatus.pass_), None)
     may_draft = policy.decide(principal.role, ActionType.draft_loan_application).allowed
     draft = draft_application(best, need, facts, now=clock()) if best and may_draft else None
+    if draft is not None:
+        issue_cards(session, principal.tenant_id, (draft,), clock())
     unpriced = [AskTheLender(**vars(u)) for u in load_unpriced(jurisdiction=body.jurisdiction)]
     return MatchResult(need=need, as_of=as_of, options=options, lenders=lenders,
                        application=draft, ask_the_lender=unpriced,
@@ -258,4 +261,6 @@ def application(body: ApplicationBody,
                       product_id=body.product_id[:128])
     if chosen.eligibility.status is EligibilityStatus.fail:
         return _error(422, "not_eligible", "error.not_eligible", product_id=body.product_id)
-    return draft_application(chosen, need, facts, now=clock())
+    card = draft_application(chosen, need, facts, now=clock())
+    issue_cards(session, principal.tenant_id, (card,), clock())
+    return card

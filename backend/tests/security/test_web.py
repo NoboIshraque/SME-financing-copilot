@@ -8,7 +8,7 @@ from app.contracts import Principal, Role
 from app.facts import masking
 from app.main import create_app
 from app.security.errors import not_authenticated
-from app.security.web import LIMITS, RateLimitMiddleware, install_security
+from app.security.web import LIMITS, MAX_BODY_BYTES, RateLimitMiddleware, install_security
 from app.settings import Settings
 from tests.security.conftest import sign_in
 
@@ -120,6 +120,8 @@ def test_rate_limit_buckets_are_per_client_ip():
     ("POST", "/api/guard/check", "guard"),
     ("GET", "/api/auth/me", "api"),
     ("GET", "/api/approvals/ap-1", "api"),
+    ("GET", "/api/cash/alerts", "simulate"),
+    ("POST", "/api/analysis/scenarios", "simulate"),
 ])
 def test_routes_fall_into_the_right_rate_limit_group(method, path, bucket):
     limiter = RateLimitMiddleware(app=None)  # type: ignore[arg-type]
@@ -176,3 +178,23 @@ def test_rate_limits_survive_an_app_restart_only_in_memory(settings):
     with TestClient(second) as client:
         assert client.post("/api/auth/login",
                            json={"email": "x@y.test", "password": "p" * 12}).status_code == 401
+
+
+def test_oversized_bodies_are_refused_before_the_app_reads_them(web):
+    """Known risk R13: sign-in needs no session, so its body must be capped too."""
+    big = "x" * (MAX_BODY_BYTES + 1)
+    res = web.post("/api/auth/login", content=big, headers={"content-type": "application/json"})
+    assert (res.status_code, res.json()["code"]) == (413, "body_too_large")
+    upload = web.post("/api/ingest/preview", content=b"x" * (MAX_BODY_BYTES + 1),
+                      headers={"content-type": "application/octet-stream"})
+    assert upload.status_code != 413  # uploads get the larger ingest cap
+
+
+def test_a_body_without_a_declared_length_is_counted(web):
+    def chunks():
+        for _ in range(3):
+            yield b"x" * (MAX_BODY_BYTES // 2)
+
+    res = web.post("/api/auth/login", content=chunks(),
+                   headers={"content-type": "application/json"})
+    assert (res.status_code, res.json()["code"]) == (413, "body_too_large")

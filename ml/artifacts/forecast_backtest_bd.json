@@ -1,0 +1,97 @@
+{
+  "dataset": "Bangladeshi retailer daily sales 2013-2017 (Mendeley 10.17632/xwmbk7n3c8.1, CC BY 4.0), units sold per day as a stand-in for daily inflow",
+  "data_mode": "public",
+  "period": [
+    "2013-01-01",
+    "2017-12-31"
+  ],
+  "horizon_days": 28,
+  "origin_step_days": 14,
+  "seed": 20261020,
+  "no_leakage": "each forecast uses only data before its origin; LightGBM lags >= 28 days",
+  "gap_rule": "balance < 3 days of average inflow; outflows: weekly supplier run at 95% of average inflow + rent of 4 days on the 1st; opening = cushion of 0.5/1/2 days above the expected low point",
+  "models": {
+    "ets": {
+      "origins": 103,
+      "wape_mean": 0.1994,
+      "weekly_mape_mean": 0.1076,
+      "coverage_80_mean": 0.7295,
+      "pinball_mean": 1.28,
+      "gaps": {
+        "cushion_0.5_days": {
+          "real_gaps": 52,
+          "gap_hit_rate": 0.8654,
+          "false_alarm_rate": 0.1569,
+          "mean_lead_time_days": 15.07
+        },
+        "cushion_1.0_days": {
+          "real_gaps": 45,
+          "gap_hit_rate": 0.8222,
+          "false_alarm_rate": 0.1724,
+          "mean_lead_time_days": 17.76
+        },
+        "cushion_2.0_days": {
+          "real_gaps": 36,
+          "gap_hit_rate": 0.6944,
+          "false_alarm_rate": 0.194,
+          "mean_lead_time_days": 21.36
+        }
+      }
+    },
+    "lightgbm_quantile": {
+      "origins": 103,
+      "wape_mean": 0.1988,
+      "weekly_mape_mean": 0.0913,
+      "coverage_80_mean": 0.5687,
+      "pinball_mean": 1.35,
+      "gaps": {
+        "cushion_0.5_days": {
+          "real_gaps": 52,
+          "gap_hit_rate": 0.8846,
+          "false_alarm_rate": 0.1373,
+          "mean_lead_time_days": 15.22
+        },
+        "cushion_1.0_days": {
+          "real_gaps": 45,
+          "gap_hit_rate": 0.8667,
+          "false_alarm_rate": 0.1552,
+          "mean_lead_time_days": 17.46
+        },
+        "cushion_2.0_days": {
+          "real_gaps": 36,
+          "gap_hit_rate": 0.75,
+          "false_alarm_rate": 0.209,
+          "mean_lead_time_days": 21.19
+        }
+      }
+    },
+    "seasonal_naive": {
+      "origins": 103,
+      "wape_mean": 0.2607,
+      "weekly_mape_mean": 0.1108,
+      "coverage_80_mean": 0.777,
+      "pinball_mean": 1.67,
+      "gaps": {
+        "cushion_0.5_days": {
+          "real_gaps": 52,
+          "gap_hit_rate": 0.8462,
+          "false_alarm_rate": 0.2549,
+          "mean_lead_time_days": 15.14
+        },
+        "cushion_1.0_days": {
+          "real_gaps": 45,
+          "gap_hit_rate": 0.9111,
+          "false_alarm_rate": 0.1552,
+          "mean_lead_time_days": 17.07
+        },
+        "cushion_2.0_days": {
+          "real_gaps": 36,
+          "gap_hit_rate": 0.7222,
+          "false_alarm_rate": 0.194,
+          "mean_lead_time_days": 21.5
+        }
+      }
+    }
+  },
+  "chosen_model": "ets"
+}

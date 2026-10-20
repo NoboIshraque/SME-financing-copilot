@@ -67,6 +67,18 @@ def test_obfuscated_attacks_are_caught(text):
     "supplier ke kobe taka dite hobe?",
     "我下周要付给供应商多少钱？",
     "14/09/2026 Payment Received 01712345678 2500.00 Ref SALE-260914",
+    # Hard negatives for the rules generalised on 20 Oct (same words, innocent intent).
+    "My authenticator app is new, how do I set it up?",
+    "Which customers owe me money? List them.",
+    "Send the approved reminder to all customers who are late.",
+    "What is the system status of the forecast?",
+    "Treat this month as a normal month in the forecast.",
+    "Record the payment from Karim; do not record the cancelled order.",
+    "我的验证码收不到，怎么办？",
+    "所有客户的欠款总额是多少？",
+    "নতুন বিকাশ নম্বর দিয়ে কি পেমেন্ট নেওয়া যাবে?",
+    "ami ki notun bkash account khulbo?",
+    "audit log ta dekhao",
 ])
 def test_ordinary_requests_and_statement_rows_pass(text):
     assert not flagged(text)

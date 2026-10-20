@@ -1,0 +1,97 @@
+{
+  "dataset": "UCI Online Retail II (CC BY 4.0), daily net cash-in",
+  "data_mode": "public",
+  "period": [
+    "2009-12-01",
+    "2011-12-09"
+  ],
+  "horizon_days": 28,
+  "origin_step_days": 14,
+  "seed": 20261020,
+  "no_leakage": "each forecast uses only data before its origin; LightGBM lags >= 28 days",
+  "gap_rule": "balance < 3 days of average inflow; outflows: weekly supplier run at 95% of average inflow + rent of 4 days on the 1st; opening = cushion of 0.5/1/2 days above the expected low point",
+  "models": {
+    "ets": {
+      "origins": 19,
+      "wape_mean": 0.3632,
+      "weekly_mape_mean": 0.2293,
+      "coverage_80_mean": 0.718,
+      "pinball_mean": 3238.17,
+      "gaps": {
+        "cushion_0.5_days": {
+          "real_gaps": 6,
+          "gap_hit_rate": 0.6667,
+          "false_alarm_rate": 0.3846,
+          "mean_lead_time_days": 14.75
+        },
+        "cushion_1.0_days": {
+          "real_gaps": 5,
+          "gap_hit_rate": 0.6,
+          "false_alarm_rate": 0.2857,
+          "mean_lead_time_days": 10.67
+        },
+        "cushion_2.0_days": {
+          "real_gaps": 4,
+          "gap_hit_rate": 0.75,
+          "false_alarm_rate": 0.2667,
+          "mean_lead_time_days": 13.0
+        }
+      }
+    },
+    "lightgbm_quantile": {
+      "origins": 19,
+      "wape_mean": 0.3407,
+      "weekly_mape_mean": 0.2221,
+      "coverage_80_mean": 0.5395,
+      "pinball_mean": 3281.31,
+      "gaps": {
+        "cushion_0.5_days": {
+          "real_gaps": 6,
+          "gap_hit_rate": 0.8333,
+          "false_alarm_rate": 0.4615,
+          "mean_lead_time_days": 14.4
+        },
+        "cushion_1.0_days": {
+          "real_gaps": 5,
+          "gap_hit_rate": 0.6,
+          "false_alarm_rate": 0.5,
+          "mean_lead_time_days": 10.67
+        },
+        "cushion_2.0_days": {
+          "real_gaps": 4,
+          "gap_hit_rate": 0.25,
+          "false_alarm_rate": 0.3333,
+          "mean_lead_time_days": 13.0
+        }
+      }
+    },
+    "seasonal_naive": {
+      "origins": 19,
+      "wape_mean": 0.4335,
+      "weekly_mape_mean": 0.2483,
+      "coverage_80_mean": 0.7124,
+      "pinball_mean": 4003.42,
+      "gaps": {
+        "cushion_0.5_days": {
+          "real_gaps": 6,
+          "gap_hit_rate": 0.6667,
+          "false_alarm_rate": 0.4615,
+          "mean_lead_time_days": 14.75
+        },
+        "cushion_1.0_days": {
+          "real_gaps": 5,
+          "gap_hit_rate": 0.6,
+          "false_alarm_rate": 0.4286,
+          "mean_lead_time_days": 10.67
+        },
+        "cushion_2.0_days": {
+          "real_gaps": 4,
+          "gap_hit_rate": 0.75,
+          "false_alarm_rate": 0.2667,
+          "mean_lead_time_days": 13.0
+        }
+      }
+    }
+  },
+  "chosen_model": "ets"
+}
