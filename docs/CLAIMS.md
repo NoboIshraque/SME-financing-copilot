@@ -33,3 +33,4 @@ over. Set the old row to `taken over by orch-X` and add your own row.
 | WP-12 reduced (message drafts, owner approves, copy channel) | orch-C | wp-12-messaging | done (merged) | 2026-10-20 00:15 | #34 |
 | WP-13 milestone 4: passport API (issue, share with step-up, revoke, public verify) | orch-C | wp-13-reports | done (merged) | 2026-10-20 00:30 | #35 |
 | WP-19 final pass: DecisionGuard rename, status refresh, PDFs, claims check | orch-C | wp-19-submission | done | 2026-10-20 00:40 | — |
+| Final end-to-end audit | audit | audit-final | active | 2026-10-20 06:54 | — |
