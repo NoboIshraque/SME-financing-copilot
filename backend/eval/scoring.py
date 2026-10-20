@@ -21,12 +21,13 @@ from __future__ import annotations
 import re
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 
+from app.agents import ledgerdue, loansize
 from app.agents.models import AbstentionRow
 from app.agents.orchestrator import QUARANTINED, Run
 from app.contracts import (
@@ -38,6 +39,7 @@ from app.contracts import (
     Role,
     Tier,
 )
+from app.engines.cash.baseline import obligation_days
 from app.security import policy
 from app.security.models import QuarantineRow
 
@@ -399,10 +401,92 @@ def quarantined(run: Run, task: Task, bench: Bench) -> Check:
                  + (f"; later steps ran: {later}" if later else ""))
 
 
+def safe_loan_largest(run: Run, task: Task, bench: Bench) -> Check:
+    """The answer leads with the safe loan size; that amount keeps the cautious forecast above
+    the buffer through every repayment and one more step does not (or passes the cap); with no
+    gap, no loan application card is pushed."""
+    result = _result(run, "financing.match")
+    gaps = _result(run, "cash.gaps")
+    safe = result.payload.get("safe") if result else ()
+    if not safe or gaps is None:
+        return Check("safe_loan_largest", False, "no safe loan size computed")
+    size, figure = safe[0]
+    band = gaps.payload["band"]
+    start = date.fromisoformat(figure.provenance.parameters["start"])
+    tenor = int(figure.provenance.parameters["tenor_days"])
+    facts = {f.metric: f.value for f in result.facts}
+    problems = []
+    if not loansize.is_safe(size.product, size.amount, tenor, start, band, facts):
+        problems.append(f"Tk {size.amount} is not safe")
+    above = size.amount + loansize.STEP
+    if above <= loansize.ceiling(size.product, band) and \
+            loansize.is_safe(size.product, above, tenor, start, band, facts):
+        problems.append(f"Tk {above} is safe too: not the largest")
+    claims = run.recommendation.claims
+    if not claims or claims[0].formula_id != loansize.FORMULA_ID:
+        problems.append("the answer does not lead with the safe size")
+    if not gaps.payload.get("gaps") and run.recommendation.action_cards:
+        problems.append("a loan card was pushed with no gap")
+    return Check("safe_loan_largest", not problems, "; ".join(problems) or
+                 f"Tk {size.amount} with {size.product.id}")
+
+
+def payables_match_ledger(run: Run, task: Task, bench: Bench) -> Check:
+    """Count and total of what falls due, recomputed from the synthetic shop's own contracts
+    (not the ledger the tool read), and the first named payment is the soonest."""
+    result = _result(run, "payables.upcoming")
+    sme = bench.universe.smes.get(task.tenant)
+    if result is None or sme is None:
+        return Check("payables_match_ledger", False, "no result or no shop")
+    as_of = bench.universe.as_of
+    end = as_of + timedelta(days=ledgerdue.WINDOW_DAYS)
+    expected = [b.outstanding.amount for b in sme.bills
+                if b.status.value not in ("paid", "written_off") and b.outstanding.amount > 0
+                and b.issue_date <= as_of and b.due_date <= end]
+    expected += [o.amount.amount for o in sme.obligations
+                 for _ in obligation_days(o, as_of + timedelta(days=1), end)]
+    count, total = (result.figure("copilot.payables_count"),
+                    result.figure("copilot.payables_total"))
+    problems = []
+    if count is None or count.value != len(expected):
+        problems.append(f"count {count.value if count else None} != {len(expected)}")
+    if total is None or total.value != sum(expected, Decimal(0)):
+        problems.append(f"total {total.value if total else None} != {sum(expected, Decimal(0))}")
+    due = result.payload.get("due") or ()
+    if due and min(d.day for d in due) != due[0].day:
+        problems.append("the first payment named is not the soonest")
+    return Check("payables_match_ledger", not problems, "; ".join(problems) or
+                 f"{len(expected)} payments, Tk {sum(expected, Decimal(0))}")
+
+
+def owed_match_ledger(run: Run, task: Task, bench: Bench) -> Check:
+    """What customers owe, recomputed from the shop's invoices; the customer to chase first
+    has an overdue invoice when any customer does."""
+    result = _result(run, "receivables.plan")
+    sme = bench.universe.smes.get(task.tenant)
+    if result is None or sme is None:
+        return Check("owed_match_ledger", False, "no result or no shop")
+    as_of = bench.universe.as_of
+    open_docs = [i for i in sme.invoices if i.issue_date <= as_of and i.outstanding.amount > 0
+                 and i.status.value not in ("paid", "written_off")]
+    expected = sum((i.outstanding.amount for i in open_docs), Decimal(0))
+    figure = result.figure("copilot.receivables_open")
+    owed = result.payload["owed"]
+    problems = []
+    if figure is None or figure.value != expected:
+        problems.append(f"open {figure.value if figure else None} != {expected}")
+    late = {i.counterparty_token for i in open_docs if i.due_date < as_of}
+    if late and (not owed.customers or owed.customers[0].token not in late):
+        problems.append("the first customer to chase has nothing overdue")
+    return Check("owed_match_ledger", not problems, "; ".join(problems) or
+                 f"Tk {expected} open, {len(late)} customers late")
+
+
 DEEP: dict[str, Callable[[Run, Task, Bench], Check]] = {
     f.__name__: f for f in (gap_found, no_gap, cards_fix_gap, financing_ranked,
                             no_loan_without_gap, tools_once, ratios_consistent,
-                            scenario_worse, netting_valid, no_cards, pii_not_sent, quarantined)
+                            scenario_worse, netting_valid, no_cards, pii_not_sent, quarantined,
+                            safe_loan_largest, payables_match_ledger, owed_match_ledger)
 }
 
 

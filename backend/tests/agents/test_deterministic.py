@@ -21,12 +21,16 @@ from app.llm.providers import Role
     ("Is the wholesale price of rice cheaper elsewhere?", ["market_prices"], "en"),
     ("Tell me a joke", ["unknown"], "en"),
     ("Can I pay salaries on 31 October?", ["cash_outlook"], "en"),
-    ("Who do I have to pay next", ["cash_outlook"], "en"),
+    ("Who do I have to pay next", ["upcoming_payments", "cash_outlook"], "en"),
     ("৩১ তারিখে কর্মচারীদের বেতন দিতে পারব?", ["cash_outlook"], "bn"),
     ("这个月的房租和工资付得起吗？", ["cash_outlook"], "zh"),
+    ("সামনে কবে বিল দিব", ["upcoming_payments"], "bn"),
+    ("বিলম্ব হলে কী হবে?", ["unknown"], "bn"),
+    ("What can you do?", ["help"], "en"),
 ], ids=["en-cash", "bn-loan-not-market", "banglish-baki", "zh-two-intents", "what-if",
         "netting", "negotiate", "draft", "bn-profit", "prices", "unknown", "en-salaries",
-        "en-pay-next", "bn-salaries", "zh-rent-wages"])
+        "en-pay-next", "bn-salaries", "zh-rent-wages", "bn-bill-whole-word",
+        "bn-delay-is-not-a-bill", "help"])
 def test_plan_intents_across_languages(question, intents, language):
     plan = deterministic.plan(question)
     assert plan["intents"] == intents
@@ -41,6 +45,15 @@ def test_plan_tools_follow_intents_without_duplicates():
 
 def test_unknown_question_plans_no_tools():
     assert deterministic.plan("good morning")["tools"] == []
+    assert deterministic.plan("hello")["tools"] == []  # help is a menu, not a tool run
+
+
+@pytest.mark.parametrize(("question", "matches"), [
+    ("বিল", True), ("বিলের", True), ("বিলগুলো", True), ("বিলটা", True), ("বিলে", True),
+    ("বিলম্ব", False), ("বিলাস", False), ("নবিল", False),
+], ids=["bare", "of-the", "plural", "classifier", "locative", "delay", "luxury", "inside"])
+def test_bangla_bill_matches_only_as_a_whole_word(question, matches):
+    assert ("upcoming_payments" in deterministic.classify(question)) is matches
 
 
 def test_english_keywords_match_whole_words_only():

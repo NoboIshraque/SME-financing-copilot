@@ -6,11 +6,13 @@ import { useTranslation } from "react-i18next";
 
 import type { Recommendation } from "../api/contracts";
 import { api } from "../api/endpoints";
+import { useRequiredSession } from "../auth/session";
 import { Dialog } from "../components/Dialog";
 import { Icon } from "../components/Icon";
 import { ErrorState } from "../components/States";
 import { describeError } from "../i18n/serverText";
 import { RecommendationCard } from "./RecommendationCard";
+import { UPLOAD_SUGGESTION, suggestionsFor } from "./suggestions";
 import { UploadDialog } from "./UploadDialog";
 
 interface Turn {
@@ -20,10 +22,10 @@ interface Turn {
   error?: unknown;
 }
 
-const SUGGESTIONS = ["copilot.suggest.salary", "copilot.suggest.chase", "copilot.suggest.loan"] as const;
-
 export function CopilotPanel() {
   const { t } = useTranslation();
+  const role = useRequiredSession().principal.role;
+  const suggestions = suggestionsFor(role);
   const titleId = useId();
   const inputId = useId();
   const [open, setOpen] = useState(false);
@@ -47,6 +49,12 @@ export function CopilotPanel() {
     event.preventDefault();
     send(question);
   };
+  const upload = () => {
+    setOpen(false);
+    setUploading(true);
+  };
+
+  if (suggestions.length === 0) return null; // a role that cannot ask the copilot
 
   return (
     <>
@@ -68,10 +76,7 @@ export function CopilotPanel() {
             <Icon name="close" />
           </button>
         </div>
-        <button type="button" onClick={() => {
-            setOpen(false);
-            setUploading(true);
-          }} className="mt-3 flex items-center gap-2 self-start rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium dark:border-slate-600">
+        <button type="button" onClick={upload} className="mt-3 flex items-center gap-2 self-start rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium dark:border-slate-600">
           <Icon name="upload" className="h-4 w-4" />
           {t("upload.open")}
         </button>
@@ -81,13 +86,20 @@ export function CopilotPanel() {
             <div>
               <p className="text-sm text-slate-600 dark:text-slate-400">{t("copilot.tryAsking")}</p>
               <ul className="mt-2 flex flex-wrap gap-2">
-                {SUGGESTIONS.map((key) => (
+                {suggestions.map((key) => (
                   <li key={key}>
                     <button type="button" onClick={() => send(t(key))} className="rounded-full bg-teal-50 px-3 py-1.5 text-sm text-teal-900 hover:bg-teal-100 dark:bg-teal-950 dark:text-teal-100">
                       {t(key)}
                     </button>
                   </li>
                 ))}
+                {UPLOAD_SUGGESTION[role] && (
+                  <li>
+                    <button type="button" onClick={upload} className="rounded-full bg-teal-50 px-3 py-1.5 text-sm text-teal-900 hover:bg-teal-100 dark:bg-teal-950 dark:text-teal-100">
+                      {t("copilot.suggestUpload")}
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
           )}
@@ -95,7 +107,7 @@ export function CopilotPanel() {
             <div key={turn.id} className="space-y-2">
               <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-teal-700 px-3 py-2 text-white">{turn.question}</p>
               {turn.answer ? (
-                <RecommendationCard recommendation={turn.answer} />
+                <RecommendationCard recommendation={turn.answer} suggestions={suggestions} onAsk={send} />
               ) : turn.error ? (
                 describeError(turn.error).key === "error.input_quarantined" ? (
                   <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-900 dark:bg-red-950 dark:text-red-100">

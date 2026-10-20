@@ -3,7 +3,8 @@
 The last link of every fallback chain, and the only one in `llm_mode=deterministic`. It
 answers the same four tasks as the models, in the same JSON shapes, from rules alone:
 
-    plan      keyword intents (EN, BN, Banglish, ZH) -> {"intents", "tools", "language"}
+    plan      keyword intents (EN, BN, Banglish, ZH) -> {"intents", "tools", "language"};
+              a greeting or "what can you do" plans to ["help"] with no tools
     vote      the engine's own top-ranked option     -> {"choice", "rationale"}
     critique  the most severe code-detected risk     -> {"objection", "severity"}
     narrate   the verified claims, joined            -> {"text"}
@@ -28,8 +29,10 @@ class Unsupported(RuntimeError):
 
 
 # Intent -> tools the orchestrator runs for it. Tool names are the registry's (milestone 2).
+# Reminder drafts are built from the receivables plan (WP-12), so drafting reads that plan.
 INTENT_TOOLS: dict[str, tuple[str, ...]] = {
     "cash_outlook": ("cash.forecast", "cash.gaps"),
+    "upcoming_payments": ("payables.upcoming",),
     "collect_receivables": ("receivables.plan",),
     "find_financing": ("cash.gaps", "financing.match"),
     "business_health": ("analysis.ratios",),
@@ -37,52 +40,72 @@ INTENT_TOOLS: dict[str, tuple[str, ...]] = {
     "settle_debts": ("mesh.propose",),
     "market_prices": ("market.prices",),
     "negotiate": ("market.prices", "market.negotiate"),
-    "draft_message": ("messaging.draft",),
+    "draft_message": ("receivables.plan",),
 }
 UNKNOWN = "unknown"
+HELP = "help"  # a greeting or "what can you do": answered with the copilot's own menu
 MAX_INTENTS = 3
 
 # Latin-script keywords (English and Banglish) match whole words. Bangla keywords match at
 # the start of a word, because case endings attach to the stem (ঋণের = "of the loan"); short
-# stems that start common unrelated words are left out (দর: দরকার "need"; ধার: ধারণা "idea").
-# Chinese has no spaces between words, so Chinese keywords match anywhere.
+# stems that start common unrelated words are left out (দর: দরকার "need"; ধার: ধারণা "idea"),
+# or listed in BANGLA_WHOLE_WORDS, which match only as a word with a case ending (বিল, বিলের,
+# বিলগুলো: "bill"; never বিলম্ব "delay"). Chinese has no spaces between words, so Chinese
+# keywords match anywhere (see _CJK_NOT_AFTER for compounds).
+# Ties keep the table order: an explicit what-if outranks the topic it is about, and a bill or
+# "who do I pay next" outranks the general cash question that comes with it.
 KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
+    "what_if": {
+        "latin": ("what if", "what happens if", "happens if", "what would happen", "suppose",
+                  "scenario", "scenarios", "stress", "jodi", "dhoren"),
+        "script": ("যদি", "ধরুন", "如果", "假如", "情景"),
+    },
+    "upcoming_payments": {
+        "latin": ("bill", "bills", "pay next", "payments due", "payment due", "due next",
+                  "upcoming payment", "upcoming payments", "coming up", "payable", "payables",
+                  "supplier payment", "supplier payments", "pay suppliers", "pay the supplier",
+                  "owe suppliers", "owe the supplier", "i owe", "do i owe", "who do i pay",
+                  "what do i pay", "dite hobe", "bill dibo"),
+        "script": ("বিল", "সাপ্লায়ার", "সরবরাহকারী", "দিতে হবে", "账单", "付款", "应付", "要付"),
+    },
     "cash_outlook": {
-        # Paying what is due (wages, rent, bills, suppliers) is a cash question too: the forecast
-        # and the gaps' drivers answer "can I pay salaries on the 31st?" and "who do I pay next?".
+        # Paying wages and rent is a cash question too: the forecast and the gaps' drivers
+        # answer "can I pay salaries on the 31st?". So is "how is today looking?".
         "latin": ("cash", "cash flow", "cashflow", "forecast", "run out", "shortfall", "gap",
-                  "liquidity", "balance next", "taka thakbe", "hate taka", "ghatti",
-                  "salary", "salaries", "wage", "wages", "payroll", "rent", "bill", "bills",
-                  "can i pay", "can i afford", "afford", "have to pay", "need to pay",
-                  "pay next", "payments due", "due next", "upcoming payments", "beton",
-                  "bhara", "dite parbo"),
+                  "liquidity", "balance", "balance next", "enough money", "money left",
+                  "taka thakbe", "hate taka", "ghatti", "salary", "salaries", "wage", "wages",
+                  "payroll", "rent", "can i pay", "can i afford", "afford", "have to pay",
+                  "need to pay", "beton", "bhara", "dite parbo", "today", "today's",
+                  "summary", "attention", "aj ki", "ajker"),
         "script": ("নগদ", "ক্যাশ", "ঘাটতি", "পূর্বাভাস", "হাতে টাকা", "টাকা থাকবে",
-                   "বেতন", "মজুরি", "ভাড়া", "দিতে পারব",
-                   "现金", "预测", "缺口", "资金", "工资", "薪水", "房租", "账单", "付款"),
+                   "কত টাকা আছে", "টাকার টান", "বেতন", "মজুরি", "ভাড়া", "দিতে পারব",
+                   "আজকের", "আজকে", "现金", "预测", "缺口", "资金", "工资", "薪水", "房租",
+                   "钱够", "余额", "今天"),
     },
     "collect_receivables": {
-        "latin": ("receivable", "receivables", "owe me", "owes me", "overdue", "unpaid",
-                  "collect", "collection", "baki", "paona", "aday"),
-        "script": ("বাকি", "পাওনা", "আদায়", "应收", "欠款", "催收", "收款"),
+        "latin": ("receivable", "receivables", "owe me", "owes me", "who owes", "owe us",
+                  "owes us", "customers owe", "overdue", "unpaid", "outstanding", "invoice",
+                  "invoices", "chase", "collect", "collection", "credit sales", "baki",
+                  "paona", "aday"),
+        "script": ("বাকি", "পাওনা", "আদায়", "应收", "欠款", "欠我", "催收", "催款", "收款"),
     },
     "find_financing": {
         "latin": ("loan", "loans", "financing", "finance", "borrow", "lender", "credit line",
                   "interest rate", "apr", "microfinance", "rin", "dhar", "lon"),
-        "script": ("ঋণ", "লোন", "কর্জ", "贷款", "融资", "借款", "利率"),
+        "script": ("ঋণ", "লোন", "কর্জ", "贷", "融资", "借款", "利率"),
     },
     "business_health": {
         "latin": ("profit", "profits", "margin", "margins", "ratio", "ratios", "p&l",
-                  "how is my business", "performance", "labh", "lav", "business kemon",
-                  "byabsa kemon"),
-        "script": ("লাভ", "মুনাফা", "লোকসান", "ব্যবসা কেমন", "利润", "毛利", "比率", "经营"),
-    },
-    "what_if": {
-        "latin": ("what if", "suppose", "scenario", "scenarios", "stress", "jodi", "dhoren"),
-        "script": ("যদি", "ধরুন", "如果", "假如", "情景"),
+                  "how is my business", "my business", "business doing", "doing ok",
+                  "how am i doing", "performance", "revenue", "earn", "earned", "earning",
+                  "labh", "lav", "business kemon", "byabsa kemon"),
+        "script": ("লাভ", "মুনাফা", "লোকসান", "ব্যবসা কেমন", "ব্যবসার অবস্থা", "বিক্রি কেমন",
+                   "利润", "毛利", "比率", "经营", "赚", "营收"),
     },
     "settle_debts": {
-        "latin": ("netting", "net off", "offset", "settle", "circular debt", "debt ring",
-                  "katakati", "mitano"),
+        "latin": ("netting", "net off", "net it", "net out", "offset", "settle", "circular debt",
+                  "debt ring", "other shops", "we owe them", "owe each other", "katakati",
+                  "mitano"),
         "script": ("কাটাকাটি", "নিষ্পত্তি", "抵消", "轧差", "清算", "三角债"),
     },
     "market_prices": {
@@ -96,10 +119,25 @@ KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
         "script": ("দরদাম", "দর কষাকষি", "谈判", "砍价", "议价"),
     },
     "draft_message": {
-        "latin": ("draft", "write a message", "message to", "send a reminder", "remind",
-                  "sms", "whatsapp", "message likhe"),
-        "script": ("বার্তা", "মেসেজ", "লিখে দাও", "起草", "短信", "消息"),
+        "latin": ("draft", "write a message", "write a", "message to", "send a reminder",
+                  "remind", "reminder", "reminders", "sms", "whatsapp", "message likhe",
+                  "tagada"),
+        "script": ("বার্তা", "মেসেজ", "লিখে দাও", "তাগাদা", "起草", "短信", "消息"),
     },
+}
+BANGLA_WHOLE_WORDS = frozenset({"বিল"})
+# Case endings and classifiers a whole Bangla word may carry: বিলের, বিলে, বিলটা, বিলগুলো.
+_BANGLA_ENDINGS = ("গুলোর", "গুলোতে", "গুলো", "গুলির", "গুলি", "টার", "টির", "টা", "টি",
+                   "ের", "এর", "ে", "র")
+
+# Greetings and "what can you do?": only when nothing else matched, so "Hi, will I run out of
+# cash?" is still a cash question.
+HELP_PHRASES: dict[str, tuple[str, ...]] = {
+    "latin": ("hi", "hello", "hey", "salam", "assalamualaikum", "assalamu alaikum", "help",
+              "menu", "what can you do", "what do you do", "how can you help",
+              "what can i ask", "how do i use", "ki korte paro", "ki korte paren"),
+    "script": ("হ্যালো", "হাই", "সাহায্য", "কী করতে পার", "কি করতে পার", "আসসালামু আলাইকুম",
+               "নমস্কার", "你好", "您好", "帮助", "能做什么", "怎么用"),
 }
 
 _BANGLA = re.compile(r"[ঀ-৿]")
@@ -112,6 +150,10 @@ _CJK_NOT_AFTER = {"利率": "毛"}
 
 
 def _pattern(word: str) -> re.Pattern[str]:
+    word = unicodedata.normalize("NFC", word)
+    if word in BANGLA_WHOLE_WORDS:
+        endings = "|".join(unicodedata.normalize("NFC", e) for e in _BANGLA_ENDINGS)
+        return re.compile(rf"(?<![ঀ-৿]){re.escape(word)}(?:{endings})?(?![ঀ-৿])")
     if _BANGLA.search(word):
         return re.compile(rf"(?<![ঀ-৿]){re.escape(word)}")
     if _CJK.search(word):
@@ -122,6 +164,7 @@ def _pattern(word: str) -> re.Pattern[str]:
 
 _PATTERNS = {intent: [_pattern(w) for w in (*words["latin"], *words["script"])]
              for intent, words in KEYWORDS.items()}
+_HELP = [_pattern(w) for w in (*HELP_PHRASES["latin"], *HELP_PHRASES["script"])]
 
 
 def language_of(text: str) -> str:
@@ -144,12 +187,19 @@ def classify(question: str) -> list[str]:
     return sorted(scores, key=lambda i: (-scores[i], order.index(i)))[:MAX_INTENTS]
 
 
+def is_help(question: str) -> bool:
+    """A greeting or a question about the copilot itself, with no finance intent in it."""
+    text = unicodedata.normalize("NFC", question).casefold()
+    return not classify(question) and any(p.search(text) for p in _HELP)
+
+
 def plan(question: str) -> dict[str, Any]:
     intents = classify(question)
     tools: list[str] = []
     for intent in intents:
         tools.extend(t for t in INTENT_TOOLS[intent] if t not in tools)
-    return {"intents": intents or [UNKNOWN], "tools": tools, "language": language_of(question)}
+    fallback = HELP if is_help(question) else UNKNOWN
+    return {"intents": intents or [fallback], "tools": tools, "language": language_of(question)}
 
 
 def vote(context: dict[str, Any]) -> dict[str, Any]:

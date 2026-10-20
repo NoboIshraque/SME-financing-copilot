@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 from app.agents.tools import ToolResult
@@ -130,8 +131,86 @@ TEMPLATES: dict[str, tuple[str, str, str]] = {
                                "目前现金在缓冲之上可维持 {v} 天。"),
     "scenario.runway_after": ("With the change it lasts {v} days.",
                               "পরিবর্তনের পরে থাকবে {v} দিন।", "变化后可维持 {v} 天。"),
+    # Session A: upcoming payments, money owed, safe loan size. {what}/{who}/{when} are names
+    # (a supplier label, a date): their digits are not figures.
+    "copilot.payables_count": ("Payments falling due over the coming month: {v}.",
+                               "সামনের মাসখানেকে যত পেমেন্ট দিতে হবে: {v}টি।",
+                               "未来几周内到期的款项：{v} 笔。"),
+    "copilot.payables_total": ("Together they come to Tk {v}.", "সব মিলিয়ে {v} টাকা।",
+                               "合计 {v} 塔卡。"),
+    "copilot.payable_item": ("{what}: Tk {v}, due {when}.", "{what}: {v} টাকা, দিতে হবে {when}।",
+                             "{what}：{v} 塔卡，{when}到期。"),
+    "copilot.payable_overdue": ("{what}: Tk {v}, overdue since {when}.",
+                                "{what}: {v} টাকা, {when} থেকে বকেয়া।",
+                                "{what}：{v} 塔卡，自{when}起逾期。"),
+    "copilot.receivables_open": ("Customers owe you Tk {v} in total.",
+                                 "কাস্টমারদের কাছে মোট পাওনা {v} টাকা।", "客户共欠您 {v} 塔卡。"),
+    "copilot.receivables_overdue": ("Of that, Tk {v} is past its due date.",
+                                    "এর মধ্যে {v} টাকার তারিখ পেরিয়ে গেছে।", "其中 {v} 塔卡已逾期。"),
+    "copilot.chase_first": ("Chase {who} first: Tk {v} open, oldest due {when}.",
+                            "আগে {who}-এর কাছে তাগাদা দিন: {v} টাকা বাকি, পুরোনোটা {when} তারিখের।",
+                            "先催{who}：未付 {v} 塔卡，最早{when}到期。"),
+    "copilot.chase_next": ("Then {who}: Tk {v}, oldest due {when}.",
+                           "তারপর {who}: {v} টাকা, পুরোনোটা {when} তারিখের।",
+                           "然后是{who}：{v} 塔卡，最早{when}到期。"),
+    "copilot.safe_loan": ("The largest loan you can safely repay over the next three months is "
+                          "Tk {v}, with {name}: its repayments keep even the cautious forecast "
+                          "above your safety buffer.",
+                          "আগামী তিন মাসে নিরাপদে শোধ করা যায় এমন সবচেয়ে বড় ঋণ {v} টাকা, {name}: "
+                          "এর কিস্তি দিলেও সতর্ক পূর্বাভাসে ব্যালান্স নিরাপত্তা বাফারের উপরে থাকে।",
+                          "未来三个月内可安全偿还的最大贷款为 {v} 塔卡（{name}）：即使按保守预测，"
+                          "还款后余额仍高于安全缓冲。"),
+    "copilot.safe_loan_alt": ("With {name}: up to Tk {v}.", "{name} নিলে: সর্বোচ্চ {v} টাকা।",
+                              "选择{name}：最多 {v} 塔卡。"),
+    "copilot.no_safe_loan_gap": ("No new loan is safe to repay right now: the forecast already "
+                                 "falls short of your safety buffer, by Tk {v} expected. Close "
+                                 "that gap first.",
+                                 "এখন নতুন ঋণ নিরাপদে শোধ করা যাবে না: পূর্বাভাসে আগেই "
+                                 "নিরাপত্তা বাফারের চেয়ে প্রত্যাশিত {v} টাকা কম পড়ছে। আগে "
+                                 "ঘাটতিটা মেটান।",
+                                 "目前任何新贷款都无法安全偿还：预测余额已低于安全缓冲，预计短缺 "
+                                 "{v} 塔卡。请先弥补这个缺口。"),
+    "copilot.no_safe_loan": ("No loan size keeps the cautious forecast above your safety buffer "
+                             "of Tk {v} while you repay it.",
+                             "কোনো অঙ্কের ঋণেই কিস্তি দিতে গিয়ে সতর্ক পূর্বাভাস {v} টাকার "
+                             "নিরাপত্তা বাফারের উপরে থাকে না।",
+                             "任何金额的贷款在还款期间都无法让保守预测保持在 {v} 塔卡的安全缓冲"
+                             "之上。"),
 }
 _LANG = {"en": 0, "bn": 1, "zh": 2}
+
+# Names the ledger composers put into claims, per language (en, bn, zh).
+WHO: dict[str, tuple[str, str, str]] = {"Supplier": ("Supplier", "সরবরাহকারী", "供应商"),
+                                        "Customer": ("Customer", "কাস্টমার", "客户")}
+PAYMENT_KIND: dict[str, tuple[str, str, str]] = {
+    "bill": ("{who} bill", "{who}-এর বিল", "{who}的账单"),
+    "rent": ("Rent", "দোকান ভাড়া", "房租"),
+    "salary": ("Salaries", "বেতন", "工资"),
+    "emi": ("Loan instalment", "ঋণের কিস্তি", "贷款分期"),
+    "utility": ("Utility bills", "বিদ্যুৎ-পানি-গ্যাস বিল", "水电费"),
+    "tax": ("Tax", "কর", "税款"),
+    "subscription": ("Subscription", "সাবস্ক্রিপশন", "订阅费"),
+    "other": ("Regular payment", "নিয়মিত পেমেন্ট", "定期付款"),
+}
+_MONTHS_EN = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+_MONTHS_BN = ("জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট",
+              "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর")
+_BN_DIGITS = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
+
+
+def day_text(day: date, language: str) -> str:
+    if language == "bn":
+        return f"{str(day.day).translate(_BN_DIGITS)} {_MONTHS_BN[day.month - 1]}"
+    if language == "zh":
+        return f"{day.month}月{day.day}日"
+    return f"{day.day} {_MONTHS_EN[day.month - 1]}"
+
+
+def party(label: str, language: str) -> str:
+    """"Supplier 3" -> "সরবরাহকারী 3" (the number is the tenant's stable label, not a figure)."""
+    word, _, number = label.partition(" ")
+    names = WHO.get(word)
+    return f"{names[_LANG.get(language, 0)]} {number}" if names else label
 
 
 @dataclass(frozen=True)
@@ -187,6 +266,27 @@ def _gaps(result: ToolResult, language: str) -> list[Statement]:
     return out
 
 
+def _safe_loans(result: ToolResult, language: str,
+                gaps: ToolResult | None) -> list[Statement]:
+    """The safe loan size first (what "how big a loan?" asks), or why there is none."""
+    safe = result.payload.get("safe") or ()
+    if safe:
+        (size, figure), *others = safe
+        out = [statement("copilot.safe_loan", figure, language, name=size.product.name)]
+        out += [statement("copilot.safe_loan_alt", fig, language, name=other.product.name)
+                for other, fig in others[:MAX_OPTIONS - 1]]
+        return out
+    if not result.payload.get("sized") or gaps is None:
+        return []
+    found = gaps.payload.get("gaps") or ()
+    if found:
+        short = next((f for f in found[0].figures if f.label_key == "cash.expected_shortfall"),
+                     None)
+        return [statement("copilot.no_safe_loan_gap", short, language)] if short else []
+    target = gaps.figure("cash.buffer_target")
+    return [statement("copilot.no_safe_loan", target, language)] if target else []
+
+
 def _financing(result: ToolResult, language: str) -> list[Statement]:
     out: list[Statement] = []
     for option in (result.payload.get("options") or ())[:MAX_OPTIONS]:
@@ -222,12 +322,54 @@ def _scenario(result: ToolResult, language: str) -> list[Statement]:
     return out
 
 
+def _payables(result: ToolResult, language: str) -> list[Statement]:
+    lang = _LANG.get(language, 0)
+    count, total = result.figure("copilot.payables_count"), result.figure("copilot.payables_total")
+    out = [statement("copilot.payables_count", count, language)] if count else []
+    if total is not None and total.value > 0:
+        out.append(statement("copilot.payables_total", total, language))
+    by_ref = {f.provenance.parameters.get("ref"): f for f in result.figures
+              if f.label_key == "copilot.payable_item"}
+    suppliers = result.payload.get("suppliers") or {}
+    for item in result.payload.get("due") or ():
+        figure = by_ref.get(item.ref)
+        if figure is None:
+            continue
+        who = party(suppliers.get(item.counterparty_token, "Supplier"), language)
+        what = PAYMENT_KIND.get(item.kind, PAYMENT_KIND["other"])[lang].format(who=who)
+        template = "copilot.payable_overdue" if item.overdue else "copilot.payable_item"
+        out.append(statement(template, figure, language, what=what,
+                             when=day_text(item.day, language)))
+    return out
+
+
+def _receivables(result: ToolResult, language: str) -> list[Statement]:
+    out = _labelled(result.figures, language, ("copilot.receivables_open",))
+    overdue = result.figure("copilot.receivables_overdue")
+    if overdue is not None and overdue.value > 0:
+        out.append(statement("copilot.receivables_overdue", overdue, language))
+    owed = result.payload.get("owed")
+    labels = result.payload.get("customers") or {}
+    by_token = {f.provenance.parameters.get("token"): f for f in result.figures
+                if f.label_key == "copilot.customer_owes"}
+    for i, customer in enumerate(owed.customers if owed is not None else ()):
+        figure = by_token.get(customer.token)
+        if figure is None:
+            continue
+        out.append(statement("copilot.chase_first" if i == 0 else "copilot.chase_next", figure,
+                             language, who=party(labels.get(customer.token, "Customer"), language),
+                             when=day_text(customer.oldest_due, language)))
+    return out
+
+
 def _mesh(result: ToolResult, language: str) -> list[Statement]:
     return _labelled(result.figures, language, ("mesh.gross_total", "mesh.net_total",
                                                 "mesh.cash_saved"))
 
 
 COMPOSERS = {
+    "payables.upcoming": _payables,
+    "receivables.plan": _receivables,
     "cash.forecast": _forecast,
     "cash.gaps": _gaps,
     "financing.match": _financing,
@@ -247,7 +389,10 @@ def compose(results: Mapping[str, ToolResult], order: Iterable[str],
         composer = COMPOSERS.get(name)
         if result is None or composer is None:
             continue
-        for item in composer(result, language):
+        items = composer(result, language)
+        if name == "financing.match":
+            items = _safe_loans(result, language, results.get("cash.gaps")) + items
+        for item in items:
             if item.claim.id not in seen:
                 seen.add(item.claim.id)
                 out.append(item)
