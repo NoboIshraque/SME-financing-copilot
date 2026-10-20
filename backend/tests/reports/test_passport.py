@@ -48,7 +48,17 @@ def test_passport_counts_attestations_and_versions():
     v1 = build()
     assert (v1.version, v1.attestations_confirmed, v1.attestations_disputed) == (1, 2, 1)
     v2 = build(previous=v1)
-    assert v2.version == 2 and v2.id.endswith("v2")
+    assert v2.version == 2
+
+
+def test_passport_ids_cannot_be_guessed_from_the_shop_or_version():
+    v1 = build()
+    v2 = build(previous=v1)
+    assert v1.id != v2.id
+    for passport in (v1, v2):
+        assert passport.tenant_id not in passport.id
+        assert not passport.id.endswith(f"v{passport.version}")
+        assert len(passport.id) >= 16
 
 
 def test_digest_is_salted_and_matches_the_sealed_content():
