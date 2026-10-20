@@ -18,12 +18,12 @@ from app.agents import marketwords
 from app.agents.tools import ToolResult
 from app.contracts import ActionCard, Claim, Figure, Unit
 from app.engines.financing import cost as cost_mod
-from app.engines.financing import fit as fit_mod
 
 CENT = Decimal("0.01")
 MONEY = (Unit.BDT, Unit.USD, Unit.CNY)
 MAX_OPTIONS = 2  # financing options described in words (all of them are on the cards/screen)
-MAX_GAPS = 2
+MAX_GAPS = 1  # the first gap is the one to act on; the Cash screen lists them all
+SHOWN_OPTIONS = 1  # a loan question is answered with the best option, not a catalogue
 
 
 def _grouped(integer: int) -> str:
@@ -93,10 +93,6 @@ TEMPLATES: dict[str, tuple[str, str, str]] = {
     "financing.total_cost": ("{name} costs Tk {v} in total for this need.",
                              "{name}: এই প্রয়োজনে মোট খরচ {v} টাকা।",
                              "{name}：此次需求总成本 {v} 塔卡。"),
-    "financing.p_buffer_breach": ("With {name}, the chance of still falling below the buffer "
-                                  "is {v}.",
-                                  "{name} নিলেও বাফারের নিচে নামার সম্ভাবনা {v}।",
-                                  "使用{name}后，仍低于缓冲的概率为 {v}。"),
     "mesh.gross_total": ("The circular debt you are part of totals Tk {v}.",
                          "আপনি যে চক্রাকার দেনায় আছেন তার মোট {v} টাকা।",
                          "您所在的三角债总额为 {v} 塔卡。"),
@@ -144,6 +140,23 @@ TEMPLATES: dict[str, tuple[str, str, str]] = {
     "copilot.payable_overdue": ("{what}: Tk {v}, overdue since {when}.",
                                 "{what}: {v} টাকা, {when} থেকে বকেয়া।",
                                 "{what}：{v} 塔卡，自{when}起逾期。"),
+    # Loans the shop already repays. {asked} is the amount the owner named (their own words).
+    "copilot.loans_count": ("Loans you are repaying, on record: {v}.",
+                            "রেকর্ডে আপনার চলমান ঋণ: {v}টি।", "记录中您正在偿还的贷款：{v} 笔。"),
+    "copilot.loans_none": ("You are not repaying any loan on record (loans on record: {v}).",
+                           "রেকর্ডে আপনার কোনো চলমান ঋণ নেই (ঋণ: {v}টি)।",
+                           "记录中您没有正在偿还的贷款（贷款：{v} 笔）。"),
+    "copilot.loan_asked_ok": (
+        "Yes: a loan of Tk {asked} is within what your cash flow can safely repay (up to Tk {v} "
+        "with {name}).",
+        "হ্যাঁ: {asked} টাকার ঋণ আপনার নগদ প্রবাহ নিরাপদে শোধ করতে পারবে ({name}-এ সর্বোচ্চ {v} টাকা)।",
+        "可以：{asked} 塔卡的贷款在您的现金流可安全偿还的范围内（{name} 最多 {v} 塔卡）。"),
+    "copilot.loan_asked_too_big": (
+        "Not safely: a loan of Tk {asked} is more than your cash flow can repay. The most you "
+        "can safely take is Tk {v}, with {name}.",
+        "নিরাপদে নয়: {asked} টাকার ঋণ শোধ করার মতো নগদ প্রবাহ নেই। নিরাপদে সর্বোচ্চ নিতে পারেন "
+        "{v} টাকা, {name}-এ।",
+        "不安全：{asked} 塔卡的贷款超出您的现金流偿还能力。您最多可安全借 {v} 塔卡（{name}）。"),
     "copilot.receivables_open": ("Customers owe you Tk {v} in total.",
                                  "কাস্টমারদের কাছে মোট পাওনা {v} টাকা।", "客户共欠您 {v} 塔卡。"),
     "copilot.receivables_overdue": ("Of that, Tk {v} is past its due date.",
@@ -264,6 +277,18 @@ def statement(template: str, figure: Figure, language: str, **names: str) -> Sta
     return Statement(claim, figure, tuple(names.values()))
 
 
+def statement_with(template: str, figure: Figure, language: str, names: Mapping[str, str],
+                   said: Mapping[str, str]) -> Statement:
+    """Like `statement`, plus values the owner said (`said`): they stay in the claim's text, so a
+    narration may repeat them, but they are not names (a name's digits are not checked)."""
+    text = TEMPLATES[template][_LANG.get(language, 0)].format(
+        v=render(figure.value, figure.unit), **names, **said)
+    claim = Claim(id=f"claim:{template}:{figure.id}", text=text, value=figure.value,
+                  unit=figure.unit, formula_id=figure.provenance.formula_id,
+                  input_fact_ids=figure.provenance.input_fact_ids)
+    return Statement(claim, figure, tuple(names.values()))
+
+
 def _labelled(figures: Iterable[Figure], language: str,
               labels: Iterable[str]) -> list[Statement]:
     by_label = {f.label_key: f for f in figures}
@@ -303,6 +328,13 @@ def _safe_loans(result: ToolResult, language: str,
                 gaps: ToolResult | None) -> list[Statement]:
     """The safe loan size first (what "how big a loan?" asks), or why there is none."""
     safe = result.payload.get("safe") or ()
+    asked = result.payload.get("asked")
+    if safe and asked is not None:  # "can I take a loan of X?": yes or no first
+        size, figure = safe[0]
+        template = "copilot.loan_asked_ok" if asked <= figure.value else \
+            "copilot.loan_asked_too_big"
+        return [statement_with(template, figure, language, {"name": size.product.name},
+                               {"asked": render(asked, Unit.BDT)})]
     if safe:
         (size, figure), *others = safe
         out = [statement("copilot.safe_loan", figure, language, name=size.product.name)]
@@ -321,8 +353,9 @@ def _safe_loans(result: ToolResult, language: str,
 
 
 def _financing(result: ToolResult, language: str) -> list[Statement]:
+    """The best option's true cost and total cost: the rest are on the Financing screen."""
     out: list[Statement] = []
-    for option in (result.payload.get("options") or ())[:MAX_OPTIONS]:
+    for option in (result.payload.get("options") or ())[:SHOWN_OPTIONS]:
         # Told apart by formula and unit, not by label (labels are the web's to rename).
         cost = [f for f in option.figures if f.provenance.formula_id == cost_mod.FORMULA_ID]
         for template, unit in (("financing.effective_apr", Unit.percent),
@@ -330,11 +363,6 @@ def _financing(result: ToolResult, language: str) -> list[Statement]:
             fig = next((f for f in cost if f.unit is unit), None)
             if fig is not None:
                 out.append(statement(template, fig, language, name=option.product.name))
-        breach = next((f for f in option.figures
-                       if f.provenance.formula_id == fit_mod.FORMULA_ID), None)
-        if breach is not None and "fit.no_forecast" not in option.reason_keys:
-            out.append(statement("financing.p_buffer_breach", breach, language,
-                                 name=option.product.name))
     return out
 
 
@@ -373,6 +401,25 @@ def _payables(result: ToolResult, language: str) -> list[Statement]:
         template = "copilot.payable_overdue" if item.overdue else "copilot.payable_item"
         out.append(statement(template, figure, language, what=what,
                              when=day_text(item.day, language)))
+    return out
+
+
+def _loans(result: ToolResult, language: str) -> list[Statement]:
+    """How many loans the shop is repaying, then each instalment due this month."""
+    lang = _LANG.get(language, 0)
+    count = result.figure("copilot.loans_count")
+    if count is None:
+        return []
+    out = [statement("copilot.loans_count" if count.value else "copilot.loans_none", count,
+                     language)]
+    by_ref = {f.provenance.parameters.get("ref"): f for f in result.figures
+              if f.label_key == "copilot.payable_item"}
+    for item in result.payload.get("due") or ():
+        figure = by_ref.get(item.ref)
+        if figure is not None:
+            out.append(statement("copilot.payable_item", figure, language,
+                                 what=PAYMENT_KIND["emi"][lang],
+                                 when=day_text(item.day, language)))
     return out
 
 
@@ -442,6 +489,7 @@ COMPOSERS = {
     "cash.forecast": _forecast,
     "cash.gaps": _gaps,
     "financing.match": _financing,
+    "loans.current": _loans,
     "analysis.ratios": _ratios,
     "analysis.scenarios": _scenario,
     "mesh.propose": _mesh,
@@ -449,10 +497,12 @@ COMPOSERS = {
 
 
 def compose(results: Mapping[str, ToolResult], order: Iterable[str],
-            language: str) -> list[Statement]:
-    """Statements for every result, in plan order, each figure stated once."""
+            language: str, limits: Mapping[str, int] | None = None) -> list[Statement]:
+    """Statements for every result, in plan order, each figure stated once. `limits` caps how
+    many statements a tool may add (context tools say one line, not their whole report)."""
     out: list[Statement] = []
     seen: set[str] = set()
+    limits = limits or {}
     for name in order:
         result = results.get(name)
         composer = COMPOSERS.get(name)
@@ -461,6 +511,11 @@ def compose(results: Mapping[str, ToolResult], order: Iterable[str],
         items = composer(result, language)
         if name == "financing.match":
             items = _safe_loans(result, language, results.get("cash.gaps")) + items
+        if name in limits:  # context: its first lines only, and nothing if they repeat the answer
+            told = {s.figure.id for s in out}
+            items = items[:limits[name]]
+            if any(i.figure.id in told for i in items):
+                items = []
         for item in items:
             if item.claim.id not in seen:
                 seen.add(item.claim.id)

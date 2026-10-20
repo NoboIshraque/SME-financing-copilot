@@ -218,6 +218,10 @@ class Checker:
             return self._payables(figure)
         if formula == ledgerdue.RECEIVABLES_FORMULA:
             return self._receivables(figure)
+        if formula == ledgerdue.LOANS_FORMULA:
+            with self.ctx.db() as store:
+                obligations = store.obligations(self.ctx.tenant_id)
+            return Decimal(sum(1 for o in obligations if o.kind.value == "emi"))
         if formula == loansize.FORMULA_ID:
             return self._safe_loan(figure)
         if formula == TCB_PRICE or formula in watch.EXPRESSIONS:

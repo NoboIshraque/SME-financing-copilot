@@ -14,6 +14,7 @@ input facts they cite.
     analysis.ratios    WP-01  ledger ratios from the metric registry (WP-07 adds more)
     mesh.propose       WP-08  a netting round over the circular debt the shop is part of
     payables.upcoming  ledger bills and recurring obligations due in the next 31 days
+    loans.current      the loans the shop is repaying (EMI obligations) and the next instalments
     receivables.plan   WP-05  what customers owe, overdue, and who to chase first
 
 Tools whose engine has not landed are registered without a runner, so the planner knows them
@@ -293,7 +294,7 @@ def financing_match(ctx: ToolContext, params: FinancingParams) -> ToolResult:
     safe_notes = () if safe or not sizing else ("financing.no_safe_amount",)
     if need is None:
         return ToolResult("financing.match", notes=("financing.no_gap", *safe_notes),
-                          payload={"safe": (), "sized": sizing},
+                          payload={"safe": (), "sized": sizing, "asked": None},
                           data_mode=ctx.results["cash.gaps"].data_mode)
     if safe and need.amount.amount == safe[0].amount:
         products = [safe[0].product]  # priced at its own safe size (others: safe size only)
@@ -302,13 +303,17 @@ def financing_match(ctx: ToolContext, params: FinancingParams) -> ToolResult:
     top = usable[:TOP_OPTIONS]
     figures = (*safe_figures, *(f for option in top for f in option.figures))
     # No gap: the safe size answers the question asked, but no loan is pushed (no card).
-    cards = (draft_application(top[0], need, facts, now=ctx.now),) if top and not no_gap else ()
+    # Nor for an amount the owner named that the forecast cannot safely repay.
+    too_big = params.amount is not None and (not safe or params.amount.amount > safe[0].amount)
+    cards = (draft_application(top[0], need, facts, now=ctx.now),) \
+        if top and not no_gap and not too_big else ()
     gap_note = ("financing.no_gap",) if no_gap else ()
     notes = gap_note + tuple(dict.fromkeys(k for o in top for k in o.reason_keys)) + safe_notes
     if not top:
         notes = (*gap_note, "financing.no_eligible_option", *safe_notes)
     return ToolResult("financing.match", figures=figures, facts=tuple(cited), cards=cards,
                       payload={"need": need, "options": tuple(top),
+                               "asked": params.amount.amount if params.amount else None,
                                "safe": tuple(zip(safe[:TOP_OPTIONS], safe_figures, strict=True)),
                                "sized": sizing,
                                "facts_missing": tuple(sorted(m for m, v in facts.items()
@@ -423,6 +428,29 @@ def payables_upcoming(ctx: ToolContext, params: DueParams) -> ToolResult:
                       notes=() if due else ("payables.none_due",), data_mode=mode)
 
 
+def loans_current(ctx: ToolContext, params: NoParams) -> ToolResult:
+    """The loans the shop is already repaying: how many, and the instalments due this month."""
+    with ctx.db() as store:
+        bills = store.bills(ctx.tenant_id)
+        obligations = store.obligations(ctx.tenant_id)
+    as_of = ctx.as_of
+    loans = [o for o in obligations if o.kind.value == "emi"]
+    due = [d for d in ledgerdue.upcoming(bills, obligations, as_of) if d.kind == "emi"]
+    mode = most_cautious([o.data_mode for o in obligations]) if obligations else ctx.data_mode
+    base = {"as_of": as_of.isoformat(), "days": str(ledgerdue.WINDOW_DAYS)}
+    key = f"{ctx.tenant_id}:loans:{as_of.isoformat()}"
+    rows = tuple(f"obl:{o.id}" for o in loans) or (f"ledger:{ctx.tenant_id}",)
+    figures = [_due_figure(f"{key}:count", "copilot.loans_count", Decimal(len(loans)), Unit.count,
+                           ledgerdue.LOANS_FORMULA, rows, base, mode)]
+    for item in due[:TOP_DUE]:
+        figures.append(_due_figure(f"{key}:{item.ref}", "copilot.payable_item", item.amount,
+                                   Unit.BDT, ledgerdue.PAYABLES_FORMULA, (item.ref,),
+                                   {**base, "part": "item", "ref": item.ref}, mode))
+    return ToolResult("loans.current", figures=tuple(figures),
+                      payload={"due": tuple(due), "loans": tuple(loans), "as_of": as_of},
+                      notes=() if loans else ("loans.none",), data_mode=mode)
+
+
 def receivables_plan(ctx: ToolContext, params: NoParams) -> ToolResult:
     with ctx.db() as store:
         invoices = store.invoices(ctx.tenant_id)
@@ -479,7 +507,7 @@ def price_figure(row: watch.Watch) -> Figure:
                                                     "observed_on": point.observed_on.isoformat(),
                                                     "published_on":
                                                         row.latest.published_on.isoformat(),
-                                                    "source": point.source.value}))
+                                                    "source": str(point.source)}))
 
 
 def market_prices(ctx: ToolContext, params: MarketParams) -> ToolResult:
@@ -566,6 +594,8 @@ def build_registry() -> ToolRegistry:
         Tool("payables.upcoming", "Bills and regular payments (rent, salaries, utilities, "
              "loan instalments) due in the next 31 days, soonest first, and overdue bills",
              "ledger bills and obligations", DueParams, run=payables_upcoming),
+        Tool("loans.current", "The loans the shop is already repaying (EMIs on record) and the "
+             "instalments due in the next 31 days", "ledger obligations", run=loans_current),
         Tool("receivables.plan", "What customers owe, how much is overdue, and who to chase "
              "first", "WP-05 receivables engine", run=receivables_plan),
         Tool("analysis.stability", "Whether a recommendation holds under stressed inputs",
