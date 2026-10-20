@@ -1,4 +1,3 @@
 =========================== short test summary info ============================
 SKIPPED [1] tests/ingest/test_ocr.py:132: Tesseract with ben+eng not installed
-SKIPPED [1] tests/ml/test_artifacts.py:49: notebook 01 has not been run on Kaggle yet
-1694 passed, 2 skipped in 195.84s (0:03:15)
+2304 passed, 1 skipped in 253.53s (0:04:13)
