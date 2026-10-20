@@ -1,6 +1,6 @@
 # Execution evidence (deliverable 06)
 
-Generated 2026-10-19 18:57 UTC by `npm run evidence`. Every figure below comes from a run in this repository; all data is synthetic (`data_mode: "synthetic"`). The hand-written index (freeze record, sandbox operation log, worked examples, what the evidence does not show) is [`INDEX.md`](INDEX.md).
+Generated 2026-10-20 01:05 UTC by `npm run evidence`. Every figure below comes from a run in this repository; all data is synthetic (`data_mode: "synthetic"`). The hand-written index (freeze record, sandbox operation log, worked examples, what the evidence does not show) is [`INDEX.md`](INDEX.md).
 
 | Path | What |
 | --- | --- |
@@ -160,7 +160,7 @@ Attacks the guard missed, and what they reached:
 | Backend (pytest) | facts | 146 |
 | Backend (pytest) | financing | 149 |
 | Backend (pytest) | infra | 19 |
-| Backend (pytest) | ingest | 302 |
+| Backend (pytest) | ingest | 307 |
 | Backend (pytest) | mesh | 113 |
 | Backend (pytest) | messaging | 10 |
 | Backend (pytest) | ml | 7 |
@@ -169,9 +169,9 @@ Attacks the guard missed, and what they reached:
 | Backend (pytest) | reports | 35 |
 | Backend (pytest) | security | 405 |
 | Backend (pytest) | synthetic | 87 |
-| **Backend total** | | **2246** |
+| **Backend total** | | **2251** |
 | Web units (Vitest) | all | 210 |
-| **Total** | | **2456** |
+| **Total** | | **2461** |
 
 ## Reproduce
 
