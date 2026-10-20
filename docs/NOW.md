@@ -18,6 +18,8 @@ with the guard's held-out result (15/24 attacks caught, 10/24 false alarms); `vi
 State at 20 Oct 01:00 (orch-C): every work package is merged or cut; the product is now
 **DecisionGuard**. Submission files: `docs/submission/` (PDFs in `docs/submission/pdf/`).
 
+**Code freeze (20 Oct, 20:00 Dhaka):** code frozen at `6e1c6af`; evidence regenerated on it (2,832 offline tests, eval 72/72), all-refs secret scan clean, freeze record filled in `docs/submission/evidence/INDEX.md`, PDFs re-exported. Only doc/video fixes after this.
+
 **Session B (20 Oct afternoon):** first demo owner sign-in fixed (PR #51), Market back on TCB's published Dhaka prices with alerts, vendor ranking and negotiation (PRs #53, #54), cash slider sends one request when it rests (PR #55), docs/evidence/PDFs refreshed.
 
 - [ ] **Redeploy both Render services** (**decisionguard-api** and **decisionguard-web** → Manual Deploy → Deploy latest commit), then run the 5-minute check in `docs/handover/FREE_SERVER.md` §5a (sign in as each demo role, own shop, slider, Market).

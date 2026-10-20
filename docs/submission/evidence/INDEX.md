@@ -8,9 +8,9 @@ secrets are redacted. Each file says how to regenerate it.
 
 | Item | Value |
 | --- | --- |
-| Code-freeze commit on `main` | _filled at freeze_ |
-| CI run on that commit (lint, tests, audits, secret scan, Docker stack boot) | _filled at freeze_ |
-| All-refs secret scan before the repository went public | _filled at freeze_ |
+| Code-freeze commit on `main` | `6e1c6af` (20 Oct 2026, 13:10 UTC). Later commits change only documentation, evidence and the labels in the evidence report (`backend/eval/evidence.py`) |
+| CI run on that commit (lint, tests, audits, secret scan, Docker stack boot) | [CI run 242](https://github.com/NoboIshraque/SME-financing-copilot/actions/runs/39428198692): all jobs passed. Full local runs on the same code: backend 2,581 passed, 1 skipped (OCR language data not installed); web 250 passed (`test-runs/`) |
+| All-refs secret scan before the repository went public | gitleaks 8.28.0 (the CI build, checksum-verified) over all 68 branches, 350 commits, 20 Oct 2026 13:32 UTC: no leaks found |
 | Sepolia anchor transaction | none recorded: anchors in this evidence are offline (labelled `offline`) |
 | Live-model traces | none: every copilot answer in the evidence was produced offline by the deterministic planner |
 

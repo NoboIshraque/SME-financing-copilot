@@ -1,4 +1,4 @@
  Test Files  23 passed (23)
-      Tests  226 passed (226)
-   Start at  05:58:00
-   Duration  24.73s (tests 43%, environment 27%, import 20%, setup 7%, transform 3%)
+      Tests  250 passed (250)
+   Start at  13:44:19
+   Duration  21.20s (tests 55%, environment 20%, import 14%, setup 8%, transform 2%)

@@ -37,6 +37,8 @@ FEATURES = {
     "N8": "Multi-agent orchestration", "N17": "Required \"I don't know\"",
     "P13": "Tool budget per run", "P2": "Permission tiers (no money moves)",
     "N18": "Anonymised model inputs", "P5": "Multilingual injection guard",
+    "Q2": "Unpaid receivables, chased one by one", "N3": "Market watch (published prices)",
+    "N19": "Negotiation support",
 }
 LANGUAGES = {"en": "English", "bn": "Bangla", "bl": "Banglish", "zh": "Chinese"}
 SOURCES = {"corpus_test": "Corpus test split (regression)",
