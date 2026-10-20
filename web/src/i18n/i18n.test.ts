@@ -65,6 +65,13 @@ describe("locales", () => {
     expect(i18n.t("error.account_locked", { lng: "bn", retry_after_minutes: "15" })).toContain("১৫");
     expect(i18n.t("error.account_locked", { lng: "zh", retry_after_minutes: "15" })).toContain("15");
   });
+
+  it("keeps a hash comparable in Bangla: digits inside it stay ASCII, the rest turn Bangla", () => {
+    const head = "3ee12ab9c04d5f6e7a8b9c0d1e2f30415263748596a7b8c9d0e1f2031425364";
+    expect(i18n.t("trust.head", { lng: "bn", hash: head })).toBe(`সর্বশেষ হ্যাশ ${head}`);
+    expect(i18n.t("mesh.tx", { lng: "bn", hash: "0x2b4d6f8a" })).toContain("0x2b4d6f8a");
+    expect(i18n.t("error.account_locked", { lng: "bn", retry_after_minutes: "15" })).toContain("১৫");
+  });
 });
 
 describe("server keys", () => {
