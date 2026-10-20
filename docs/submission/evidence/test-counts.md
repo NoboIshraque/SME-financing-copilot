@@ -1,6 +1,6 @@
 # Test counts by layer
 
-Generated 2026-10-20 00:37 UTC by `npm run evidence`.
+Generated 2026-10-20 01:09 UTC by `npm run evidence`.
 Every test runs offline: no real LLM call, no network.
 
 | Layer | Area | Tests |
@@ -12,7 +12,7 @@ Every test runs offline: no real LLM call, no network.
 | Backend (pytest) | core | 34 |
 | Backend (pytest) | eval | 17 |
 | Backend (pytest) | facts | 146 |
-| Backend (pytest) | financing | 149 |
+| Backend (pytest) | financing | 150 |
 | Backend (pytest) | infra | 19 |
 | Backend (pytest) | ingest | 304 |
 | Backend (pytest) | mesh | 113 |
@@ -23,6 +23,6 @@ Every test runs offline: no real LLM call, no network.
 | Backend (pytest) | reports | 35 |
 | Backend (pytest) | security | 422 |
 | Backend (pytest) | synthetic | 87 |
-| **Backend total** | | **2269** |
+| **Backend total** | | **2270** |
 | Web units (Vitest) | all | 210 |
-| **Total** | | **2479** |
+| **Total** | | **2480** |
