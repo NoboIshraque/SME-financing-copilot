@@ -196,6 +196,18 @@ def test_a_sales_drop_lowers_the_likely_balance_and_slower_collections_never_rai
                                                                               strict=True))
 
 
+def test_the_same_what_if_asked_again_reuses_the_simulation(grocery, monkeypatch):
+    runs = []
+    real_run = cash_api.run
+    monkeypatch.setattr(cash_api, "run", lambda *a, **k: runs.append(1) or real_run(*a, **k))
+    body = {"sales_change_pct": "-17", "collection_delay_days": 3}
+    first = grocery.post("/api/cash/whatif", json=body).json()
+    grocery.post("/api/cash/whatif", json={"sales_change_pct": "-18"})
+    again = grocery.post("/api/cash/whatif", json=body).json()
+    assert again == first
+    assert len(runs) == 2  # -17/3 once, -18 once: the slider back on -17 costs no simulation
+
+
 @pytest.mark.parametrize(
     "body",
     [{"sales_change_pct": "-150"}, {"one_off_day": "2027-06-01",
