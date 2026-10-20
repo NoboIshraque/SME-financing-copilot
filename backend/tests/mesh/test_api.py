@@ -170,7 +170,10 @@ def test_the_last_approval_settles_anchors_and_verifies(app, as_user, clock):
     # the debts are discharged: nothing open is left to net
     assert {o["status"] for o in garment.get("/api/mesh/obligations").json()["obligations"]} \
         == {"settled"}
-    assert garment.post("/api/mesh/rounds/propose").json()["code"] == "nothing_to_net"
+    # the shared demo ring re-opens for the next visitor; the settled round still verifies
+    again = proposed(garment)
+    assert again["id"] != round_id and again["status"] == "proposed"
+    assert garment.get(f"/api/mesh/rounds/{round_id}/verify").json()["valid"] is True
     with app.state.session_factory() as db:
         actions = [e.action for e in AuditLog(db).events("sme_hardware")]
     assert {"mesh.round_approved", "mesh.round_settled"} <= set(actions)

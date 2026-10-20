@@ -58,6 +58,19 @@ class MeshStore:
 
         self.put_obligations(load_universe().mesh_obligations)
 
+    def reopen_demo_ring(self, tenant: str) -> bool:
+        """Re-open the synthetic ring for a member once it has been settled (shared demo server).
+
+        Settled rounds keep their own records and anchors, so they still verify afterwards.
+        """
+        from app.synthetic import load_universe
+
+        ring = load_universe().mesh_obligations
+        if not any(tenant in (o.debtor_tenant, o.creditor_tenant) for o in ring):
+            return False
+        self.put_obligations(ring)
+        return True
+
     def mark(self, obligation_ids: Iterable[str], status: ObligationStatus) -> None:
         current = {o.id: o for o in self.obligations()}
         self.put_obligations(current[oid].model_copy(update={"status": status})

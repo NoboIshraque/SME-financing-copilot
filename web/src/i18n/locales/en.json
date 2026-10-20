@@ -635,7 +635,7 @@
     }
   },
   "mesh": {
-    "empty": "You are not in any debt ring yet. When your buyers and suppliers join DecisionGuard, circular debts can be cleared here with little cash.",
+    "empty": "You are not in any debt ring yet. When your buyers and suppliers join DecisionGuard, circular debts can be cleared here with little cash. In the demo, sign in as the owner of the fabric, garment or hardware shop to see a debt ring.",
     "graphTitle": "Who owes whom",
     "owes": "{{debtor}} owes {{creditor}}",
     "due": "due {{date}}",

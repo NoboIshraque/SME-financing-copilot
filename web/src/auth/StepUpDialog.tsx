@@ -1,12 +1,44 @@
 // Step-up check for EXECUTE-tier actions: the owner re-enters a fresh TOTP code (CLAUDE.md rule 4).
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+
+import { api } from "../api/endpoints";
+import type { Session } from "../api/types";
 
 import { Dialog } from "../components/Dialog";
 import { Icon } from "../components/Icon";
 import { describeError, useServerText } from "../i18n/serverText";
 import { normalizeCode } from "./code";
 import { CodeField } from "./CodeField";
+import { SESSION_KEY } from "./session";
+
+const DEMO_CODE_REFRESH_MS = 20_000;
+
+/** On the public demo server, the signed-in demo account's current code (as on the sign-in page). */
+function DemoCodeHint() {
+  const { t } = useTranslation();
+  const session = useQueryClient().getQueryData<Session | null>(SESSION_KEY);
+  const demo = useQuery({
+    queryKey: ["demo-accounts", "step-up"],
+    queryFn: api.auth.demoAccounts,
+    enabled: Boolean(session),
+    retry: false,
+    refetchInterval: DEMO_CODE_REFRESH_MS,
+  });
+  const hint = session
+    ? demo.data?.find(
+        (account) => account.business_name === session.business_name && account.role === session.principal.role,
+      )?.totp_hint
+    : null;
+  if (!hint) return null;
+  return (
+    <div className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+      <p className="font-semibold">{t("auth.demoCode", { code: hint })}</p>
+      <p className="text-xs">{t("auth.demoCodeFresh")}</p>
+    </div>
+  );
+}
 
 interface StepUpDialogProps {
   open: boolean;
@@ -70,6 +102,7 @@ function StepUpForm({
       <p id={helpId} className="mt-3 text-sm text-slate-600 dark:text-slate-400">
         {t("stepUp.help")}
       </p>
+      <DemoCodeHint />
       <div className="mt-4">
         <CodeField
           id={codeId}
