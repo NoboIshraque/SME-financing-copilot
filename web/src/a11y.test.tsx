@@ -24,7 +24,7 @@ describe("WCAG 2.1 AA (axe)", () => {
     ["Receivables", "/receivables", OWNER, "৳21,859"],
     ["Analysis", "/analysis", OWNER, "94.2%"],
     ["Mesh", "/mesh", "garment@hishab.demo", "Proposed netting round"],
-    ["Market", "/market", OWNER, "Onion is up"],
+    ["Market", "/market", OWNER, "Onion (local) is up"],
     ["Messages", "/messages", OWNER, "Overdue reminder · Customer 9"],
     ["Reports", "/reports", OWNER, "Version 2 · 30 September 2026"],
     ["Trust & audit", "/trust", OWNER, "Intact: 1,284 entries, each linked to the one before."],
