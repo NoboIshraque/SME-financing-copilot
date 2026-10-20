@@ -8,6 +8,7 @@ import { FigureValue } from "../components/FigureValue";
 import { StabilityBar } from "../components/StabilityBar";
 import { useServerText } from "../i18n/serverText";
 import { useFormat } from "../i18n/useFormat";
+import { HELP_TOPICS } from "./suggestions";
 
 const CHECK_STYLE: Record<CheckStatus, string> = {
   verified: "text-emerald-700 dark:text-emerald-300",
@@ -15,11 +16,65 @@ const CHECK_STYLE: Record<CheckStatus, string> = {
   unverifiable: "text-amber-700 dark:text-amber-300",
 };
 
-export function RecommendationCard({ recommendation }: { recommendation: Recommendation }) {
+const HELP_KEY = "copilot.help.intro";
+const MAX_RETRY_SUGGESTIONS = 3;
+
+interface Props {
+  recommendation: Recommendation;
+  /** The signed-in role's suggested questions (i18n keys), offered when a question is not understood. */
+  suggestions?: readonly string[];
+  onAsk?: (question: string) => void;
+}
+
+function Suggestions({ keys, onAsk }: { keys: readonly string[]; onAsk?: (question: string) => void }) {
+  const { t } = useTranslation();
+  if (!onAsk || keys.length === 0) return null;
+  return (
+    <>
+      <p className="mt-3 text-sm font-medium">{t("copilot.tryInstead")}</p>
+      <ul className="mt-1 flex flex-wrap gap-2">
+        {keys.map((key) => (
+          <li key={key}>
+            <button type="button" onClick={() => onAsk(t(key))} className="rounded-full bg-white px-3 py-1.5 text-sm text-teal-900 hover:bg-teal-50 dark:bg-slate-900 dark:text-teal-100">
+              {t(key)}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+export function RecommendationCard({ recommendation, suggestions = [], onAsk }: Props) {
   const { t } = useTranslation();
   const text = useServerText();
   const format = useFormat();
   const { abstention, agreement } = recommendation;
+  const retry = suggestions.slice(0, MAX_RETRY_SUGGESTIONS);
+
+  if (abstention?.message_key === HELP_KEY) {
+    return (
+      <div role="note" className="rounded-2xl border border-teal-200 bg-teal-50 p-4 dark:border-teal-900 dark:bg-teal-950/50">
+        <p className="font-semibold">{t("copilot.help.title")}</p>
+        <p className="mt-1">{t("copilot.help.intro")}</p>
+        <ul className="mt-2 list-disc pl-5 text-sm">
+          {HELP_TOPICS.map((topic) => <li key={topic}>{t(`copilot.help.can.${topic}`)}</li>)}
+        </ul>
+        <Suggestions keys={retry} onAsk={onAsk} />
+      </div>
+    );
+  }
+
+  if (abstention?.reason === "out_of_scope") {
+    // Not understood, or a part cut from this version: say so kindly and offer what works.
+    return (
+      <div role="note" className="rounded-2xl border border-slate-300 bg-slate-100 p-4 dark:border-slate-700 dark:bg-slate-800">
+        <p className="font-semibold">{t("copilot.notYet")}</p>
+        <p className="mt-1">{text(abstention.message_key)}</p>
+        <Suggestions keys={retry} onAsk={onAsk} />
+      </div>
+    );
+  }
 
   if (abstention) {
     return (

@@ -308,9 +308,11 @@
     "insufficient_data": "I don't have enough data to advise on this safely.",
     "low_agreement": "The models disagreed, so I won't guess.",
     "unverifiable": "I couldn't verify the numbers, so I won't give advice.",
-    "out_of_scope": "I can't answer that one yet. I can help with cash and upcoming payments, loans, money owed to you, profit, and what-ifs. Try: “Can I pay salaries this month?”",
+    "out_of_scope": "I didn't understand that question. I can help with cash and upcoming payments, loans, money owed to you, profit, and what-ifs.",
     "policy": "This needs a person. I can't do it.",
-    "budget_exhausted": "I reached my work limit for this question. Try a narrower one."
+    "budget_exhausted": "I reached my work limit for this question. Try a narrower one.",
+    "market_unavailable": "Market prices and vendor negotiation are not part of this version yet. I can help with cash, upcoming payments, loans, money owed to you, profit and what-ifs.",
+    "engine_unavailable": "That part of DecisionGuard is not available in this version yet."
   },
   "unit": {
     "days_one": "{{value}} day",
@@ -924,11 +926,6 @@
     "placeholder": "Ask in English, বাংলা or 中文",
     "send": "Ask",
     "thinking": "Checking your numbers…",
-    "suggest": {
-      "salary": "Can I pay salaries on 31 October?",
-      "chase": "Which customer should I chase first?",
-      "loan": "How big a loan can I safely take?"
-    },
     "abstained": "I won't guess on this.",
     "claims": "Statements checked against your records",
     "check": {
@@ -943,7 +940,48 @@
       "low": "low",
       "medium": "medium",
       "high": "high"
-    }
+    },
+    "suggest": {
+      "owner": {
+        "1": "How much cash will I have this month?",
+        "2": "Can I pay salaries on the 31st?",
+        "3": "Which loan is best for me?",
+        "4": "Which customer should I chase first?"
+      },
+      "accountant": {
+        "1": "How are profit and ratios this quarter?",
+        "2": "Which invoices are overdue?",
+        "3": "Which bills are due this month?"
+      },
+      "staff": {
+        "1": "What is today's cash position?",
+        "2": "Who owes us money?",
+        "3": "Draft a payment reminder for the customer who owes the most"
+      }
+    },
+    "suggestUpload": "Upload a bank statement",
+    "notYet": "I can't help with that one yet.",
+    "tryInstead": "Try one of these:",
+    "help": {
+      "title": "Here's what I can do",
+      "intro": "Ask me about your shop's money in English, বাংলা or 中文. Every number I give is computed from your own records and checked before you see it.",
+      "can": {
+        "cash": "Cash for the coming weeks: can you pay salaries and rent",
+        "payments": "Bills and payments due next, soonest first",
+        "owed": "Who owes you, and whom to chase first",
+        "loans": "How big a loan you can safely repay, and the cheapest options",
+        "health": "Profit, margins and other ratios",
+        "whatif": "What-ifs: sales drop, costs rise, customers pay late",
+        "debts": "Settling circular debts with other shops"
+      }
+    },
+    "payables_count": "Payments due",
+    "payables_total": "Total due",
+    "payable_item": "Payment due",
+    "receivables_open": "Owed to you",
+    "receivables_overdue": "Overdue",
+    "customer_owes": "Customer owes",
+    "safe_loan": "Largest safe loan"
   },
   "upload": {
     "open": "Add a statement or photo",
