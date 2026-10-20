@@ -28,6 +28,7 @@ from app.engines.receivables import risk
 WINDOW_DAYS = 31  # a month ahead, month-end salaries included
 PAYABLES_FORMULA = "copilot.upcoming_payments"
 RECEIVABLES_FORMULA = "copilot.receivables_owed"
+LOANS_FORMULA = "copilot.loans_on_record"  # loans the shop is repaying: its EMI obligations
 FORMULA_VERSION = 1
 CLOSED = (DocumentStatus.paid, DocumentStatus.written_off)
 

@@ -17,21 +17,37 @@ from typing import Any
 
 from app.agents import marketwords
 from app.agents.tools import ToolRegistry
-from app.llm.deterministic import INTENT_TOOLS, MAX_INTENTS, UNKNOWN, language_of
+from app.llm.deterministic import INTENT_TOOLS, MAX_INTENTS, UNKNOWN, classify, language_of
 
 # A tool listed here runs after the tools it reads (financing is sized to the cash gap).
 DEPENDS: dict[str, tuple[str, ...]] = {"financing.match": ("cash.gaps",)}
-TOOL_ORDER = ("cash.forecast", "cash.gaps", "payables.upcoming", "analysis.scenarios",
-              "analysis.ratios", "receivables.plan", "financing.match", "mesh.propose",
-              "market.prices", "market.negotiate")
+TOOL_ORDER = ("cash.forecast", "cash.gaps", "payables.upcoming", "loans.current",
+              "analysis.scenarios", "analysis.ratios", "receivables.plan", "financing.match",
+              "mesh.propose", "market.prices", "market.negotiate")
 # The tool whose result answers the intent's question, stated before the context it needs
 # ("how big a loan?" leads with the loan, then the cash gap it was sized on).
-LEAD_TOOL = {"find_financing": "financing.match", "negotiate": "market.negotiate"}
+LEAD_TOOL = {"find_financing": "financing.match", "negotiate": "market.negotiate",
+             "current_loans": "loans.current"}
 # "How big / how much / which is best": size the largest loan the forecast can carry. A plain
 # "should I take a loan?" with no gap is not sized: no loan is pushed when none is needed.
 _LOAN_SIZE = re.compile(r"how (?:big|much|large)|max(?:imum)?|largest|biggest|safe(?:ly)?|"
                         r"afford|best|which loan|cheapest|koto|kon lon|কত|কতো|সর্বোচ্চ|"
                         r"নিরাপদ|কোন ঋণ|কোন লোন|সবচেয়ে ভালো|多少|多大|最多|最高|安全|哪个|最好")
+# "Can I take a loan of X?": X is sized against what the forecast can carry, too.
+_LOAN_ASK = re.compile(r"can i (?:take|get|borrow)|could i (?:take|get|borrow)|eligible|qualify|"
+                       r"পারব|পাবো|পাব|能贷|可以贷|能借|可以借")
+# An amount in the owner's words: 5000000, 50,00,000, 50 lakh, 2.5 crore, 5 million, 20k,
+# ৫০ লাখ, 50万. Read by rules (CLAUDE.md rule 1), never by a model.
+_AMOUNT = re.compile(r"(?:tk\.?|taka|৳|bdt)?\s*(\d[\d,]*(?:\.\d+)?)\s*"
+                     r"(lakh|lac|lakhs|crore|crores|million|mn|thousand|k|লাখ|লক্ষ|কোটি|হাজার|万|亿)?"
+                     r"(?![a-z\d%])", re.IGNORECASE)
+_SCALE = {"lakh": 100_000, "lac": 100_000, "lakhs": 100_000, "লাখ": 100_000, "লক্ষ": 100_000,
+          "crore": 10_000_000, "crores": 10_000_000, "কোটি": 10_000_000, "million": 1_000_000,
+          "mn": 1_000_000, "thousand": 1_000, "k": 1_000, "হাজার": 1_000, "万": 10_000,
+          "亿": 100_000_000}
+MIN_LOAN = Decimal(1000)  # smaller numbers are days, percentages or item counts, not a loan
+CONTEXT_LINES = 1  # a tool the answer only reads (the cash gap a loan is sized on)
+OTHER_TOPIC_LINES = 2  # a tool of another intent the planner added to the question
 LANGUAGES = ("en", "bn", "zh")
 DEFAULT_SALES_SHOCK = Decimal(-20)  # a what-if with no number stresses sales by 20%
 
@@ -75,6 +91,20 @@ class Plan:
             return self.tools
         return (lead, *(t for t in self.tools if t != lead))
 
+    def focus(self) -> tuple[dict[str, int], tuple[str, ...]]:
+        """(statement limits per tool, tools whose cards are shown). The owner's question is
+        answered in full by its lead tool (or by every tool of its intent when it has no lead);
+        a tool the lead only reads (cash gaps under a loan question) adds one line of context,
+        and a tool of another intent the planner added at most two."""
+        if not self.intents:
+            return {}, self.tools
+        primary = INTENT_TOOLS.get(self.intents[0], ())
+        lead = LEAD_TOOL.get(self.intents[0])
+        answering = (lead,) if lead in self.tools else tuple(t for t in self.tools if t in primary)
+        limits = {t: (CONTEXT_LINES if t in primary else OTHER_TOPIC_LINES)
+                  for t in self.tools if t not in answering}
+        return limits, answering
+
     def subagents(self) -> list[tuple[str, tuple[str, ...]]]:
         """(intent, tools) per sub-agent; a shared tool runs once and both read the result."""
         return [(intent, tuple(t for t in self.tools if t in INTENT_TOOLS.get(intent, ())))
@@ -99,6 +129,22 @@ def what_if_params(question: str) -> tuple[dict[str, Decimal | int], tuple[str, 
     return {"sales_change_pct": DEFAULT_SALES_SHOCK}, ("scenario.default_shock",)
 
 
+def loan_amount(question: str) -> Decimal | None:
+    """The largest amount of money the owner names (Tk 1,000 or more), or None."""
+    text = question.translate(_DIGITS)
+    found = []
+    for match in _AMOUNT.finditer(text):
+        try:
+            number = Decimal(match.group(1).replace(",", ""))
+        except ArithmeticError:
+            continue
+        unit = (match.group(2) or "").casefold()
+        number *= _SCALE.get(unit, 1)
+        if number >= MIN_LOAN:
+            found.append(number.quantize(Decimal("0.01")))
+    return max(found) if found else None
+
+
 def _ordered(tools: Iterable[str]) -> tuple[str, ...]:
     wanted = set(tools)
     for tool in list(wanted):
@@ -114,6 +160,13 @@ def build_plan(proposal: Mapping[str, Any] | None, question: str, registry: Tool
     raw_intents = [i for i in proposal.get("intents") or () if isinstance(i, str)]
     raw_tools = [t for t in proposal.get("tools") or () if isinstance(t, str)]
     intents = tuple(dict.fromkeys(i for i in raw_intents if i in INTENT_TOOLS))[:MAX_INTENTS]
+    # The owner's own words decide which question comes first: a model that lists "cash" before
+    # "my loan" still gets the loan answered first, with the rest as context.
+    asked_first = next((i for i in classify(question) if i in intents), None)
+    if asked_first is not None:
+        intents = (asked_first, *(i for i in intents if i != asked_first))
+    if intents[:1] == ("current_loans",):  # "my loan" is the one being repaid, not a new one
+        intents = tuple(i for i in intents if i != "find_financing")
     dropped = tuple(dict.fromkeys(
         [i for i in raw_intents if i not in INTENT_TOOLS and i != UNKNOWN]
         + [t for t in raw_tools if t not in registry]))
@@ -125,8 +178,16 @@ def build_plan(proposal: Mapping[str, Any] | None, question: str, registry: Tool
     notes: tuple[str, ...] = ()
     if "analysis.scenarios" in ordered:
         params["analysis.scenarios"], notes = what_if_params(question)
-    if "financing.match" in ordered and _LOAN_SIZE.search(question.casefold()):
-        params["financing.match"] = {"safe_size": True}
+    if "financing.match" in ordered:
+        amount = loan_amount(question)
+        financing: dict[str, Any] = {}
+        if amount is not None:
+            financing["amount"] = {"amount": str(amount), "currency": "BDT"}
+        if amount is not None or _LOAN_SIZE.search(question.casefold()) or \
+                _LOAN_ASK.search(question.casefold()):
+            financing["safe_size"] = True
+        if financing:
+            params["financing.match"] = financing
     named = marketwords.commodities(question)
     if "market.prices" in ordered and named:
         params["market.prices"] = {"commodities": named}

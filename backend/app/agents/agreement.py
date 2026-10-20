@@ -60,7 +60,9 @@ def judgement_for(plan: Plan, results: Mapping[str, ToolResult],
     """`question` is the owner's question, anonymised: only an intent vote needs it."""
     financing = results.get("financing.match")
     options = financing.payload.get("options") or () if financing is not None else ()
-    if len(options) >= 2:
+    # Only a choice sized on the cash gap is one the self-loop can re-make; an amount the owner
+    # named ("can I take Tk 50 lakh?") is answered by the safe-size check, not voted on.
+    if len(options) >= 2 and financing.payload.get("asked") is None:
         need = financing.payload["need"]
         summaries = tuple({
             "id": o.product.id,

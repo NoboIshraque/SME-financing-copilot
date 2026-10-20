@@ -18,7 +18,8 @@ from app.agents.models import RejectedClaimRow
 from app.agents.tools import ToolContext
 from app.agents.toolset import REGISTRY
 from app.api import cash as cash_api
-from app.contracts import CheckStatus, Period, Unit
+from app.contracts import CheckStatus, Claim, Period, Unit
+from app.engines.financing import fit as fit_mod
 from app.facts import REGISTRY as METRICS
 from app.facts.registry import MetricDefinition
 from tests.agents.helpers import NOW, seeded_store
@@ -33,7 +34,7 @@ TEMPLATES = (
     "cash.closing_balance", "cash.lowest_likely_balance", "cash.runway_days",
     "cash.buffer_target", "cash.expected_shortfall", "cash.lead_time_days",
     "cash.breach_probability", "action.gap_reduced", "action.cost",
-    "financing.effective_apr", "financing.total_cost", "financing.p_buffer_breach",
+    "financing.effective_apr", "financing.total_cost",
     "analysis.net_sales", "analysis.gross_profit", "analysis.gross_margin",
     "analysis.operating_expenses", "analysis.net_cash_flow", "analysis.dso", "analysis.dpo",
     "scenario.lowest_before", "scenario.lowest_after", "scenario.runway_before",
@@ -127,10 +128,16 @@ def test_unknown_formula_is_unverifiable(run):
 
 
 def test_a_fit_figure_from_another_forecast_is_unverifiable(run):
-    item = run[2]["financing.p_buffer_breach"]
-    params = {**item.figure.provenance.parameters, "principal": "1.00"}
-    prov = item.figure.provenance.model_copy(update={"parameters": params})
-    check = run[1].check(item.claim, item.figure.model_copy(update={"provenance": prov}))
+    # The fit figure is no longer said in words (one loan, its cost), but cards still carry it.
+    option = run[0].results["financing.match"].payload["options"][0]
+    figure = next(f for f in option.figures if f.provenance.formula_id == fit_mod.FORMULA_ID)
+    claim = Claim(id="claim:fit", text=render(figure.value, figure.unit), value=figure.value,
+                  unit=figure.unit, formula_id=figure.provenance.formula_id,
+                  input_fact_ids=figure.provenance.input_fact_ids)
+    assert run[1].check(claim, figure).status is CheckStatus.verified
+    params = {**figure.provenance.parameters, "principal": "1.00"}
+    prov = figure.provenance.model_copy(update={"parameters": params})
+    check = run[1].check(claim, figure.model_copy(update={"provenance": prov}))
     assert check.status is CheckStatus.unverifiable
 
 
