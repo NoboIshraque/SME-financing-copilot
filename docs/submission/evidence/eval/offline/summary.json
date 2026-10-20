@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T00:37:16+00:00",
+  "generated_at": "2026-10-20T01:09:13+00:00",
   "mode": "offline",
   "llm_mode": "fixtures",
-  "commit": "335c1ca+local",
+  "commit": "11d605d",
   "as_of": "2026-09-30T18:00:00+00:00",
   "data_mode": "synthetic",
   "tasks": {
@@ -240,8 +240,8 @@
     "noise_flips": 0
   },
   "latency_ms": {
-    "median": 47,
-    "max": 2081
+    "median": 60,
+    "max": 2093
   },
   "models": {
     "mode": "fixtures",

@@ -75,7 +75,7 @@ Repo layout and ownership are in `CLAUDE.md`.
 | WP-14 | Frontend: all screens, provenance drawer, i18n, PWA, a11y (P6, P9, P12) | B1 | 1–3 | 110 (Vitest) |
 | WP-15 | done (3/3) | merged | 24 e2e (12 flows x desktop + phone) | the 12 most important flows run in CI (E2E workflow, local target) against the live APIs; hosted evidence run waits for WP-18's server |
 | WP-16 | done (reduced) | merged (PR #33) | 16 + 62 eval tasks | offline eval harness (functional, abstention, guard, privacy, provenance), `npm run evidence` writes `docs/submission/evidence/`; no mutation score (PR #25) |
-| WP-17 | ML on Kaggle/Colab: forecaster backtest, delay model, injection classifier (N15, P5) | Human PC-4 + notebooks from orchestrator | 1–2 | 20 |
+| WP-17 | done (2/4; 03 GPU and 04 cut) | merged | 7 | 01 run 20 Oct on UCI Online Retail II (ETS chosen: WAPE 36.3% vs 43.4% naive, 3 of 5 real gaps flagged ~11 days ahead); 02 done (baseline beats LightGBM); 03 CPU baseline AUC 0.69 on unseen families, not deployed; GPU injection run and market backtest cut (PR #25) |
 | WP-18 | Infra & deploy: Docker, Caddy, SG server, CI/CD, China tests (P6) | Orchestrator + Amdad | 2–3 | 15 |
 | WP-19 | done | merged (wp-19-submission) | — | renamed to DecisionGuard; technical doc, security self-assessment, video script, deck source, evidence bundle, PDFs (`scripts/export_submission_pdfs.py`); video recording by Nobo |
 | WP-20 | Real-shop data collection and anonymisation (P7) | Labib (human) | 1–2 | — |

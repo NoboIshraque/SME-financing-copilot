@@ -16,7 +16,6 @@ State at 20 Oct 01:00 (orch-C): every work package is merged or cut; the product
 
 - [ ] **Deck:** the Slides artifact lives on orch-A's claude.ai account and still says Hishab. Either republish it from `docs/submission/deck/` or send `docs/submission/pdf/deck.pdf`.
 - [ ] **Video (≤ 5 min):** record from `docs/submission/video-script.md` (`npm run dev`, demo shop `sme_hardware`, owner@hardware.hishab.test); save as `DecisionGuard_TopicE_BUP_demo.mp4`; run `npm run evidence` once more after recording.
-- [ ] **Datasets (WP-20 / notebook 01):** this cloud session cannot reach UCI, Kaggle, Mendeley or Hugging Face (network policy). Either add those hosts in the environment's network settings and ask the orchestrator again, or Labib runs notebook 01 on Kaggle.
 - [ ] **Send** (PLAN §9): deck, technical doc, security self-assessment, evidence bundle, video, repo link (source zip while the repo is private) to wangyr@pbcsf.tsinghua.edu.cn.
 - [ ] When Amdad sends the server IP: Namecheap A record `hishab` → IP (RUNBOOK §5.9), then add secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_DOMAIN`.
 - [ ] Before making the repo public: run the all-refs secret scan (WP-18, PR #14).
@@ -32,6 +31,6 @@ State at 20 Oct 01:00 (orch-C): every work package is merged or cut; the product
 <!-- section: labib -->
 ## Labib (@lab-af)
 
-- [ ] **Kaggle notebook 01 only** (`01_forecast_backtest`, table in `docs/team/LABIB.md`): the orchestrator cannot download the public datasets from the cloud. Save the version and push the artefacts (< 50 MB) to `ml/`.
+- [x] **Notebook 01 done (20 Oct, orch-C ran it on UCI Online Retail II).** Nothing to do unless you want to rerun it on Kaggle: (`01_forecast_backtest`, table in `docs/team/LABIB.md`): the orchestrator cannot download the public datasets from the cloud. Save the version and push the artefacts (< 50 MB) to `ml/`.
 - [ ] **Real data (WP-20, cut 19 Oct):** public real datasets listed in `docs/packages/WP-20.md`; field data only if it arrives.
 - [ ] PC-4 hourly jobs (LABIB.md "PC-4 always-on jobs") if not running yet.

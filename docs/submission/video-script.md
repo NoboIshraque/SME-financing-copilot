@@ -264,7 +264,7 @@ call from Appendix C. The console shows `allowed: false`, `families: ["fake_owne
   provenance · audit". "Limits: synthetic shops · guard rules-based · demo actions recorded,
   not sent". "Team: Nobo Ishraque · Amdad · Labib · BUP". Optionally add
   `<backend + web test total from docs/submission/evidence/test-counts.md>` (on 20 Oct:
-  2,269 backend + 210 web). Add the hosted URL only if `hishab.quadbits.net` is up on the day.
+  2,270 backend + 210 web). Add the hosted URL only if `hishab.quadbits.net` is up on the day.
 - **VO:** "DecisionGuard warns before the cash gap, ranks financing by true cost, and keeps the owner
   in charge. Honest limits: these shops are synthetic, our injection guard is rule-based and
   still needs a fresh unseen test, and demo actions are recorded, not sent to a bank.
