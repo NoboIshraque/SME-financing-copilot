@@ -36,8 +36,14 @@ services:
         generateValue: true
       - key: VAULT_KEY
         generateValue: true
+      # Real anchoring on the Ethereum Sepolia testnet. With no SEPOLIA_PRIVATE_KEY (or if the
+      # testnet fails) every anchor is made offline instead and labelled offline.
       - key: CHAIN_MODE
-        value: offline
+        value: sepolia
+      - key: SEPOLIA_RPC_URL
+        value: https://ethereum-sepolia-rpc.publicnode.com
+      - key: SEPOLIA_PRIVATE_KEY
+        sync: false
       # fixtures: recorded answers, no model calls. Set to live and fill the two keys in the
       # dashboard (Environment tab) to use real models.
       - key: LLM_MODE

@@ -7,7 +7,7 @@
 > 4, 7; WP-15 to about 12 flows; WP-16 to about 40 tasks without mutation score. P7 real shop
 > data is substituted by public real datasets (WP-20.md). Every idea stays in this file as roadmap.
 
-FinTechathon 2026 · International Track · Topic E · Team: Nobo, Amdad, Labib
+FinTechathon 2026 · International Track · Topic E · Team: Md. Amdadul Haque (lead), Nobo Ishraque, Labib Afnan, Adil Akhtab Abir
 
 Topic E brief (official): *a finance copilot for small-business owners, offering
 financing-option matching, cash-flow management with alerts, and business financial
