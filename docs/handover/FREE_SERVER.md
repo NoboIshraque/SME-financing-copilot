@@ -68,6 +68,12 @@ each other:
    Traders**. The next screen shows the demo code to type.
 3. The Today screen should show a **Critical** cash alert for the hardware shop.
 
+**Judges' own shops.** The sign-in page also offers **create your own shop**. A judge picks a
+shop name, email and password, lands on **Settings → Set up your shop**, types the opening cash
+balance and its date, downloads the example file (or uses their own CSV/Excel), uploads it, and
+every screen then runs on those numbers: no synthetic banner for that shop. Approvals need them
+to set up an approval code there with any authenticator app.
+
 ## 5. If something is wrong
 
 | What you see | Why | Fix |

@@ -72,7 +72,9 @@
     "demoTitle": "体验演示",
     "demoHelp": "仅含合成的模拟企业，一键即可登录。",
     "demoAs": "以{{role}}身份登录",
-    "demoCode": "演示验证码：{{code}}"
+    "demoCode": "演示验证码：{{code}}",
+    "ownShop": "或者用您自己的数字试试：",
+    "ownShopLink": "创建自己的店铺"
   },
   "stepUp": {
     "title": "确认是您本人",
@@ -133,7 +135,12 @@
     "body_too_large": "请求内容过大，无法发送。",
     "weak_password": "请设置更长、更难猜的密码。",
     "invalid_card": "无法读取此操作，请刷新页面。",
-    "tenant_required": "请先选择您的企业。"
+    "tenant_required": "请先选择您的企业。",
+    "email_taken": "该邮箱已有账户，请直接登录。",
+    "invalid_email": "请输入有效的邮箱地址。",
+    "signup_closed": "本演示服务器已停止创建新店铺。",
+    "opening_needs_both": "请同时填写期初余额和日期。",
+    "date_in_future": "该日期在未来。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -879,5 +886,43 @@
   },
   "ingest": {
     "bad_date": "日期无效"
+  },
+  "signup": {
+    "title": "创建自己的店铺",
+    "help": "用您自己的数字试用 DecisionGuard。您的店铺与演示店铺分开，只有您能看到。",
+    "business": "店铺名称",
+    "passwordHelp": "至少 12 个字符；一句短句即可。",
+    "create": "创建店铺",
+    "creating": "正在创建…",
+    "privacy": "这是公开的演示服务器：请输入测试或已匿名化的数字，不要输入真实客户姓名或电话。",
+    "haveAccount": "已有账户？登录"
+  },
+  "setup": {
+    "title": "设置您的店铺",
+    "step1": "填写期初现金余额和记录开始日期。",
+    "step2": "上传您的记录（CSV 或 Excel），或从示例文件开始。",
+    "step3": "设置审批验证码，以便批准操作。",
+    "numbersTitle": "您的数字",
+    "numbersHelp": "预测从这个余额开始。其他信息供贷款方核查。",
+    "openingBalance": "期初现金（塔卡）",
+    "openingDate": "记录开始日期",
+    "businessAge": "经营时长（月）",
+    "staff": "员工人数",
+    "tradeLicence": "有营业执照",
+    "etin": "有电子税号（e-TIN）",
+    "save": "保存",
+    "saving": "正在保存…",
+    "saved": "已保存。",
+    "recordsTitle": "您的记录",
+    "recordsHelp": "列：date、type（in 或 out）、amount、party、category、channel、ref。预测至少需要 8 周的记录。",
+    "template": "下载示例文件",
+    "upload": "上传记录",
+    "codeTitle": "审批验证码",
+    "codeHelp": "离开 DecisionGuard 的操作需要身份验证器应用（Google 或 Microsoft Authenticator）生成的 6 位验证码。",
+    "codeStart": "设置验证码",
+    "codeAdd": "将此密钥添加到身份验证器应用，或在手机上打开链接，然后输入应用显示的验证码。",
+    "codeOpenApp": "在身份验证器应用中打开",
+    "codeConfirm": "确认验证码",
+    "codeOn": "审批验证码已设置。"
   }
 }

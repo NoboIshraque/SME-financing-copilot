@@ -72,7 +72,9 @@
     "demoTitle": "Try the demo",
     "demoHelp": "Synthetic businesses only. One tap signs you in.",
     "demoAs": "Sign in as {{role}}",
-    "demoCode": "Demo code: {{code}}"
+    "demoCode": "Demo code: {{code}}",
+    "ownShop": "Or try it on your own numbers:",
+    "ownShopLink": "create your own shop"
   },
   "stepUp": {
     "title": "Confirm it's you",
@@ -133,7 +135,12 @@
     "body_too_large": "That request is too large to send.",
     "weak_password": "Choose a longer, harder-to-guess password.",
     "invalid_card": "This action could not be read. Please refresh.",
-    "tenant_required": "Choose your business first."
+    "tenant_required": "Choose your business first.",
+    "email_taken": "An account with this email already exists. Sign in instead.",
+    "invalid_email": "Enter a valid email address.",
+    "signup_closed": "New shops are closed on this demo server.",
+    "opening_needs_both": "Enter the opening balance and its date together.",
+    "date_in_future": "That date is in the future."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -879,5 +886,43 @@
   },
   "ingest": {
     "bad_date": "the date is not a real date"
+  },
+  "signup": {
+    "title": "Create your own shop",
+    "help": "Try DecisionGuard on your own numbers. Your shop is separate from the demo shops, and only you can see it.",
+    "business": "Shop name",
+    "passwordHelp": "At least 12 characters; a short sentence works well.",
+    "create": "Create shop",
+    "creating": "Creating…",
+    "privacy": "This is a public demo server: enter test or anonymised figures, not real customer names or phone numbers.",
+    "haveAccount": "Already have an account? Sign in"
+  },
+  "setup": {
+    "title": "Set up your shop",
+    "step1": "Enter your opening cash balance and the date your records start.",
+    "step2": "Upload your records (CSV or Excel), or start from the example file.",
+    "step3": "Set up an approval code so you can approve actions.",
+    "numbersTitle": "Your numbers",
+    "numbersHelp": "The forecast starts from this balance. Lenders check the other facts.",
+    "openingBalance": "Cash on hand at the start (Tk)",
+    "openingDate": "Date your records start",
+    "businessAge": "Business age (months)",
+    "staff": "Staff",
+    "tradeLicence": "Has a trade licence",
+    "etin": "Has an e-TIN",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "recordsTitle": "Your records",
+    "recordsHelp": "Columns: date, type (in or out), amount, party, category, channel, ref. At least 8 weeks of records are needed for a forecast.",
+    "template": "Download example file",
+    "upload": "Upload records",
+    "codeTitle": "Approval code",
+    "codeHelp": "Actions that leave DecisionGuard need a 6-digit code from an authenticator app (Google or Microsoft Authenticator).",
+    "codeStart": "Set up code",
+    "codeAdd": "Add this key to your authenticator app, or open the link on your phone, then type the code it shows.",
+    "codeOpenApp": "Open in authenticator app",
+    "codeConfirm": "Confirm code",
+    "codeOn": "Approval code is set up."
   }
 }

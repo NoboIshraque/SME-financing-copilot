@@ -13,6 +13,7 @@ import { ErrorState, QueryView } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
 import { useFormat } from "../../i18n/useFormat";
 import { THEMES, setThemePreference, useThemePreference } from "../../theme";
+import { ShopSetup } from "./ShopSetup";
 
 const card = "rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800";
 
@@ -88,6 +89,8 @@ export function SettingsScreen() {
           )}
         </dl>
       </section>
+
+      {session.data_mode === "live" && (principal.role === "owner" || principal.role === "accountant") && <ShopSetup />}
 
       <section aria-labelledby="h-display" className={card}>
         <h3 id="h-display" className="text-lg font-semibold">{t("settings.display")}</h3>

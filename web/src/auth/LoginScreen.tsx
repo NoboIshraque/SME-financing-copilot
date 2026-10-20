@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
 import { api } from "../api/endpoints";
 import type { DemoAccount, LoginRequest, Session } from "../api/types";
@@ -198,6 +198,10 @@ export function LoginScreen() {
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
             <h3 className="font-semibold text-amber-900 dark:text-amber-100">{t("auth.demoTitle")}</h3>
             <p className="mt-1 text-sm text-amber-900/80 dark:text-amber-100/80">{t("auth.demoHelp")}</p>
+            <p className="mt-2 text-sm text-amber-900 dark:text-amber-100">
+              {t("auth.ownShop")}{" "}
+              <Link to="/signup" className="font-semibold underline">{t("auth.ownShopLink")}</Link>
+            </p>
             <ul className="mt-3 space-y-2">
               {demo.data.map((account) => (
                 <li key={account.email}>

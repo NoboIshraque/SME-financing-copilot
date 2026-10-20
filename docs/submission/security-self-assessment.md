@@ -191,6 +191,7 @@ an in-memory test app. Every operation answered 401 `not_authenticated` except t
 | `POST /api/auth/login`, `POST /api/auth/login/totp` | Signing in. The TOTP step works only with the 5-minute pending cookie from a correct password. |
 | `POST /api/auth/logout` | Does nothing without a session. |
 | `GET /api/auth/demo-accounts` | Demo mode only, for judges. Answers 404 otherwise (`backend/tests/security/test_auth_api.py`). |
+| `POST /api/onboarding/signup` | Demo mode only (404 otherwise): a judge creates their own shop, a new tenant marked `live`, and is signed in as its owner. Rate limited (10 per minute per IP, bucket `signup`), capped at 500 shops, password policy as for every account; no approval code until the owner sets one up, so EXECUTE stays impossible until then. Tests: `backend/tests/onboarding/test_api.py`. |
 | `GET /api/verify/{passport_id}` | Trust Passport verification for a lender without an account (WP-13). Returns only whether the passport's digest matches its anchor, never ledger rows. |
 | `/api/docs`, `/api/redoc`, `/api/openapi.json` | Only when `APP_ENV` is `development` or `test` (PR #18, `create_app` in `backend/app/main.py`). They answer 404 in `demo` and `production` (`backend/tests/core/test_app.py`, `test_interactive_docs_are_served_only_where_developers_run_the_app`). |
 
@@ -510,7 +511,7 @@ Ratings: our own judgement of likelihood and impact for this deployment.
 20. **R20 [Fixed 20 Oct] Route coverage is now a CI test.**
     `backend/tests/core/test_route_coverage.py` calls every API route (from `api_routes()`, which
     includes nested routers since PR #27) without a session and fails if any route outside the
-    six public ones in section 1 answers anything but 401.
+    seven public ones in section 1 answers anything but 401.
 21. **R21 [Low] Re-uploading a statement could double-count seeded rows.** Rows from a statement
     with transaction ids were matched only by id, so uploading a demo shop's own bKash file into
     its seeded ledger added the rows again. This is an integrity bug, not a breach, and only
