@@ -29,7 +29,7 @@ export function TierBadge({ tier }: { tier: Tier }) {
 const ALERT_STYLE: Record<AlertTier, string> = {
   critical: "bg-red-600 text-white",
   warning: "bg-amber-500 text-slate-950",
-  watch: "bg-sky-600 text-white",
+  watch: "bg-sky-700 text-white",
 };
 
 export function AlertTierBadge({ tier }: { tier: AlertTier }) {

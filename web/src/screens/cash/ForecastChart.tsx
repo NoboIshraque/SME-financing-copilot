@@ -73,7 +73,7 @@ export function ForecastChart({ band, whatIf, gaps }: { band: ForecastBand; what
   return (
     <div className="h-72 w-full text-slate-500 dark:text-slate-400" aria-hidden="true">
       <ResponsiveContainer>
-        <ComposedChart data={rows} margin={{ top: 12, right: 8, bottom: 0, left: 0 }}>
+        <ComposedChart data={rows} margin={{ top: 12, right: 8, bottom: 0, left: 0 }} accessibilityLayer={false}>
           <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.15} />
           <XAxis dataKey="day" tickFormatter={(day: string) => format.date(day)} interval={13} tick={{ fontSize: 11, fill: "currentColor" }} />
           <YAxis

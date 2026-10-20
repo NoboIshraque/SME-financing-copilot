@@ -105,7 +105,7 @@ function RoundCard({ round, labels }: { round: NettingRound; labels: Record<stri
         {round.participants.map((tenant) => (
           <li key={tenant} className="flex justify-between gap-2">
             <span>{name(tenant)}{tenant === me ? ` (${t("mesh.you")})` : ""}</span>
-            <span className={round.approvals?.[tenant] ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500"}>
+            <span className={round.approvals?.[tenant] ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"}>
               {round.approvals?.[tenant] ? t("mesh.approved") : t("mesh.waiting")}
             </span>
           </li>

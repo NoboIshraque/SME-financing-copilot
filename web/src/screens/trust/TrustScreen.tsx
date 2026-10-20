@@ -54,7 +54,7 @@ export function TrustScreen() {
         <h3 id="h-events" className="text-lg font-semibold">{t("trust.eventsTitle")}</h3>
         <QueryView query={events} isEmpty={(list) => list.length === 0} empty={t("trust.noEvents")}>
           {(list) => (
-            <div className="mt-2 overflow-x-auto">
+            <div role="region" aria-labelledby="h-events" tabIndex={0} className="relative mt-2 overflow-x-auto">
               <table className="w-full min-w-[30rem] text-sm">
                 <caption className="sr-only">{t("trust.eventsTitle")}</caption>
                 <thead className="text-left text-slate-500 dark:text-slate-400">

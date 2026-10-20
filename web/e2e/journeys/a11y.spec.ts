@@ -15,20 +15,10 @@ const WCAG21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 const THEMES = ["light", "dark"] as const;
 
 // Known, found by this suite (WP-15.md, Notes), as "<theme> <rule>" per page and viewport, plus
-// "too wide" for a page wider than the device:
-//  - cash: the forecast chart is aria-hidden but its SVG keeps focusable elements.
-//  - mesh, reports, settings (desktop) in dark: slate-500 small text on slate-900 is 3.74:1.
-//  - trust on a phone: TierBadge's visually hidden text escapes the audit table's scroll box, so
-//    the page is 31-57 px too wide (it pans; the fixed bottom bar is laid out off-screen), and that
-//    scroll box cannot be reached by keyboard.
-const both = (rule: string) => [`dark ${rule}`, `light ${rule}`];
-const KNOWN: Record<string, { desktop?: string[]; phone?: string[] }> = {
-  cash: { desktop: both("aria-hidden-focus"), phone: both("aria-hidden-focus") },
-  mesh: { desktop: ["dark color-contrast"], phone: ["dark color-contrast"] },
-  reports: { desktop: ["dark color-contrast"], phone: ["dark color-contrast"] },
-  settings: { desktop: ["dark color-contrast"] },
-  trust: { phone: [...both("scrollable-region-focusable"), "too wide"] },
-};
+// "too wide" for a page wider than the device. All fixed on 20 Oct (final audit, M10-M13): the
+// cash chart's focusable SVG, dark slate-500 text on mesh/reports/settings, the Watch badge, and
+// trust's audit table on a phone. Add an entry here only for a newly found, reported bug.
+const KNOWN: Record<string, { desktop?: string[]; phone?: string[] }> = {};
 
 const MEANING: Record<string, string> = {
   "color-contrast": "text below the 4.5:1 contrast minimum",

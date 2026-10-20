@@ -133,7 +133,7 @@ export function SettingsScreen() {
             >
               {API_MODES.map((mode) => <option key={mode} value={mode}>{t(`settings.apiModes.${mode}`)}</option>)}
             </select>
-            <span className="text-xs text-slate-500">{t("settings.reloadNeeded")}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{t("settings.reloadNeeded")}</span>
           </label>
         )}
       </section>

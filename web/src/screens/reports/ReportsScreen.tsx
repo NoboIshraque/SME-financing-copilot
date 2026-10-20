@@ -37,7 +37,7 @@ function PassportCard({ passport }: { passport: PassportVersion }) {
         {passport.evidence.map((item) => (
           <li key={`${item.kind}-${item.digest}`} className="flex justify-between gap-2">
             <span>{t(`reports.evidence.${item.kind}`)}</span>
-            <span className={item.verified ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500"}>
+            <span className={item.verified ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"}>
               {item.verified ? t("reports.verified") : t("reports.selfDeclared")}
             </span>
           </li>
