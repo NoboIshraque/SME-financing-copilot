@@ -71,8 +71,8 @@ export function AlertCard({ alert, level }: { alert: Alert; level: 3 | 4 | 5 }) 
         <div className="mt-3">
           <p className="text-sm font-medium">{t("today.why")}</p>
           <ul className="mt-1 space-y-0.5 text-sm">
-            {gap.drivers.map((driver) => (
-              <li key={`${driver.kind}-${driver.label_key}`} className="flex justify-between gap-3">
+            {gap.drivers.map((driver, index) => (
+              <li key={`${driver.kind}-${driver.label_key}-${driver.reference_id ?? index}`} className="flex justify-between gap-3">
                 <span>{text(driver.label_key)}</span>
                 <Num
                   value={driver.amount.amount}
