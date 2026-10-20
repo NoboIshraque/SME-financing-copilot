@@ -74,7 +74,11 @@
     "demoAs": "以{{role}}身份登录",
     "demoCode": "演示验证码：{{code}}",
     "ownShop": "或者用您自己的数字试试：",
-    "ownShopLink": "创建自己的店铺"
+    "ownShopLink": "创建自己的店铺",
+    "serverWaking": "服务器正在唤醒（免费服务器在无人使用时会休眠）。请等待约一分钟后重试。",
+    "slowServer": "仍在连接：免费服务器唤醒可能需要约一分钟。",
+    "lockoutNote": "连续输错 5 次后，账户将被锁定 15 分钟。",
+    "demoCodeFresh": "演示验证码每 30 秒更换一次；此处会自动刷新。"
   },
   "stepUp": {
     "title": "确认是您本人",

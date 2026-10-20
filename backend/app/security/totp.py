@@ -42,7 +42,11 @@ def _totp(secret: str) -> pyotp.TOTP:
 
 
 def code_at(secret: str, when: datetime) -> str:
-    return _totp(secret).generate_otp(step_at(when))
+    return code_for_step(secret, step_at(when))
+
+
+def code_for_step(secret: str, step: int) -> str:
+    return _totp(secret).generate_otp(step)
 
 
 def verify(secret: str, raw_code: str, when: datetime, last_step: int | None) -> int | None:
