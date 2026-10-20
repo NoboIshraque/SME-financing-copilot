@@ -427,6 +427,24 @@ and raises fewer false alarms; LightGBM is slightly more accurate but its 80% ba
 that were flagged were flagged about 11 days ahead. Only 5 real gaps occurred, so the hit and
 false-alarm rates are rough; this is one retailer, not a Bangladeshi shop.
 
+**Real Bangladeshi data** (same notebook with `HISHAB_DAILY_PATH`, run 20 Oct; results in
+`ml/artifacts/forecast_backtest_bd.json`). Data: a Bangladeshi retailer's daily units sold for one
+product, 1 Jan 2013 to 31 Dec 2017 (Mendeley 10.17632/xwmbk7n3c8.1, CC BY 4.0, copy in
+`data/public/retail_bd/`), used as a stand-in for daily inflow. 103 origins from 2014 on, the
+same 28-day horizon and gap rule.
+
+| Model | WAPE | Weekly MAPE | 80% band covers | Real gaps flagged | False alarms | Lead time |
+| --- | --- | --- | --- | --- | --- | --- |
+| Seasonal naive | 26.1% | 11.1% | 77.7% | 41 of 45 (91%) | 15.5% | 17.1 d |
+| ETS (chosen) | 19.9% | 10.8% | 73.0% | 37 of 45 (82%) | 17.2% | 17.8 d |
+| LightGBM quantile | 19.9% | 9.1% | 56.9% | 39 of 45 (87%) | 15.5% | 17.5 d |
+
+Reading: on real Bangladeshi sales, ETS cuts the daily error by about a quarter against the naive
+baseline, but it does not flag more gaps: the naive forecast caught 4 more of the 45, at a
+similar false-alarm rate. Better accuracy did not mean better warnings here, so the alert layer,
+not only the forecaster, needs tuning on real shop data. One product of one shop, units not
+taka.
+
 ### 3.4 Financing: true cost, eligibility, ranking, lender check (Built)
 
 Files: `backend/app/engines/financing/`. API: `backend/app/api/financing.py`.

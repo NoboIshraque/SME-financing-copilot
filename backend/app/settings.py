@@ -69,6 +69,17 @@ class Settings(BaseSettings):
             return [part.strip() for part in value.split(",") if part.strip()]
         return value
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def _psycopg_driver(cls, value: object) -> object:
+        """Hosted databases (Render, Neon) hand out `postgres://` or `postgresql://` URLs;
+        SQLAlchemy needs the psycopg 3 driver named, the only one installed."""
+        if isinstance(value, str):
+            for prefix in ("postgres://", "postgresql://"):
+                if value.startswith(prefix):
+                    return "postgresql+psycopg://" + value.removeprefix(prefix)
+        return value
+
     @model_validator(mode="after")
     def _production_guards(self) -> Settings:
         if self.app_env in (AppEnv.demo, AppEnv.production):

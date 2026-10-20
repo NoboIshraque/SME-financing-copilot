@@ -119,3 +119,10 @@ def test_interactive_docs_are_served_only_where_developers_run_the_app(settings,
                  for path in ("/api/docs", "/api/redoc", "/api/openapi.json")}
     assert codes == dict.fromkeys(codes, 200 if served else 404)
 
+
+@pytest.mark.parametrize("given", ["postgres://u:p@db.example:5432/dg",
+                                   "postgresql://u:p@db.example:5432/dg",
+                                   "postgresql+psycopg://u:p@db.example:5432/dg"])
+def test_hosted_database_urls_use_the_installed_psycopg_driver(given):
+    settings = Settings(_env_file=None, database_url=given)
+    assert settings.database_url == "postgresql+psycopg://u:p@db.example:5432/dg"
