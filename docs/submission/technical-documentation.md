@@ -52,7 +52,8 @@ LLM traces are included or claimed.
 | Message drafts: EN/BN templates, drafts from the reminder plan, owner approval, send log | WP-12 | Built (reduced) | PR #34; sending channels cut: the owner copies the approved text |
 | End-to-end flows (12, desktop + phone, Playwright with axe) | WP-15 | Built | Run in CI on every PR against the local stack; hosted run waits for the server |
 | Evaluation harness (62 tasks, step logs, evidence bundle) | WP-16 | Built (reduced) | PR #33; mutation score and nightly audit drill cut |
-| Market watch and negotiation (N3, N19); nightly audit drill (P8) | WP-09, WP-16 | Cut | Market screen kept as a labelled preview on bundled sample data |
+| Market: TCB Dhaka prices, alerts, vendor ranking, negotiation (N3, N19) | WP-09 | Built (reduced) | Re-included 20 Oct. Prices are TCB's published daily lists (10 lists saved, not fetched on a schedule); vendor quotes are generated for the demo shops' own ledger suppliers (synthetic); no quote form for self-service shops |
+| Nightly audit drill (P8) | WP-16 | Cut | |
 
 Source: `docs/PLAN.md` §8 and the merged code. Statuses are re-checked at code freeze.
 
@@ -208,8 +209,8 @@ first, mock only for routes whose router has not landed).
 
 | Live backend in this snapshot | No backend in this snapshot |
 | --- | --- |
-| Sign-in, TOTP, team and lender access, approvals inbox, audit verify | Market (WP-09, cut: labelled sample preview) |
-| Upload: preview, column mapping, commit (WP-02) | Settings notification preferences (card hidden when the route is absent) |
+| Sign-in, TOTP, team and lender access, approvals inbox, audit verify | Settings notification preferences (card hidden when the route is absent) |
+| Upload: preview, column mapping, commit (WP-02) | |
 | Cash: forecast, gaps, alerts, what-if (WP-04) | |
 | Financing: match, lender check, application card (WP-06) | |
 | Analysis: statements, ratios, expected vs reality, compare decisions, stability after Compare (WP-07) | |
@@ -218,6 +219,7 @@ first, mock only for routes whose router has not landed).
 | Receivables: aging, risk, reminder ladder (WP-05, PR #31) | |
 | Messages: drafts, owner approval with step-up, copy and send log (WP-12, PR #34) | |
 | Reports: Trust Passport versions, sharing consent, public verify page (WP-13, PR #35) | |
+| Market: TCB Dhaka prices, alerts, vendor ranking, negotiation (WP-09, re-included 20 Oct) | |
 | Provenance drawer (`/api/explain`) | |
 
 Screens without a backend run only on the mock, which the banner labels. They show how the
@@ -853,8 +855,9 @@ traces with `python -m app.llm.live_check` (keys required); the evidence index l
   proof of generalisation. On the final audit's fresh held-out set (24 attacks and 24 innocent
   look-alikes in four languages, never seen while widening) the rules caught 15 of 24 attacks and
   wrongly quarantined 10 of 24 innocent questions (`docs/handover/fresh_injection_result.txt`).
-- **Cut** (roadmap only): market watch and negotiation (WP-09: N3, N19), the nightly audit drill
-  (P8), the lender report (WP-13), the GPU injection-classifier run and the market backtest
+- **Re-included 20 Oct (reduced):** market watch and negotiation (WP-09: N3, N19) on TCB's
+  published Dhaka price lists; vendor quotes are synthetic.
+- **Cut** (roadmap only): the nightly audit drill (P8), the lender report (WP-13), the GPU injection-classifier run and the market backtest
   (WP-17), the Vercel mirror (WP-18).
 
 ---
@@ -969,8 +972,12 @@ The evaluation harness (WP-16) runs offline with `npm run eval` and writes its s
 
 1. **Reduced or cut:** receivables lost credit limits, the dispute log and the early-pay
    calculator; messaging has no sending channel (the owner copies the approved text). **Cut:**
-   market watch, negotiation, the nightly audit drill and the lender report. The Market screen is
-   a labelled preview on bundled sample data and proves nothing about a backend.
+   the nightly audit drill and the lender report. **Market (reduced):** prices are TCB's daily
+   Dhaka retail lists as published (10 lists, 10 to 19 Oct, saved in the repo, not fetched on a
+   schedule), so they are a day old at best and never "live"; vendor quotes are generated for the
+   demo shops' own ledger suppliers (synthetic) and supplier reliability is read from bill
+   payment timing, because delivery dates are not recorded; a self-service shop cannot add
+   quotes yet.
 2. **All data is synthetic.** Backtest numbers in §3.3 and the examples in §3.8 and §3.9 come
    from shops our own generator produced. They test the harness, not real-world accuracy. No real
    shop data is in the repository.
