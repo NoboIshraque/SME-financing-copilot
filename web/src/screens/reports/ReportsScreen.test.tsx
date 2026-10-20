@@ -11,7 +11,7 @@ describe("Reports & Trust Passport", () => {
     expect(within(passport).getByText("e-TIN").nextSibling).toHaveTextContent("self-declared");
     expect(passport).toHaveTextContent("12 confirmed, 1 disputed");
     expect(passport).toHaveTextContent("How often DecisionGuard said \"I don't know\"6%");
-    expect(passport).toHaveTextContent("Audit drill catch rate90%");
+    expect(passport).not.toHaveTextContent("Audit drill");  // P8 (nightly audit drill) was cut
     expect(passport).toHaveTextContent("Anchored on Ethereum Sepolia (testnet)");
     expect(within(passport).getByRole("link", { name: "Open the public verify page" })).toHaveAttribute("href", "/verify/pp-grocery-2");
   });

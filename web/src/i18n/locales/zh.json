@@ -705,7 +705,6 @@
     "attestations": "交易方确认",
     "attestationCounts": "{{confirmed}} 条确认，{{disputed}} 条争议",
     "abstentionRate": "DecisionGuard 说\"我不知道\"的频率",
-    "drillRate": "审计演练捕获率",
     "openVerify": "打开公开验证页面",
     "issue": "生成新版本",
     "history_one": "{{count}} 个早期版本",

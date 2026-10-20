@@ -705,7 +705,6 @@
     "attestations": "Confirmed by trading partners",
     "attestationCounts": "{{confirmed}} confirmed, {{disputed}} disputed",
     "abstentionRate": "How often DecisionGuard said \"I don't know\"",
-    "drillRate": "Audit drill catch rate",
     "openVerify": "Open the public verify page",
     "issue": "Issue a new version",
     "history_one": "{{count}} earlier version",

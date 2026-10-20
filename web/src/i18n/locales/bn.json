@@ -705,7 +705,6 @@
     "attestations": "লেনদেন-সঙ্গীদের নিশ্চিতকরণ",
     "attestationCounts": "{{confirmed}}টি নিশ্চিত, {{disputed}}টি বিরোধপূর্ণ",
     "abstentionRate": "DecisionGuard কতবার \"জানি না\" বলেছে",
-    "drillRate": "অডিট মহড়ায় ধরা পড়ার হার",
     "openVerify": "প্রকাশ্য যাচাই পাতা খুলুন",
     "issue": "নতুন সংস্করণ তৈরি করুন",
     "history_one": "{{count}}টি আগের সংস্করণ",
