@@ -2,7 +2,7 @@
 
 **DecisionGuard: SME Finance Copilot**
 
-| | |
+| Item | Detail |
 | --- | --- |
 | **Document** | Security self-assessment report: permission-tier implementation and known-risk list (Deliverable 05) |
 | **Team** | DecisionGuard: Md. Amdadul Haque (lead), Nobo Ishraque, Labib Afnan, Adil Akhtab Abir |

@@ -2,7 +2,7 @@
 
 **Deliverable 01: system architecture, core algorithms and security design**
 
-| | |
+| Item | Detail |
 | --- | --- |
 | Document | Technical Documentation, version 1.0 |
 | Date | 20 October 2026 |
