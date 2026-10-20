@@ -321,7 +321,8 @@
     "days_other": "{{value}} days",
     "kg": "kg",
     "litre": "litre",
-    "metric_ton": "tonne"
+    "metric_ton": "tonne",
+    "hali": "hali (4)"
   },
   "receivables": {
     "remindersTitle": "Reminders to send",
@@ -659,7 +660,6 @@
     "propose": "Propose a netting round"
   },
   "market": {
-    "preview": "Preview with sample data: live market prices are not part of this version.",
     "alertsTitle": "Price alerts",
     "noAlerts": "No big price moves today.",
     "rose": "{{commodity}} is up",
@@ -699,14 +699,28 @@
     "unit_price": "Price",
     "delivery_per_unit": "Delivery",
     "delay_cost": "Waiting cost",
-    "reliability_penalty": "Reliability risk"
+    "reliability_penalty": "Reliability risk",
+    "sourceNote": "Prices: TCB's daily retail price list for Dhaka, published {{date}}. TCB publishes once a day, so these are not live prices.",
+    "sourceLink": "Open TCB's list",
+    "sampleNote": "Sample data: a preview of a planned feature, not live prices. The server has no market prices yet.",
+    "sampleLabel": "Sample data: a preview of a planned feature, not live prices",
+    "addQuote": "Add a supplier quote to compare vendors. Sample vendors are not shown as yours.",
+    "change_vs_previous": "Change vs the previous list"
   },
   "commodity": {
-    "onion": "Onion",
+    "onion": "Onion (local)",
     "lentil_masur": "Lentils (masur)",
     "rice_coarse": "Rice (coarse)",
-    "soybean_oil": "Soybean oil",
-    "sugar": "Sugar"
+    "soybean_oil": "Soybean oil (loose)",
+    "sugar": "Sugar",
+    "rice_fine": "Rice (fine)",
+    "atta_loose": "Atta (loose)",
+    "chickpea": "Chickpeas",
+    "potato": "Potato",
+    "egg_farm": "Eggs (farm)",
+    "garlic": "Garlic (local)",
+    "salt": "Salt (iodised)",
+    "ms_rod": "MS rod (60 grade)"
   },
   "negotiation": {
     "step": {

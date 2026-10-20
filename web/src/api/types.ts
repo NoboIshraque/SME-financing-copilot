@@ -220,6 +220,8 @@ export interface RoundVerification {
 
 // ---- Market (WP-09) ------------------------------------------------------------------------
 
+/** GET /api/market/prices (WP-09). The server adds `published_on` (the source list's date) and
+ *  the baseline it used; the bundled sample (no market route) has neither. */
 export interface WatchItem {
   commodity: string;
   unit: string;
@@ -227,6 +229,9 @@ export interface WatchItem {
   median_4w: Money;
   change_pct: string;
   history: PricePoint[];
+  published_on?: string;
+  baseline_basis?: "median_4w" | "previous";
+  baseline_points?: number;
 }
 
 export interface MarketAlert {
@@ -236,6 +241,8 @@ export interface MarketAlert {
   change: Figure;
   observed_on: string;
   source: PricePoint["source"];
+  source_url?: string | null;
+  published_on?: string;
 }
 
 export interface VendorRank {

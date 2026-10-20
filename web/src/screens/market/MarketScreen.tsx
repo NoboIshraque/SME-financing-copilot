@@ -1,12 +1,15 @@
 // Market (N3, N19): watched input prices with honest publication dates, price alerts, vendors
 // ranked by landed cost, and a step-by-step negotiation script with the numbers behind it.
+// Prices come from TCB's published daily lists (WP-09); a part the server does not serve yet falls
+// back to the bundled sample (`orSample`) and carries a "Sample data" label on its own card.
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { compareDecimal } from "../../api/decimal";
 import { api } from "../../api/endpoints";
-import type { NegotiationRequest } from "../../api/types";
+import type { NegotiationRequest, WatchItem } from "../../api/types";
+import { useSession } from "../../auth/session";
 import { FigureValue } from "../../components/FigureValue";
 import { EmptyState, ErrorState, QueryView } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
@@ -15,10 +18,26 @@ import { useFormat } from "../../i18n/useFormat";
 import { parseAmount } from "../financing/amount";
 
 const card = "rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800";
+/** Server answers carry the source list's date; the bundled sample has none. */
+function livePrices(list: WatchItem[] | undefined): boolean {
+  return Boolean(list && list.length > 0 && list.every((item) => item.published_on));
+}
+
+function SampleLabel() {
+  const { t } = useTranslation();
+  return (
+    <p role="note" className="mt-1 rounded-lg bg-amber-50 px-2 py-1 text-xs font-medium text-amber-900 dark:bg-amber-900/30 dark:text-amber-100">
+      {t("market.sampleLabel")}
+    </p>
+  );
+}
+
 const field = "w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-slate-600 dark:bg-slate-800";
 
 function VendorRanking({ commodities }: { commodities: string[] }) {
   const { t } = useTranslation();
+  // A self-service shop's own data is live: sample vendors are never shown to it as its own.
+  const ownShop = useSession().data?.data_mode === "live";
   const text = useServerText();
   const format = useFormat();
   const ids = { commodity: useId(), quantity: useId() };
@@ -28,6 +47,7 @@ function VendorRanking({ commodities }: { commodities: string[] }) {
   return (
     <section aria-labelledby="h-vendors" className={card}>
       <h3 id="h-vendors" className="text-lg font-semibold">{t("market.vendorsTitle")}</h3>
+      <SampleLabel />
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <div>
           <label htmlFor={ids.commodity} className="mb-1 block text-sm font-medium">{t("market.commodity")}</label>
@@ -46,7 +66,10 @@ function VendorRanking({ commodities }: { commodities: string[] }) {
         </div>
       </div>
       {rank.isError && <div className="mt-3"><ErrorState error={rank.error} /></div>}
-      {rank.data && (rank.data.length === 0 ? (
+      {rank.data && ownShop && (
+        <div className="mt-3"><EmptyState>{t("market.addQuote")}</EmptyState></div>
+      )}
+      {rank.data && !ownShop && (rank.data.length === 0 ? (
         <div className="mt-3"><EmptyState>{t("market.noQuotes")}</EmptyState></div>
       ) : (
         <ol className="mt-4 space-y-3">
@@ -97,6 +120,7 @@ function Negotiation({ commodities }: { commodities: string[] }) {
   return (
     <section aria-labelledby="h-negotiate" className={card}>
       <h3 id="h-negotiate" className="text-lg font-semibold">{t("market.negotiateTitle")}</h3>
+      <SampleLabel />
       <p className="text-sm text-slate-600 dark:text-slate-400">{t("market.negotiateHelp")}</p>
       <form onSubmit={submit} noValidate className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
@@ -166,13 +190,28 @@ export function MarketScreen() {
   const prices = useQuery({ queryKey: ["market", "prices"], queryFn: api.market.prices });
   const alerts = useQuery({ queryKey: ["market", "alerts"], queryFn: api.market.alerts });
   const commodities = prices.data?.map((item) => item.commodity) ?? [];
+  const live = livePrices(prices.data);
+  const published = live ? prices.data?.[0]?.published_on : undefined;
+  const sourceUrl = live ? prices.data?.[0]?.latest.source_url : undefined;
   return (
     <section aria-labelledby="h-market" className="space-y-6">
       <h2 id="h-market" className="text-xl font-semibold">{t("nav.market")}</h2>
-      <p role="note" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-100">{t("market.preview")}</p>
+      {prices.data && (live && published ? (
+        <p role="note" className="rounded-xl bg-teal-50 p-3 text-sm text-teal-900 dark:bg-teal-900/30 dark:text-teal-100">
+          {t("market.sourceNote", { date: format.date(published, "long") })}{" "}
+          {sourceUrl && (
+            <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+              {t("market.sourceLink")}
+            </a>
+          )}
+        </p>
+      ) : (
+        <p role="note" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-100">{t("market.sampleNote")}</p>
+      ))}
 
       <section aria-labelledby="h-price-alerts" className="space-y-2">
         <h3 id="h-price-alerts" className="text-lg font-semibold">{t("market.alertsTitle")}</h3>
+        {prices.data && !live && <SampleLabel />}
         <QueryView query={alerts} isEmpty={(list) => list.length === 0} empty={t("market.noAlerts")}>
           {(list) => (
             <ul className="space-y-2">
@@ -194,6 +233,7 @@ export function MarketScreen() {
 
       <section aria-labelledby="h-watchlist" className={card}>
         <h3 id="h-watchlist" className="text-lg font-semibold">{t("market.watchTitle")}</h3>
+        {prices.data && !live && <SampleLabel />}
         <QueryView query={prices} isEmpty={(list) => list.length === 0} empty={t("market.noWatch")}>
           {(list) => (
             <table className="mt-2 w-full text-sm">
