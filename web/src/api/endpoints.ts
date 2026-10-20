@@ -95,7 +95,8 @@ export const api = {
     forecast: () => apiGet<CashForecast>("/api/cash/forecast"),
     /** The gaps ahead; the indicators and sweep in the same answer are not shown yet. */
     gaps: () => apiGet<CashGaps>("/api/cash/gaps").then((answer) => answer.gaps),
-    whatIf: (body: WhatIfRequest) => apiPost<CashForecast>("/api/cash/whatif", body),
+    whatIf: (body: WhatIfRequest, options: { signal?: AbortSignal } = {}) =>
+      apiPost<CashForecast>("/api/cash/whatif", body, options),
   },
   receivables: {
     overview: () => apiGet<ReceivablesOverview>("/api/receivables"),

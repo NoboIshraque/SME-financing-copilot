@@ -160,6 +160,10 @@ class Analysis:
 
 # (database, tenant, ledger revision, seed) -> (the engine, kept so its id stays unique, analysis)
 _cache: OrderedDict[tuple[int, str, int, int], tuple[object, Analysis]] = OrderedDict()
+# (database, tenant, ledger revision, seed, buffer, shocks) -> (the engine, what-if forecast):
+# a slider dragged back to a value already asked about is answered without a new simulation.
+_whatif_cache: OrderedDict[tuple, tuple[object, CashForecast]] = OrderedDict()
+WHATIF_CACHE_SIZE = 64
 _lock = threading.Lock()
 
 
@@ -403,6 +407,13 @@ def post_whatif(body: WhatIfRequest, buffer: Decimal | None = BufferQuery,
         analysis = analyse(store, principal.tenant_id, seed)
     except Abstain as exc:
         return exc.response()
+    bind = store.session.get_bind()
+    key = (id(bind), principal.tenant_id, store.revision(principal.tenant_id), seed,
+           str(buffer), body.model_dump_json())
+    with _lock:
+        if key in _whatif_cache:
+            _whatif_cache.move_to_end(key)
+            return _whatif_cache[key][1]
     if body.one_off_cost.currency is not Currency.BDT:
         return _invalid("one_off_cost must be in BDT")
     if body.one_off_cost.amount < 0:
@@ -418,10 +429,16 @@ def post_whatif(body: WhatIfRequest, buffer: Decimal | None = BufferQuery,
                             collection_delay_days=body.collection_delay_days, flows=flows)
     except ValueError as exc:
         return _invalid(str(exc))
-    return _forecast(store, analysis, buffer, scenario, datetime.now(UTC))
+    result = _forecast(store, analysis, buffer, scenario, datetime.now(UTC))
+    with _lock:
+        _whatif_cache[key] = (bind, result)
+        while len(_whatif_cache) > WHATIF_CACHE_SIZE:
+            _whatif_cache.popitem(last=False)
+    return result
 
 
 def clear_cache() -> None:
     """Forget every cached analysis (tests; a new seed file)."""
     with _lock:
         _cache.clear()
+        _whatif_cache.clear()

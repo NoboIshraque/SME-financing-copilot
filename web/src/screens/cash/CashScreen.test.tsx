@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { formatCompactTaka } from "../../api/format";
@@ -47,6 +47,28 @@ describe("Cash screen", () => {
     await user.click(within(panel).getByRole("button", { name: "Reset" }));
     expect(within(panel).queryByText("Runway in this case")).not.toBeInTheDocument();
     expect(requestedPaths(fetchMock).filter((p) => p === "/api/cash/whatif")).toHaveLength(1);
+  });
+
+  it("sends one what-if request for a burst of slider moves, with the value it rests on", async () => {
+    const { fetchMock } = renderApp("/cash");
+    const panel = await screen.findByRole("region", { name: "What if…" });
+    const slider = within(panel).getByLabelText(/Sales change/);
+    for (const value of ["-5", "-10", "-15", "-20", "-25", "-30"]) fireEvent.change(slider, { target: { value } });
+
+    expect(within(panel).getByRole("status")).toHaveTextContent("Updating…");
+    expect(await within(panel).findByText("27 days")).toBeInTheDocument();
+    const calls = fetchMock.mock.calls.filter(([path]) => String(path) === "/api/cash/whatif");
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(String((calls[0]?.[1] as RequestInit).body))).toMatchObject({ sales_change_pct: "-30" });
+  });
+
+  it("asks at once when the slider is released", async () => {
+    const { fetchMock } = renderApp("/cash");
+    const panel = await screen.findByRole("region", { name: "What if…" });
+    const slider = within(panel).getByLabelText(/Sales change/);
+    fireEvent.change(slider, { target: { value: "-30" } });
+    fireEvent.pointerUp(slider);
+    await waitFor(() => expect(requestedPaths(fetchMock)).toContain("/api/cash/whatif"), { timeout: 200 });
   });
 
   it("offers the ranked fixes as approvable action cards", async () => {

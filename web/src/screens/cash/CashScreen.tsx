@@ -1,7 +1,7 @@
 // Cash: 13-week forecast with P10/P50/P90 bands, gap markers, what-if sliders, and the ranked
 // fixes as approvable action cards.
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useDeferredValue, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { ActionCard, ForecastBand, Provenance } from "../../api/contracts";
@@ -24,6 +24,9 @@ interface Shocks {
 }
 
 const NO_SHOCKS: Shocks = { sales: 0, costs: 0, delay: 0, oneOff: 0 };
+// Each what-if runs a 1,000-path simulation on the server (rate-limited, slow on the free host):
+// the slider moves instantly, but a request goes out only once it rests this long, or on release.
+const WHATIF_SETTLE_MS = 400;
 
 const SLIDERS: Array<{ key: keyof Shocks; min: number; max: number; step: number }> = [
   { key: "sales", min: -30, max: 30, step: 5 },
@@ -83,7 +86,13 @@ function WeeklyTable({ band }: { band: ForecastBand }) {
   );
 }
 
-function WhatIfPanel({ shocks, onChange, result }: { shocks: Shocks; onChange: (s: Shocks) => void; result?: CashForecast }) {
+function WhatIfPanel({ shocks, onChange, onRelease, result, updating }: {
+  shocks: Shocks;
+  onChange: (s: Shocks) => void;
+  onRelease: () => void;
+  result?: CashForecast;
+  updating: boolean;
+}) {
   const { t } = useTranslation();
   const format = useFormat();
   const active = JSON.stringify(shocks) !== JSON.stringify(NO_SHOCKS);
@@ -110,11 +119,16 @@ function WhatIfPanel({ shocks, onChange, result }: { shocks: Shocks; onChange: (
               value={shocks[key]}
               aria-valuetext={valueText(key, shocks[key])}
               onChange={(event) => onChange({ ...shocks, [key]: Number(event.target.value) })}
+              onPointerUp={onRelease}
+              onKeyUp={onRelease}
               className="mt-1 w-full accent-teal-700"
             />
           </label>
         ))}
       </div>
+      {active && updating && (
+        <p role="status" className="mt-3 text-sm text-slate-500 dark:text-slate-400">{t("cash.updating")}</p>
+      )}
       {active && (
         <div className="mt-4 flex flex-wrap items-end gap-x-8 gap-y-3" aria-live="polite">
           {runway && (
@@ -147,20 +161,35 @@ export function CashScreen() {
   const gaps = useQuery({ queryKey: ["cash", "gaps"], queryFn: api.cash.gaps });
   const alerts = useQuery({ queryKey: ["cash", "alerts"], queryFn: api.cash.alerts });
   const [shocks, setShocks] = useState<Shocks>(NO_SHOCKS);
-  const deferred = useDeferredValue(shocks);
-  const active = JSON.stringify(deferred) !== JSON.stringify(NO_SHOCKS);
+  // `sent` is what the server is asked about: the slider value once it has rested (or on release).
+  const [sent, setSent] = useState<Shocks>(NO_SHOCKS);
+  const latest = useRef(shocks);
+  latest.current = shocks;
+  useEffect(() => {
+    const timer = setTimeout(() => setSent(shocks), WHATIF_SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, [shocks]);
+  const release = () => setSent(latest.current);
+  const change = (next: Shocks) => {
+    setShocks(next);
+    if (JSON.stringify(next) === JSON.stringify(NO_SHOCKS)) setSent(NO_SHOCKS); // reset at once
+  };
+  const active = JSON.stringify(shocks) !== JSON.stringify(NO_SHOCKS);
+  const asked = JSON.stringify(sent) !== JSON.stringify(NO_SHOCKS);
   const whatIf = useQuery({
-    queryKey: ["cash", "whatif", deferred.sales, deferred.costs, deferred.delay, deferred.oneOff],
-    queryFn: () =>
+    queryKey: ["cash", "whatif", sent.sales, sent.costs, sent.delay, sent.oneOff],
+    // react-query aborts the signal when a newer slider value replaces this one.
+    queryFn: ({ signal }) =>
       api.cash.whatIf({
-        sales_change_pct: String(deferred.sales),
-        cost_change_pct: String(deferred.costs),
-        collection_delay_days: deferred.delay,
-        one_off_cost: { amount: `${deferred.oneOff}.00`, currency: "BDT" },
-      }),
-    enabled: active,
+        sales_change_pct: String(sent.sales),
+        cost_change_pct: String(sent.costs),
+        collection_delay_days: sent.delay,
+        one_off_cost: { amount: `${sent.oneOff}.00`, currency: "BDT" },
+      }, { signal }),
+    enabled: asked,
     placeholderData: keepPreviousData,
   });
+  const updating = whatIf.isFetching || JSON.stringify(sent) !== JSON.stringify(shocks);
 
   const fixes = new Map<string, ActionCard>();
   for (const alert of alerts.data ?? []) for (const fix of alert.fixes ?? []) fixes.set(fix.id, fix);
@@ -233,7 +262,8 @@ export function CashScreen() {
         )}
       </section>
 
-      <WhatIfPanel shocks={shocks} onChange={setShocks} result={active ? whatIf.data : undefined} />
+      <WhatIfPanel shocks={shocks} onChange={change} onRelease={release} updating={updating}
+        result={active && asked ? whatIf.data : undefined} />
 
       <section aria-labelledby="h-levers" className="space-y-3">
         <h3 id="h-levers" className="text-lg font-semibold">{t("cash.leversTitle")}</h3>

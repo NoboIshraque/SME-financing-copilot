@@ -308,7 +308,8 @@
     "noLevers": "No fixes needed right now.",
     "dso_before": "Days to get paid, earlier",
     "dso_now": "Days to get paid, now",
-    "lead_time_days": "Days until the gap"
+    "lead_time_days": "Days until the gap",
+    "updating": "Updating…"
   },
   "abstain": {
     "insufficient_data": "I don't have enough data to advise on this safely.",
