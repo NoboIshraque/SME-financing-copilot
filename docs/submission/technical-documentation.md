@@ -44,7 +44,7 @@ LLM traces are included or claimed.
 | Liquidity mesh: netting, consent, settlement, residual routing, attestations, anchoring, API | WP-08 | Built | PR #26 |
 | LLM gateway, agents, checker, critic, agreement, self-loops, abstention, copilot API | WP-10 | Built | PR #29, 9/9 milestones |
 | Security: auth, roles, tiers, approvals, audit chain, injection guard, hardening | WP-11 | Built | |
-| Trust Passport, sharing, verification, state adapter | WP-13 | Partial | Lender report cut |
+| Trust Passport, sharing, verification, state adapter | WP-13 | Partial | Lender report cut. Sharing records the owner's consent (step-up, expiry, revoke); the lender reads through a consented lender-access account, not a share link |
 | Web app (12 milestones) | WP-14 | Built | Screens whose backend is missing are listed in §2.3 |
 | ML notebooks | WP-17 | Partial | Injection classifier not deployed; GPU run and market backtest cut |
 | Docker, Caddy, deploy with rollback, backups | WP-18 | Partial | China check pending; Vercel mirror cut |
@@ -208,13 +208,16 @@ first, mock only for routes whose router has not landed).
 
 | Live backend in this snapshot | No backend in this snapshot |
 | --- | --- |
-| Sign-in, TOTP, team and lender access, approvals inbox, audit verify | Receivables (WP-05) |
-| Upload: preview, column mapping, commit (WP-02) | Messages (WP-12) |
-| Cash: forecast, gaps, alerts, what-if (WP-04) | Reports, passport sharing, verify page (WP-13 has engines, no API) |
-| Financing: match, lender check, application card (WP-06) | Market (WP-09, cut: hidden or labelled preview) |
-| Analysis: statements, ratios, expected vs reality, compare decisions, stability (WP-07) | Audit-drill card (P8, cut) |
-| Mesh: obligations, rounds, approve with step-up, verify (WP-08, PR #26) | |
-| Copilot panel and abstention log (WP-10, PR pending) | |
+| Sign-in, TOTP, team and lender access, approvals inbox, audit verify | Market (WP-09, cut: labelled sample preview) |
+| Upload: preview, column mapping, commit (WP-02) | Settings notification preferences (card hidden when the route is absent) |
+| Cash: forecast, gaps, alerts, what-if (WP-04) | |
+| Financing: match, lender check, application card (WP-06) | |
+| Analysis: statements, ratios, expected vs reality, compare decisions, stability after Compare (WP-07) | |
+| Mesh: obligations, propose, approve with step-up, verify (WP-08) | |
+| Copilot panel and abstention log (WP-10, PR #29) | |
+| Receivables: aging, risk, reminder ladder (WP-05, PR #31) | |
+| Messages: drafts, owner approval with step-up, copy and send log (WP-12, PR #34) | |
+| Reports: Trust Passport versions, sharing consent, public verify page (WP-13, PR #35) | |
 | Provenance drawer (`/api/explain`) | |
 
 Screens without a backend run only on the mock, which the banner labels. They show how the
@@ -630,8 +633,8 @@ changed after anchoring). The same mechanism seals netting rounds, Trust Passpor
 What runs today: the daily job `security.anchor_audit_heads` (23:55 Dhaka) anchors through
 `SepoliaAnchorer` when `CHAIN_MODE=sepolia` and an RPC URL and key are configured, otherwise
 through `OfflineAnchorer`, labelled `offline`. Settled netting rounds are anchored the same way by
-the mesh API (PR #26). Trust Passport versions are sealed by an engine function that no API calls
-yet. Tests use a fake web3 object and never touch a node
+the mesh API (PR #26), and Trust Passport versions when they are issued (`/api/reports/passport`,
+PR #35). Tests use a fake web3 object and never touch a node
 (`backend/tests/mesh/test_sepolia.py`). **No Sepolia transaction hash is recorded in this
 snapshot.**
 
