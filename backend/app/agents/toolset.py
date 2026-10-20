@@ -507,7 +507,7 @@ def price_figure(row: watch.Watch) -> Figure:
                                                     "observed_on": point.observed_on.isoformat(),
                                                     "published_on":
                                                         row.latest.published_on.isoformat(),
-                                                    "source": point.source.value}))
+                                                    "source": str(point.source)}))
 
 
 def market_prices(ctx: ToolContext, params: MarketParams) -> ToolResult:
