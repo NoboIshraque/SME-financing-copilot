@@ -122,3 +122,26 @@ def test_negotiation_abstains_when_no_financing_option_passes(grocery: TestClien
     response = grocery.post("/api/market/negotiate", json=NEGOTIATION)
     assert response.status_code == 422
     assert response.json()["detail"] == {"missing": "eligible_financing"}
+
+
+def test_vendors_rank_the_shops_own_suppliers_by_landed_cost(grocery: TestClient):
+    body = grocery.post("/api/market/vendors/rank",
+                        json={"commodity": "rice_coarse", "quantity": "500"}).json()
+    assert 2 <= len(body) <= 4
+    assert [v["rank"] for v in body] == list(range(1, len(body) + 1))
+    costs = [Decimal(v["landed_cost"]["value"]) for v in body]
+    assert costs == sorted(costs)
+    for vendor in body:
+        assert vendor["vendor_label"].startswith("Supplier ")
+        assert vendor["quote"]["data_mode"] == "synthetic" and vendor["source"] == "ledger_supplier"
+        assert sum(Decimal(f["value"]) for f in vendor["breakdown"]) == Decimal(
+            vendor["landed_cost"]["value"])
+    explained = grocery.get(f"/api/explain/{body[0]['landed_cost']['id']}").json()
+    assert explained["formula"]["formula_id"] == "market.landed_cost_per_unit"
+
+
+def test_a_shop_without_a_synthetic_ledger_has_no_quotes_to_rank(api: TestClient):
+    response = api.post("/api/market/vendors/rank", json={"commodity": "rice_coarse",
+                                                          "quantity": "500"})
+    assert response.status_code == 422
+    assert response.json()["detail"] == {"missing": "supplier_quote"}

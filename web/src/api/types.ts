@@ -251,6 +251,8 @@ export interface VendorRank {
   quote: VendorQuote;
   landed_cost: Figure;
   breakdown: Figure[];
+  /** Server only (WP-09): generated quotes from the shop's own ledger suppliers. */
+  source?: "ledger_supplier";
 }
 
 export interface NegotiationRequest {

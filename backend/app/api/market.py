@@ -2,6 +2,8 @@
 
     GET /api/market/prices   -> [WatchItem]   latest TCB price, baseline, change, 6-week history
     GET /api/market/alerts   -> [MarketAlert] moves past +/-5% of the baseline
+    POST /api/market/vendors/rank {commodity, quantity}
+                             -> [VendorRank]     suppliers by landed cost per unit
     POST /api/market/negotiate {commodity, quantity, offer_price, payment_days}
                              -> NegotiationPlan  walk-away, target, script (N19)
 
@@ -19,6 +21,12 @@ eligibility for, for a working-capital need the size of the deal over max(paymen
 With no eligible option, or no TCB price for the item, it abstains with 422 `not_enough_data`
 (`missing: eligible_financing` / `market_price`). The answer also carries `cost_of_money` (that
 APR as a Figure) and `market_price` (the TCB point used).
+
+Vendor ranking (demo shops only): the shop's main ledger suppliers, labelled "Supplier N" (stable
+per shop), with generated quotes (`data_mode: synthetic`, `source: "ledger_supplier"`) around
+today's TCB price, ranked by landed cost at the same cost of money; reliability is the share of
+each supplier's bills the shop settled on time. A shop whose ledger is not synthetic (a
+self-service shop) has no quotes on record: 422 `not_enough_data` (`missing: supplier_quote`).
 
 The caller is the signed-in principal with `ledger:read`. Prices are public, the same for every
 shop. Alert figures are recorded in the caller's tenant ledger (formula + figure, no raw fact,
@@ -53,11 +61,14 @@ from app.contracts import (
     Principal,
     Provenance,
     Unit,
+    VendorQuote,
 )
+from app.engines.analysis.ledger import NotEnoughData
+from app.engines.analysis.store import records
 from app.engines.financing.catalogue import load_catalogue
 from app.engines.financing.ranking import match as rank_options
 from app.engines.market import negotiate as negotiate_mod
-from app.engines.market import tcb, watch
+from app.engines.market import tcb, vendors, watch
 from app.facts import FactStore
 from app.facts.provenance import combined_data_mode
 from app.main import get_session
@@ -102,6 +113,21 @@ class NegotiationBody(BaseModel):
     payment_days: int = Field(ge=0, le=180)
 
 
+class VendorBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    commodity: str = Field(max_length=40)
+    quantity: str = Field(max_length=20)
+
+
+class VendorRank(BaseModel):
+    rank: int
+    vendor_label: str
+    quote: VendorQuote
+    landed_cost: Figure
+    breakdown: list[Figure]
+    source: Literal["ledger_supplier"] = "ledger_supplier"
+
+
 class NegotiationStep(BaseModel):
     text_key: str
     figures: list[Figure]
@@ -137,6 +163,14 @@ def _abstain(missing: str = "price_snapshot") -> JSONResponse:
 def _invalid(what: str) -> JSONResponse:
     body = ApiError(code=f"invalid_{what}", message_key=f"error.invalid_{what}")
     return JSONResponse(status_code=422, content=body.model_dump(mode="json"))
+
+
+def _quantity(raw: str) -> Decimal | None:
+    try:
+        value = Decimal(raw.strip())
+    except InvalidOperation:
+        return None
+    return value if value.is_finite() and value > 0 else None
 
 
 def _record(store: FactStore, tenant_id: str, figure: Figure,
@@ -218,11 +252,8 @@ def negotiate(body: NegotiationBody,
               principal: Principal = Depends(require(Permission.ledger_read)),
               clock: Clock = Depends(get_clock),
               session: Session = Depends(get_session)) -> NegotiationPlan | JSONResponse:
-    try:
-        quantity = Decimal(body.quantity.strip())
-    except InvalidOperation:
-        return _invalid("quantity")
-    if not quantity.is_finite() or quantity <= 0:
+    quantity = _quantity(body.quantity)
+    if quantity is None:
         return _invalid("quantity")
     if body.offer_price.amount <= 0:
         return _invalid("offer")
@@ -264,3 +295,46 @@ def negotiate(body: NegotiationBody,
                                figures=[record(fig) for fig in step.figures])
                for step in plan.steps],
         cost_of_money=record(apr_figure), market_price=row.latest.point)
+
+
+@router.post("/vendors/rank", response_model=list[VendorRank])
+def rank_vendors(body: VendorBody,
+                 principal: Principal = Depends(require(Permission.ledger_read)),
+                 clock: Clock = Depends(get_clock),
+                 session: Session = Depends(get_session)) -> list[VendorRank] | JSONResponse:
+    quantity = _quantity(body.quantity)
+    if quantity is None:
+        return _invalid("quantity")
+    rows = _rows(clock)
+    if rows is None:
+        return _abstain()
+    row = next((r for r in rows if r.commodity == body.commodity), None)
+    if row is None:
+        return _abstain("market_price")
+    store = FactStore(session)
+    try:
+        bills = records(store, principal.tenant_id).bills
+    except NotEnoughData:
+        bills = ()
+    if not bills or any(bill.data_mode is not DataMode.synthetic for bill in bills):
+        return _abstain("supplier_quote")  # quotes are generated only for the demo shops
+    as_of = clock().astimezone(DHAKA).date()
+    point = row.latest.point
+    deal = Money.of((point.price.amount * quantity).quantize(Decimal("0.01")))
+    found = cost_of_money(session, principal.tenant_id, deal, 30, as_of)
+    if found is None:
+        return _abstain("eligible_financing")
+    apr, product_id, money_mode = found
+    labels = {token: f"Supplier {i}" for i, token in
+              enumerate(sorted({b.counterparty_token for b in bills}), start=1)}
+    quotes = vendors.synthetic_quotes(principal.tenant_id, vendors.main_suppliers(bills),
+                                      point.commodity, point.unit, point.price, bills, as_of)
+    ranked = vendors.rank(quotes, labels, quantity, apr, f"financing:{product_id}",
+                          combined_data_mode([money_mode, DataMode.synthetic]))
+
+    def record(fig: Figure) -> Figure:
+        return _record(store, principal.tenant_id, fig, vendors.EXPRESSIONS)
+
+    return [VendorRank(rank=r.rank, vendor_label=r.label, quote=r.quote,
+                       landed_cost=record(r.landed_cost),
+                       breakdown=[record(f) for f in r.breakdown]) for r in ranked]
