@@ -15,6 +15,18 @@ show its formula and the source rows behind it.
 > (`data/public/financing/bd.yaml`) is real: each product row carries its source URL, a quoted
 > line from the source and the date it was checked.
 
+## Live demo
+
+**https://decisionguard-web.onrender.com** (free hosting in Singapore; after 15 idle minutes the
+server sleeps and the first page takes about a minute to load).
+
+- **Try the demo:** on the sign-in page, one tap signs you in to a synthetic shop as owner,
+  accountant, staff, lender viewer or compliance officer. The owner's 6-digit code is shown.
+- **Your own shop:** "create your own shop" on the same page makes a separate shop for you. In
+  Settings → Set up your shop, enter the opening cash balance, download the example ledger (or
+  use your own CSV/Excel) and upload it; every screen then runs on your numbers, with no
+  synthetic banner. Please enter test or anonymised figures: this is a public demo server.
+
 ## What it does
 
 | Area (Topic E) | What DecisionGuard does | Where |
@@ -27,9 +39,9 @@ show its formula and the source rows behind it.
 | Copilot | Answers questions with decision cards: checked claims, a case against, model agreement, abstention when unsure | `backend/app/agents/`, `backend/app/llm/` |
 | Web app | React PWA in English, বাংলা and 中文; provenance drawer on every number | `web/` |
 
-Status of this snapshot (20 Oct 2026): see `docs/PLAN.md` §8. Cut for the submission and kept as
-roadmap: market watch and negotiation (N3, N19), sending messages by email (drafts stay in the
-approval queue), the nightly audit drill. See `docs/FEATURES.md`.
+Status of this snapshot (20 Oct 2026): see `docs/PLAN.md` §8 and `docs/FEATURES.md` for what is
+built, reduced or on the roadmap (for example, messages are drafted and approved but not sent by
+email, and the nightly audit drill is not built).
 
 ## Quick start
 
@@ -105,6 +117,10 @@ rather than guess.
 
 ## Tests
 
+Test cases live in `backend/tests/<area>/` (pytest, one folder per engine or API), `web/src/**/*.test.tsx`
+(Vitest), `web/e2e/journeys/` (Playwright: the 12 main user journeys on desktop and phone) and
+`backend/eval/tasks.py` (the offline evaluation: functional and adversarial copilot tasks).
+
 - `npm run test` runs every backend (pytest) and web (Vitest) unit test. Tests never call a real
   model or the network; a guard in `backend/tests/conftest.py` fails any test that tries.
 - Counts and the latest full run: `docs/submission/evidence/test-counts.md` and
@@ -115,11 +131,16 @@ rather than guess.
 
 ## Deployment
 
-`docs/DEPLOY.md` sets up the stack from zero on a Linux server (Docker Compose behind Caddy with
+**Free, no server of your own (how the live demo runs):** `render.yaml` is a Render Blueprint.
+Render → New → Blueprint → this repository → Apply creates a free PostgreSQL database, the API
+(Docker; it loads the synthetic demo shops on start) and the web app. Step by step:
+`docs/handover/FREE_SERVER.md`.
+
+**Own Linux server:** `docs/DEPLOY.md` sets up the stack from zero on a Linux server (Docker Compose behind Caddy with
 automatic HTTPS). After CI passes on `main`, `.github/workflows/deploy.yml` ships the exact commit
-to the server, rebuilds, runs an HTTPS health check, and rolls back if it fails. The hosted demo
-runs in Singapore, and the web app loads no third-party hosts, so it stays reachable from mainland
-China.
+to the server, rebuilds, runs an HTTPS health check, and rolls back if it fails. The web app loads
+no third-party hosts (no Google Fonts or CDNs), so only the route to the server decides whether it
+opens from mainland China.
 
 ## Security
 
@@ -130,9 +151,9 @@ in `docs/submission/security-self-assessment.md`.
 
 | Deliverable | File |
 | --- | --- |
-| 01 Technical documentation | `docs/submission/technical-documentation.md` |
-| 02 Presentation deck | linked in the submission email |
-| 03 Demo video | script in `docs/submission/video-script.md` |
+| 01 Technical documentation | `docs/submission/technical-documentation.md` (PDF in `docs/submission/pdf/`) |
+| 02 Presentation deck | `docs/submission/pdf/deck.pdf` (source: `docs/submission/deck/`) |
+| 03 Demo video | linked in the submission email; script in `docs/submission/video-script.md` |
 | 04 Source code, README, deployment, tests | this repository, `docs/DEPLOY.md`, `npm run test` |
-| 05 Security self-assessment | `docs/submission/security-self-assessment.md` |
-| 06 Execution evidence | `docs/submission/evidence/` |
+| 05 Security self-assessment | `docs/submission/security-self-assessment.md` (PDF in `docs/submission/pdf/`) |
+| 06 Execution evidence | `docs/submission/evidence/` (sandbox operation log, evaluation logs, test counts) and the demo video |
