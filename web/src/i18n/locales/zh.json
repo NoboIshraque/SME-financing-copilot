@@ -306,7 +306,8 @@
     "noLevers": "目前不需要采取措施。",
     "dso_before": "此前收回货款的天数",
     "dso_now": "目前收回货款的天数",
-    "lead_time_days": "距离缺口的天数"
+    "lead_time_days": "距离缺口的天数",
+    "updating": "正在更新…"
   },
   "abstain": {
     "insufficient_data": "我没有足够的数据来稳妥地给出建议。",
