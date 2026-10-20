@@ -18,10 +18,9 @@ services:
     region: singapore
     dockerfilePath: ./infra/Dockerfile.api
     dockerContext: .
-    # Load the synthetic demo shops (idempotent), then serve on Render's port.
-    dockerCommand: >-
-      sh -c "python -m app.facts.seed && exec uvicorn --factory app.main:create_app
-      --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips '*'"
+    # Load the synthetic demo shops (idempotent), then serve on Render's port. Render runs this
+    # through a shell itself, so it stays a plain path with no quotes.
+    dockerCommand: sh bin/start-hosted.sh
     healthCheckPath: /api/health
     autoDeploy: false
     envVars:
