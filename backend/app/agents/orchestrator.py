@@ -287,7 +287,8 @@ class Orchestrator:
         primary = set(subagents[0][1]) if subagents else set()
         primary_errors = {n: e for n, e in errors.items() if n in primary}
         skipped = {n: str(e) for n, e in errors.items() if n not in primary}
-        composed = claims_mod.compose(results, plan.answer_order(), plan.language)
+        limits, answering = plan.focus()
+        composed = claims_mod.compose(results, plan.answer_order(), plan.language, limits)
         if primary_errors or not composed:
             abstention = abstention_for(primary_errors or errors) if (primary_errors or errors) \
                 else abstain.unverifiable(detail="nothing_to_report")
@@ -295,7 +296,9 @@ class Orchestrator:
                                 abstention=abstention, actor=actor, budget=budget, trace=trace)
         checker = Checker(ctx, results)
         statements, checks = self.verify(checker, composed, ctx, rec_id, trace)
-        cards, dropped = self.verified_cards(checker, self.cards(results, role, limit=None))
+        cards, dropped = self.verified_cards(
+            checker, self.cards({n: r for n, r in results.items() if n in answering}, role,
+                                limit=None))
         if not statements:
             abstention = abstain.unverifiable(
                 detail="; ".join(sorted({c.reason or "" for c in checks})))

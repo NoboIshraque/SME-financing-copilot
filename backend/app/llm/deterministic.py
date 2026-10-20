@@ -34,6 +34,7 @@ INTENT_TOOLS: dict[str, tuple[str, ...]] = {
     "cash_outlook": ("cash.forecast", "cash.gaps"),
     "upcoming_payments": ("payables.upcoming",),
     "collect_receivables": ("receivables.plan",),
+    "current_loans": ("loans.current",),
     "find_financing": ("cash.gaps", "financing.match"),
     "business_health": ("analysis.ratios",),
     "what_if": ("analysis.scenarios",),
@@ -58,7 +59,9 @@ MAX_INTENTS = 3
 KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
     "what_if": {
         "latin": ("what if", "what happens if", "happens if", "what would happen", "suppose",
-                  "scenario", "scenarios", "stress", "jodi", "dhoren"),
+                  "scenario", "scenarios", "stress", "jodi", "dhoren", "if sales",
+                  "if my sales", "if costs", "if my costs", "sales drop", "sales fall",
+                  "sales go down", "costs rise", "costs go up"),
         "script": ("যদি", "ধরুন", "如果", "假如", "情景"),
     },
     "upcoming_payments": {
@@ -89,6 +92,15 @@ KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
                   "invoices", "chase", "collect", "collection", "credit sales", "baki",
                   "paona", "aday"),
         "script": ("বাকি", "পাওনা", "আদায়", "应收", "欠款", "欠我", "催收", "催款", "收款"),
+    },
+    # The loan the shop is already repaying ("what's my loan looking like?"), not a new one.
+    "current_loans": {
+        "latin": ("my loan", "my loans", "existing loan", "existing loans", "current loan",
+                  "current loans", "loan looking", "loan status", "loan balance", "emi", "emis",
+                  "instalment", "instalments", "installment", "installments", "kisti",
+                  "owe the bank", "amar lon", "amar rin"),
+        "script": ("কিস্তি", "আমার ঋণ", "আমার লোন", "ঋণের অবস্থা", "我的贷款", "分期", "月供",
+                   "还款"),
     },
     "find_financing": {
         "latin": ("loan", "loans", "financing", "finance", "borrow", "lender", "credit line",
