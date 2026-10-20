@@ -184,7 +184,7 @@
   "actionCard": {
     "open": "打开",
     "markDone": "标记为已完成",
-    "approveDraft": "批准草稿",
+    "approveDraft": "输入验证码批准草稿",
     "approveWithCode": "输入验证码批准",
     "approved": "已批准，并已记入审计日志。",
     "ownerOnly": "只有店主可以批准此操作。",

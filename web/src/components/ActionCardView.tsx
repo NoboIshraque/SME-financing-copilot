@@ -115,9 +115,11 @@ export function ActionCardView({ card, primary = false, approvalId }: ActionCard
           : button(t("actionCard.askOwner"), () => request.mutate(), request.isPending)
         : button(t("actionCard.approveWithCode"), () => setStepUpOpen(true), execute.isPending);
   } else if (card.tier === "DRAFT") {
-    control = draftId
-      ? button(t("actionCard.approveDraft"), () => approveDraft.mutate(), approveDraft.isPending)
-      : button(t("actionCard.reviewDraft"), () => navigate(screenPath("messages")));
+    control = !draftId
+      ? button(t("actionCard.reviewDraft"), () => navigate(screenPath("messages")))
+      : session.principal.role === "owner"
+        ? button(t("actionCard.approveDraft"), () => setStepUpOpen(true), approveDraft.isPending)
+        : <p className="text-sm text-slate-600 dark:text-slate-400">{t("actionCard.ownerOnly")}</p>;
   } else {
     control = button(t("actionCard.markDone"), () => setMarkedDone(true));
   }
@@ -178,7 +180,7 @@ export function ActionCardView({ card, primary = false, approvalId }: ActionCard
             {details.length > 0 && <p>{details.join(" · ")}</p>}
           </>
         }
-        onConfirm={(code) => execute.mutateAsync(code)}
+        onConfirm={(code) => (card.tier === "EXECUTE" ? execute.mutateAsync(code) : approveDraft.mutateAsync(code))}
         onClose={() => setStepUpOpen(false)}
       />
     </article>

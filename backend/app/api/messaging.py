@@ -1,7 +1,7 @@
 """Messages API (WP-12 milestones 1, 2, 3, 5 after the 19 Oct cut; FEATURES N2).
 
     GET  /api/messages/drafts?language=en|bn   -> [MessageDraft]   (newest first)
-    POST /api/messages/{id}/approve            -> MessageDraft     (owner)
+    POST /api/messages/{id}/approve            -> MessageDraft     (owner + X-Step-Up-Code)
     POST /api/messages/{id}/send               -> MessageDraft     (owner, once approved)
 
 Drafts come from the WP-05 reminder plan: one per customer with open invoices, filled from typed
@@ -37,7 +37,7 @@ from app.messaging.models import DraftRow
 from app.messaging.templates import amount_text, render
 from app.security.audit import AuditLog
 from app.security.clock import Clock
-from app.security.deps import get_clock, require
+from app.security.deps import StepUp, get_clock, require, step_up
 from app.security.errors import ProblemRoute
 from app.security.models import TenantRow
 from app.security.roles import Permission
@@ -129,8 +129,13 @@ def _decide(draft_id: str, principal: Principal, session: Session, now: datetime
 @router.post("/{draft_id}/approve", response_model=MessageDraft)
 def approve(draft_id: str,
             principal: Principal = Depends(require(Permission.approvals_decide)),
+            step: StepUp = Depends(step_up),
             clock: Clock = Depends(get_clock),
             session: Session = Depends(get_session)) -> MessageDraft | JSONResponse:
+    if _own(session, principal, draft_id) is None:
+        return _error(404, "draft_not_found", "error.draft_not_found", draft_id=draft_id[:160])
+    if step.problem is not None:
+        return step.problem.response()
     return _decide(draft_id, principal, session, clock(), want=DraftStatus.approved,
                    needs=DraftStatus.draft, action="message.approved")
 

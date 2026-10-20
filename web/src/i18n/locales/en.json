@@ -184,7 +184,7 @@
   "actionCard": {
     "open": "Open",
     "markDone": "Mark as done",
-    "approveDraft": "Approve draft",
+    "approveDraft": "Approve draft with code",
     "approveWithCode": "Approve with code",
     "approved": "Approved. It is recorded in the audit log.",
     "ownerOnly": "Only the owner can approve this.",

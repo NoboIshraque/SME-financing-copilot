@@ -15,7 +15,9 @@ export const inboxRoutes: MockRoute[] = [
     handler: (req, db) => {
       const draft = db.drafts.find((candidate) => candidate.id === req.params.id);
       if (!draft) return apiError(404, "not_found", "error.not_found");
-      if (!["owner", "accountant"].includes(callerRole(db))) return apiError(403, "forbidden", "error.forbidden");
+      if (callerRole(db) !== "owner") return apiError(403, "forbidden", "error.forbidden");
+      if (!req.headers.get("X-Step-Up-Code")) return apiError(401, "step_up_required", "error.step_up_required");
+      if (req.headers.get("X-Step-Up-Code") !== DEMO_TOTP_CODE) return apiError(401, "invalid_step_up", "error.invalid_step_up");
       if (draft.status === "draft") draft.status = "approved";
       return ok(draft);
     },
