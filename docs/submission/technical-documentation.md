@@ -115,7 +115,7 @@ Each component carries one of four status labels:
 | Evaluation harness (62 tasks, step logs, evidence bundle) | Implemented (reduced scope) | Mutation score and the nightly audit drill are planned |
 | Machine-learning notebooks | Implemented (reduced scope) | Injection classifier not deployed; GPU training run and market backtest planned |
 | Deployment: Docker, Caddy, deploy with rollback, backups, Render Blueprint | Implemented (reduced scope) | Measurement from mainland China is pending; a second front-end mirror is planned |
-| Market intelligence: price watch, vendor ranking, negotiation support | In progress | Any market price is taken from a dated public source (§4.8) |
+| Market intelligence: price watch by location, vendor ranking, negotiation support | Implemented (reduced scope) | Prices from dated public sources in Bangladesh and China (§4.8); vendor quotes are synthetic |
 | Nightly audit drill | Planned (roadmap) | |
 
 Sources: `docs/PLAN.md` §8, `docs/FEATURES.md` and the submitted code.
@@ -284,9 +284,10 @@ backend first, mock only for routes whose router is absent).
 | Messages: drafts, owner approval with step-up, copy and send log | |
 | Reports: Trust Passport versions, sharing consent, public verification page | |
 | Provenance drawer (`/api/explain`) | |
+| Market: prices and alerts by location (Bangladesh, China), vendor ranking by distance, negotiation | |
 
-The market screens (price watch, vendor ranking, negotiation) are in progress (§4.8). Screens
-without a backend run only on the mock, which the banner labels; they show how the finished
+The market screens (price watch by location, vendor ranking, negotiation) are served by the
+market API (§4.8). Screens without a backend run only on the mock, which the banner labels; they show how the finished
 product is intended to work and are not evidence of backend functionality. The demonstration
 video uses live screens only (`docs/submission/video-script.md`).
 
@@ -928,12 +929,22 @@ CSV/XLSX columns, refuses any file with residual personal data, and writes a cou
   values only (an unfilled variable is refused), one draft per reminder, owner approval and a send
   log (`backend/app/messaging/`, `/api/messages/*`). There is no sending channel yet: the owner
   copies the approved text into their own chat application. Sending channels are planned.
-- **Market intelligence** (in progress). Price watch, vendor ranking and negotiation support
-  (`docs/FEATURES.md` N3, N19; `backend/app/engines/market/`) are under implementation. Any market
-  price the system shows is taken from a dated public source: the Trading Corporation of
-  Bangladesh's published daily retail price lists for Dhaka (`data/public/prices/tcb/`), shown as
-  "published on <date> by TCB" and never as live prices. Any vendor quotes in the demonstration
-  shops are synthetic.
+- **Market intelligence** (implemented, reduced scope; `docs/FEATURES.md` N3, N19;
+  `backend/app/engines/market/`, `/api/market/*`). The owner picks a location, and every price
+  comes from a dated public source saved in `data/public/prices/`: Dhaka city (Trading Corporation
+  of Bangladesh daily retail lists), 104 markets in all eight divisions (World Food Programme
+  market monitoring, monthly, CC BY-IGO), China's national averages (National Bureau of
+  Statistics, every 10 days) and Beijing Xinfadi wholesale market (daily). Prices are shown as
+  "published on <date>" with a link to the source, never as live prices. Alerts fire when the
+  latest price moves more than 5% from the median of the previous 4 weeks (or from the previous
+  list for monthly and 10-day sources). Vendor ranking uses landed cost per unit: price, delivery
+  per unit, a waiting cost at the shop's best eligible APR, and a reliability penalty from how
+  punctually the shop's bills with that supplier were settled; delivery cost and lead time grow
+  with the road distance from the owner's location, and the owner can keep only nearby vendors.
+  The negotiation plan prices a sale on credit against the market price at the same APR (walk-away
+  point, target and a 3-4 step script, property-tested never to fall below walk-away). Vendor
+  quotes and supplier locations in the demonstration shops are synthetic; prices in yuan have no
+  vendor ranking or negotiation, because the loans on file are Bangladeshi.
 
 ---
 
@@ -1238,10 +1249,12 @@ fonts and assets are bundled. Swagger UI, which loads from a CDN, is disabled ou
    with no model: the deterministic planner planned and narrated, and no agreement was claimed.
    With keys configured, free-tier providers impose rate limits and may train on the (anonymised)
    inputs. Questions outside the planner's intents abstain as out of scope.
-9. **Market data is published, not live.** Market prices are taken from TCB's daily Dhaka retail
-   lists as published (10 lists, 10 to 19 October 2026, stored in the repository and not fetched
-   on a schedule), so they are at best one day old; vendor quotes in the demonstration are
-   synthetic. The market module is in progress (§4.8).
+9. **Market data is published, not live.** Market prices are public lists as published and
+   stored in the repository, not fetched on a schedule: TCB (Dhaka, to 19 October 2026), WFP
+   (Bangladesh markets, monthly, latest 15 August 2026), NBS (China, to late September 2026) and
+   Xinfadi (Beijing, to 20 October 2026). Vendor quotes and supplier locations in the
+   demonstration are synthetic, distances are straight-line distance times 1.3, and cities in
+   China other than Beijing are not covered.
 10. **Hosting.** The hosted demonstration runs on a free tier: after 15 idle minutes the server
     sleeps and the first page takes about a minute to load. Reachability from mainland China is
     unmeasured. The stack is also verified by the CI boot test and runs locally (`npm run dev`) or
