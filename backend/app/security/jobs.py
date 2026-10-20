@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app.chain.anchor import Anchorer, OfflineAnchorer, SepoliaAnchorer
+from app.chain.anchor import Anchorer, FallbackAnchorer, OfflineAnchorer, SepoliaAnchorer
 from app.db import make_engine, session_factory
 from app.security.audit import AuditLog
 from app.security.clock import system_clock
@@ -14,10 +14,17 @@ from app.worker import Job
 
 
 def anchorer_for(settings: Settings) -> Anchorer:
-    if settings.chain_mode is ChainMode.sepolia:
-        return SepoliaAnchorer.from_settings(settings.sepolia_rpc_url.get_secret_value(),
-                                             settings.sepolia_private_key.get_secret_value())
-    return OfflineAnchorer()
+    """Sepolia when configured, falling back to an offline anchor (labelled offline) whenever
+    the testnet is unreachable or the wallet cannot pay, so the audit anchor never fails."""
+    offline = OfflineAnchorer()
+    rpc = settings.sepolia_rpc_url.get_secret_value()
+    key = settings.sepolia_private_key.get_secret_value()
+    if settings.chain_mode is ChainMode.sepolia and rpc and key:
+        try:
+            return FallbackAnchorer(SepoliaAnchorer.from_settings(rpc, key), offline)
+        except Exception:  # a malformed key: stay offline rather than fail
+            return offline
+    return offline
 
 
 def anchor_audit_heads(settings: Settings | None = None, now: datetime | None = None) -> str:

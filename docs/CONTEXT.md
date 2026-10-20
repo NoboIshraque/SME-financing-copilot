@@ -24,7 +24,7 @@ the Claude Doc "SME Finance Copilot — Research Brief"
   Taipei; teams of 2–5; ≥ 60% non-Chinese nationals; one team per person. **Language: English.**
 - **Timeline after:** online review 20–31 Oct; finalists announced 31 Oct; Shenzhen final 21–23 Nov.
   Prizes: RMB 100k / 80k / 50k, Best Innovation RMB 20k. Finalists' travel covered.
-- **Our team:** Nobo Ishraque, Amdad, Labib (BUP, Bangladesh).
+- **Our team:** Md. Amdadul Haque (lead), Nobo Ishraque, Labib Afnan, Adil Akhtab Abir (BUP, Bangladesh).
 
 ## 2. The problem — numbers worth quoting (sources in the research brief)
 

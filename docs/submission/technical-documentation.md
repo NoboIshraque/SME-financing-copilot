@@ -6,7 +6,7 @@
 | --- | --- |
 | Competition | 2026 Shenzhen International FinTech Competition (FinTechathon), International Track |
 | Topic | **E: SME Finance Copilot** (financing-option matching, cash-flow management with alerts, business financial analysis) |
-| Team | DecisionGuard: Nobo Ishraque (lead), Amdad, Labib |
+| Team | DecisionGuard: Md. Amdadul Haque (lead), Nobo Ishraque, Labib Afnan, Adil Akhtab Abir |
 | University | Bangladesh University of Professionals (BUP), Dhaka, Bangladesh |
 | Date | 20 Oct 2026 (final submission) |
 | Code | `main` at the code-freeze commit named in `docs/submission/evidence/README.md` |

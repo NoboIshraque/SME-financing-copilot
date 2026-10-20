@@ -1,7 +1,7 @@
 # DecisionGuard — SME Finance Copilot
 
 **2026 Shenzhen International FinTech Competition (FinTechathon), International Track, Topic E: SME Finance Copilot.**
-Team DecisionGuard, Bangladesh University of Professionals: Nobo Ishraque (lead), Amdad, Labib.
+Team DecisionGuard, Bangladesh University of Professionals: Md. Amdadul Haque (lead), Nobo Ishraque, Labib Afnan, Adil Akhtab Abir.
 
 DecisionGuard is a mobile-first copilot for a small Bangladeshi business: a grocery in Mirpur, a
 pharmacy in Dhanmondi, a fabric wholesaler in Islampur. It reads the shop's own records (bKash,
