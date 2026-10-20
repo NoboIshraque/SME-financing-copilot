@@ -163,6 +163,8 @@ export interface VarianceReport {
   period: Period;
   variances: Variance[];
   accuracy: Figure;
+  /** Metric -> the expected and actual values as figures, each with its provenance. */
+  lines?: Record<string, { expected: Figure; actual: Figure; favourable: boolean }>;
 }
 
 /** POST /api/analysis/scenarios {decisions}: each decision simulated; the best risk-adjusted
@@ -170,6 +172,10 @@ export interface VarianceReport {
 export interface ScenarioComparison {
   scenarios: Scenario[];
   recommended_id: string;
+  /** Give it to POST /api/analysis/stability to re-run this comparison under stress and noise. */
+  recommendation_id: string;
+  /** Scenario id -> its figures (expected, worst 5%, chance below the buffer, ...), with provenance. */
+  figures?: Record<string, Figure[]>;
 }
 
 // ---- Mesh (WP-08) --------------------------------------------------------------------------

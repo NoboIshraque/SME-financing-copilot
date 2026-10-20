@@ -22,6 +22,7 @@ from __future__ import annotations
 import logging
 import re
 import threading
+import unicodedata
 from collections import OrderedDict
 from collections.abc import Iterable, Mapping, Sequence
 from datetime import datetime
@@ -56,6 +57,33 @@ _COMMENT = re.compile(r"\(([^()]*)\)")
 _IDENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
 _BANGLA_DIGITS = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
+
+# Numbers written as words. A model can state a figure without a single digit ("fifty thousand",
+# "পঞ্চাশ হাজার", "五万"), so the narration check reads those too. A lone "one" is not counted
+# ("this one", "一些"), and Bangla "নয়" (nine, but also "is not") is left out.
+_EN_SMALL = {word: value for value, word in enumerate((
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
+    "nineteen"))}
+_EN_SMALL.update({word: 10 * value for value, word in enumerate((
+    "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"), start=2)})
+_EN_SCALES = {"thousand": 10**3, "lakh": 10**5, "lakhs": 10**5, "lac": 10**5, "lacs": 10**5,
+              "crore": 10**7, "crores": 10**7, "million": 10**6, "billion": 10**9}
+_BN_SMALL = {unicodedata.normalize("NFC", word): value for word, value in {
+    "শূন্য": 0, "এক": 1, "দুই": 2, "দু": 2, "তিন": 3, "চার": 4, "পাঁচ": 5, "ছয়": 6,
+    "সাত": 7, "আট": 8, "দশ": 10, "বিশ": 20, "কুড়ি": 20, "ত্রিশ": 30,
+    "চল্লিশ": 40, "পঞ্চাশ": 50, "ষাট": 60, "সত্তর": 70, "আশি": 80, "নব্বই": 90}.items()}
+_BN_SCALES = {unicodedata.normalize("NFC", word): value for word, value in {
+    "হাজার": 10**3, "লাখ": 10**5, "লক্ষ": 10**5, "কোটি": 10**7}.items()}
+_BN_HUNDRED = {"শ", "শত", "শো"}
+_BN_SUFFIXES = tuple(unicodedata.normalize("NFC", s) for s in (
+    "য়ের", "য়ের", "টি", "টা", "জন", "ের", "এর", "তে", "র", "ে"))
+_WORD = re.compile(r"[A-Za-z]+|[\u0980-\u09FF]+")
+_ZH_DIGITS = dict(zip("零〇一二两三四五六七八九", (0, 0, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9),
+                      strict=True))
+_ZH_UNITS = {"十": 10, "百": 100, "千": 1000}
+_ZH_SECTIONS = {"万": 10**4, "亿": 10**8}
+_ZH_RUN = re.compile("[" + "".join([*_ZH_DIGITS, *_ZH_UNITS, *_ZH_SECTIONS]) + "]+")
 DAYS_SYMBOL = "days_in_period"
 CACHE_SIZE = 32
 
@@ -339,12 +367,86 @@ class Checker:
 # ---------------------------------------------------------------------- narration
 
 
+def _word_part(word: str) -> tuple[str, int] | None:
+    """A number word as ("n", value), ("h", 100) or ("s", scale); None otherwise."""
+    lower = word.lower()
+    if lower in _EN_SMALL:
+        return "n", _EN_SMALL[lower]
+    if lower == "hundred":
+        return "h", 100
+    if lower in _EN_SCALES:
+        return "s", _EN_SCALES[lower]
+    for stem in (word, *(word[:-len(x)] for x in _BN_SUFFIXES if word.endswith(x))):
+        if stem in _BN_SMALL:
+            return "n", _BN_SMALL[stem]
+        if stem in _BN_HUNDRED:
+            return "h", 100
+        if stem in _BN_SCALES:
+            return "s", _BN_SCALES[stem]
+    return None
+
+
+def _phrase_value(parts: list[tuple[str, int]]) -> int:
+    total = current = 0
+    for kind, value in parts:
+        if kind == "n":
+            current += value
+        elif kind == "h":
+            current = (current or 1) * value
+        else:
+            total += (current or 1) * value
+            current = 0
+    return total + current
+
+
+def _zh_value(run: str) -> int:
+    total = section = digit = 0
+    for char in run:
+        if char in _ZH_DIGITS:
+            digit = _ZH_DIGITS[char]
+        elif char in _ZH_UNITS:
+            section += (digit or 1) * _ZH_UNITS[char]
+            digit = 0
+        else:
+            total += ((section + digit) or 1) * _ZH_SECTIONS[char]
+            section = digit = 0
+    return total + section + digit
+
+
+def spelled_numbers(text: str) -> set[Decimal]:
+    """Values of the numbers written as words in English, Bangla or Chinese."""
+    text = unicodedata.normalize("NFC", text)
+    values: set[Decimal] = set()
+    phrase: list[tuple[str, int]] = []
+    words: list[str] = []
+
+    def close() -> None:
+        if phrase and words not in (["one"], ["এক"]):
+            values.add(Decimal(_phrase_value(phrase)))
+        phrase.clear()
+        words.clear()
+
+    for match in _WORD.finditer(text):
+        word = match.group()
+        part = _word_part(word)
+        if part is not None:
+            phrase.append(part)
+            words.append(word.lower())
+        elif not (phrase and word.lower() == "and"):
+            close()
+    close()
+    values |= {Decimal(_zh_value(run)) for run in _ZH_RUN.findall(text) if run != "一"}
+    return values
+
+
 def numbers_in(text: str, names: Iterable[str] = ()) -> set[Decimal]:
-    """Every number in a text (Bangla digits too), with entity names taken out first."""
+    """Every number in a text (Bangla digits and numbers written as words too), with entity
+    names taken out first."""
     for name in sorted(set(names), key=len, reverse=True):
         text = text.replace(name, " ")
     found = _NUMBER.findall(text.translate(_BANGLA_DIGITS))
-    return {Decimal(n.replace(",", "").rstrip(".")).normalize() for n in found}
+    digits = {Decimal(n.replace(",", "").rstrip(".")).normalize() for n in found}
+    return digits | {value.normalize() for value in spelled_numbers(text)}
 
 
 def unverified_numbers(answer: str, verified: Sequence[Statement]) -> set[Decimal]:

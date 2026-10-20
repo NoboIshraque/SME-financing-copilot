@@ -1,10 +1,13 @@
 // Flow 6: a receivables reminder (WP-05 plan, WP-12 draft) approved in one tap on Receivables,
 // then found approved in Messages and sent from there.
 import { sessionFile } from "../support/auth";
-import { expect, test } from "../support/fixtures";
+import { expect, test, type StepUpCall } from "../support/fixtures";
 import { needsRoutes } from "../support/target";
 
 test.use({ storageState: sessionFile("owner") });
+
+// A message leaves DecisionGuard, so approving its draft is EXECUTE: the owner confirms with a code.
+const MESSAGE_APPROVE: StepUpCall = { route: "POST /api/messages/probe/approve", url: /\/api\/messages\/[^/]+\/approve$/ };
 
 test("the owner approves a reminder draft on Receivables and sends it from Messages", async ({ app, page }) => {
   await needsRoutes(["GET /api/receivables/plan", "GET /api/messages/drafts", "POST /api/messages/probe/approve"]);
@@ -29,6 +32,7 @@ test("the owner approves a reminder draft on Receivables and sends it from Messa
   await expect(reminder).toContainText(app.t("tier.DRAFT"));
 
   await reminder.getByRole("button", { name: app.t("actionCard.approveDraft") }).click();
+  await app.confirmStepUp(await app.signedInAccount(), MESSAGE_APPROVE);
   await expect(reminder).toContainText(app.t("actionCard.approved"));
 
   await app.open("messages");

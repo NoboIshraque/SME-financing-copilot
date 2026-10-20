@@ -87,6 +87,23 @@ export function variance(): VarianceReport {
       formula_id: "analysis.forecast_accuracy",
       parameters: { snapshot: "2026-09-01", method: "1 - weighted absolute percentage error" },
     }),
+    lines: Object.fromEntries(
+      (
+        [
+          ["net_sales", "1620000.00", "1580750.00", false],
+          ["collections", "140000.00", "119700.00", false],
+          ["purchases", "1310000.00", "1342000.00", false],
+          ["closing_balance", "455000.00", "427842.00", false],
+        ] as const
+      ).map(([metric, expected, actual, favourable]) => [
+        metric,
+        {
+          expected: figure(`fig-expected-${metric}`, `metric.${metric}`, expected, "BDT", { formula_id: "analysis.snapshot_value", input_fact_ids: [`snap-2026-09-${metric}`] }),
+          actual: figure(`fig-actual-${metric}`, `metric.${metric}`, actual, "BDT", { formula_id: `analysis.${metric}`, input_fact_ids: [`fact-${metric}-2026-09`] }),
+          favourable,
+        },
+      ]),
+    ),
   };
 }
 
@@ -96,6 +113,9 @@ const SCENARIOS: Record<string, [number, number, string]> = {
   offer_discount: [271000, 61000, "0.19"],
   do_nothing: [265000, 18000, "0.41"],
 };
+
+/** Like the API, /stability only knows the ids that /scenarios handed out. */
+export const COMPARISON_PREFIX = "cmp-";
 
 export function scenarioComparison(decisions: string[]): ScenarioComparison {
   const chosen = decisions.filter((decision) => decision in SCENARIOS);
@@ -112,7 +132,21 @@ export function scenarioComparison(decisions: string[]): ScenarioComparison {
       seed: 20261020,
     };
   });
-  return { scenarios, recommended_id: chosen.includes("retime_supplier") ? "sc-retime_supplier" : (scenarios[0]?.id ?? "") };
+  return {
+    scenarios,
+    recommended_id: chosen.includes("retime_supplier") ? "sc-retime_supplier" : (scenarios[0]?.id ?? ""),
+    recommendation_id: `${COMPARISON_PREFIX}${chosen.join("+")}`,
+    figures: Object.fromEntries(
+      scenarios.map((scenario) => [
+        scenario.id,
+        [
+          figure(`fig-${scenario.id}-expected`, "analysis.expected_outcome", scenario.expected_outcome.amount, "BDT", { formula_id: "analysis.scenario.expected_outcome" }),
+          figure(`fig-${scenario.id}-worst`, "analysis.worst_5pct_outcome", scenario.worst_5pct_outcome.amount, "BDT", { formula_id: "analysis.scenario.worst_5pct_outcome" }),
+          figure(`fig-${scenario.id}-breach`, "analysis.p_buffer_breach", scenario.p_buffer_breach, "probability", { formula_id: "analysis.scenario.p_buffer_breach" }),
+        ],
+      ]),
+    ),
+  };
 }
 
 export function stability(): StabilityReport {

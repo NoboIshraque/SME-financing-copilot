@@ -8,6 +8,7 @@ import { newIdempotencyKey } from "../../actions/useApproveAction";
 import type { MessageDraft } from "../../api/contracts";
 import { api } from "../../api/endpoints";
 import { useRequiredSession } from "../../auth/session";
+import { StepUpDialog } from "../../auth/StepUpDialog";
 import { ActionCardView } from "../../components/ActionCardView";
 import { Icon } from "../../components/Icon";
 import { ErrorState, QueryView } from "../../components/States";
@@ -21,18 +22,21 @@ function DraftCard({ draft }: { draft: MessageDraft }) {
   const queryClient = useQueryClient();
   const key = useRef<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [stepUpOpen, setStepUpOpen] = useState(false);
   const recipient = draft.variables?.recipient_label ?? draft.recipient_token;
   const update = (next: MessageDraft) =>
     queryClient.setQueryData<MessageDraft[]>(["messages", "drafts"], (list) => list?.map((d) => (d.id === next.id ? next : d)));
+  // A message leaves DecisionGuard (EXECUTE): the owner approves it with a fresh code.
   const approve = useMutation({
-    mutationFn: () => api.messages.approve(draft.id, { idempotencyKey: (key.current ??= newIdempotencyKey()) }),
+    mutationFn: (stepUpCode: string) =>
+      api.messages.approve(draft.id, { idempotencyKey: (key.current ??= newIdempotencyKey()), stepUpCode }),
     onSuccess: update,
   });
   const send = useMutation({
     mutationFn: () => api.messages.send(draft.id, { idempotencyKey: newIdempotencyKey() }),
     onSuccess: update,
   });
-  const canApprove = session.principal.role === "owner" || session.principal.role === "accountant";
+  const canApprove = session.principal.role === "owner";
   const copy = async () => {
     await navigator.clipboard.writeText(draft.body);
     setCopied(true);
@@ -57,7 +61,7 @@ function DraftCard({ draft }: { draft: MessageDraft }) {
       <div className="mt-3 flex flex-wrap items-center gap-3">
         {draft.status === "draft" &&
           (canApprove ? (
-            <button type="button" onClick={() => approve.mutate()} disabled={approve.isPending} className="rounded-xl bg-teal-700 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
+            <button type="button" onClick={() => setStepUpOpen(true)} disabled={approve.isPending} className="rounded-xl bg-teal-700 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
               {t("messages.approve")}
             </button>
           ) : (
@@ -80,6 +84,12 @@ function DraftCard({ draft }: { draft: MessageDraft }) {
         )}
       </div>
       {error && <div className="mt-2"><ErrorState error={error} /></div>}
+      <StepUpDialog
+        open={stepUpOpen}
+        summary={<p className="font-semibold">{t(`messages.purpose.${draft.purpose}`)} · {recipient}</p>}
+        onConfirm={(code) => approve.mutateAsync(code)}
+        onClose={() => setStepUpOpen(false)}
+      />
     </article>
   );
 }

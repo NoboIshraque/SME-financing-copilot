@@ -41,12 +41,14 @@ export function useRequestApproval(card: ActionCard) {
   });
 }
 
-/** DRAFT card carrying a message draft: approve that draft. */
+/** DRAFT card carrying a message draft: approve that draft. The message leaves DecisionGuard once
+ * approved, so the API treats it as EXECUTE: the owner confirms with a fresh code. */
 export function useApproveDraft(draftId: string | null) {
   const queryClient = useQueryClient();
   const key = useRef<string | null>(null);
   return useMutation({
-    mutationFn: () => api.messages.approve(draftId ?? "", { idempotencyKey: (key.current ??= newIdempotencyKey()) }),
+    mutationFn: (stepUpCode: string) =>
+      api.messages.approve(draftId ?? "", { idempotencyKey: (key.current ??= newIdempotencyKey()), stepUpCode }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["messages"] }),
   });
 }

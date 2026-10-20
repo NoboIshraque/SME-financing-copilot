@@ -9,7 +9,8 @@ from app.facts import FactStore
 from app.facts.seed import load_sme_into
 from app.messaging.templates import TEMPLATES, TemplateError, amount_text, render
 from app.security.audit import AuditLog
-from app.security.deps import current_principal
+from app.security.deps import StepUp, current_principal, step_up
+from app.security.errors import SecurityProblem
 
 OWNER = Principal(user_id="u-owner", tenant_id="sme_grocery", role=Role.owner)
 VARS = {"customer": "Customer 3", "amount": "5,804.00", "due_date": "2026-09-11",
@@ -48,7 +49,18 @@ def api(client: TestClient, universe) -> TestClient:
         session.commit()
     client.app.state.security_clock = lambda: datetime(2026, 10, 19, 6, tzinfo=UTC)
     client.app.dependency_overrides[current_principal] = lambda: OWNER
+    client.app.dependency_overrides[step_up] = lambda: StepUp(auth=None, problem=None)  # type: ignore[arg-type]
     return client
+
+
+def test_approving_a_message_needs_a_fresh_step_up_code(api: TestClient):
+    # A message leaves DecisionGuard, so it is EXECUTE (CLAUDE.md rule 4): owner plus code.
+    draft = api.get("/api/messages/drafts").json()[0]
+    missing = SecurityProblem(401, "step_up_required", "error.step_up_required")
+    api.app.dependency_overrides[step_up] = lambda: StepUp(auth=None, problem=missing)  # type: ignore[arg-type]
+    res = api.post(f"/api/messages/{draft['id']}/approve")
+    assert (res.status_code, res.json()["code"]) == (401, "step_up_required")
+    assert api.get("/api/messages/drafts").json()[0]["status"] == "draft"
 
 
 def test_one_copy_draft_per_reminder_and_refreshing_adds_no_duplicates(api: TestClient):
