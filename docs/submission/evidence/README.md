@@ -1,6 +1,6 @@
 # Execution evidence (deliverable 06)
 
-Generated 2026-10-20 05:58 UTC by `npm run evidence`. Every figure below comes from a run in this repository; all data is synthetic (`data_mode: "synthetic"`). The hand-written index (freeze record, sandbox operation log, worked examples, what the evidence does not show) is [`INDEX.md`](INDEX.md).
+Generated 2026-10-20 07:38 UTC by `npm run evidence`. Every figure below comes from a run in this repository; all data is synthetic (`data_mode: "synthetic"`). The hand-written index (freeze record, sandbox operation log, worked examples, what the evidence does not show) is [`INDEX.md`](INDEX.md).
 
 | Path | What |
 | --- | --- |
@@ -14,7 +14,7 @@ Generated 2026-10-20 05:58 UTC by `npm run evidence`. Every figure below comes f
 
 The real copilot (WP-10 orchestrator) answers each task over the synthetic ledger. Model calls replay recorded answers; a prompt with no recording falls through the gateway's chain to the deterministic planner, exactly as when every model is down, and each step log shows those attempts. Nothing touches the network.
 
-Run of commit `11d605d` at 2026-10-20T01:09:13+00:00, ledger as of 2026-09-30, all data synthetic.
+Run of commit `5199de3` at 2026-10-20T07:38:19+00:00, ledger as of 2026-09-30, all data synthetic.
 
 | Suite | Passed |
 | --- | --- |
@@ -62,7 +62,7 @@ Honest limit: the guard's rules were written with sight of the whole injection c
 - Numbers shown: 174 claims, 174 recomputed by the symbolic checker to the same value.
 - Noise (N16): 0 of 16 irrelevant variations in the self-loops flipped a decision.
 - Agreement (N9): no vote offline (the voters have no recordings); the live run measures it.
-- Latency per task: median 60 ms, max 2093 ms.
+- Latency per task: median 63 ms, max 2561 ms.
 
 ### Every task
 
@@ -149,6 +149,7 @@ Honest limit: the guard's rules were written with sight of the whole injection c
 | Backend (pytest) | financing | 150 |
 | Backend (pytest) | infra | 20 |
 | Backend (pytest) | ingest | 305 |
+| Backend (pytest) | market | 59 |
 | Backend (pytest) | mesh | 113 |
 | Backend (pytest) | messaging | 11 |
 | Backend (pytest) | ml | 7 |
@@ -156,11 +157,11 @@ Honest limit: the guard's rules were written with sight of the whole injection c
 | Backend (pytest) | privacy | 105 |
 | Backend (pytest) | receivables | 25 |
 | Backend (pytest) | reports | 37 |
-| Backend (pytest) | security | 423 |
+| Backend (pytest) | security | 426 |
 | Backend (pytest) | synthetic | 87 |
-| **Backend total** | | **2305** |
-| Web units (Vitest) | all | 226 |
-| **Total** | | **2531** |
+| **Backend total** | | **2367** |
+| Web units (Vitest) | all | 235 |
+| **Total** | | **2602** |
 
 ## Reproduce
 
