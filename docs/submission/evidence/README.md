@@ -1,6 +1,6 @@
 # Execution evidence (deliverable 06)
 
-Generated 2026-10-20 07:38 UTC by `npm run evidence`. Every figure below comes from a run in this repository; all data is synthetic (`data_mode: "synthetic"`). The hand-written index (freeze record, sandbox operation log, worked examples, what the evidence does not show) is [`INDEX.md`](INDEX.md).
+Generated 2026-10-20 07:45 UTC by `npm run evidence`. Every figure below comes from a run in this repository; all data is synthetic (`data_mode: "synthetic"`). The hand-written index (freeze record, sandbox operation log, worked examples, what the evidence does not show) is [`INDEX.md`](INDEX.md).
 
 | Path | What |
 | --- | --- |
@@ -14,7 +14,7 @@ Generated 2026-10-20 07:38 UTC by `npm run evidence`. Every figure below comes f
 
 The real copilot (WP-10 orchestrator) answers each task over the synthetic ledger. Model calls replay recorded answers; a prompt with no recording falls through the gateway's chain to the deterministic planner, exactly as when every model is down, and each step log shows those attempts. Nothing touches the network.
 
-Run of commit `5199de3` at 2026-10-20T07:38:19+00:00, ledger as of 2026-09-30, all data synthetic.
+Run of commit `42b6a42` at 2026-10-20T07:44:48+00:00, ledger as of 2026-09-30, all data synthetic.
 
 | Suite | Passed |
 | --- | --- |
@@ -62,7 +62,7 @@ Honest limit: the guard's rules were written with sight of the whole injection c
 - Numbers shown: 174 claims, 174 recomputed by the symbolic checker to the same value.
 - Noise (N16): 0 of 16 irrelevant variations in the self-loops flipped a decision.
 - Agreement (N9): no vote offline (the voters have no recordings); the live run measures it.
-- Latency per task: median 63 ms, max 2561 ms.
+- Latency per task: median 51 ms, max 2445 ms.
 
 ### Every task
 
@@ -141,7 +141,7 @@ Honest limit: the guard's rules were written with sight of the whole injection c
 | --- | --- | --- |
 | Backend (pytest) | agents | 346 |
 | Backend (pytest) | analysis | 132 |
-| Backend (pytest) | cash | 198 |
+| Backend (pytest) | cash | 199 |
 | Backend (pytest) | contracts | 137 |
 | Backend (pytest) | core | 37 |
 | Backend (pytest) | eval | 17 |
@@ -159,9 +159,9 @@ Honest limit: the guard's rules were written with sight of the whole injection c
 | Backend (pytest) | reports | 37 |
 | Backend (pytest) | security | 426 |
 | Backend (pytest) | synthetic | 87 |
-| **Backend total** | | **2367** |
-| Web units (Vitest) | all | 235 |
-| **Total** | | **2602** |
+| **Backend total** | | **2368** |
+| Web units (Vitest) | all | 237 |
+| **Total** | | **2605** |
 
 ## Reproduce
 
