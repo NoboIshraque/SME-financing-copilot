@@ -48,7 +48,7 @@ describe("Receivables screen", () => {
     expect(db.disputes).toEqual({});
   });
 
-  it("offers the reminder ladder as one-tap drafts", async () => {
+  it("offers the reminder ladder as drafts the owner approves with a code", async () => {
     const { user, db } = renderApp("/receivables");
     const reminders = await screen.findByRole("region", { name: "Reminders to send" });
     const cards = await within(reminders).findAllByRole("article");
@@ -56,7 +56,10 @@ describe("Receivables screen", () => {
     expect(cards[2]).toHaveTextContent("Send a friendly reminder before the due date");
     // A reminder whose draft is not written yet opens Messages instead of approving blind.
     expect(within(cards[1] as HTMLElement).getByRole("button", { name: "Review in Messages" })).toBeInTheDocument();
-    await user.click(within(cards[2] as HTMLElement).getByRole("button", { name: "Approve draft" }));
+    await user.click(within(cards[2] as HTMLElement).getByRole("button", { name: "Approve draft with code" }));
+    const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
+    await user.type(within(dialog).getByLabelText("6-digit code"), "246810");
+    await user.click(within(dialog).getByRole("button", { name: "Approve" }));
     expect(await within(cards[2] as HTMLElement).findByText("Approved. It is recorded in the audit log.")).toBeInTheDocument();
     expect(db.drafts.find((d) => d.id === "msg-predue-11")?.status).toBe("approved");
   });
@@ -76,7 +79,7 @@ describe("Receivables screen", () => {
     const reminders = await screen.findByRole("region", { name: "Reminders to send" });
     const cards = await within(reminders).findAllByRole("article");
     expect(within(cards[0] as HTMLElement).getByText("Your role can't approve this.")).toBeInTheDocument();
-    expect(within(reminders).queryByRole("button", { name: "Approve draft" })).not.toBeInTheDocument();
+    expect(within(reminders).queryByRole("button", { name: "Approve draft with code" })).not.toBeInTheDocument();
   });
 
   it("has an empty state when nobody owes money", async () => {

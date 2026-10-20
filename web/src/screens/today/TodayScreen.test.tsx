@@ -143,12 +143,14 @@ describe("Today screen", () => {
     expect(headersOf("/execute")["X-Idempotency-Key"]).toMatch(/^[0-9a-f-]{36}$/);
   });
 
-  it("approves a DRAFT card's message draft in one tap, without a code", async () => {
+  it("approves a DRAFT card's message draft with the owner's code (the message leaves DecisionGuard)", async () => {
     const { user, db } = renderApp("/");
     const remind = await screen.findByRole("article", { name: "Send a payment reminder" });
-    await user.click(within(remind).getByRole("button", { name: "Approve draft" }));
+    await user.click(within(remind).getByRole("button", { name: "Approve draft with code" }));
+    const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
+    await user.type(within(dialog).getByLabelText("6-digit code"), "246810");
+    await user.click(within(dialog).getByRole("button", { name: "Approve" }));
     expect(await within(remind).findByText("Approved. It is recorded in the audit log.")).toBeInTheDocument();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(db.drafts.find((d) => d.id === "msg-overdue-9")?.status).toBe("approved");
   });
 
@@ -159,7 +161,7 @@ describe("Today screen", () => {
     await user.click(within(retime).getByRole("button", { name: "Ask the owner to approve" }));
     expect(await within(retime).findByText("Sent to the owner for approval.")).toBeInTheDocument();
     expect(db.approvals.find((r) => r.card.id === "act-retime-supplier-2")?.approval).toMatchObject({ status: "pending", requested_by: "u-accountant" });
-    expect(within(card(/Send a payment reminder/)).getByRole("button", { name: "Approve draft" })).toBeEnabled();
+    expect(within(card(/Send a payment reminder/)).getByText("Only the owner can approve this.")).toBeInTheDocument();
   });
 
   it("opens the screen a READ card points to", async () => {

@@ -34,6 +34,9 @@ describe("Messages & approvals inbox", () => {
     expect(body).toHaveAttribute("lang", "bn");
 
     await user.click(within(draft).getByRole("button", { name: "Approve message" }));
+    const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
+    await user.type(within(dialog).getByLabelText("6-digit code"), "246810");
+    await user.click(within(dialog).getByRole("button", { name: "Approve" }));
     await user.click(await within(draft).findByRole("button", { name: "Copy message" }));
     expect(writeText).toHaveBeenCalledWith(db.drafts[0]?.body);
     expect(within(draft).getByRole("button", { name: "Copied. Paste it into your chat app." })).toBeInTheDocument();
@@ -44,9 +47,30 @@ describe("Messages & approvals inbox", () => {
     const { user, db } = renderApp("/messages");
     const draft = await screen.findByRole("article", { name: "Overdue reminder · Customer 9" });
     await user.click(within(draft).getByRole("button", { name: "Approve message" }));
+    const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
+    await user.type(within(dialog).getByLabelText("6-digit code"), "246810");
+    await user.click(within(dialog).getByRole("button", { name: "Approve" }));
     await user.click(await within(draft).findByRole("button", { name: "Send" }));
     expect(await within(draft).findByText("Sent", { selector: "p" })).toBeInTheDocument();
     expect(db.drafts[1]?.status).toBe("sent");
+  });
+
+  it("keeps a draft unapproved when the code is wrong", async () => {
+    const { user, db } = renderApp("/messages");
+    const draft = await screen.findByRole("article", { name: "Overdue reminder · Customer 9" });
+    await user.click(within(draft).getByRole("button", { name: "Approve message" }));
+    const dialog = screen.getByRole("dialog", { name: "Confirm it's you" });
+    await user.type(within(dialog).getByLabelText("6-digit code"), "111111");
+    await user.click(within(dialog).getByRole("button", { name: "Approve" }));
+    expect(await within(dialog).findByRole("alert")).toBeInTheDocument();
+    expect(db.drafts[1]?.status).toBe("draft");
+  });
+
+  it("leaves message approval to the owner: the accountant sees no approve button", async () => {
+    renderApp("/messages", { signedInAs: "accountant@hishab.demo" });
+    const draft = await screen.findByRole("article", { name: "Overdue reminder · Customer 9" });
+    expect(within(draft).getByText("Your role can't approve this.")).toBeInTheDocument();
+    expect(within(draft).queryByRole("button", { name: "Approve message" })).not.toBeInTheDocument();
   });
 
   it("does not let staff approve drafts", async () => {

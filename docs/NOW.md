@@ -11,6 +11,9 @@ Step-by-step guides (20 Oct): `docs/handover/VIDEO.md` (recording), `docs/handov
 (server or no-card tunnel), `docs/handover/FREE_SERVER.md` (free hosting on Render, no card, no PC), `docs/handover/NOTEBOOK01.md` (Labib's notebook, plain words),
 `docs/handover/AUDIT_PROMPT.md` (paste into a new chat for the final audit).
 
+**Final audit (20 Oct, PR #41 merged):** report in `docs/handover/AUDIT_REPORT.md`. The audit session is fixing the
+open findings one by one on branch `audit-fixes` (each merged only with green CI); the report's table says which are fixed.
+
 State at 20 Oct 01:00 (orch-C): every work package is merged or cut; the product is now
 **DecisionGuard**. Submission files: `docs/submission/` (PDFs in `docs/submission/pdf/`).
 

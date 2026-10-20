@@ -219,7 +219,7 @@ cases. CI prints counts per layer; `npm run evidence` writes the report used in 
 | WP-16 | not started | — | 0 | P3 approved; cut to ~40 tasks, no mutation score (PR #25) |
 | WP-17 | in progress (2/4) | merged | 7 | 02 done (baseline beats LightGBM); 03 threshold now off the test split, CPU baseline AUC 0.69 on unseen families; Labib runs 01/03/04 on Kaggle; GPU injection run (notebook 03) and market backtest (04) cut; only 01 left (PR #25) |
 | WP-18 | in progress (4/6) | merged + PR #14 | 19 + CI stack boot | compose, deploy+rollback, backups, DEPLOY.md; CI on main + PRs only; secret scan scoped to the tested commit (PR #14, all-refs scan before going public); China checks + mirror pending; Vercel mirror cut (PR #25) |
-| WP-19 | not started | — | — | |
+| WP-19 | done | merged (PR #37; final audit PR #41) | — | DecisionGuard rename, submission pack, PDFs; final audit report `docs/handover/AUDIT_REPORT.md` (PR #41: 3 fixes); audit findings being fixed on `audit-fixes` |
 | WP-20 | in progress | wp-20-data | — | P7 approved; Labib at shops 18 Oct 10:00–14:00; anonymiser ready (PR #12); field data replaced by public real datasets listed in WP-20.md; field data only if it arrives (PR #25) |
 
 ## 9. Submission (the 6 official deliverables)

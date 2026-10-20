@@ -191,7 +191,7 @@
   "actionCard": {
     "open": "打开",
     "markDone": "标记为已完成",
-    "approveDraft": "批准草稿",
+    "approveDraft": "输入验证码批准草稿",
     "approveWithCode": "输入验证码批准",
     "approved": "已批准，并已记入审计日志。",
     "ownerOnly": "只有店主可以批准此操作。",
@@ -481,8 +481,8 @@
     "worst5": "最差 5%",
     "breach": "低于缓冲的概率",
     "recommended": "推荐",
-    "stabilityTitle": "今天的建议有多稳定？",
-    "stabilityOf": "建议针对：{{question}}",
+    "stabilityTitle": "推荐的选择有多稳定？",
+    "stabilityHint": "先在上方比较各项决定，就能看到销售、价格或付款方变化时，推荐的选择是否依然成立。",
     "forecast_accuracy": "预测准确度"
   },
   "statement": {
