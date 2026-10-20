@@ -18,7 +18,7 @@ list in section 10 is deliberately blunt: it keeps the problems we found, marks 
 on 20 Oct with the test that proves each fix, and says why the rest stay open.
 
 **Test evidence.** On 20 Oct, the whole backend suite (`cd backend && uv run pytest -q`):
-2,269 passed, 1 skipped (Tesseract not installed
+2,304 passed, 1 skipped (Tesseract not installed
 locally). The suite is re-run on the freeze commit; counts by area
 are in `docs/submission/evidence/test-counts.md`.
 Every test runs offline: `backend/tests/conftest.py` fails any test that opens a non-loopback
