@@ -95,7 +95,7 @@ to a third-party service.
 - **Control review.** For every control we name the source file that implements it and the tests
   that check it. Every number in this report names the file it comes from.
 - **Internal audit.** A pre-submission audit of the whole codebase
-  (`docs/handover/AUDIT_REPORT.md`) produced several findings; each is listed in the risk
+  (`docs/submission/evidence/audit-report.md`) produced several findings; each is listed in the risk
   register (section 12) with its mitigation and the test that verifies it.
 - **Adversarial measurement.** The injection guard was measured on a labelled corpus, on attacks
   written without reading its rules, and on a fresh held-out set (section 6).
@@ -470,7 +470,7 @@ numbers. Text over 20,000 characters is refused outright.
 | Labelled corpus (`data/public/injection/injection_corpus.jsonl`: 96 attacks and 96 benign texts, 24 of each per language, 12 families in all four languages) | 96 / 96 | 0 / 96 | Regression only: the rules were written after seeing the corpus |
 | 12 attacks written without reading the rules, before the rules were widened | 3 / 12 | not measured | Generalisation at the time; 11 of 12 were still contained (no tool ran that should not have) and no approval was granted |
 | The same 12 attacks after the rules were widened | 12 / 12 | 0 / 96 corpus benign texts; 0 / 11 new hard negatives | Regression only: the 12 attacks were seen while widening the rules |
-| Fresh held-out set (`docs/handover/fresh_injection_set.jsonl`: 24 attacks, 24 innocent look-alikes) | 15 / 24 (13 before widening) | 10 / 24 (10 before widening) | Generalisation: the figure to quote |
+| Fresh held-out set (`docs/submission/evidence/injection-heldout/fresh_injection_set.jsonl`: 24 attacks, 24 innocent look-alikes) | 15 / 24 (13 before widening) | 10 / 24 (10 before widening) | Generalisation: the figure to quote |
 
 **Corpus.** The benign texts include hard negatives such as "ignore the disputed invoice" and
 "how do I update my own bank details". Obfuscated variants are caught: zero-width spaces,
@@ -489,7 +489,7 @@ widening the rules, we treat that figure as a regression number, not a generalis
 language for six families (skip_approval, change_bank_details, add_payee, exfiltrate_vault,
 disable_audit and hidden_instruction) in English, Bangla, Banglish and Chinese. It was committed
 before anyone read `guard_rules.py` and was never seen while widening the rules. Per-row verdicts
-are in `docs/handover/fresh_injection_result.txt`. The rules key on vocabulary ("payee",
+are in `docs/submission/evidence/injection-heldout/fresh_injection_result.txt`. The rules key on vocabulary ("payee",
 "vault", "audit log") more than on intent, so innocent questions containing those words are
 blocked and paraphrases without them pass (skip_approval: 1 of 4 caught).
 
@@ -797,7 +797,7 @@ back to a plain dump with a warning.
 
 **R18. Free-tier model providers may use inputs to improve their models.** Rating Info.
 State: Open. Only anonymised text leaves the server, and only when model keys are configured;
-the optional paid tier during judging avoids this (`docs/PLAN.md` section 6). The hosted demo
+the optional paid tier during judging avoids this. The hosted demo
 uses recorded answers by default (`LLM_MODE=fixtures`), and the submitted evidence was produced
 offline, with no model call.
 

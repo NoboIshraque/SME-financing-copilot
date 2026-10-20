@@ -2,8 +2,7 @@
 
 Mobile-first web app + API + agents that help a small Bangladeshi business with financing-option
 matching, cash-flow management with alerts, and business financial analysis.
-Deadline: **Tue 20 Oct 2026 21:59 Dhaka**. Plan: `docs/PLAN.md`. Features: `docs/FEATURES.md`.
-Why: `docs/CONTEXT.md`. Your task: the WP file you were pointed at in `docs/packages/`.
+Features: `docs/FEATURES.md`. Why: `docs/CONTEXT.md`. Submission documents: `docs/submission/`.
 
 ## Non-negotiable rules
 
@@ -24,8 +23,7 @@ Why: `docs/CONTEXT.md`. Your task: the WP file you were pointed at in `docs/pack
 
 ## Repo layout and ownership
 
-Only edit paths your WP owns. Shared contracts belong to WP-00 (orchestrator): to change one,
-write the request under "Questions" in your WP file and stop.
+Each area was built as a work package (WP); the shared contracts are owned by WP-00.
 
 ```
 backend/app/contracts/     WP-00   Pydantic schemas shared by everyone (facts, API, agents)
@@ -115,7 +113,4 @@ Run a single backend test: `cd backend && uv run pytest tests/cash/test_forecast
 - Engines are pure functions over contracts; no database or network inside an engine.
 - React + TypeScript + Vite + Tailwind. All user-visible strings via `web/src/i18n`. No Google
   Fonts or third-party CDNs (China reachability): self-host all assets.
-- Commit messages: `WP-XX: what changed`. Small commits; autosave also commits every 5 minutes.
-- Before starting a milestone: `git fetch && git rebase origin/main`.
-- After each milestone: tick it in the WP file's STATUS block and update `docs/PLAN.md` §8.
-- If blocked or a decision is needed: write it under "Questions" in the WP file, commit, stop.
+- Commit messages: `WP-XX: what changed`. Small commits.
