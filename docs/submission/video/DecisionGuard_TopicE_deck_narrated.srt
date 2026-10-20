@@ -1,0 +1,364 @@
+1
+00:00:00,600 --> 00:00:01,690
+Assalamu alaikum.
+
+2
+00:00:01,690 --> 00:00:06,499
+We are team DecisionGuard, from the Bangladesh University of Professionals.
+
+3
+00:00:06,499 --> 00:00:10,538
+DecisionGuard is a finance copilot for small Bangladeshi shops.
+
+4
+00:00:10,538 --> 00:00:16,885
+It covers the three areas of Topic E: financing that fits, cash-flow alerts, and business analysis.
+
+5
+00:00:16,885 --> 00:00:19,450
+One rule shapes everything you will see.
+
+6
+00:00:19,450 --> 00:00:27,528
+Code computes every number, the language model only explains it, and nothing that matters happens until the owner approves it.
+
+7
+00:00:29,028 --> 00:00:32,183
+The problem is the same in Dhaka and in Shenzhen.
+
+8
+00:00:32,183 --> 00:00:34,244
+Small firms are short of credit.
+
+9
+00:00:34,244 --> 00:00:46,349
+The IFC puts the gap at 5.7 trillion dollars across developing economies, and about 2.8 billion dollars in Bangladesh, where women-led firms get only 7.28 percent of small-business credit.
+
+10
+00:00:46,349 --> 00:00:55,622
+And cash gets stuck: in a Peking University survey of over nine thousand Chinese small firms, 71 percent were owed money they had not been paid.
+
+11
+00:00:55,622 --> 00:01:01,932
+Lenders say no because these shops cannot show a clean record, not because the businesses are bad.
+
+12
+00:01:03,432 --> 00:01:05,970
+Picture the owner of a grocery in Mirpur.
+
+13
+00:01:05,970 --> 00:01:13,586
+Her money moves through bKash and Nagad, a bank account and a cash box, and her credit sales live in a paper baki register.
+
+14
+00:01:13,586 --> 00:01:18,105
+She has three questions, and they are exactly the three areas of Topic E.
+
+15
+00:01:18,105 --> 00:01:21,324
+Which loan is really the cheapest, and can I get it?
+
+16
+00:01:21,324 --> 00:01:25,349
+Will I run short of cash, when, and what can I do about it today?
+
+17
+00:01:25,349 --> 00:01:27,763
+And is my business actually doing well?
+
+18
+00:01:27,763 --> 00:01:35,688
+Everything in this demo runs on five synthetic Dhaka shops with eighteen months of daily records, clearly labelled as synthetic.
+
+19
+00:01:37,188 --> 00:01:40,044
+Why not just put a chatbot on top of the ledger?
+
+20
+00:01:40,044 --> 00:01:42,662
+Because language models are not calculators.
+
+21
+00:01:42,662 --> 00:01:48,612
+They pick the wrong figure, rarely catch their own mistakes, and sound more confident than they are.
+
+22
+00:01:48,612 --> 00:01:51,826
+With money, a guessed number becomes a wrong decision.
+
+23
+00:01:51,826 --> 00:01:53,789
+So DecisionGuard splits the work.
+
+24
+00:01:53,789 --> 00:01:59,620
+Code computes every number with exact decimal arithmetic, and records where each number came from.
+
+25
+00:01:59,620 --> 00:02:01,643
+The model only plans and explains.
+
+26
+00:02:01,643 --> 00:02:05,868
+And any number the model states is recomputed before the owner sees it.
+
+27
+00:02:07,368 --> 00:02:09,061
+Here is the whole pipeline.
+
+28
+00:02:09,061 --> 00:02:16,960
+The shop's own records come in: mobile-money and bank statements, the cash book, the baki register, even a photo of a receipt.
+
+29
+00:02:16,960 --> 00:02:18,465
+They become typed facts.
+
+30
+00:02:18,465 --> 00:02:26,113
+Bangla and Banglish are read correctly, names and phone numbers become tokens, and every row remembers where it came from.
+
+31
+00:02:26,113 --> 00:02:29,749
+Deterministic engines compute everything from those facts.
+
+32
+00:02:29,749 --> 00:02:31,693
+The copilot plans and explains.
+
+33
+00:02:31,693 --> 00:02:36,896
+Anything that leaves DecisionGuard needs the owner's approval with a one-time code.
+
+34
+00:02:36,896 --> 00:02:42,288
+And any number on any screen can be tapped to show its formula and the rows behind it.
+
+35
+00:02:43,788 --> 00:02:44,974
+Area B, cash flow.
+
+36
+00:02:44,974 --> 00:02:57,230
+DecisionGuard forecasts thirteen weeks ahead with a thousand simulated paths, built from the shop's own weekday, month-end and Eid patterns, and from how late each customer usually pays.
+
+37
+00:02:57,230 --> 00:03:07,641
+For our synthetic hardware shop, there is an 86.7 percent chance of a cash gap that starts in five days, with an expected shortfall of about 73 thousand taka.
+
+38
+00:03:07,641 --> 00:03:14,098
+Every possible fix is measured on the same thousand paths, so the difference is the fix, not luck.
+
+39
+00:03:14,098 --> 00:03:23,652
+The cheapest one, asking a buyer to pay early, closes almost the whole gap at no cost, and it arrives as an action card for the owner to approve.
+
+40
+00:03:25,152 --> 00:03:26,433
+Area A, financing.
+
+41
+00:03:26,433 --> 00:03:36,327
+Lenders quote headline rates, so DecisionGuard turns every option into dated cash flows and solves for the true yearly cost, fees included.
+
+42
+00:03:36,327 --> 00:03:46,079
+The same 9 percent headline costs 11.29 percent a year as a normal bank loan, and 22.15 percent as a digital loan repaid in daily debits.
+
+43
+00:03:46,079 --> 00:03:53,411
+Our catalogue holds 13 real Bangladeshi loan products, each with its source and the date we checked it.
+
+44
+00:03:53,411 --> 00:03:58,892
+If a lender asks for a fact we do not hold, DecisionGuard says not on record.
+
+45
+00:03:58,892 --> 00:04:00,600
+It never assumes a pass.
+
+46
+00:04:02,100 --> 00:04:03,226
+Area C, analysis.
+
+47
+00:04:03,226 --> 00:04:14,024
+DecisionGuard builds cash-basis statements and thirteen ratios, each one clickable down to the transactions, and it compares decisions before the owner makes them.
+
+48
+00:04:14,024 --> 00:04:21,642
+Here, five options for the same hardware shop are replayed on the same thousand paths across forty economic states.
+
+49
+00:04:21,642 --> 00:04:25,749
+A loan barely helps, because it pays out after the gap starts.
+
+50
+00:04:25,749 --> 00:04:35,487
+Offering one large customer two percent off for paying early costs 7,600 taka, and cuts the risk of dipping below the buffer from 94 to 52 percent.
+
+51
+00:04:35,487 --> 00:04:42,708
+The advice held in 8 of 10 stress re-runs, and never changed when we only shuffled rows or renamed customers.
+
+52
+00:04:44,208 --> 00:04:49,978
+The copilot is where most AI products cut corners, so we built five steps around the model.
+
+53
+00:04:49,978 --> 00:04:54,606
+First, every question is screened for prompt injection in four languages.
+
+54
+00:04:54,606 --> 00:04:59,742
+Second, a model proposes a plan, and code removes anything it does not recognise.
+
+55
+00:04:59,742 --> 00:05:06,844
+The owner's own question decides what is answered first, so asking about a loan gets the loan, not every report.
+
+56
+00:05:06,844 --> 00:05:11,346
+Third, every number in the answer is recomputed by an independent path.
+
+57
+00:05:11,346 --> 00:05:15,403
+Fourth, a model from a different family argues the case against.
+
+58
+00:05:15,403 --> 00:05:21,744
+Fifth, if checks fail or votes disagree, DecisionGuard says I don't know, and names what is missing.
+
+59
+00:05:23,244 --> 00:05:26,106
+Here is something no single-shop tool can do.
+
+60
+00:05:26,106 --> 00:05:33,931
+These three synthetic shops owe each other in a circle: 11.5 lakh taka of debt, with each shop waiting for the next to pay.
+
+61
+00:05:33,931 --> 00:05:40,864
+Minimum-cost netting clears all of it with 1.9 lakh taka of cash, moving only along debts that already exist.
+
+62
+00:05:40,864 --> 00:05:46,017
+Every owner must approve with a one-time code, and one refusal cancels the round.
+
+63
+00:05:46,017 --> 00:05:58,548
+The settled record is sealed with a salted hash that can be anchored on the Ethereum Sepolia testnet, so anyone can later check it was not edited, without the chain ever seeing a name or an amount.
+
+64
+00:06:00,048 --> 00:06:04,664
+Security comes down to one promise: money never moves without the owner.
+
+65
+00:06:04,664 --> 00:06:06,202
+Every action has a tier.
+
+66
+00:06:06,202 --> 00:06:16,460
+Anything that leaves DecisionGuard is execute tier: the owner approves that exact card with a fresh one-time code, and the policy is checked again when it runs.
+
+67
+00:06:16,460 --> 00:06:20,114
+Four actions are denied to everyone, including the owner.
+
+68
+00:06:20,114 --> 00:06:26,717
+The audit log is a hash chain the database refuses to edit, and only anonymised text can reach a model.
+
+69
+00:06:26,717 --> 00:06:28,897
+Our injection guard is rules only.
+
+70
+00:06:28,897 --> 00:06:35,244
+On a fresh held-out set it caught 15 of 24 attacks and wrongly blocked 10 of 24 innocent questions.
+
+71
+00:06:35,244 --> 00:06:42,360
+So we do not rely on it: an injected instruction still needs the owner's one-time code before anything happens.
+
+72
+00:06:43,860 --> 00:06:47,575
+Everything we show is backed by evidence you can rerun.
+
+73
+00:06:47,575 --> 00:06:52,911
+More than 2,500 automated tests, and none of them calls a model or the network.
+
+74
+00:06:52,911 --> 00:06:59,327
+A sandbox log of 48 steps through the real API, from sign-in to an approved and audited action.
+
+75
+00:06:59,327 --> 00:07:02,705
+Thirteen real loan products, each with its source.
+
+76
+00:07:02,705 --> 00:07:05,879
+And the app speaks English, Bangla and Chinese.
+
+77
+00:07:05,879 --> 00:07:12,701
+Every pull request runs lint, tests, dependency audits and a secret scan, then boots the whole stack.
+
+78
+00:07:12,701 --> 00:07:18,780
+The evidence index in the repository lists every file and the command that regenerates it.
+
+79
+00:07:20,280 --> 00:07:23,322
+We want to be clear about what is not proven yet.
+
+80
+00:07:23,322 --> 00:07:27,543
+All demo data is synthetic, and no real shop has used DecisionGuard.
+
+81
+00:07:27,543 --> 00:07:33,068
+The injection guard is rules only, so the approval rules, not the guard, keep money safe.
+
+82
+00:07:33,068 --> 00:07:37,041
+The copilot was measured offline, not with live models at scale.
+
+83
+00:07:37,041 --> 00:07:40,766
+Receivables and message drafts are reduced, with no sending.
+
+84
+00:07:40,766 --> 00:07:47,843
+Market prices are public lists from Bangladesh and China, as published, not live, and vendor quotes are synthetic.
+
+85
+00:07:47,843 --> 00:08:03,984
+Next, we want to pilot with consenting Dhaka shops using their own bKash and Nagad exports, send approved reminders through SMS partners, bring in licensed lenders to fund netting rounds, and add a learned injection classifier with an external security review.
+
+86
+00:08:05,484 --> 00:08:10,998
+DecisionGuard gives a small shop owner numbers she can check, and actions she approves.
+
+87
+00:08:10,998 --> 00:08:19,236
+Code computes every figure, the copilot explains it and checks itself, and nothing that matters happens without her one-time code.
+
+88
+00:08:19,236 --> 00:08:19,870
+Thank you.
+
+89
+00:08:19,870 --> 00:08:20,504
+Dhonnobad.
+
+90
+00:08:20,504 --> 00:08:21,264
+Shieh shieh.
+
+91
+00:08:21,264 --> 00:08:25,764
+The code, the documentation and the evidence are all in our repository.
+
