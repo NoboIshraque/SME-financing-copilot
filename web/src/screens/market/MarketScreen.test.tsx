@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { PricePoint } from "../../api/contracts";
 import type { MarketAlert, WatchItem } from "../../api/types";
 import { sessionFor } from "../../mocks/db";
+import { vendorRanking } from "../../mocks/fixtures/market";
 import { renderApp } from "../../test/render";
 
 const TCB_URL = "https://objectstorage.example/office-tcb/2026-10-19.xlsx";
@@ -51,8 +52,50 @@ describe("Market screen", () => {
     const alerts = screen.getByRole("region", { name: "Price alerts" });
     expect(await within(alerts).findByText(/Chickpeas is up/)).toBeInTheDocument();
     expect(within(alerts).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
-    // Vendors and negotiation still come from the sample until their routes exist.
-    expect(within(screen.getByRole("region", { name: "Best vendor for an order" })).getByText(SAMPLE_LABEL)).toBeInTheDocument();
+  });
+
+  it("labels vendor results from the bundled sample even when prices are live", async () => {
+    const prices = [...LIVE_PRICES, { ...LIVE_PRICES[0]!, commodity: "rice_coarse" }];
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "GET /api/market/prices": { body: prices } } });
+    const vendors = await screen.findByRole("region", { name: "Best vendor for an order" });
+    expect(within(vendors).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+    await user.click(within(vendors).getByRole("button", { name: "Rank vendors" }));
+    expect(await within(vendors).findByText(SAMPLE_LABEL)).toBeInTheDocument();
+  });
+
+  it("shows the server's ranking of the shop's own suppliers without the sample label", async () => {
+    const ranked = vendorRanking("rice_coarse").map((vendor) => ({ ...vendor, source: "ledger_supplier" as const }));
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "POST /api/market/vendors/rank": { body: ranked } } });
+    const vendors = await screen.findByRole("region", { name: "Best vendor for an order" });
+    await user.click(within(vendors).getByRole("button", { name: "Rank vendors" }));
+    expect(await within(vendors).findByRole("listitem", { name: "Supplier 2" })).toBeInTheDocument();
+    expect(within(vendors).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+  });
+
+  it("asks a shop with no supplier quotes on record to add one", async () => {
+    const abstain = { status: 422, body: { code: "not_enough_data", message_key: "error.not_enough_data", detail: { missing: "supplier_quote" } } };
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "POST /api/market/vendors/rank": abstain } });
+    const vendors = await screen.findByRole("region", { name: "Best vendor for an order" });
+    await user.click(within(vendors).getByRole("button", { name: "Rank vendors" }));
+    expect(await within(vendors).findByText(/Add a supplier quote to compare vendors/)).toBeInTheDocument();
+  });
+
+  it("shows a live negotiation plan with the TCB price and cost of money it used, without the sample label", async () => {
+    const fig = (id: string, label: string, value: string, unit: "BDT" | "percent" = "BDT") => ({ id, label_key: label, value, unit, data_mode: "synthetic" as const, provenance: { formula_id: label, formula_version: 1 } });
+    const plan = {
+      walk_away: fig("w", "negotiation.walk_away", "52.69"),
+      target: fig("t", "negotiation.target", "62.00"),
+      steps: [{ text_key: "negotiation.step.walk_away", figures: [fig("w2", "negotiation.walk_away", "52.69")] }],
+      cost_of_money: fig("c", "market.cost_of_money", "4.07", "percent"),
+      market_price: { ...tcbPoint("52.50", "2026-10-19"), commodity: "rice_coarse" },
+    };
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "POST /api/market/negotiate": { body: plan } } });
+    const negotiate = await screen.findByRole("region", { name: "Negotiate a sale" });
+    expect(within(negotiate).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+    await user.click(within(negotiate).getByRole("button", { name: "Make my plan" }));
+    expect(await within(negotiate).findByText(/Market price used: ৳52.50 \/ kg, TCB, published 19 Oct/)).toBeInTheDocument();
+    expect(negotiate).toHaveTextContent("Your cost of money (best loan you qualify for): 4.07%");
+    expect(within(negotiate).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
   });
 
   it("never shows sample vendors to a self-service shop as its own", async () => {
