@@ -15,7 +15,8 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from statistics import median
 
-from app.contracts import Figure, Money, PricePoint, Provenance, Unit
+from app.contracts import Figure, Money, Provenance, Unit
+from app.engines.market.points import MarketPrice, digest
 from app.engines.market.tcb import Observation
 
 WINDOW = timedelta(days=28)
@@ -46,11 +47,12 @@ class Watch:
     latest: Observation
     baseline: Baseline | None
     change_pct: Decimal | None
-    history: tuple[PricePoint, ...]
+    history: tuple[MarketPrice, ...]
 
 
 def _pct(latest: Decimal, base: Decimal) -> Decimal:
-    return ((latest - base) / base * HUNDRED).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+    change = ((latest - base) / base * HUNDRED).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+    return change.copy_abs() if change == 0 else change  # never "-0.0"
 
 
 def baseline(series: Sequence[Observation]) -> Baseline | None:
@@ -91,20 +93,23 @@ def change_figure(watch: Watch) -> Figure | None:
         return None
     point = watch.latest.point
     formula = FORMULA_MEDIAN if watch.baseline.basis == "median_4w" else FORMULA_PREVIOUS
+    refs = (watch.latest.ref, *watch.baseline.refs)
     return Figure(
-        id=f"market:{point.commodity}:change:{point.observed_on.isoformat()}",
+        id=f"market:{point.source}:{point.commodity}:change:{point.observed_on.isoformat()}:"
+           f"{digest(watch.change_pct, {'baseline': str(watch.baseline.price.amount)}, refs)}",
         label_key="market.change_vs_median" if formula == FORMULA_MEDIAN
         else "market.change_vs_previous",
         value=watch.change_pct, unit=Unit.percent, data_mode=point.data_mode,
         provenance=Provenance(
             formula_id=formula, formula_version=1,
-            source_row_ids=(watch.latest.ref, *watch.baseline.refs),
+            source_row_ids=refs,
             parameters={"latest": str(point.price.amount),
                         "baseline": str(watch.baseline.price.amount),
                         "baseline_basis": watch.baseline.basis,
                         "baseline_points": str(len(watch.baseline.refs)),
                         "threshold_pct": str(THRESHOLD_PCT),
-                        "source": point.source.value,
+                        "source": point.source,
+                        "market": point.market,
                         "published_on": watch.latest.published_on.isoformat()}))
 
 

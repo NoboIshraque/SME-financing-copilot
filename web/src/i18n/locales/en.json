@@ -327,7 +327,9 @@
     "kg": "kg",
     "litre": "litre",
     "metric_ton": "tonne",
-    "hali": "hali (4)"
+    "hali": "hali (4)",
+    "piece": "piece",
+    "jin": "jin (500 g)"
   },
   "receivables": {
     "remindersTitle": "Reminders to send",
@@ -677,7 +679,10 @@
       "agripricebd": "AgriPriceBD",
       "worldbank_pinksheet": "World Bank Pink Sheet",
       "vendor": "your vendor's quote",
-      "manual": "entered by you"
+      "manual": "entered by you",
+      "wfp": "WFP",
+      "nbs": "NBS China",
+      "xinfadi": "Beijing Xinfadi"
     },
     "watchTitle": "Prices you watch",
     "noWatch": "No inputs watched yet. They appear once purchases are on record.",
@@ -705,14 +710,34 @@
     "delivery_per_unit": "Delivery",
     "delay_cost": "Waiting cost",
     "reliability_penalty": "Reliability risk",
-    "sourceNote": "Prices: TCB's daily retail price list for Dhaka, published {{date}}. TCB publishes once a day, so these are not live prices.",
     "sourceLink": "Open TCB's list",
     "sampleNote": "Sample data: a preview of a planned feature, not live prices. The server has no market prices yet.",
     "sampleLabel": "Sample data: a preview of a planned feature, not live prices",
     "addQuote": "Add a supplier quote to compare vendors. Sample vendors are not shown as yours.",
     "change_vs_previous": "Change vs the previous list",
     "cost_of_money": "Your cost of money (best loan you qualify for)",
-    "priceUsed": "Market price used: {{price}} / {{unit}}, TCB, published {{date}}"
+    "priceUsed": "Market price used: {{price}} / {{unit}}, TCB, published {{date}}",
+    "location": "Your location",
+    "locationHelp": "Prices, alerts, the negotiation price and vendor distances follow this place.",
+    "countryBD": "Bangladesh",
+    "countryCN": "China",
+    "cadence": {
+      "daily": "daily",
+      "10-day": "every 10 days",
+      "monthly": "monthly"
+    },
+    "sourceNoteAt": "Prices: {{source}}, {{place}}, published {{date}}. These are published lists, not live prices.",
+    "sourceName": {
+      "tcb": "TCB's daily retail price list",
+      "wfp": "WFP market monitoring (monthly)",
+      "nbs": "China's National Bureau of Statistics (every 10 days)",
+      "xinfadi": "Xinfadi wholesale market prices (daily)"
+    },
+    "maxDistance": "Vendors within",
+    "anyDistance": "Any distance",
+    "withinKm": "{{km}} km",
+    "vendorPlace": "{{place}}, {{division}} · {{km}} km away",
+    "noFinancingHere": "Negotiation prices credit at your best loan, and the loans on file are Bangladeshi (taka). Pick a Bangladesh location to plan a deal."
   },
   "commodity": {
     "onion": "Onion (local)",
@@ -727,7 +752,28 @@
     "egg_farm": "Eggs (farm)",
     "garlic": "Garlic (local)",
     "salt": "Salt (iodised)",
-    "ms_rod": "MS rod (60 grade)"
+    "ms_rod": "MS rod (60 grade)",
+    "palm_oil": "Palm oil",
+    "egg_piece": "Eggs (per piece)",
+    "garlic_imported": "Garlic (imported)",
+    "chili_green": "Green chilli",
+    "onion_imported": "Onion (imported)",
+    "chicken_broiler": "Chicken (broiler)",
+    "rebar": "Rebar (20 mm)",
+    "cement": "Cement (P.O 42.5)",
+    "float_glass": "Float glass",
+    "rice_japonica": "Rice (japonica)",
+    "wheat": "Wheat",
+    "corn": "Corn",
+    "soybean": "Soybeans",
+    "sugar_white": "White sugar",
+    "peanut": "Peanuts",
+    "urea": "Urea",
+    "diesel": "Diesel",
+    "egg_loose": "Eggs (loose)",
+    "chinese_cabbage": "Chinese cabbage",
+    "cabbage": "Cabbage",
+    "carrot": "Carrot"
   },
   "negotiation": {
     "step": {

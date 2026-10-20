@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { ApiRequestError } from "../../api/client";
 import { compareDecimal } from "../../api/decimal";
 import { api } from "../../api/endpoints";
-import type { NegotiationRequest, WatchItem } from "../../api/types";
+import type { MarketLocation, NegotiationRequest, WatchItem } from "../../api/types";
 import { useSession } from "../../auth/session";
 import { FigureValue } from "../../components/FigureValue";
 import { EmptyState, ErrorState, QueryView } from "../../components/States";
@@ -19,6 +19,58 @@ import { useFormat } from "../../i18n/useFormat";
 import { parseAmount } from "../financing/amount";
 
 const card = "rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800";
+const LOCATION_KEY = "decisionguard.market.location";
+const DISTANCES = [0, 25, 50, 100, 250];
+
+function savedLocation(): string | null {
+  try {
+    return localStorage.getItem(LOCATION_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveLocation(id: string) {
+  try {
+    localStorage.setItem(LOCATION_KEY, id);
+  } catch {
+    // a private window: the choice lasts for this visit only
+  }
+}
+
+/** The server's answer when the chosen place has no data for this (yuan prices, no quotes). */
+function missing(error: unknown): string | undefined {
+  return error instanceof ApiRequestError ? (error.body?.detail?.missing as string | undefined) : undefined;
+}
+
+/** Locations grouped for the picker: Bangladesh by division, then China. */
+function LocationPicker({ places, value, onChange }: { places: MarketLocation[]; value: string; onChange: (id: string) => void }) {
+  const { t } = useTranslation();
+  const pickerId = useId();
+  const groups = new Map<string, MarketLocation[]>();
+  for (const place of places) {
+    const group = place.country === "CN" ? t("market.countryCN") : `${t("market.countryBD")} · ${place.division}`;
+    groups.set(group, [...(groups.get(group) ?? []), place]);
+  }
+  return (
+    <div>
+      <label htmlFor={pickerId} className="mb-1 block text-sm font-medium">{t("market.location")}</label>
+      <select id={pickerId} value={value} onChange={(e) => onChange(e.target.value)} className={field}>
+        {[...groups.entries()].map(([group, list]) => (
+          <optgroup key={group} label={group}>
+            {list.map((place) => (
+              <option key={place.id} value={place.id}>
+                {place.name} ({t(`market.cadence.${place.cadence}`)})
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t("market.locationHelp")}</p>
+    </div>
+  );
+}
+
 /** Server answers carry the source list's date; the bundled sample has none. */
 function livePrices(list: WatchItem[] | undefined): boolean {
   return Boolean(list && list.length > 0 && list.every((item) => item.published_on));
@@ -37,24 +89,25 @@ const field = "w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 da
 
 /** The server has no supplier quote on record for this shop (a self-service shop). */
 function noQuotes(error: unknown): boolean {
-  return error instanceof ApiRequestError && error.body?.detail?.missing === "supplier_quote";
+  return missing(error) === "supplier_quote";
 }
 
-function VendorRanking({ commodities, live }: { commodities: string[]; live: boolean }) {
+function VendorRanking({ commodities, live, location }: { commodities: string[]; live: boolean; location?: string }) {
   const { t } = useTranslation();
   // A self-service shop's own data is live: sample vendors are never shown to it as its own.
   const ownShop = useSession().data?.data_mode === "live";
   const text = useServerText();
   const format = useFormat();
-  const ids = { commodity: useId(), quantity: useId() };
+  const ids = { commodity: useId(), quantity: useId(), distance: useId() };
   const [commodity, setCommodity] = useState(commodities.includes("rice_coarse") ? "rice_coarse" : (commodities[0] ?? ""));
   const [quantity, setQuantity] = useState("500");
-  const rank = useMutation({ mutationFn: () => api.market.rankVendors(commodity, quantity.trim()) });
+  const [maxKm, setMaxKm] = useState(0);
+  const rank = useMutation({ mutationFn: () => api.market.rankVendors(commodity, quantity.trim(), location, maxKm || undefined) });
   return (
     <section aria-labelledby="h-vendors" className={card}>
       <h3 id="h-vendors" className="text-lg font-semibold">{t("market.vendorsTitle")}</h3>
       {(rank.data ? rank.data.length > 0 && !rank.data.every((v) => v.source) : !live) && <SampleLabel />}
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+      <div className="mt-3 grid gap-3 sm:grid-cols-4">
         <div>
           <label htmlFor={ids.commodity} className="mb-1 block text-sm font-medium">{t("market.commodity")}</label>
           <select id={ids.commodity} value={commodity} onChange={(e) => setCommodity(e.target.value)} className={field}>
@@ -64,6 +117,14 @@ function VendorRanking({ commodities, live }: { commodities: string[]; live: boo
         <div>
           <label htmlFor={ids.quantity} className="mb-1 block text-sm font-medium">{t("market.quantity")}</label>
           <input id={ids.quantity} inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} className={field} />
+        </div>
+        <div>
+          <label htmlFor={ids.distance} className="mb-1 block text-sm font-medium">{t("market.maxDistance")}</label>
+          <select id={ids.distance} value={maxKm} onChange={(e) => setMaxKm(Number(e.target.value))} className={field}>
+            {DISTANCES.map((km) => (
+              <option key={km} value={km}>{km === 0 ? t("market.anyDistance") : t("market.withinKm", { km: format.number(String(km), 0) })}</option>
+            ))}
+          </select>
         </div>
         <div className="flex items-end">
           <button type="button" onClick={() => rank.mutate()} disabled={rank.isPending} className="w-full rounded-xl bg-teal-700 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
@@ -102,6 +163,9 @@ function VendorRanking({ commodities, live }: { commodities: string[]; live: boo
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 {t("market.leadTime", { days: format.days(vendor.quote.lead_time_days) })}
                 {vendor.quote.on_time_rate && <> · {t("market.onTime", { rate: format.probability(vendor.quote.on_time_rate) })}</>}
+                {vendor.vendor_location && vendor.distance_km !== undefined && (
+                  <> · {t("market.vendorPlace", { place: vendor.vendor_location.name, division: vendor.vendor_location.division, km: format.number(vendor.distance_km, 0) })}</>
+                )}
               </p>
             </li>
           ))}
@@ -111,7 +175,7 @@ function VendorRanking({ commodities, live }: { commodities: string[]; live: boo
   );
 }
 
-function Negotiation({ commodities, live }: { commodities: string[]; live: boolean }) {
+function Negotiation({ commodities, live, location }: { commodities: string[]; live: boolean; location?: string }) {
   const { t } = useTranslation();
   const text = useServerText();
   const format = useFormat();
@@ -126,7 +190,7 @@ function Negotiation({ commodities, live }: { commodities: string[]; live: boole
     event.preventDefault();
     const amount = parseAmount(offer);
     setInvalid(amount === null);
-    if (amount) plan.mutate({ commodity, quantity: quantity.trim(), offer_price: { amount, currency: "BDT" }, payment_days: days });
+    if (amount) plan.mutate({ commodity, quantity: quantity.trim(), offer_price: { amount, currency: "BDT" }, payment_days: days, ...(location ? { location } : {}) });
   };
   return (
     <section aria-labelledby="h-negotiate" className={card}>
@@ -159,7 +223,11 @@ function Negotiation({ commodities, live }: { commodities: string[]; live: boole
           {t("market.makePlan")}
         </button>
       </form>
-      {plan.isError && <div className="mt-3"><ErrorState error={plan.error} /></div>}
+      {plan.isError && (missing(plan.error) === "financing_catalogue" ? (
+        <div className="mt-3"><EmptyState>{t("market.noFinancingHere")}</EmptyState></div>
+      ) : (
+        <div className="mt-3"><ErrorState error={plan.error} /></div>
+      ))}
       {plan.data && (
         <div className="mt-4 space-y-3">
           <dl className="flex flex-wrap gap-x-8 gap-y-2">
@@ -209,18 +277,32 @@ export function MarketScreen() {
   const text = useServerText();
   const format = useFormat();
   useDocumentTitle(t("nav.market"));
-  const prices = useQuery({ queryKey: ["market", "prices"], queryFn: api.market.prices });
-  const alerts = useQuery({ queryKey: ["market", "alerts"], queryFn: api.market.alerts });
+  const places = useQuery({ queryKey: ["market", "locations"], queryFn: api.market.locations });
+  const [chosen, setChosen] = useState<string | null>(savedLocation);
+  const known = places.data ?? [];
+  const location = (known.find((place) => place.id === chosen) ?? known[0])?.id;
+  const choose = (id: string) => {
+    setChosen(id);
+    saveLocation(id);
+  };
+  const prices = useQuery({ queryKey: ["market", "prices", location], queryFn: () => api.market.prices(location), enabled: places.isFetched });
+  const alerts = useQuery({ queryKey: ["market", "alerts", location], queryFn: () => api.market.alerts(location), enabled: places.isFetched });
   const commodities = prices.data?.map((item) => item.commodity) ?? [];
   const live = livePrices(prices.data);
-  const published = live ? prices.data?.[0]?.published_on : undefined;
-  const sourceUrl = live ? prices.data?.[0]?.latest.source_url : undefined;
+  const first = live ? prices.data?.[0] : undefined;
+  const published = first?.published_on;
+  const sourceUrl = first?.latest.source_url;
   return (
     <section aria-labelledby="h-market" className="space-y-6">
       <h2 id="h-market" className="text-xl font-semibold">{t("nav.market")}</h2>
+      {known.length > 0 && location && <LocationPicker places={known} value={location} onChange={choose} />}
       {prices.data && (live && published ? (
         <p role="note" className="rounded-xl bg-teal-50 p-3 text-sm text-teal-900 dark:bg-teal-900/30 dark:text-teal-100">
-          {t("market.sourceNote", { date: format.date(published, "long") })}{" "}
+          {t("market.sourceNoteAt", {
+            source: t(`market.sourceName.${first?.latest.source ?? "tcb"}`),
+            place: first?.latest.market ?? "",
+            date: format.date(published, "long"),
+          })}{" "}
           {sourceUrl && (
             <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
               {t("market.sourceLink")}
@@ -293,8 +375,8 @@ export function MarketScreen() {
         </QueryView>
       </section>
 
-      {commodities.length > 0 && <VendorRanking commodities={commodities} live={live} />}
-      {commodities.length > 0 && <Negotiation commodities={commodities} live={live} />}
+      {commodities.length > 0 && <VendorRanking key={`v-${location}`} commodities={commodities} live={live} location={location} />}
+      {commodities.length > 0 && <Negotiation key={`n-${location}`} commodities={commodities} live={live} location={location} />}
     </section>
   );
 }

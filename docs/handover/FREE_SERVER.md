@@ -106,8 +106,9 @@ Redeploy both services first (**decisionguard-api** and **decisionguard-web** �
 4. As the grocery owner, **Cash → What if…**: drag Sales change quickly from 0 to -30. The
    slider moves at once, "Updating…" shows, and one result arrives about a second after you
    stop (one request, not one per step).
-5. **Market**: the note says "TCB's daily retail price list for Dhaka, published 19 October 2026"
-   with a link to the list; no "Sample data" label on any card; chickpea shows a price alert;
+5. **Market**: the note says "TCB's daily retail price list, Dhaka, published 19 October 2026"
+   with a link to the list; **Your location** lists Bangladesh by division and China, and picking
+   Gazipur Sadar or China (national average) changes the prices and the note; no "Sample data" label on any card; chickpea shows a price alert;
    **Rank vendors** lists Supplier N rows; **Make my plan** shows the walk-away, the target, the
    TCB price and your cost of money.
 

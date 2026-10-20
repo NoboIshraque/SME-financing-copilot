@@ -1,11 +1,11 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { PricePoint } from "../../api/contracts";
-import type { MarketAlert, WatchItem } from "../../api/types";
+import type { MarketAlert, MarketLocation, WatchItem } from "../../api/types";
 import { sessionFor } from "../../mocks/db";
 import { vendorRanking } from "../../mocks/fixtures/market";
-import { renderApp } from "../../test/render";
+import { renderApp, requestedPaths } from "../../test/render";
 
 const TCB_URL = "https://objectstorage.example/office-tcb/2026-10-19.xlsx";
 
@@ -43,8 +43,8 @@ describe("Market screen", () => {
 
   it("shows TCB's published list with its date and link, and no sample label on the price cards", async () => {
     renderApp("/market", { overrides: LIVE });
-    const note = await screen.findByText(/TCB's daily retail price list for Dhaka, published 19 October 2026/);
-    expect(note).toHaveTextContent("these are not live prices");
+    const note = await screen.findByText(/TCB's daily retail price list, Dhaka, published 19 October 2026/);
+    expect(note).toHaveTextContent("These are published lists, not live prices.");
     expect(screen.getByRole("link", { name: "Open TCB's list" })).toHaveAttribute("href", TCB_URL);
     const watch = screen.getByRole("region", { name: "Prices you watch" });
     expect(within(watch).getByRole("row", { name: /Chickpeas/ })).toHaveTextContent("TCB Dhaka, published 19 Oct");
@@ -96,6 +96,48 @@ describe("Market screen", () => {
     expect(await within(negotiate).findByText(/Market price used: ৳52.50 \/ kg, TCB, published 19 Oct/)).toBeInTheDocument();
     expect(negotiate).toHaveTextContent("Your cost of money (best loan you qualify for): 4.07%");
     expect(within(negotiate).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+  });
+
+  it("lets the owner pick a location in Bangladesh or China, and asks for that place's prices", async () => {
+    const place = (id: string, name: string, division: string, country: string, source: MarketLocation["source"], cadence: MarketLocation["cadence"]) =>
+      ({ id, name, division, district: division, latitude: 0, longitude: 0, source, cadence, country, currency: country === "CN" ? "CNY" : "BDT", latest_on: "2026-10-19" });
+    const locations = [
+      place("tcb-dhaka", "Dhaka city", "Dhaka", "BD", "tcb", "daily"),
+      place("wfp-4035", "Gazipur Sadar", "Dhaka", "BD", "wfp", "monthly"),
+      place("wfp-114", "Teknaf Market", "Chittagong", "BD", "wfp", "monthly"),
+      place("cn-national", "China (national average)", "China", "CN", "nbs", "10-day"),
+    ];
+    const { user, fetchMock } = renderApp("/market", { overrides: { ...LIVE, "GET /api/market/locations": { body: locations } } });
+    const picker = await screen.findByLabelText("Your location");
+    expect(within(picker).getAllByRole("group").map((g) => g.getAttribute("label"))).toEqual(["Bangladesh · Dhaka", "Bangladesh · Chittagong", "China"]);
+    expect(within(picker).getByRole("option", { name: "China (national average) (every 10 days)" })).toBeInTheDocument();
+
+    await user.selectOptions(picker, "cn-national");
+    await waitFor(() => expect(requestedPaths(fetchMock)).toContain("/api/market/prices?location=cn-national"));
+    expect(requestedPaths(fetchMock)).toContain("/api/market/alerts?location=cn-national");
+  });
+
+  it("shows where each vendor is and how far, and sends the distance limit", async () => {
+    const ranked = vendorRanking("rice_coarse").map((vendor, i) => ({
+      ...vendor, source: "ledger_supplier" as const, distance_km: String(12 + i * 40),
+      vendor_location: { id: `wfp-${i}`, name: ["Gazipur Sadar", "Narsingdi Sadar", "Teknaf Market"][i] ?? "x", division: i === 2 ? "Chittagong" : "Dhaka", district: "x" },
+    }));
+    const prices = [...LIVE_PRICES, { ...LIVE_PRICES[0]!, commodity: "rice_coarse" }];
+    const { user, fetchMock } = renderApp("/market", { overrides: { ...LIVE, "GET /api/market/prices": { body: prices }, "POST /api/market/vendors/rank": { body: ranked } } });
+    const vendors = await screen.findByRole("region", { name: "Best vendor for an order" });
+    await user.selectOptions(within(vendors).getByLabelText("Vendors within"), "50");
+    await user.click(within(vendors).getByRole("button", { name: "Rank vendors" }));
+    expect(await within(vendors).findByText(/Gazipur Sadar, Dhaka · 12 km away/)).toBeInTheDocument();
+    const call = fetchMock.mock.calls.find(([path]) => String(path) === "/api/market/vendors/rank");
+    expect(JSON.parse(String((call?.[1] as RequestInit).body))).toMatchObject({ commodity: "rice_coarse", max_km: 50 });
+  });
+
+  it("explains that a deal priced in yuan cannot be planned with Bangladeshi loans", async () => {
+    const abstain = { status: 422, body: { code: "not_enough_data", message_key: "error.not_enough_data", detail: { missing: "financing_catalogue" } } };
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "POST /api/market/negotiate": abstain } });
+    const negotiate = await screen.findByRole("region", { name: "Negotiate a sale" });
+    await user.click(within(negotiate).getByRole("button", { name: "Make my plan" }));
+    expect(await within(negotiate).findByText(/Pick a Bangladesh location to plan a deal/)).toBeInTheDocument();
   });
 
   it("never shows sample vendors to a self-service shop as its own", async () => {

@@ -11,7 +11,7 @@ test("the Market screen names TCB's list and its publication date instead of the
   await needsRoutes(["GET /api/market/prices"], { mockCannot: "serve TCB's published lists" });
 
   await app.start("market");
-  const note = page.getByRole("note").filter({ hasText: tPattern("market.sourceNote", { date: ".+" }, app.language, false) });
+  const note = page.getByRole("note").filter({ hasText: tPattern("market.sourceNoteAt", { source: ".+", place: ".+", date: ".+" }, app.language, false) });
   await expect(note).toBeVisible();
   await expect(note.getByRole("link", { name: app.t("market.sourceLink") })).toHaveAttribute("href", /^https:\/\//);
   const watch = page.getByRole("region", { name: app.t("market.watchTitle") });
@@ -29,4 +29,14 @@ test("the Market screen names TCB's list and its publication date instead of the
   await expect(negotiate.getByText(app.t("market.walkAway"))).toBeVisible();
   await expect(negotiate).toContainText(app.t("market.cost_of_money"));
   await expect(negotiate.getByText(app.t("market.sampleLabel"))).toHaveCount(0);
+
+  // The owner can pick another place: a WFP market elsewhere in Bangladesh, or China.
+  const picker = page.getByLabel(app.t("market.location"));
+  await picker.selectOption({ label: `Gazipur Sadar (${app.t("market.cadence.monthly")})` });
+  await expect(note).toContainText(app.t("market.sourceName.wfp"));
+  await expect(note).toContainText("Gazipur Sadar");
+  await picker.selectOption("cn-national");
+  await expect(note).toContainText(app.t("market.sourceName.nbs"));
+  await expect(watch.getByRole("row").nth(1)).toContainText("¥");
 });
+

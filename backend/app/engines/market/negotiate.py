@@ -22,7 +22,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
 
-from app.contracts import DataMode, Figure, PricePoint, Provenance, Unit
+from app.contracts import DataMode, Figure, Provenance, Unit
+from app.engines.market.points import MarketPrice, digest
 
 TARGET_SHARE = Decimal("0.5")
 DISCOUNT_SHARE = Decimal("0.8")
@@ -65,7 +66,7 @@ def _round(value: Decimal) -> Decimal:
     return value.quantize(CENT, rounding=ROUND_HALF_UP)
 
 
-def plan(*, market: PricePoint, market_ref: str, offer: Decimal, quantity: Decimal,
+def plan(*, market: MarketPrice, market_ref: str, offer: Decimal, quantity: Decimal,
          payment_days: int, apr_percent: Decimal, apr_ref: str,
          data_mode: DataMode) -> Plan:
     """Walk-away, target and script for one sale (see the module docstring for the formulas)."""
@@ -82,13 +83,12 @@ def plan(*, market: PricePoint, market_ref: str, offer: Decimal, quantity: Decim
 
     params = {"market_price": str(mid), "market_high": str(high), "offer": str(offer),
               "quantity": str(quantity), "payment_days": str(payment_days),
-              "apr_percent": str(apr_percent), "source": market.source.value,
+              "apr_percent": str(apr_percent), "source": market.source, "market": market.market,
               "observed_on": market.observed_on.isoformat()}
     rows = (market_ref, apr_ref)
 
     def fig(name: str, label: str, value: Decimal, unit: Unit = Unit.BDT) -> Figure:
-        return Figure(id=f"negotiation:{name}:{market.commodity}:{payment_days}:{offer}:"
-                         f"{quantity}:{apr_percent}:{market.observed_on.isoformat()}",
+        return Figure(id=f"negotiation:{name}:{market.commodity}:{digest(value, params, rows)}",
                       label_key=label, value=value, unit=unit, data_mode=data_mode,
                       provenance=Provenance(formula_id=f"negotiation.{name}", formula_version=1,
                                             source_row_ids=rows, parameters=params))
