@@ -8,8 +8,8 @@ input facts they cite.
     cash.forecast      WP-04  P10/P50/P90 balance band, runway, buffer target
     cash.gaps          WP-04  gaps (breach day, shortfall, drivers) and the cheapest fixes
     analysis.scenarios WP-04  the forecast replayed with shocks (what-if, same seeded draws)
-    financing.match    WP-06  options ranked by true cost and fit, sized to the cash gap; with
-                              no gap (or when asked how big), the largest loan whose
+    financing.match    WP-06  options ranked by true cost and fit, sized to the cash gap; asked
+                              how big (or which loan is best), also the largest loan whose
                               repayments keep the cautious forecast above the buffer
     analysis.ratios    WP-01  ledger ratios from the metric registry (WP-07 adds more)
     mesh.propose       WP-08  a netting round over the circular debt the shop is part of
@@ -262,7 +262,8 @@ def financing_match(ctx: ToolContext, params: FinancingParams) -> ToolResult:
         modes.append(source.data_mode)
     mode = most_cautious(modes)
     safe: list[loansize.SafeSize] = []
-    sizing = band is not None and (need is None or params.safe_size)
+    no_gap = need is None
+    sizing = band is not None and params.safe_size
     if sizing:
         start = params.needed_by or ctx.as_of + timedelta(days=1)
         safe = safe_sizes(products, facts, start, band, params.tenor_days, params.purpose_key)
@@ -283,10 +284,12 @@ def financing_match(ctx: ToolContext, params: FinancingParams) -> ToolResult:
     usable = [c.option for c in ranked if c.option.eligibility.status is not EligibilityStatus.fail]
     top = usable[:TOP_OPTIONS]
     figures = (*safe_figures, *(f for option in top for f in option.figures))
-    cards = (draft_application(top[0], need, facts, now=ctx.now),) if top else ()
-    notes = tuple(dict.fromkeys(k for o in top for k in o.reason_keys)) + safe_notes
+    # No gap: the safe size answers the question asked, but no loan is pushed (no card).
+    cards = (draft_application(top[0], need, facts, now=ctx.now),) if top and not no_gap else ()
+    gap_note = ("financing.no_gap",) if no_gap else ()
+    notes = gap_note + tuple(dict.fromkeys(k for o in top for k in o.reason_keys)) + safe_notes
     if not top:
-        notes = ("financing.no_eligible_option", *safe_notes)
+        notes = (*gap_note, "financing.no_eligible_option", *safe_notes)
     return ToolResult("financing.match", figures=figures, facts=tuple(cited), cards=cards,
                       payload={"need": need, "options": tuple(top),
                                "safe": tuple(zip(safe[:TOP_OPTIONS], safe_figures, strict=True)),

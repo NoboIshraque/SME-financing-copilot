@@ -26,9 +26,11 @@ TOOL_ORDER = ("cash.forecast", "cash.gaps", "payables.upcoming", "analysis.scena
 # The tool whose result answers the intent's question, stated before the context it needs
 # ("how big a loan?" leads with the loan, then the cash gap it was sized on).
 LEAD_TOOL = {"find_financing": "financing.match"}
-# "How big / how much / how safely" a loan: size the largest loan the forecast can carry.
+# "How big / how much / which is best": size the largest loan the forecast can carry. A plain
+# "should I take a loan?" with no gap is not sized: no loan is pushed when none is needed.
 _LOAN_SIZE = re.compile(r"how (?:big|much|large)|max(?:imum)?|largest|biggest|safe(?:ly)?|"
-                        r"afford|koto|কত|কতো|সর্বোচ্চ|নিরাপদ|多少|多大|最多|最高|安全")
+                        r"afford|best|which loan|cheapest|koto|kon lon|কত|কতো|সর্বোচ্চ|"
+                        r"নিরাপদ|কোন ঋণ|কোন লোন|সবচেয়ে ভালো|多少|多大|最多|最高|安全|哪个|最好")
 LANGUAGES = ("en", "bn", "zh")
 DEFAULT_SALES_SHOCK = Decimal(-20)  # a what-if with no number stresses sales by 20%
 

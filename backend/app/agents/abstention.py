@@ -69,8 +69,8 @@ def not_in_this_version(tools: Iterable[str], engines: Iterable[str]) -> Abstent
     names = set(tools)
     key = "abstain.market_unavailable" if names and names <= CUT_TOOLS \
         else "abstain.engine_unavailable"
-    return Abstention(reason=R.out_of_scope, missing=(), message_key=key,
-                      detail=("engine_unavailable: " + ", ".join(dict.fromkeys(engines)))[:500])
+    return Abstention(reason=R.out_of_scope, missing=tuple(dict.fromkeys(engines)),
+                      message_key=key, detail="engine_unavailable")
 
 
 def help_menu() -> Abstention:

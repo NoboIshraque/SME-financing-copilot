@@ -96,6 +96,12 @@ def test_how_big_a_loan_with_a_cash_gap_says_no_loan_is_safe_and_why(orch, ledge
 def test_which_loan_with_no_gap_no_longer_stops_at_no_gap(orch, ledger):
     rec = ask(orch, ledger, "Which loan is best for me?", "sme_garment").recommendation
     assert any(c.formula_id == loansize.FORMULA_ID for c in rec.claims)
+    assert rec.action_cards == ()  # no gap: no loan application is pushed
+
+
+def test_should_i_take_a_loan_with_no_gap_is_not_sized(orch, ledger):
+    run = ask(orch, ledger, "Should I take a loan?", "sme_garment")
+    assert run.results["financing.match"].notes == ("financing.no_gap",)
 
 
 # ---------------------------------------------------------------- money owed, help, cut engines
@@ -156,7 +162,8 @@ def test_money_due_figures_recompute_and_a_changed_value_is_rejected(ledger, ten
 
 @pytest.mark.parametrize("delta", [-loansize.STEP, loansize.STEP], ids=["smaller", "larger"])
 def test_a_safe_loan_amount_that_is_not_the_largest_safe_one_is_rejected(ledger, delta):
-    context = _context(ledger, "sme_garment", "cash.gaps", "financing.match")
+    context = _context(ledger, "sme_garment", "cash.gaps", "financing.match",
+                       params={"financing.match": {"safe_size": True}})
     checker = Checker(context, context.results)
     _, figure = context.results["financing.match"].payload["safe"][0]
     assert checker.check_figure(figure) is CheckStatus.verified

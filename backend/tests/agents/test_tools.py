@@ -231,10 +231,18 @@ def test_financing_is_sized_to_the_first_gap_and_uses_the_forecast(hardware):
     assert card.payload["product_id"] == result.payload["options"][0].product.id
 
 
-def test_financing_without_a_gap_prices_the_largest_safe_loan(ledger):
+def test_financing_without_a_gap_says_so(ledger):
     context = ctx(ledger, "sme_grocery")
     REGISTRY.run("cash.gaps", context)
     result = REGISTRY.run("financing.match", context)
+    assert result.notes == ("financing.no_gap",) and result.figures == ()
+
+
+def test_asked_how_big_without_a_gap_prices_the_largest_safe_loan_but_pushes_none(ledger):
+    context = ctx(ledger, "sme_grocery")
+    REGISTRY.run("cash.gaps", context)
+    result = REGISTRY.run("financing.match", context, {"safe_size": True})
+    assert "financing.no_gap" in result.notes and result.cards == ()
     (size, figure), *_ = result.payload["safe"]
     assert figure.label_key == "copilot.safe_loan" and figure.value == size.amount > 0
     assert figure.provenance.parameters["product_id"] == size.product.id

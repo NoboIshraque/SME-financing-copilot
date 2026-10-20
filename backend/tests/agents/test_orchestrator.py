@@ -138,7 +138,7 @@ def test_primary_intent_without_an_engine_abstains_with_the_engine_name(orch, le
     rec = ask(orch, ledger, "What is the wholesale price of rice?").recommendation
     assert rec.abstention.reason is AbstentionReason.out_of_scope
     assert rec.abstention.message_key == "abstain.market_unavailable"  # cut, said politely
-    assert "WP-09 market engine" in rec.abstention.detail
+    assert rec.abstention.missing == ("WP-09 market engine",)
 
 
 def test_secondary_intent_without_an_engine_is_skipped_not_fatal(orch, ledger):
