@@ -5,7 +5,8 @@ import type { Alert, Recommendation } from "../../api/contracts";
 import { alerts, cashForecast } from "../../mocks/fixtures/cash";
 import { money, NOW } from "../../mocks/fixtures/common";
 import { todayRecommendation } from "../../mocks/fixtures/copilot";
-import { ACCOUNTANT, renderApp } from "../../test/render";
+import i18n from "../../i18n";
+import { ACCOUNTANT, renderApp, requestedPaths } from "../../test/render";
 
 const criticalAlert: Alert = {
   id: "al-payroll",
@@ -32,6 +33,15 @@ function card(name: RegExp) {
 }
 
 describe("Today screen", () => {
+
+  it("asks the copilot for today's advice in the language the owner reads", async () => {
+    await i18n.changeLanguage("bn");
+    const { fetchMock } = renderApp("/");
+    await screen.findAllByRole("article");
+    expect(requestedPaths(fetchMock).filter((path) => path.includes("/api/copilot/today"))).toContain(
+      "/api/copilot/today?language=bn",
+    );
+  });
 
   it("lists two supplier bills that drive the same gap as two rows", async () => {
     const twoBills: Alert = {

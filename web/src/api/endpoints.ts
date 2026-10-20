@@ -1,4 +1,5 @@
 // One typed function per backend route. Screens call these, never fetch() directly.
+import type { Language } from "../i18n";
 import { ApiRequestError, apiGet, apiPost } from "./client";
 
 type MarketSample = typeof import("../mocks/fixtures/market");
@@ -124,7 +125,8 @@ export const api = {
 
   copilot: {
     /** WP-10: today's recommendation, with at most 3 pre-checked action cards (P9). */
-    today: () => apiGet<Recommendation>("/api/copilot/today"),
+    today: (language: Language = "en") =>
+      apiGet<Recommendation>(`/api/copilot/today?language=${encodeURIComponent(language)}`),
     ask: (question: string) => apiPost<Recommendation>("/api/copilot/ask", { question }),
     abstentions: () => apiGet<AbstentionLogEntry[]>("/api/copilot/abstentions"),
   },

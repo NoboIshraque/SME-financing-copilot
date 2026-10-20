@@ -12,6 +12,7 @@ import { StabilityBar } from "../../components/StabilityBar";
 import { ErrorState, QueryView } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
 import { useServerText } from "../../i18n/serverText";
+import type { Language } from "../../i18n";
 import { useFormat } from "../../i18n/useFormat";
 
 const STATEMENTS = ["pnl", "balance_sheet", "cash_flow"] as const;
@@ -56,14 +57,15 @@ function StatementTables({ data }: { data: Statements }) {
 }
 
 export function AnalysisScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const text = useServerText();
   const format = useFormat();
   useDocumentTitle(t("nav.analysis"));
   const statements = useQuery({ queryKey: ["analysis", "statements"], queryFn: api.analysis.statements });
   const ratios = useQuery({ queryKey: ["analysis", "ratios"], queryFn: api.analysis.ratios });
   const variance = useQuery({ queryKey: ["analysis", "variance"], queryFn: api.analysis.variance });
-  const today = useQuery({ queryKey: ["copilot", "today"], queryFn: api.copilot.today });
+  const language = (i18n.language || "en") as Language;
+  const today = useQuery({ queryKey: ["copilot", "today", language], queryFn: () => api.copilot.today(language) });
   const recommendationId = today.data?.id;
   const stability = useQuery({
     queryKey: ["analysis", "stability", recommendationId],
