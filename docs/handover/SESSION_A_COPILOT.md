@@ -58,6 +58,20 @@ doing ok", what-ifs, debts with other shops, drafting a reminder, today's summar
 like "hi"/"help"/"what can you do"). For each, the expected intent(s). Run it, list which ones
 fall to `unknown`. Put the miss count in your PR.
 
+Two failures Nobo saw on the hosted site (both must be fixed and kept as tests):
+- **"সামনে কবে বিল দিব"** ("when do I pay the next bills?", demo accountant, grocery shop) got
+  "won't guess". `বিল` (bill) was left out of `KEYWORDS` on purpose because Bangla keywords
+  match at the start of a word and `বিলম্ব` means "delay". Add a way to match some Bangla
+  keywords as **whole words** (e.g. `বিল` followed by a space, punctuation, end, or a case
+  ending like `বিলের`/`বিলগুলো`, but not `বিলম্ব`), and route it to upcoming payments (A2).
+- **"How big a loan can I safely take?"** (demo owner, garment shop) answered only "no cash gap
+  is expected…" with the safety buffer: it never said how big a loan is safe. The answer must
+  address the question asked: for loan-size questions, run `financing.match` (and the cash
+  band) and narrate the largest amount among the eligible options whose repayments keep the
+  balance above the safety buffer, or say plainly which fact is missing. Find why the
+  financing part was dropped for this shop (intent planning, a tool abstaining, or the
+  narrator only covering cash) and fix the cause, not the wording.
+
 ### A2. Fix the misses without breaking precision
 - Widen `KEYWORDS` per intent in all four writing styles. Bangla keywords match at word start,
   so avoid short stems that start unrelated words (the file explains this); Chinese matches
