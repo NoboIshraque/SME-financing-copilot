@@ -406,7 +406,9 @@ def _market(result: ToolResult, language: str) -> list[Statement]:
         if price is not None:
             out.append(statement("copilot.market_price", price, language, **names,
                                  when=day_text(row.latest.published_on, language)))
-        change = by_id.get(f"market:{point.commodity}:change:{point.observed_on.isoformat()}")
+        # Matched by what it was computed from: WP-09 owns the change figure's id format.
+        change = next((f for f in result.figures if f.unit is Unit.percent
+                       and f.provenance.source_row_ids[:1] == (row.latest.ref,)), None)
         if change is not None and change.label_key in TEMPLATES:
             out.append(statement(change.label_key, change, language))
     return out
