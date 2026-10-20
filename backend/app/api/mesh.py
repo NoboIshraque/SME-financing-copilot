@@ -168,6 +168,11 @@ def propose(principal: Principal = Depends(require(Permission.ledger_read)),
     store = _store(session, principal)
     graph = build_graph(store.obligations())
     group = next((g for g in graph.nettable_groups() if principal.tenant_id in g), None)
+    if group is None and principal.tenant_id in SME_IDS and store.reopen_demo_ring(
+            principal.tenant_id):
+        # Once one visitor settles the demo ring it would stay settled for everyone else.
+        graph = build_graph(store.obligations())
+        group = next((g for g in graph.nettable_groups() if principal.tenant_id in g), None)
     if group is None:
         return _error(409, "nothing_to_net", "error.nothing_to_net")
     modes = {graph.obligations[oid].data_mode for _, _, d in graph.graph.subgraph(group)
