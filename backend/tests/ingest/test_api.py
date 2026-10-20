@@ -23,6 +23,7 @@ AMBIGUOUS = csv_bytes(["date,party,category,type,amount,channel,ref",
 OWNER = Principal(user_id="u-owner", tenant_id=T, role=Role.owner)
 LENDER = Principal(user_id="u-lender", tenant_id=T, role=Role.lender_viewer,
                    expires_at=datetime(2026, 12, 31, tzinfo=UTC))
+STAFF = Principal(user_id="u-staff", tenant_id=T, role=Role.staff)
 
 
 def _as(client: TestClient, principal: Principal | None) -> None:
@@ -207,3 +208,9 @@ def test_only_roles_that_may_upload_can_preview_or_map_columns(client: TestClien
     res = client.post("/api/ingest/columns", files={"file": ("ledger.csv", AMBIGUOUS, "text/csv")},
                       data={"tenant_id": T})
     assert (res.status_code, res.json()["code"]) == (403, "forbidden")
+
+
+def test_staff_holding_ingest_upload_may_still_preview(client: TestClient):
+    _as(client, STAFF)
+    res = _preview(client)
+    assert (res.status_code, len(res.json()["transactions"])) == (200, 2)

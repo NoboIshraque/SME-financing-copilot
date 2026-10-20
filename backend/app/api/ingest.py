@@ -11,8 +11,9 @@ drafts only when the owner confirms them. Errors are `ApiError` bodies.
 
 The caller is the signed-in principal (WP-11 `current_principal`): without a session every
 route answers 401. The tenant always comes from the principal; a `tenant_id` in the form, query
-or body is optional and must then name the caller's own tenant (403 otherwise). Committing
-writes the shop's ledger, so it is allowed only for the owner or accountant.
+or body is optional and must then name the caller's own tenant (403 otherwise). Preview and
+column mapping need `ingest:upload` (owner, accountant, staff). Committing writes the shop's
+ledger, so it is allowed only for the owner or accountant.
 """
 
 from __future__ import annotations

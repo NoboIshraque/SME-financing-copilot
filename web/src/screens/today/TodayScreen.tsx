@@ -10,6 +10,7 @@ import { ActionCardView } from "../../components/ActionCardView";
 import { EmptyState, ErrorState, LoadingState } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
 import { useServerText } from "../../i18n/serverText";
+import type { Language } from "../../i18n";
 import { useFormat } from "../../i18n/useFormat";
 import { AlertCard } from "./AlertCard";
 import { ALERT_TIER_ORDER, sortAlerts } from "./alerts";
@@ -70,12 +71,13 @@ function TopActions({ today, alerts }: { today: UseQueryResult<Recommendation>; 
 }
 
 export function TodayScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const format = useFormat();
   useDocumentTitle(t("nav.today"));
   const forecast = useQuery({ queryKey: ["cash", "forecast"], queryFn: api.cash.forecast });
   const alerts = useQuery({ queryKey: ["cash", "alerts"], queryFn: api.cash.alerts });
-  const today = useQuery({ queryKey: ["copilot", "today"], queryFn: api.copilot.today });
+  const language = (i18n.language || "en") as Language;
+  const today = useQuery({ queryKey: ["copilot", "today", language], queryFn: () => api.copilot.today(language) });
 
   const sorted = sortAlerts(alerts.data ?? []);
   const pinned = sorted.filter((alert) => alert.tier === "critical");

@@ -1,11 +1,12 @@
 import { screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { Alert, Recommendation } from "../../api/contracts";
 import { alerts, cashForecast } from "../../mocks/fixtures/cash";
 import { money, NOW } from "../../mocks/fixtures/common";
 import { todayRecommendation } from "../../mocks/fixtures/copilot";
-import { ACCOUNTANT, renderApp } from "../../test/render";
+import i18n from "../../i18n";
+import { ACCOUNTANT, renderApp, requestedPaths } from "../../test/render";
 
 const criticalAlert: Alert = {
   id: "al-payroll",
@@ -32,6 +33,40 @@ function card(name: RegExp) {
 }
 
 describe("Today screen", () => {
+
+  it("asks the copilot for today's advice in the language the owner reads", async () => {
+    await i18n.changeLanguage("bn");
+    const { fetchMock } = renderApp("/");
+    await screen.findAllByRole("article");
+    expect(requestedPaths(fetchMock).filter((path) => path.includes("/api/copilot/today"))).toContain(
+      "/api/copilot/today?language=bn",
+    );
+  });
+
+  it("lists two supplier bills that drive the same gap as two rows", async () => {
+    const twoBills: Alert = {
+      ...criticalAlert,
+      gap: {
+        ...criticalAlert.gap!,
+        drivers: [
+          { kind: "bill_due", label_key: "driver.supplier_bill", amount: money(12000), reference_id: "bill-1" },
+          { kind: "bill_due", label_key: "driver.supplier_bill", amount: money(7000), reference_id: "bill-2" },
+        ],
+      },
+    };
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      renderApp("/", { overrides: { "GET /api/cash/alerts": { body: [twoBills] } } });
+      const critical = await screen.findByRole("article", { name: "Payroll at risk" });
+      const why = within(critical).getByText("Why").nextElementSibling as HTMLElement;
+      expect(within(why).getAllByRole("listitem")).toHaveLength(2);
+      expect(within(why).getByText("৳12,000")).toBeInTheDocument();
+      expect(within(why).getByText("৳7,000")).toBeInTheDocument();
+      expect(errors.mock.calls.some((call) => String(call[0]).includes("same key"))).toBe(false);
+    } finally {
+      errors.mockRestore();
+    }
+  });
   it("shows cash now, the runway and the buffer from the forecast's figures", async () => {
     renderApp("/");
     const cash = await screen.findByRole("region", { name: "Cash now" });
