@@ -218,6 +218,8 @@ def match(body: NeedBody,
     best = next((o for o in options if o.eligibility.status is EligibilityStatus.pass_), None)
     may_draft = policy.decide(principal.role, ActionType.draft_loan_application).allowed
     draft = draft_application(best, need, facts, now=clock()) if best and may_draft else None
+    if draft is not None:
+        issue_cards(session, principal.tenant_id, (draft,), clock())
     unpriced = [AskTheLender(**vars(u)) for u in load_unpriced(jurisdiction=body.jurisdiction)]
     return MatchResult(need=need, as_of=as_of, options=options, lenders=lenders,
                        application=draft, ask_the_lender=unpriced,
