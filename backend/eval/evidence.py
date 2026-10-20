@@ -107,7 +107,7 @@ def eval_section(mode: str, summary: dict[str, Any], results: list[dict[str, Any
     out = [f"## Evaluation harness ({title})", ""]
     if mode == "offline":
         out += [
-            "The real copilot (WP-10 orchestrator) answers each task over the synthetic "
+            "The real copilot (its agent orchestrator) answers each task over the synthetic "
             "ledger. Model calls replay recorded answers; a prompt with no recording falls "
             "through the gateway's chain to the deterministic planner, exactly as when every "
             "model is down, and each step log shows those attempts. Nothing touches the "
@@ -204,7 +204,7 @@ def readme(backend: Counter[str], web: int | None, stamp: str) -> str:
         lines.append("| `eval/live/` | The same, with live models (`npm run eval -- --live`) |")
     lines += ["| `test-counts.md` | Tests per layer |"]
     if (OUT / "e2e").is_dir():
-        lines.append("| `e2e/` | Hosted end-to-end runs (WP-15) |")
+        lines.append("| `e2e/` | Hosted end-to-end browser runs (Playwright journeys) |")
     lines.append("")
     for mode in ("offline", "live"):
         loaded = load(mode)
