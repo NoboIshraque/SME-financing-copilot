@@ -2,7 +2,7 @@
 
 | | |
 | --- | --- |
-| **Team** | DecisionGuard: Nobo Ishraque (lead), Amdad, Labib |
+| **Team** | DecisionGuard: Md. Amdadul Haque (lead), Nobo Ishraque, Labib Afnan, Adil Akhtab Abir |
 | **University** | Bangladesh University of Professionals (BUP), Dhaka |
 | **Competition** | 2026 Shenzhen International FinTech Competition (FinTechathon), International Track |
 | **Topic** | E: SME Finance Copilot |

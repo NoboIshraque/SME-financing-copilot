@@ -5,8 +5,16 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.chain.anchor import SEPOLIA_CHAIN_ID, AnchorError, SepoliaAnchorer
+from app.chain.anchor import (
+    SEPOLIA_CHAIN_ID,
+    AnchorError,
+    FallbackAnchorer,
+    OfflineAnchorer,
+    SepoliaAnchorer,
+)
 from app.contracts import AnchorChain
+from app.security.jobs import anchorer_for
+from app.settings import Settings
 
 DIGEST = "ab" * 32
 TX_HASH = bytes.fromhex("cd" * 32)
@@ -75,3 +83,34 @@ def test_reads_the_digest_back_from_chain():
     anchorer, _ = make()
     receipt = anchorer.anchor(DIGEST, NOW)
     assert anchorer.onchain_digest(receipt) == DIGEST
+
+
+def test_a_failing_testnet_falls_back_to_an_offline_anchor_that_says_so():
+    """Out of test ETH, node down or no block in time: the approval still completes."""
+    anchorer, _ = make(status=0)
+    receipt = FallbackAnchorer(anchorer, OfflineAnchorer()).anchor(DIGEST, NOW)
+    assert receipt.chain is AnchorChain.offline and receipt.tx_hash is None
+    assert receipt.digest == DIGEST
+
+
+def test_a_working_testnet_is_used_and_read_back_through_the_fallback():
+    anchorer, _ = make()
+    both = FallbackAnchorer(anchorer, OfflineAnchorer())
+    receipt = both.anchor(DIGEST, NOW)
+    assert receipt.chain is AnchorChain.sepolia
+    assert both.onchain_digest(receipt) == DIGEST
+
+
+def test_the_wait_for_a_block_is_bounded_for_web_requests():
+    eth = FakeEth()
+    seen = {}
+    eth.wait_for_transaction_receipt = lambda tx_hash, timeout: seen.setdefault("t", timeout) and {
+        "status": 1, "blockNumber": 1}
+    SepoliaAnchorer(SimpleNamespace(eth=eth), KEY, receipt_timeout=60).anchor(DIGEST, NOW)
+    assert seen["t"] == 60
+
+
+def test_a_malformed_key_keeps_the_audit_anchor_offline():
+    settings = Settings(_env_file=None, chain_mode="sepolia", sepolia_rpc_url="http://127.0.0.1:9",
+                        sepolia_private_key="not-a-key")
+    assert isinstance(anchorer_for(settings), OfflineAnchorer)

@@ -23,6 +23,7 @@ the synthetic demo ring, seeded on first use by a synthetic tenant and labelled 
 
 from __future__ import annotations
 
+import logging
 import secrets
 from dataclasses import dataclass, field
 
@@ -31,7 +32,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.chain.anchor import Anchorer, SepoliaAnchorer
+from app.chain.anchor import Anchorer, FallbackAnchorer, SepoliaAnchorer
 from app.chain.digest import new_salt
 from app.chain.store import StoredOfflineAnchorer
 from app.contracts import (
@@ -62,6 +63,7 @@ from app.security.roles import Permission
 from app.settings import ChainMode
 from app.synthetic.universe import SME_IDS
 
+log = logging.getLogger(__name__)
 router = APIRouter(prefix="/mesh", tags=["mesh"], route_class=ProblemRoute)
 
 
@@ -92,8 +94,14 @@ def get_anchors(request: Request, session: Session = Depends(get_session)) -> An
     rpc = settings.sepolia_rpc_url.get_secret_value()
     key = settings.sepolia_private_key.get_secret_value()
     if settings.chain_mode is ChainMode.sepolia and rpc and key:
-        sepolia = SepoliaAnchorer.from_settings(rpc, key)
-        return Anchors(sepolia, {AnchorChain.offline: offline, AnchorChain.sepolia: sepolia})
+        # A web request waits at most 60 s for a block, then anchors offline (FallbackAnchorer).
+        try:
+            sepolia = SepoliaAnchorer.from_settings(rpc, key, receipt_timeout=60)
+        except Exception:  # a malformed key must not take the mesh and passport pages down
+            log.warning("Sepolia anchorer could not start; anchoring offline")
+        else:
+            return Anchors(FallbackAnchorer(sepolia, offline),
+                           {AnchorChain.offline: offline, AnchorChain.sepolia: sepolia})
     return Anchors(offline, {AnchorChain.offline: offline})
 
 

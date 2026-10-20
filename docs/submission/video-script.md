@@ -4,7 +4,7 @@
 | --- | --- |
 | Deliverable | 03 Demo video (also used in 06 Execution evidence) |
 | Competition | 2026 Shenzhen FinTechathon, International Track, **Topic E: SME Finance Copilot** |
-| Team | Nobo Ishraque (lead), Amdad, Labib |
+| Team | Md. Amdadul Haque (lead), Nobo Ishraque, Labib Afnan, Adil Akhtab Abir |
 | University | Bangladesh University of Professionals (BUP), Dhaka |
 | Language / limit | English. Hard limit 5:00. **Planned 4:40 with every scene, 4:28 without the optional Analysis shot (S9)** |
 | Recording | Tue 20 Oct, morning (Dhaka). Narration by Nobo |
@@ -264,14 +264,14 @@ call from Appendix C. The console shows `allowed: false`, `families: ["fake_owne
 
 - **On screen:** three short lines. "Built: cash alerts · ranked financing · owner approvals ·
   provenance · audit". "Limits: synthetic shops · guard rules-based · demo actions recorded,
-  not sent". "Team: Nobo Ishraque · Amdad · Labib · BUP". Optionally add
+  not sent". "Team: Md. Amdadul Haque · Nobo Ishraque · Labib Afnan · Adil Akhtab Abir · BUP". Optionally add
   `<backend + web test total from docs/submission/evidence/test-counts.md>` (read it from that
   file on the day). Add the hosted URL only if `hishab.quadbits.net` is up on the day.
 - **VO:** "DecisionGuard warns before the cash gap, ranks financing by true cost, and keeps the owner
   in charge. Honest limits: these shops are synthetic, our injection guard is rule-based and on a
   fresh held-out test caught 15 of 24 attacks, which is why money never moves without the owner's
   code, and demo actions are recorded, not sent to a bank.
-  Built by Nobo Ishraque, Amdad and Labib, Bangladesh University of Professionals. Thank you."
+  Built by Md. Amdadul Haque, Nobo Ishraque, Labib Afnan and Adil Akhtab Abir, Bangladesh University of Professionals. Thank you."
 
 ---
 
@@ -392,7 +392,7 @@ All of them are LIVE.
 | 0:30–0:36 | S5 drawer | "Every number opens its formula and source transactions." |
 | 0:36–0:48 | S6 #1 option → S7 approve with code | "Financing ranked by true cost; submitting needs the owner's fresh code." |
 | 0:48–0:55 | S10 blocked Bangla attack (A or B) + S12 "Intact" | "A Bangla injection is blocked and logged in a hash-chained audit trail." |
-| 0:55–1:00 | S14 card | "Team BUP: Nobo, Amdad, Labib. Thank you." |
+| 0:55–1:00 | S14 card | "Team BUP: Amdadul, Nobo, Labib and Adil. Thank you." |
 
 ---
 
