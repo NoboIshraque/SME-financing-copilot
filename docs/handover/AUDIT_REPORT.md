@@ -232,4 +232,4 @@ not reproduce (`?language=en|bn|zh` and no parameter all answer 200).
 | Deck slides at 1920×1080 (Playwright) + `pdftoppm deck.pdf` | 0 | 6 slides overflow in HTML, 5 visibly clipped in the PDF (H6) |
 | `pytest tests/ingest/test_api.py` before/after F1 | 1 / 0 | `4 failed, 19 passed` → `23 passed` |
 | `vitest TodayScreen.test.tsx` before/after F2, F3 | 1 / 0 | each new test failed before its fix; after: web `Tests 212 passed (212)`, lint clean |
-| Final `npm run test` on `audit-final` | FINAL_EXIT | FINAL_RESULT |
+| Final `npm run test` on `audit-final` | 0 | backend `2249 passed, 2 skipped in 320.46s`; web `Test Files 22 passed (22)`, `Tests 212 passed (212)` |
