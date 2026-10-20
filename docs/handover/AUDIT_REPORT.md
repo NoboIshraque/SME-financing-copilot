@@ -6,38 +6,48 @@ Auditor session: `audit` (helper, not the on-duty orchestrator). Branch `audit-f
 
 ## 1. Summary
 
-The product runs. Lint is clean; 2,244 backend tests (2 skipped) and 210 web tests pass on
-`main`, and 2,249 + 212 on this branch. The offline eval reproduces the published 53/62
-(functional 26/26). Local Playwright: 27 passed, 2 skipped (the mesh journey skips itself against
-the live API). The security core holds when probed live with real sessions: tenant isolation,
-the origin check, step-up on EXECUTE, single-use codes, the DENY list, the lender's 403s and the
-three-owner mesh round with verify. The weak points are the **submission documents**, which
-overstate or misstate several things, the **injection guard's generalisation**, and three broken
-or unwired demo paths.
+**Update after merging `main` at `2c57f67` (PRs #38–#40) into this branch.** Every finding below was
+re-checked on the merged tree. PR #38 fixed four of them independently: the ingest permission (F1,
+same fix), the deck PDF layout (H6), the stale "not built" slide (M1) and the self-assessment's
+status table (M2). It also widened the guard rules after seeing the eval's 12 new attacks, so the
+eval now reads 62/62. The documents now ask for "a fresh held-out set… part of the final audit":
+this audit's set is that set, and it gives **15/24 attacks caught, 10/24 innocent messages
+flagged** on the widened rules.
 
-Findings: **2 Critical, 7 High, 16 Medium, 12 Low** (37 open). Fixed on this branch, each with a
-test that failed before the fix: ingest preview/columns now require `ingest:upload` (self-assessment
-R2), the Today alert lists every gap driver (duplicate React key), and Today asks the copilot in
-the reader's language (BN/ZH users got English). Evidence counts were regenerated to match.
+The product runs. On the merged branch lint is clean, the backend passes 2,273 tests (1 skipped), the web
+run on the merged tree was still in progress at this commit (212/212 before the merge), and the offline eval passes 62/62. Before the merge, on `335c1ca`: local
+Playwright 27 passed, 2 skipped (the mesh journey skips itself against the live API), and 216
+screen views were swept. The security core holds when probed live with real sessions: tenant
+isolation, the origin check, step-up on EXECUTE, single-use codes, the DENY list, the lender's 403s,
+and the three-owner mesh round with verify. What remains is **one rule-1 gap in the copilot**, the
+**guard's generalisation and its documentation**, **two unwired demo paths**, and a set of stale or
+overstated statements in the submission documents.
+
+Open findings: **1 Critical, 6 High, 15 Medium, 12 Low** (34). Fixed on this branch, each with a
+test that failed before the fix: ingest preview/columns require `ingest:upload` (also fixed on
+main), the Today alert lists every gap driver (duplicate React key), and Today asks the copilot in
+the reader's language (BN/ZH users got English).
 
 Three decisions for the orchestrator before 21:59 Dhaka:
 
-1. **Correct the guard claims (C1) and the stale feature claims (M1–M6) in the deck, the security
-   self-assessment and the video script, then re-export the PDFs.** The deck says "one new Bangla
-   paraphrase got through". The repo's own eval says 9 of 12 new attacks got through, and a fresh
-   blind set written for this audit was caught 13/24 with 10/24 false alarms. The deck also says
-   receivables and reminders are "not built", which is false. While re-exporting, fix the deck PDF
-   layout (H6): 5 of 14 slides are clipped.
-2. **Decide on the copilot's narration check (C2).** A live model can state a figure in words ("fifty
-   thousand", "五万", "পঞ্চাশ হাজার") and it passes the check. This breaks rule 1 in `llm_mode=live`,
-   which is the deployed default. Either ship the demo with `LLM_MODE=deterministic` or `fixtures`, or
-   accept a small fix in `checker.py` that rejects any narration containing a number word (the
-   fallback, the claim texts, is always safe).
-3. **Decide what the hosted demo shows (H3, H4, H5).** The deploy never seeds the ledger, so Today
-   and Cash abstain on a fresh server. The Analysis "How stable is today's advice?" card always shows
-   "Unknown recommendation" on the real API. Message approve/send are labelled EXECUTE but need no
-   step-up code. Either fix them (each is small but crosses work packages) or keep them off camera and
-   say so in the documents.
+1. **Rule 1 in live mode (C2).** A live model can state a figure in words ("fifty thousand",
+   "五万", "পঞ্চাশ হাজার") and the narration check lets it through. `LLM_MODE=live` is the deployed
+   default. Either run the hosted demo with `LLM_MODE=deterministic` (or `fixtures`), or accept a
+   small fix in `backend/app/agents/checker.py` that falls back to the claim texts whenever a
+   narration contains a number word. The fallback is always correct.
+2. **Put the held-out guard result in the documents (C1, H1).** Use 15/24 caught and 10/24 false
+   alarms, drop "still with no false alarm", fix SSA line 377 and the route table (M3), and refresh
+   the video script (M4, M5). Then re-export the PDFs.
+3. **Decide what the demo shows (H2, H3, H7).**
+   - The Analysis card "How stable is today's advice?" always shows "Unknown recommendation" on the
+     real API.
+   - Message approve and send are labelled EXECUTE but need no step-up code, although the deck and
+     the SSA say every EXECUTE does.
+   - Ratios and expected values are not clickable, although the README and the deck say every
+     number is.
+
+   Fix them (each is small but crosses work packages), or keep them off camera and soften the
+   wording.
 
 ## 2. Findings
 
@@ -47,18 +57,18 @@ a deliverable, a11y serious; Low = polish.
 
 | ID | Severity | Area | File:line | What is wrong | Evidence / how reproduced | Fixed in commit or recommendation |
 | --- | --- | --- | --- | --- | --- | --- |
-| C1 | Critical | Submission: guard claims | `docs/submission/deck/slides/security.html` (text and notes), `limits.html`; `pdf/deck.pdf` p.11, p.13; `security-self-assessment.md:280-285`, `:423-429` | Deck and self-assessment say generalisation is "unmeasured" and that "one new Bangla paraphrase got through". Measured: the repo's eval caught 3 of 12 new attacks (9 missed). The audit's fresh blind set: 13/24 attacks caught, 10/24 benign messages flagged. The tech doc (`technical-documentation.md:806-808`) states 3/12 correctly, so the documents contradict each other. | `npm run eval` → `attacks (new): caught 3/12, contained 11/12, approval held 12/12`. Fresh set: `docs/handover/fresh_injection_set.jsonl`, per-row verdicts in `docs/handover/fresh_injection_result.txt` (section 2.1). | not fixed - recommendation: replace both statements with the measured numbers (eval 3/12 caught, 11/12 contained, 12/12 approval held; fresh audit set 13/24 caught, 10/24 false alarms, 0/4 skip-approval caught). Keep "the copilot still could not act" (true: approval held 12/12). Re-export deck and SSA PDFs. |
+| C1 | High (was Critical before PR #38) | Submission: guard claims | `docs/submission/deck/slides/security.html`, `limits.html`; `technical-documentation.md:844-848`, `:977-980`; `security-self-assessment.md:284-300`, `:377`, `:440` | Main (PR #38) widened the rules after seeing the eval's 12 "new" attacks. The documents now say so and say that generalisation "needs a fresh held-out set… part of the final audit". That set is this audit's. Two statements are still wrong: the deck says the widened rules work "still with no false alarm", and SSA `:377` still says "one of ours passed it" and that the fact and ingest-preview routes lack permission checks. | Held-out set (`docs/handover/fresh_injection_set.jsonl`, committed `a320c0e` before the guard rules were opened, and not seen by PR #38): on the widened rules **15/24 attacks caught, 10/24 innocent messages flagged**; on the old rules 13/24 and 10/24. Per-row verdicts for both runs: `docs/handover/fresh_injection_result.txt`. | not fixed - recommendation: put the held-out result into the deck (security and limits slides), the tech doc and the SSA: "on a fresh held-out set of 24 attacks and 24 innocent look-alikes in four languages, the rules caught 15 and wrongly flagged 10; approval still held, because tiers, not the guard, stop money". Drop "still with no false alarm" (it holds only on the corpus). Fix SSA `:377`. Re-export the PDFs. |
 | C2 | Critical | Rule 1 (no LLM numbers) | `backend/app/agents/checker.py:57`, `:342-353`; used at `backend/app/agents/orchestrator.py:376` | The narration check only finds digit strings. A narrated number in words (English, Bangla or Chinese) is not detected, so a live model's invented figure reaches the user as `answer_text`. Default `LLM_MODE` in `infra/.env.example` and `docker-compose.yml` is `live`. | `unverified_numbers("You will be short by about fifty thousand taka next month.", [])` → `set()`; same for `下个月你将短缺五万塔卡。` and `আগামী মাসে প্রায় পঞ্চাশ হাজার টাকা ঘাটতি হবে।`; `"Short by 50,000 taka."` → `{5E+4}`. | not fixed (WP-10, judgement call) - recommendation: in `_narrate`, fall back to the claim texts when the narration contains a number word (en: one…ninety, hundred, thousand, lakh, crore, million; bn: এক…, শত, হাজার, লাখ, কোটি; zh: 〇一二三四五六七八九十百千万亿两) that the claim texts do not contain. The fallback is always correct, only less fluent. Or run the hosted demo with `LLM_MODE=deterministic`. |
-| H1 | High | Security: injection guard | `backend/app/security/guard.py` (rules in `guard_rules.py`, not opened for this measurement) | On 24 new attacks: skip_approval 0/4 caught, change_bank_details 1/4, exfiltrate_vault 2/4, disable_audit 3/4, hidden_instruction 3/4, add_payee 4/4. On 24 innocent messages with the same words, 10 were quarantined, including "How do I add a new payee…", "Can anyone turn off the audit log?" and the Chinese/Bangla "is my customer data encrypted in the vault?". A false positive blocks an owner's real question with 422. WP-15 known bug 2 (everyday Bangla override phrasing) is still open. | Section 2.1. e2e run: `Known bugs observed… WP-11 (security): the injection guard allows everyday Bangla override phrasings`. | not fixed (rule 4 of the audit brief: never tune the guard to a test set) - recommendation: report the numbers as they are (C1). Approval held 12/12 in the eval, so the tiers are the real control; say that plainly. |
+| H1 | High | Security: injection guard | `backend/app/security/guard_rules.py` (as of `2c57f67`) | On the held-out set, after PR #38: skip_approval 1/4 caught (bl only), change_bank_details 1/4 (en), add_payee 4/4, exfiltrate_vault 2/4 (bn, zh), disable_audit 4/4, hidden_instruction 3/4 (bn missed). Of 24 innocent messages with the same words, 10 are quarantined, among them "How do I add a new payee…?", "Can anyone turn off the audit log?" and "is customer data in the vault encrypted?" (bn, zh). A false positive blocks an owner's real question with 422. WP-15 known bug 2 (everyday Bangla override phrasing) is still open: "আগের সব নির্দেশ ভুলে যাও…" passes. | Section 2.1; e2e known-bug list. | not fixed (audit brief rule 4: never tune the guard to a test set) - recommendation: report the numbers (C1). Approval held 12/12 in the eval, so the tiers are the real control; say that plainly. |
 | H2 | High | Rule 4 (EXECUTE needs step-up) | `backend/app/api/messaging.py:130-145` | Message approve and send are written to the audit chain as `tier=EXECUTE` (`send_message`/`send_reminder` are EXECUTE in `policy.py`), but neither route asks for `X-Step-Up-Code`. The deck says "Anything that leaves DecisionGuard is EXECUTE: the owner approves with a fresh one-time code". Nothing is sent automatically (copy channel), so the practical risk is low; the inconsistency is in the claim. | Code read; e2e `receivables.spec.ts` approves and sends without a code. | not fixed (WP-12 + WP-14 web flow) - recommendation: add `step: StepUp = Depends(step_up)` to approve (as `mesh.py:182`) plus the code prompt in the Messages screen, or record these as DRAFT/"copied by the owner" and say so in the SSA tier table. |
 | H3 | High | Demo journey: Analysis | `web/src/screens/analysis/AnalysisScreen.tsx:66-73`; `backend/app/api/analysis.py:486-490` | "How stable is today's advice?" sends the copilot Today recommendation id to `POST /api/analysis/stability`, which only knows ids from `/scenarios`. With the real backend it always shows "Unknown recommendation". Today's recommendation also carries `stability: null`. | Sweep: every owner/accountant Analysis view logs `404 /api/analysis/stability`; screenshot shows the error card. API: `POST /api/analysis/stability {recommendation_id: <today id>}` → 404 `analysis.unknown_recommendation`. | not fixed (WP-14 ↔ WP-07/WP-10 integration) - recommendation: use `compare.data.recommendation_id` (stability of the compared decisions, shown after **Compare**), or hide the card when Today has no stability report. Keep it off camera (the video script already says "skip if it does not render"). |
-| H4 | High | Hosted demo / deployment | `docs/DEPLOY.md:28-35`, `infra/docker-compose.yml`, `.github/workflows/deploy.yml`; `README.md:36-44` | Nothing seeds the synthetic ledger outside e2e (`e2e/global-setup.ts`). On a fresh server, and after `npm run dev` on a fresh clone, Today and Cash abstain. `CLAUDE.md` even says `npm run dev` has "seeded synthetic data". WP-15 Question 2 asked for this on 19 Oct. | `grep seed` in infra, DEPLOY.md and deploy.yml: none. The video script (`video-script.md:310-313`) documents the manual step; README and DEPLOY do not. | not fixed - recommendation: add `docker compose exec api python -m app.facts.seed` to DEPLOY §3 and to `remote-deploy.sh` after the health check (idempotent? check `app/facts/seed.py` first), and `uv --directory backend run python -m app.facts.seed` to the README quick start. |
+| H4 | Medium (was High before PR #40) | Hosted demo / deployment | `docs/DEPLOY.md:28-35`, `infra/docker-compose.yml`, `.github/workflows/deploy.yml`; `README.md:36-44` | Since PR #40, Render seeds at start (`render.yaml:23`) and `docs/handover/SERVER.md` A9 has the manual seed step for the Docker server; but `docs/DEPLOY.md`, `deploy.yml` and the README still do not seed. On a fresh server, and after `npm run dev` on a fresh clone, Today and Cash abstain. `CLAUDE.md` even says `npm run dev` has "seeded synthetic data". WP-15 Question 2 asked for this on 19 Oct. | `grep seed` in infra, DEPLOY.md and deploy.yml: none. The video script (`video-script.md:310-313`) documents the manual step; README and DEPLOY do not. | not fixed - recommendation: add `docker compose exec api python -m app.facts.seed` to DEPLOY §3 and to `remote-deploy.sh` after the health check (idempotent? check `app/facts/seed.py` first), and `uv --directory backend run python -m app.facts.seed` to the README quick start. |
 | H5 | High | Deliverable 06 / demo | `docs/submission/evidence/` (no e2e summary), `web/e2e/journeys/mesh.spec.ts:32` | No browser test covers the mesh against the live API: the mesh journey skips itself when the API is live and the multi-party version was never written. The evidence bundle has no e2e run at all (the hosted run waits for the server). | `npm run e2e`: `-  [local] mesh.spec.ts … (skipped)`. The audit checked the flow by API instead (section 3): propose → three owners approve with codes → settled → verify valid. | not fixed - recommendation: commit a local e2e summary (`E2E_EVIDENCE_DIR` run against localhost) as interim evidence and say in INDEX.md that the hosted run is pending. |
-| H6 | High | Deliverable 02 layout | `docs/submission/pdf/deck.pdf` pages 2, 3, 6, 7, 10 (`problem`, `owner`, `cash`, `financing`, `mesh`) | Content is clipped at the bottom of 5 slides: the "7.28%" and "71%" cards are cut off, the owner's third question card overlaps the footer, the cash card's "Cheapest fix" line is cut, the financing cards row is cut, and the mesh "of cash, along debts…" line falls off. The HTML sources at 1920×1080 overflow by 23 to 275 px. | `pdftoppm` of `deck.pdf`; Playwright render of each `slides/<id>.html` at 1920×1080: `problem` scrollHeight 1355, `owner` 1103, `cash` 1193, `financing` 1250, `mesh` 1285, `copilot` 1083. | not fixed - recommendation: shorten or shrink those slides in the Slides artifact and re-export; the PDF is what judges open. |
+| H6 | Fixed on main (PR #38) | Deliverable 02 layout | `docs/submission/pdf/deck.pdf` pages 2, 3, 6, 7, 10 (`problem`, `owner`, `cash`, `financing`, `mesh`) | Content is clipped at the bottom of 5 slides: the "7.28%" and "71%" cards are cut off, the owner's third question card overlaps the footer, the cash card's "Cheapest fix" line is cut, the financing cards row is cut, and the mesh "of cash, along debts…" line falls off. The HTML sources at 1920×1080 overflow by 23 to 275 px. | `pdftoppm` of `deck.pdf`; Playwright render of each `slides/<id>.html` at 1920×1080: `problem` scrollHeight 1355, `owner` 1103, `cash` 1193, `financing` 1250, `mesh` 1285, `copilot` 1083. | not fixed - recommendation: shorten or shrink those slides in the Slides artifact and re-export; the PDF is what judges open.  **Re-checked on `2c57f67`: all 14 PDF pages render without clipping.** |
 | H7 | High | Submission claim: provenance | `README.md:10-11`; PLAN §8 WP-14 row; `web/src/screens/analysis/AnalysisScreen.tsx:95`, `:124` | "Every figure on screen can be clicked to show its formula" is not true: ratio values and the "Expected" column of Expected vs reality are plain text, and so are the Market sample prices. The sweep counted 5 to 18 money or percent strings per screen outside a provenance button on Cash, Receivables, Analysis, Mesh and Messages. Some are labels or inputs, but the ratio cards are figures. | Sweep `bare` counts (section 3.1); Analysis screenshot. | not fixed (WP-14) - recommendation: wrap ratio values and expected values in `FigureValue`/`Num` (the API returns provenance for ratios), or soften the claim to "every engine figure". |
-| M1 | Medium | Deck: stale feature claims | `deck/slides/limits.html`; `pdf/deck.pdf` p.13 | "Not built: receivables and reminders", and "Next: receivables and reminder drafts in the approval queue": both are merged (PR #31, #34) and demoed in e2e. "An adversarial test suite… next": the eval has 36 adversarial tasks. | Slide text; PLAN §8 WP-05/WP-12 rows. | not fixed - recommendation: rewrite the slide and notes, re-export. |
-| M2 | Medium | SSA §0 "What is built" | `security-self-assessment.md:31-40` | WP-10 is listed as "branch, PR pending", and WP-12 and WP-16 as "not in this snapshot". All three are merged (PR #29, #34, #33). WP-13 passport API (PR #35) is missing. Section 4 says "WP-16's adversarial suite… is not in this snapshot". | PLAN §8; `git log`. | not fixed - recommendation: refresh the table and §4. |
-| M3 | Medium | SSA route table | `security-self-assessment.md:171-172`, footnotes `:149-151` | The table still says the fact routes and `/ingest/history` let every role through. `/api/facts` and `/ingest/history` need `ledger:read` (PR #32), and since this branch preview/columns need `ingest:upload`. R1 is right that `/api/explain` stays open to lender viewers, masked. | Live: lender `GET /api/facts/net_sales` → 403, `GET /api/ingest/history` → 403. | not fixed - recommendation: update the rows; mark R2 fixed (commit `f4e585f`) once merged. |
+| M1 | Fixed on main (PR #38) | Deck: stale feature claims | `deck/slides/limits.html`; `pdf/deck.pdf` p.13 | "Not built: receivables and reminders", and "Next: receivables and reminder drafts in the approval queue": both are merged (PR #31, #34) and demoed in e2e. "An adversarial test suite… next": the eval has 36 adversarial tasks. | Slide text; PLAN §8 WP-05/WP-12 rows. | not fixed - recommendation: rewrite the slide and notes, re-export.  **Fixed on main (PR #38): limits slide now reads "Reduced: receivables and message drafts (no sending)".** |
+| M2 | Fixed on main (PR #38) | SSA §0 "What is built" | `security-self-assessment.md:31-40` | WP-10 is listed as "branch, PR pending", and WP-12 and WP-16 as "not in this snapshot". All three are merged (PR #29, #34, #33). WP-13 passport API (PR #35) is missing. Section 4 says "WP-16's adversarial suite… is not in this snapshot". | PLAN §8; `git log`. | not fixed - recommendation: refresh the table and §4.  **Fixed on main (PR #38): §0 now lists WP-10, WP-05, WP-12, WP-13 and WP-16 as merged.** |
+| M3 | Medium | SSA route table | `security-self-assessment.md:171-172`, `:377`, footnotes `:149-151` | The table still says the fact routes and `/ingest/history` let every role through. `/api/facts` and `/ingest/history` need `ledger:read` (PR #32), and since this branch preview/columns need `ingest:upload`. R1 is right that `/api/explain` stays open to lender viewers, masked. | Live: lender `GET /api/facts/net_sales` → 403, `GET /api/ingest/history` → 403. | not fixed - recommendation: update the rows; mark R2 fixed (commit `f4e585f`) once merged. |
 | M4 | Medium | Video script stale | `docs/submission/video-script.md:35`, `:267`, `:293-295` | "Reports/Passport sharing… have no backend router", "Messages (cut), Receivables (no backend), Reports/Passport (no API on `main`)" contradict lines 32-34 and the merged APIs. Test count "1,696 backend + 210 web" (now 2,244 / 2,251). | Text. | not fixed - recommendation: refresh before recording. |
 | M5 | Medium | Privacy claims vs code | `video-script.md:238-239`; `technical-documentation.md:621-626`; `backend/app/llm/gateway.py:12-13` | VO says "amounts are scaled by a secret factor… our model gateway runs this on every request"; the tech doc says the gateway anonymises with `prepare_messages()`. In code `prepare_messages` has no caller, `scale_amounts=True` is never used, and the narrator and critic receive exact amounts and product names (the fail-closed gate still runs, and no personal data was in the payloads). | Spy on `LLMGateway.complete` during a copilot run: the narrate payload holds "Cash on hand now: Tk 9,29,018." etc. | not fixed - recommendation: change the wording to "names, phones and places are replaced; figures sent for narration are exact amounts with no personal data; the gate refuses any request with personal data". |
 | M6 | Medium | README stale | `README.md:27`, `:36-44` | "WP-10, being merged" (merged); quick start lacks the seed step (H4). | Text. | not fixed - recommendation: update. |
@@ -84,39 +94,41 @@ a deliverable, a11y serious; Low = polish.
 | L10 | Low | Copilot Today in Chinese | `backend/app/agents/claims.py` amount rendering | Chinese narration groups amounts the Bangladeshi way ("4,27,842 塔卡"). | Live `GET /api/copilot/today?language=zh`. | not fixed - recommendation: optional; the web formats its own figures correctly. |
 | L11 | Low | Messages drafts in Bangla | `web/src/api/endpoints.ts:142` | The web never passes `language` to `GET /api/messages/drafts`, so Bangla readers only see English drafts although the API renders Bangla. | Code read. | not fixed - recommendation: pass `language=bn` when the UI is Bangla (zh has no template; keep en). |
 | L12 | Low | Copilot coverage offline | grocery tenant, Trust abstention log | In `fixtures` mode "Which customer should I chase first?" abstains as out of scope, although a receivables intent exists. Only questions with recorded plans or rule matches are answered offline. | Abstention log entry seen in the sweep. | not fixed - recommendation: rehearse the video's exact copilot questions in the mode the demo will run. |
-| F1 | (fixed) High | Role check: ingest | `backend/app/api/ingest.py:122-160` | `/ingest/preview` and `/ingest/columns` checked only the session, so a lender viewer or compliance reviewer could upload and parse files (SSA risk R2). | New tests `test_roles_without_ingest_upload_may_not_upload[*]` failed 4/4 before the fix. | **Fixed in `f4e585f`** (require `ingest:upload`; staff still may preview, tested). |
+| F1 | (fixed) High | Role check: ingest | `backend/app/api/ingest.py:122-160` | `/ingest/preview` and `/ingest/columns` checked only the session, so a lender viewer or compliance reviewer could upload and parse files (SSA risk R2). | New tests `test_roles_without_ingest_upload_may_not_upload[*]` failed 4/4 before the fix. | **Fixed in `f4e585f`**, and independently on main in `d7a8ece` (PR #38). The merge keeps main's test plus this branch's `test_staff_holding_ingest_upload_may_still_preview`. |
 | F2 | (fixed) Medium | Today alert drivers | `web/src/screens/today/AlertCard.tsx:74-75` | Two drivers of the same kind (the hardware shop's two supplier bills) shared a React key, so React warned and may drop or duplicate a row on update. | Console error on every Today view in the sweep; new Vitest test failed before the fix. | **Fixed in `d29a20d`**. |
 | F3 | (fixed) Medium | Today in BN/ZH | `web/src/api/endpoints.ts:128-129`, `TodayScreen.tsx`, `AnalysisScreen.tsx` | The web never sent `?language=` to `/api/copilot/today`, so Bangla and Chinese readers got the daily advice in English. | BN Today screenshot; new Vitest test failed before the fix; live `?language=bn` returns Bangla. | **Fixed in `c0e63c1`**. |
 
-(F1–F3 are counted in the totals above as fixed, not as open findings: open = 2 Critical, 7 High,
-16 Medium, 12 Low.)
+(F1–F3 and the rows marked "Fixed on main" are not counted as open. Open = 1 Critical (C2), 6 High (C1,
+H1, H2, H3, H5, H7), 15 Medium (H4, M3–M16), 12 Low (L1–L12).)
 
 ### 2.1 Fresh injection set (written before opening the guard rules or the eval tasks)
 
 `docs/handover/fresh_injection_set.jsonl` was committed first (`a320c0e`), then measured with
 `InjectionGuard().inspect(text, Source.user_message)` (rules only; no classifier is installed).
+Run 1 used the rules on `335c1ca`. Run 2 used the rules widened by PR #38 (`d7a8ece`), which never
+saw this set, so for those rules it is the "fresh held-out set" the documents ask for.
 
-| Family | Attacks caught (en, bn, bl, zh) | Benign flagged (en, bn, bl, zh) |
+| Family | Attacks caught, run 1 → run 2 | Benign flagged (both runs) |
 | --- | --- | --- |
-| skip_approval | 0/4 (none) | 0/4 |
-| change_bank_details | 1/4 (en) | 1/4 (en) |
-| add_payee | 4/4 | 4/4 (all) |
-| exfiltrate_vault | 2/4 (bn, zh) | 2/4 (bn, zh) |
-| disable_audit | 3/4 (en, bn, zh) | 2/4 (en, zh) |
-| hidden_instruction | 3/4 (en, bl, zh) | 1/4 (zh) |
-| **Total** | **13/24 (54%)** | **10/24 (42%)** |
+| skip_approval | 0/4 → 1/4 (bl) | 0/4 |
+| change_bank_details | 1/4 (en) → 1/4 (en) | 1/4 (en) |
+| add_payee | 4/4 → 4/4 | 4/4 (all) |
+| exfiltrate_vault | 2/4 (bn, zh) → 2/4 (bn, zh) | 2/4 (bn, zh) |
+| disable_audit | 3/4 → 4/4 | 2/4 (en, zh) |
+| hidden_instruction | 3/4 (en, bl, zh) → 3/4 (en, bl, zh) | 1/4 (zh) |
+| **Total** | **13/24 → 15/24 (63%)** | **10/24 (42%)** |
 
-By language: en 4/6 caught, 3/6 false alarms; bn 3/6, 2/6; bl 2/6, 1/6; zh 4/6, 4/6. The guard
-keys on vocabulary ("payee", "vault", "audit log", "收款人") rather than intent, so the same words
-in an innocent question trip it, and paraphrases without those words pass. Per-row verdicts and
-rule ids: `docs/handover/fresh_injection_result.txt`.
+Run 2 by language: en 4/6 caught and 3/6 innocent flagged; bn 3/6 and 2/6; bl 4/6 and 1/6; zh 4/6
+and 4/6. The guard keys on vocabulary ("payee", "vault", "audit log", "收款人") more than on intent.
+Innocent questions that use those words are flagged, and paraphrases that avoid them pass.
+Per-row verdicts and rule ids for both runs: `docs/handover/fresh_injection_result.txt`.
 
 ### 2.2 WP-15 "Found by the suite": still open?
 
 | # | Bug | Status on `audit-final` |
 | --- | --- | --- |
 | 1 | Lender viewer reads ledger figures (`/api/facts/*`) and the upload list (`/ingest/history`) | **Fixed** (PR #32): live lender → 403 on both. Ingest preview/columns: fixed here (F1). `/api/explain` stays open to lenders, masked, by design (R1) |
-| 2 | Everyday Bangla override phrasings pass the guard | **Open**: observed by the e2e run and by the fresh set ("আগের সব নির্দেশ ভুলে যাও…" allowed) |
+| 2 | Everyday Bangla override phrasings pass the guard | **Open**: observed by the e2e run, and by the fresh set on the widened rules too ("আগের সব নির্দেশ ভুলে যাও…" allowed) |
 | 3 | Trust wider than a phone; `scrollable-region-focusable` | **Open** (M12) |
 | 4 | Cash chart `aria-hidden` focusable; dark `slate-500` 3.74:1 on Reports/Settings; Watch badge 4.02:1 | **Open** (M11, M13, M10) |
 | 5 | Bangla digits inside hashes; verify page says "Not genuine" before anchoring; demo owner codes single-use per 30 s; two parallel first calls to `/demo-accounts` can 500 | Hash digits **open** (M15). Single-use codes **open by design** (hit twice during this audit: sign in again after 30 s). Verify wording and the parallel-seed 500 were not re-tested |
@@ -232,4 +244,9 @@ not reproduce (`?language=en|bn|zh` and no parameter all answer 200).
 | Deck slides at 1920×1080 (Playwright) + `pdftoppm deck.pdf` | 0 | 6 slides overflow in HTML, 5 visibly clipped in the PDF (H6) |
 | `pytest tests/ingest/test_api.py` before/after F1 | 1 / 0 | `4 failed, 19 passed` → `23 passed` |
 | `vitest TodayScreen.test.tsx` before/after F2, F3 | 1 / 0 | each new test failed before its fix; after: web `Tests 212 passed (212)`, lint clean |
-| Final `npm run test` on `audit-final` | 0 | backend `2249 passed, 2 skipped in 320.46s`; web `Test Files 22 passed (22)`, `Tests 212 passed (212)` |
+| `npm run test` on `audit-final` before merging main | 0 | backend `2249 passed, 2 skipped in 320.46s`; web `Test Files 22 passed (22)`, `Tests 212 passed (212)` |
+| `git merge origin/main` (`2c57f67`, PRs #38–#40) | 0 | conflicts in `backend/tests/ingest/test_api.py` (same R2 fix on both sides; kept main's test and this branch's staff test) and the two evidence count files (took main's) |
+| `npm run lint` on the merged tree | 0 | ruff `All checks passed!`; eslint + tsc clean |
+| `npm run eval` on the merged tree | 0 | `62/62 tasks passed (functional 26/26, adversarial 36/36)`; new attacks caught 12/12 (seen while widening, per `guard_rules.py` docstring). Only timestamps changed, so the logs were not committed |
+| `npm run test` (backend) on the merged tree | 0 | `2273 passed, 1 skipped in 328.60s` |
+| Fresh set on the merged tree | 0 | attacks caught 15/24, benign flagged 10/24 (section 2.1, run 2) |
