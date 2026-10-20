@@ -1,7 +1,7 @@
 import json
 import sys
 import types
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -230,6 +230,14 @@ def test_the_owner_releases_a_false_positive_and_it_is_audited(api, make_user):
     assert api.get("/api/guard/quarantine").json() == []
     assert api.get("/api/audit/events", params={"limit": 1}).json()[0]["action"] == \
         "guard.released"
+
+
+def test_a_role_that_cannot_ask_the_copilot_cannot_write_to_the_quarantine(api, make_user, clock):
+    make_user()
+    make_user("lender@bank.test", role=Role.lender_viewer, scopes=("passport:read",),
+              expires_at=clock() + timedelta(days=7))
+    sign_in(api, "lender@bank.test")
+    assert api.post("/api/guard/check", json={"text": "jailbreak"}).status_code == 403
 
 
 def test_staff_can_be_screened_but_cannot_read_the_quarantine(api, make_user):

@@ -108,3 +108,11 @@ def test_a_consented_lender_reads_passports_but_cannot_issue_or_share(api: TestC
 def test_staff_cannot_read_passports(api: TestClient):
     _as(api, Principal(user_id="u-s", tenant_id="sme_grocery", role=Role.staff))
     assert api.get("/api/reports/passport").status_code == 403
+
+
+def test_a_lender_viewer_cannot_list_whom_else_the_shop_shared_with(api: TestClient):
+    passport = api.get("/api/reports/passport").json()[0]
+    assert api.post(f"/api/reports/passport/{passport['id']}/share", json=SHARE).status_code == 201
+    _as(api, LENDER)
+    res = api.get("/api/reports/shares")
+    assert (res.status_code, res.json()["code"]) == (403, "forbidden")
