@@ -63,6 +63,29 @@ export interface DemoAccount {
   totp_hint?: string | null;
 }
 
+/** POST /api/onboarding/signup (demo mode only). */
+export interface SignupRequest {
+  business_name: string;
+  email: string;
+  password: string;
+}
+
+/** POST /api/auth/totp/enrol: shown once, to add to an authenticator app. */
+export interface TotpEnrolment {
+  secret: string;
+  otpauth_uri: string;
+}
+
+/** GET/POST /api/onboarding/profile: what a self-service shop's owner entered by hand. */
+export interface ShopProfile {
+  opening_balance?: string | null;
+  opening_date?: string | null;
+  business_age_months?: number | null;
+  trade_licence?: boolean | null;
+  etin_registered?: boolean | null;
+  staff_count?: number | null;
+}
+
 /** GET /api/cash/forecast (WP-04): the 13-week band and its headline figures, each explainable.
  *  Figure label_keys the screens look for: cash.closing_balance (cash now), cash.buffer_target,
  *  cash.runway_days (days until the likely balance falls below the buffer; equals the horizon

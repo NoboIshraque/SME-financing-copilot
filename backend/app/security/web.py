@@ -99,6 +99,7 @@ def _limit(bucket: str, pattern: str, per_minute: int, methods: str | None = Non
 # First match wins. Per client IP.
 LIMITS: tuple[Limit, ...] = (
     _limit("sign_in", r"^/api/auth/login(/totp)?$", 10, "POST"),
+    _limit("signup", r"^/api/onboarding/signup$", 10, "POST"),
     _limit("auth_change", r"^/api/auth/(password|users|lender-access|totp/.*)", 20,
            "POST PUT PATCH DELETE"),
     _limit("approve", r"^/api/approvals/[^/]+/(approve|execute)$", 30, "POST"),

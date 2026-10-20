@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { RouteObject } from "react-router-dom";
 
 import { LoginScreen } from "./auth/LoginScreen";
+import { SignupScreen } from "./auth/SignupScreen";
 import { RequireAuth, ScreenGate } from "./auth/RequireAuth";
 import { AppShell } from "./components/AppShell";
 import { NotFound } from "./components/NotFound";
@@ -40,6 +41,8 @@ function gated(screen: Screen): ReactNode {
 
 export const routes: RouteObject[] = [
   { path: "/login", element: <LoginScreen /> },
+  // Hosted demo only: a judge creates their own shop (the server refuses it elsewhere).
+  { path: "/signup", element: <SignupScreen /> },
   // Public: a lender checks a Trust Passport without an account.
   { path: "/verify/:passportId?", element: <VerifyScreen /> },
   {
