@@ -832,7 +832,7 @@ def run() -> dict[str, Any]:
                          "anchor checked against the chain heads.")
 
     # ------------------------------------------------------------ 10. mesh (engines)
-    LOG.begin("10. Liquidity mesh (engines called directly: no mesh API on this branch)")
+    LOG.begin("10. Liquidity mesh (engines called directly, one step at a time)")
     now = datetime.now(UTC)
     obligations = universe.mesh_obligations
     graph = engine(
@@ -1045,7 +1045,7 @@ def _markdown(h: dict[str, Any]) -> str:
         "- **Chain:** offline anchorer; nothing was sent to Sepolia.",
         "- **How:** the real FastAPI app from `app.main.create_app` (test env, demo mode) driven "
         "with `fastapi.testclient.TestClient`, the same HTTP calls the web app makes. Section 10 "
-        "calls the mesh engines directly because this branch has no mesh API yet.",
+        "calls the mesh engines directly to show each step of a round.",
         "- **Redacted:** passwords, TOTP and step-up codes, session cookies, keys and the "
         "netting salt are shown as `<redacted>`; the script refuses to write the log if any of "
         "those values appears in it.",
