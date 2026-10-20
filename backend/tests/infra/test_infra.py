@@ -10,6 +10,7 @@ REPO = Path(__file__).resolve().parents[3]
 COMPOSE = yaml.safe_load((REPO / "infra/docker-compose.yml").read_text(encoding="utf-8"))
 CADDY = (REPO / "infra/Caddyfile").read_text(encoding="utf-8")
 DEPLOY = (REPO / ".github/workflows/deploy.yml").read_text(encoding="utf-8")
+REMOTE_DEPLOY = (REPO / "infra/remote-deploy.sh").read_text(encoding="utf-8")
 ENV_EXAMPLE = (REPO / "infra/.env.example").read_text(encoding="utf-8")
 SERVICES = COMPOSE["services"]
 
@@ -84,3 +85,11 @@ def test_deploy_uses_only_the_documented_secrets_and_rolls_back():
     assert used == {"DEPLOY_HOST", "DEPLOY_USER", "DEPLOY_SSH_KEY", "DEPLOY_DOMAIN",
                     "DEPLOY_KNOWN_HOSTS"}  # the last is optional: it pins the host key (R15)
     assert "Roll back" in DEPLOY and "conclusion == 'success'" in DEPLOY
+
+
+def test_a_demo_deploy_seeds_the_synthetic_shops_and_a_real_one_does_not():
+    # Without the seed the hosted demo's Today and Cash screens abstain (final audit, H4).
+    up = REMOTE_DEPLOY.index("up -d --build")
+    seed = REMOTE_DEPLOY.index("exec -T api python -m app.facts.seed")
+    guard = REMOTE_DEPLOY.rindex("DEMO_MODE=(false|0|no)", 0, seed)
+    assert up < guard < seed

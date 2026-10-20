@@ -64,7 +64,7 @@ npm run test:backend   # cd backend && uv run pytest -q
 npm run test:web       # cd web && npm test -- --run
 npm run e2e            # Playwright (needs `npm run dev` running)
 npm run lint           # ruff + eslint + tsc
-npm run dev            # API on :8000, web on :5173, seeded synthetic data
+npm run dev            # API on :8000, web on :5173 (seed first: uv --directory backend run python -m app.facts.seed)
 npm run eval           # offline evaluation harness
 npm run evidence       # writes docs/submission/evidence/
 npm run contracts      # after a contract change (orchestrator only): schema JSON + web types

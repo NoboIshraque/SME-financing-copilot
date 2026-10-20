@@ -32,7 +32,7 @@ before you record. They are not narration.
 Status on 20 Oct 01:00 (verify again with the pre-flight check on Tuesday): auth, approvals,
 audit, guard, cash, financing (with fit from the forecast), facts/explain, ingest, analysis,
 mesh, copilot (WP-10), receivables (WP-05) and message drafts (WP-12) are on `main`.
-Reports/Passport sharing and Settings storage have no backend router. **Market (WP-09) is cut:**
+Reports/Passport (WP-13) is on `main`; Settings storage has no backend router (its card is hidden). **Market (WP-09) is cut:**
 its screen is a labelled preview on sample data. The audit-drill card was removed (P8 cut).
 
 ---
@@ -67,7 +67,7 @@ Total 4:40. Timings are for the final cut, not for recording order (see "Recordi
   **Safety buffer** and **Lowest likely balance**. Next comes "Do these today" with up to 3
   action cards, each with a tier badge. Below them, the alerts grouped as Warning and Watch.
   Scroll slowly once.
-- **Do not tap** the DRAFT card "Propose a netting round". It opens Messages, which is cut.
+- **Do not tap** the DRAFT card "Propose a netting round" here; the round is proposed on the Mesh screen in S8.
 - **VO:** "Today puts first things first. A critical alert: the likely balance falls below
   the safety buffer in `<days shown on the Critical alert>` days. Below it come the warnings
   and watch items. The first fixes aren't loans: ask a buyer for an advance, or clear circular
@@ -155,7 +155,8 @@ pre-flight check passes and you have rehearsed it once.
   approves with a fresh code. Signing the other two owners in can be a fast cut. Garment's
   own Today screen abstains, because its synthetic ledger lacks an opening balance, so open
   `/mesh` directly.
-- **On screen:** **Who owes whom** (graph + list) and **Proposed netting round**: "Clears
+- **On screen:** **Who owes whom** (graph + list). On a fresh database the hardware owner first
+  taps **Propose a netting round**. Then **Proposed netting round**: "Clears
   `<gross>` of debt with only `<cash>`", the settlements, and the per-shop **Approvals**. Tap
   **Approve the round with code**. After all three owners approve, the round settles and
   shows its anchor. Tap **Verify against the chain** → "Verified: the record matches the
@@ -191,8 +192,9 @@ editing the record: False".
 - **On screen / actions:** go to **Analysis** and scroll straight to **Compare decisions**.
   Leave the four boxes ticked and tap **Compare**. The table shows Expected balance, Worst 5%
   and Chance below buffer, with a green **Recommended** badge on one row.
-- **How stable is today's advice?** is live since WP-10 merged. Show it only if it renders in the
-  pre-flight check; otherwise skip it.
+- After **Compare**, the card below, **How stable is the recommended choice?**, re-runs the
+  comparison under stress and noise and shows the stability bar (how many variations held, and
+  what would flip it). Show it only if it rendered in the pre-flight check.
 - **VO:** "Before a big decision, DecisionGuard simulates each choice on the same thousand paths and
   marks the best risk-adjusted one."
 - **Caption:** "Scenario comparison over 1,000 seeded paths (WP-07)"
@@ -233,11 +235,11 @@ call from Appendix C. The console shows `allowed: false`, `families: ["fake_owne
 - **On screen:** PowerShell at a large font. Run the privacy snippet (Appendix A). Three lines
   print. `GATE: payload blocked: contains ADDRESS x1, PERSON x1, PHONE x1` (the raw sentence
   is refused). `SENT: Person 1 (phone Contact 1) owes Tk <scaled> since day t-18, shop in
-  Address 1.` Then `GATE: passes`. The scaled amount changes on every run.
+  Address 1.` Then `GATE: passes`. The scaled amount changes on every run (the snippet switches
+  on the anonymiser's optional amount scaling; the copilot's own calls send figures unscaled).
 - **VO:** "Only anonymised text may leave our server. Names, phones, places and dates become
-  labels, and amounts are scaled by a secret factor. If anything personal slips through, the
-  gate refuses the call."
-  - If WP-10 is merged, add: "Our model gateway runs this on every request."
+  labels. If anything personal slips through, the gate refuses the call, and our model gateway
+  runs that gate on every request."
 - **Caption:** "Fictional sample sentence · anonymiser + fail-closed privacy gate (WP-03)"
 
 ### S12 · 3:52–4:05 · Hash-chained audit log · LIVE API
@@ -263,11 +265,12 @@ call from Appendix C. The console shows `allowed: false`, `families: ["fake_owne
 - **On screen:** three short lines. "Built: cash alerts · ranked financing · owner approvals ·
   provenance · audit". "Limits: synthetic shops · guard rules-based · demo actions recorded,
   not sent". "Team: Nobo Ishraque · Amdad · Labib · BUP". Optionally add
-  `<backend + web test total from docs/submission/evidence/test-counts.md>` (on 20 Oct:
-  2,270 backend + 210 web). Add the hosted URL only if `hishab.quadbits.net` is up on the day.
+  `<backend + web test total from docs/submission/evidence/test-counts.md>` (read it from that
+  file on the day). Add the hosted URL only if `hishab.quadbits.net` is up on the day.
 - **VO:** "DecisionGuard warns before the cash gap, ranks financing by true cost, and keeps the owner
-  in charge. Honest limits: these shops are synthetic, our injection guard is rule-based and
-  still needs a fresh unseen test, and demo actions are recorded, not sent to a bank.
+  in charge. Honest limits: these shops are synthetic, our injection guard is rule-based and on a
+  fresh held-out test caught 15 of 24 attacks, which is why money never moves without the owner's
+  code, and demo actions are recorded, not sent to a bank.
   Built by Nobo Ishraque, Amdad and Labib, Bangladesh University of Professionals. Thank you."
 
 ---
@@ -290,9 +293,12 @@ call from Appendix C. The console shows `allowed: false`, `families: ["fake_owne
 | S12 Audit chain | LIVE API | — |
 | S13 Languages | LIVE API (UI) | — |
 
-No shot in the planned cut uses the OFFLINE MOCK. Screens to **skip entirely**: Market (cut),
-Messages (cut), Receivables (no backend), Reports/Passport (no API on `main`), Settings
-(off camera, only to switch the API mode).
+No shot in the planned cut uses the OFFLINE MOCK. Screens to **skip entirely**: Market (cut,
+a labelled sample) and Settings (off camera, only to switch the API mode). Receivables, Messages
+(approving a draft asks for the owner's code) and Reports/Passport have live APIs and can be
+added if time allows. **Rehearse every copilot question in the mode you record in:** offline
+(fixtures) the copilot answers only questions with a recorded plan or a rule match, and abstains
+on the rest.
 
 ---
 
