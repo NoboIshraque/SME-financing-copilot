@@ -12,7 +12,6 @@ import { StabilityBar } from "../../components/StabilityBar";
 import { ErrorState, QueryView } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
 import { useServerText } from "../../i18n/serverText";
-import type { Language } from "../../i18n";
 import { useFormat } from "../../i18n/useFormat";
 
 const STATEMENTS = ["pnl", "balance_sheet", "cash_flow"] as const;
@@ -57,23 +56,22 @@ function StatementTables({ data }: { data: Statements }) {
 }
 
 export function AnalysisScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const text = useServerText();
   const format = useFormat();
   useDocumentTitle(t("nav.analysis"));
   const statements = useQuery({ queryKey: ["analysis", "statements"], queryFn: api.analysis.statements });
   const ratios = useQuery({ queryKey: ["analysis", "ratios"], queryFn: api.analysis.ratios });
   const variance = useQuery({ queryKey: ["analysis", "variance"], queryFn: api.analysis.variance });
-  const language = (i18n.language || "en") as Language;
-  const today = useQuery({ queryKey: ["copilot", "today", language], queryFn: () => api.copilot.today(language) });
-  const recommendationId = today.data?.id;
-  const stability = useQuery({
-    queryKey: ["analysis", "stability", recommendationId],
-    queryFn: () => api.analysis.stability(recommendationId ?? ""),
-    enabled: Boolean(recommendationId),
-  });
   const [decisions, setDecisions] = useState<string[]>([...DECISIONS]);
   const compare = useMutation({ mutationFn: (chosen: string[]) => api.analysis.scenarios(chosen) });
+  // The stability of the recommended choice: /stability re-runs the comparison it was handed.
+  const comparisonId = compare.data?.recommendation_id;
+  const stability = useQuery({
+    queryKey: ["analysis", "stability", comparisonId],
+    queryFn: () => api.analysis.stability(comparisonId ?? ""),
+    enabled: Boolean(comparisonId),
+  });
 
   return (
     <section aria-labelledby="h-analysis" className="space-y-6">
@@ -200,8 +198,11 @@ export function AnalysisScreen() {
 
       <section aria-labelledby="h-stability" className={card}>
         <h3 id="h-stability" className="text-lg font-semibold">{t("analysis.stabilityTitle")}</h3>
-        {today.data && <p className="mb-2 text-sm text-slate-600 dark:text-slate-400">{t("analysis.stabilityOf", { question: today.data.question })}</p>}
-        <QueryView query={stability}>{(report) => <StabilityBar report={report} />}</QueryView>
+        {comparisonId ? (
+          <QueryView query={stability}>{(report) => <StabilityBar report={report} />}</QueryView>
+        ) : (
+          <p className="text-sm text-slate-600 dark:text-slate-400">{t("analysis.stabilityHint")}</p>
+        )}
       </section>
     </section>
   );

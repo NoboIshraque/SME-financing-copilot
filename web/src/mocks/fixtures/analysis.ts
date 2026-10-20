@@ -97,6 +97,9 @@ const SCENARIOS: Record<string, [number, number, string]> = {
   do_nothing: [265000, 18000, "0.41"],
 };
 
+/** Like the API, /stability only knows the ids that /scenarios handed out. */
+export const COMPARISON_PREFIX = "cmp-";
+
 export function scenarioComparison(decisions: string[]): ScenarioComparison {
   const chosen = decisions.filter((decision) => decision in SCENARIOS);
   const scenarios: Scenario[] = chosen.map((decision) => {
@@ -112,7 +115,11 @@ export function scenarioComparison(decisions: string[]): ScenarioComparison {
       seed: 20261020,
     };
   });
-  return { scenarios, recommended_id: chosen.includes("retime_supplier") ? "sc-retime_supplier" : (scenarios[0]?.id ?? "") };
+  return {
+    scenarios,
+    recommended_id: chosen.includes("retime_supplier") ? "sc-retime_supplier" : (scenarios[0]?.id ?? ""),
+    recommendation_id: `${COMPARISON_PREFIX}${chosen.join("+")}`,
+  };
 }
 
 export function stability(): StabilityReport {

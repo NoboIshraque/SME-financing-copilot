@@ -474,8 +474,8 @@
     "worst5": "Worst 5%",
     "breach": "Chance below buffer",
     "recommended": "Recommended",
-    "stabilityTitle": "How stable is today's advice?",
-    "stabilityOf": "Advice for: {{question}}",
+    "stabilityTitle": "How stable is the recommended choice?",
+    "stabilityHint": "Compare decisions above to see whether the recommended choice still holds when sales, prices or payers change.",
     "forecast_accuracy": "Forecast accuracy"
   },
   "statement": {

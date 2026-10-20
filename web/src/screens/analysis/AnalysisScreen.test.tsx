@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { StabilityReport } from "../../api/contracts";
 import { stability } from "../../mocks/fixtures/analysis";
-import { renderApp } from "../../test/render";
+import { renderApp, requestedPaths } from "../../test/render";
 
 describe("Analysis screen", () => {
   it("switches between the profit and loss, balance sheet and cash flow", async () => {
@@ -58,9 +58,14 @@ describe("Analysis screen", () => {
     expect(within(scenarios).getByRole("button", { name: "Compare" })).toBeDisabled();
   });
 
-  it("shows the stability bar and what would flip today's advice", async () => {
-    renderApp("/analysis");
-    const region = await screen.findByRole("region", { name: "How stable is today's advice?" });
+  it("asks for the stability of the recommended choice only once decisions are compared", async () => {
+    const { user, fetchMock } = renderApp("/analysis");
+    const region = await screen.findByRole("region", { name: "How stable is the recommended choice?" });
+    expect(within(region).getByText(/Compare decisions above/)).toBeInTheDocument();
+    expect(requestedPaths(fetchMock)).not.toContain("/api/analysis/stability");
+
+    const scenarios = screen.getByRole("region", { name: "Compare decisions" });
+    await user.click(within(scenarios).getByRole("button", { name: "Compare" }));
     const meter = await within(region).findByRole("meter", { name: "Decision stability" });
     expect(meter).toHaveAttribute("aria-valuenow", "80");
     expect(within(region).getByText("Holds in 8 of 10 variations")).toBeInTheDocument();
@@ -77,8 +82,10 @@ describe("Analysis screen", () => {
       ...stability(),
       results: stability().results.map((r) => (r.name === "rows_shuffled" ? { ...r, held: false, choice: "take_loan" } : r)) as StabilityReport["results"],
     };
-    renderApp("/analysis", { overrides: { "POST /api/analysis/stability": { body: report } } });
-    const region = await screen.findByRole("region", { name: "How stable is today's advice?" });
+    const { user } = renderApp("/analysis", { overrides: { "POST /api/analysis/stability": { body: report } } });
+    const scenarios = await screen.findByRole("region", { name: "Compare decisions" });
+    await user.click(within(scenarios).getByRole("button", { name: "Compare" }));
+    const region = screen.getByRole("region", { name: "How stable is the recommended choice?" });
     expect(await within(region).findByRole("alert")).toHaveTextContent(
       "Unreliable: the advice changed on irrelevant noise (Rows in a different order).",
     );

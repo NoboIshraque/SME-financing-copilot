@@ -170,6 +170,8 @@ export interface VarianceReport {
 export interface ScenarioComparison {
   scenarios: Scenario[];
   recommended_id: string;
+  /** Give it to POST /api/analysis/stability to re-run this comparison under stress and noise. */
+  recommendation_id: string;
 }
 
 // ---- Mesh (WP-08) --------------------------------------------------------------------------
