@@ -35,3 +35,4 @@ over. Set the old row to `taken over by orch-X` and add your own row.
 | WP-19 final pass: DecisionGuard rename, status refresh, PDFs, claims check | orch-C | wp-19-submission | done | 2026-10-20 00:40 | — |
 | Final end-to-end audit | audit | audit-final | done (merged) | 2026-10-20 06:54 | #41 |
 | Audit fixes (32 of 37 findings; Nobo authorised the merges) | audit | audit-fixes, audit-fixes-2, audit-fixes-3 | done (merged) | 2026-10-20 12:10 | #43, #45, #47 |
+| Session B: sign-in, cash slider, market label, hosting doc; B5 Market back on real public prices (WP-09) | session-B | app-fixes | in progress | 2026-10-20 12:42 | — |
