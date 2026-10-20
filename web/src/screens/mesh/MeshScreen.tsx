@@ -105,7 +105,7 @@ function RoundCard({ round, labels }: { round: NettingRound; labels: Record<stri
         {round.participants.map((tenant) => (
           <li key={tenant} className="flex justify-between gap-2">
             <span>{name(tenant)}{tenant === me ? ` (${t("mesh.you")})` : ""}</span>
-            <span className={round.approvals?.[tenant] ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500"}>
+            <span className={round.approvals?.[tenant] ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"}>
               {round.approvals?.[tenant] ? t("mesh.approved") : t("mesh.waiting")}
             </span>
           </li>
@@ -167,12 +167,33 @@ function RoundCard({ round, labels }: { round: NettingRound; labels: Record<stri
   );
 }
 
+/** Proposing a round is DRAFT (owner or accountant): nothing moves until every owner approves. */
+function ProposeRound() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const propose = useMutation({
+    mutationFn: api.mesh.propose,
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["mesh", "rounds"] }),
+  });
+  return (
+    <div className="space-y-2">
+      <button type="button" onClick={() => propose.mutate()} disabled={propose.isPending} className="rounded-xl bg-teal-700 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
+        {t("mesh.propose")}
+      </button>
+      {propose.isError && <ErrorState error={propose.error} />}
+    </div>
+  );
+}
+
 export function MeshScreen() {
   const { t } = useTranslation();
   const format = useFormat();
+  const session = useRequiredSession();
   useDocumentTitle(t("nav.mesh"));
   const graph = useQuery({ queryKey: ["mesh", "graph"], queryFn: api.mesh.obligations });
   const rounds = useQuery({ queryKey: ["mesh", "rounds"], queryFn: api.mesh.rounds });
+  const mayPropose = session.principal.role === "owner" || session.principal.role === "accountant";
+  const openRound = rounds.data?.some((round) => round.status === "proposed") ?? true;
   return (
     <section aria-labelledby="h-mesh" className="space-y-6">
       <h2 id="h-mesh" className="text-xl font-semibold">{t("nav.mesh")}</h2>
@@ -194,6 +215,7 @@ export function MeshScreen() {
             </section>
             <section aria-labelledby="h-rounds" className="space-y-3">
               <h3 id="h-rounds" className="text-lg font-semibold">{t("mesh.roundsTitle")}</h3>
+              {mayPropose && !openRound && <ProposeRound />}
               <QueryView query={rounds} isEmpty={(list) => list.length === 0} empty={t("mesh.noRounds")}>
                 {(list) => (
                   <ul className="space-y-3">

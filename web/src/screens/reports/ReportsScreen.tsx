@@ -37,7 +37,7 @@ function PassportCard({ passport }: { passport: PassportVersion }) {
         {passport.evidence.map((item) => (
           <li key={`${item.kind}-${item.digest}`} className="flex justify-between gap-2">
             <span>{t(`reports.evidence.${item.kind}`)}</span>
-            <span className={item.verified ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500"}>
+            <span className={item.verified ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"}>
               {item.verified ? t("reports.verified") : t("reports.selfDeclared")}
             </span>
           </li>
@@ -48,8 +48,6 @@ function PassportCard({ passport }: { passport: PassportVersion }) {
         <dd>{t("reports.attestationCounts", { confirmed: passport.attestations_confirmed, disputed: passport.attestations_disputed })}</dd>
         <dt className="text-slate-600 dark:text-slate-400">{t("reports.abstentionRate")}</dt>
         <dd>{passport.abstention_rate ? format.probability(passport.abstention_rate) : "—"}</dd>
-        <dt className="text-slate-600 dark:text-slate-400">{t("reports.drillRate")}</dt>
-        <dd>{passport.audit_drill_catch_rate ? format.probability(passport.audit_drill_catch_rate) : "—"}</dd>
       </dl>
       <Link to={`/verify/${encodeURIComponent(passport.id)}`} className="mt-3 inline-block text-sm font-medium text-teal-800 underline dark:text-teal-300">
         {t("reports.openVerify")}

@@ -233,12 +233,18 @@
     "expected_collection": "Expected to collect",
     "gap_reduced": "Gap closed",
     "cost": "Cost",
-    "send_pre_due_reminder": "Send a friendly reminder before the due date"
+    "send_pre_due_reminder": "Send a friendly reminder before the due date",
+    "breach_probability_after": "Chance of falling below the buffer after this step",
+    "stagger_purchase": "Split a big purchase into two",
+    "standby_facility": "Line up a standby credit line before the gap",
+    "surplus_sweep": "Move surplus cash into the safety buffer",
+    "surplus_sweep_amount": "Surplus to move into the buffer"
   },
   "alert": {
     "gap_ahead": "Cash gap ahead",
     "sales_below_norm": "Sales below the usual for this season",
-    "payroll_at_risk": "Payroll at risk"
+    "payroll_at_risk": "Payroll at risk",
+    "dso_rising": "Customers are paying more slowly"
   },
   "driver": {
     "salary": "Salaries",
@@ -248,7 +254,8 @@
     "late_customer": "Late customer payments",
     "seasonal_dip": "Seasonal dip in sales",
     "stock_build": "Stock building up",
-    "cost_shock": "Unexpected cost"
+    "cost_shock": "Unexpected cost",
+    "disputed_invoice": "Disputed invoice"
   },
   "indicator": {
     "dso_rising": "Customers paying more slowly",
@@ -292,7 +299,10 @@
     "whatIfLowest": "Lowest likely balance in this case",
     "reset": "Reset",
     "leversTitle": "Ways to close the gap",
-    "noLevers": "No fixes needed right now."
+    "noLevers": "No fixes needed right now.",
+    "dso_before": "Days to get paid, earlier",
+    "dso_now": "Days to get paid, now",
+    "lead_time_days": "Days until the gap"
   },
   "abstain": {
     "insufficient_data": "I don't have enough data to advise on this safely.",
@@ -428,7 +438,8 @@
       "fast": "Fast"
     },
     "effective_apr": "True yearly cost",
-    "total_cost": "Total cost"
+    "total_cost": "Total cost",
+    "p_buffer_breach": "Chance of falling below the buffer with this option"
   },
   "purpose": {
     "working_capital": "Working capital",
@@ -483,7 +494,21 @@
     "recommended": "Recommended",
     "stabilityTitle": "How stable is the recommended choice?",
     "stabilityHint": "Compare decisions above to see whether the recommended choice still holds when sales, prices or payers change.",
-    "forecast_accuracy": "Forecast accuracy"
+    "forecast_accuracy": "Forecast accuracy",
+    "cost_correction": "Cost correction for the next forecast",
+    "decision_cost": "Cost of the decision",
+    "dpo": "Days to pay suppliers",
+    "dso": "Days to get paid",
+    "expected_outcome": "Expected balance",
+    "gross_margin": "Gross margin",
+    "gross_profit": "Gross profit",
+    "net_cash_flow": "Net cash flow",
+    "net_sales": "Net sales",
+    "operating_expenses": "Operating expenses",
+    "p_buffer_breach": "Chance of falling below the buffer",
+    "risk_adjusted_outcome": "Risk-adjusted outcome",
+    "sales_correction": "Sales correction for the next forecast",
+    "worst_5pct_outcome": "Worst 5% outcome"
   },
   "statement": {
     "cash_sales": "Cash sales",
@@ -504,7 +529,17 @@
     "opening_cash": "Cash at start",
     "cash_in": "Money in",
     "cash_out": "Money out",
-    "closing_cash": "Cash at end"
+    "closing_cash": "Cash at end",
+    "collections": "Collections",
+    "loan_flows": "Loans received and repaid",
+    "net_cash_flow": "Net cash flow",
+    "operating_cash_flow": "Cash flow from operations",
+    "operating_expenses": "Operating expenses",
+    "operating_profit": "Operating profit",
+    "owner_flows": "Owner drawings and top-ups",
+    "revenue": "Revenue",
+    "total_assets": "Total assets",
+    "total_liabilities": "Total liabilities"
   },
   "ratio": {
     "gross_margin": "Gross margin",
@@ -513,14 +548,35 @@
     "dso": "Days to get paid",
     "dpo": "Days to pay suppliers",
     "top_customer_share": "Biggest customer's share",
-    "dscr": "Debt service cover"
+    "dscr": "Debt service cover",
+    "burn": "Monthly cash burn",
+    "cash_conversion_cycle": "Cash conversion cycle",
+    "dio": "Days of stock",
+    "interest_cover": "Interest cover",
+    "missing": {
+      "interest_expense": "Needs the interest paid",
+      "stock_value": "Needs the stock value"
+    },
+    "not_applicable": {
+      "not_burning": "Not burning cash"
+    },
+    "quick_ratio": "Quick ratio",
+    "runway": "Runway"
   },
   "interpretation": {
     "typical_grocery": "In the usual range for a grocery.",
     "healthy": "Healthy.",
     "pays_fast": "You pay suppliers fast; ask for longer terms.",
     "concentrated": "One customer is a large share of sales.",
-    "no_debt": "No loans, so nothing to cover."
+    "no_debt": "No loans, so nothing to cover.",
+    "covers_short_term": "Short-term assets cover short-term debts.",
+    "dscr": {
+      "cannot_cover": "Cash flow does not cover the loan payments.",
+      "comfortable": "Cash flow covers the loan payments comfortably."
+    },
+    "loss_making": "The business is making a loss.",
+    "not_burning": "Cash is not running down.",
+    "short_of_current_cover": "Short-term assets do not fully cover short-term debts."
   },
   "metric": {
     "net_sales": "Net sales",
@@ -529,7 +585,11 @@
     "closing_balance": "Cash at month end",
     "opening_balance": "Cash at start",
     "cash_in": "Money in",
-    "cash_out": "Money out"
+    "cash_out": "Money out",
+    "cash_sales": "Cash sales",
+    "net_cash_flow": "Net cash flow",
+    "other_costs": "Other costs",
+    "supplier_payments": "Supplier payments"
   },
   "decision": {
     "retime_supplier": "Pay the supplier after salary day",
@@ -591,7 +651,8 @@
     "verify": "Verify against the chain",
     "valid": "Verified: the record matches the anchored hash.",
     "invalid": "Does not match the anchored hash. Do not trust this record.",
-    "stepUpSummary": "Clear {{gross}} of debt by paying {{net}} in total"
+    "stepUpSummary": "Clear {{gross}} of debt by paying {{net}} in total",
+    "propose": "Propose a netting round"
   },
   "market": {
     "preview": "Preview with sample data: live market prices are not part of this version.",
@@ -712,7 +773,6 @@
     "attestations": "Confirmed by trading partners",
     "attestationCounts": "{{confirmed}} confirmed, {{disputed}} disputed",
     "abstentionRate": "How often DecisionGuard said \"I don't know\"",
-    "drillRate": "Audit drill catch rate",
     "openVerify": "Open the public verify page",
     "issue": "Issue a new version",
     "history_one": "{{count}} earlier version",
@@ -776,7 +836,36 @@
     "quarantine_input": "Blocked a suspicious instruction",
     "abstain": "Declined to guess",
     "share_passport": "Shared the passport",
-    "login": "Signed in"
+    "login": "Signed in",
+    "approval": {
+      "approved": "Approval given",
+      "executed": "Approved action carried out (recorded)",
+      "refused": "Request refused",
+      "requested": "Approval requested"
+    },
+    "auth": {
+      "login": "Signed in",
+      "logout": "Signed out",
+      "password_ok": "Password accepted, waiting for the code",
+      "step_up_failed": "Wrong confirmation code",
+      "totp_failed": "Wrong sign-in code"
+    },
+    "copilot": {
+      "abstain": "The copilot declined to guess"
+    },
+    "guard": {
+      "quarantined": "Suspicious instruction blocked"
+    },
+    "mesh": {
+      "round_approved": "Netting round approved",
+      "round_proposed": "Netting round proposed",
+      "round_settled": "Netting round settled"
+    },
+    "passport": {
+      "issued": "Trust Passport issued",
+      "share_revoked": "Passport sharing revoked",
+      "shared": "Passport shared with a lender"
+    }
   },
   "settings": {
     "profile": "You",
@@ -924,5 +1013,39 @@
     "codeOpenApp": "Open in authenticator app",
     "codeConfirm": "Confirm code",
     "codeOn": "Approval code is set up."
+  },
+  "scenario": {
+    "reason": {
+      "best_risk_adjusted_outcome": "Best outcome once risk is counted",
+      "lowest_breach_risk": "Lowest chance of falling below the buffer"
+    },
+    "skip": {
+      "no_early_bills": "Left out: no bill can be paid early",
+      "no_shortfall": "Left out: there is no shortfall to cover"
+    }
+  },
+  "variance": {
+    "actual": {
+      "cash_sales": "Actual cash sales",
+      "closing_balance": "Actual cash at month end",
+      "collections": "Actual collections",
+      "fixed_costs": "Actual fixed costs",
+      "net_cash_flow": "Actual net cash flow",
+      "other_costs": "Actual other costs",
+      "other_inflows": "Actual other money in",
+      "supplier_payments": "Actual supplier payments",
+      "transfers": "Actual transfers"
+    },
+    "expected": {
+      "cash_sales": "Expected cash sales",
+      "closing_balance": "Expected cash at month end",
+      "collections": "Expected collections",
+      "fixed_costs": "Expected fixed costs",
+      "net_cash_flow": "Expected net cash flow",
+      "other_costs": "Expected other costs",
+      "other_inflows": "Expected other money in",
+      "supplier_payments": "Expected supplier payments",
+      "transfers": "Expected transfers"
+    }
   }
 }

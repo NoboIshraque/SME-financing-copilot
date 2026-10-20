@@ -43,6 +43,7 @@ from app.contracts import (
     PassportVersion,
     Period,
     Principal,
+    Role,
     ShareGrant,
     Tier,
     VerifyResult,
@@ -59,7 +60,7 @@ from app.security import policy
 from app.security.audit import AuditLog
 from app.security.clock import Clock
 from app.security.deps import StepUp, get_clock, require, step_up
-from app.security.errors import ProblemRoute
+from app.security.errors import ProblemRoute, forbidden
 from app.security.roles import Permission
 from app.synthetic.universe import SME_IDS
 
@@ -170,6 +171,8 @@ def issue(principal: Principal = Depends(require(Permission.approvals_decide)),
 @router.get("/reports/shares", response_model=list[ShareGrant])
 def shares(principal: Principal = Depends(require(Permission.passport_read)),
            session: Session = Depends(get_session)) -> list[ShareGrant]:
+    if principal.role is Role.lender_viewer:  # one lender may not see whom else the shop told
+        raise forbidden("shares")
     rows = session.scalars(select(ShareRow).where(ShareRow.tenant_id == principal.tenant_id))
     grants = [ShareGrant.model_validate_json(r.payload) for r in rows]
     return sorted(grants, key=lambda g: (g.created_at, g.id), reverse=True)

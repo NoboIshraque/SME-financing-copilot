@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { API_MODES, readSavedApiMode, resolveApiMode, saveApiMode, type ApiMode } from "../../api/apiMode";
+import { ApiRequestError } from "../../api/client";
 import { api } from "../../api/endpoints";
 import type { UserSettings } from "../../api/types";
 import { useRequiredSession } from "../../auth/session";
@@ -62,6 +63,9 @@ export function SettingsScreen() {
   const session = useRequiredSession();
   const theme = useThemePreference();
   const settings = useQuery({ queryKey: ["settings"], queryFn: api.settings.get, enabled: session.principal.role !== "lender_viewer" });
+  // Settings storage has no backend router (sending channels were cut): hide the card instead of
+  // showing an error when the server has no such route.
+  const noSettingsRoute = settings.error instanceof ApiRequestError && settings.error.body === null && settings.error.status === 404;
   const health = useQuery({ queryKey: ["health"], queryFn: api.health, staleTime: 10 * 60_000 });
   const [apiMode, setApiMode] = useState<ApiMode>(() => resolveApiMode(import.meta.env, readSavedApiMode()));
   const { principal } = session;
@@ -111,7 +115,7 @@ export function SettingsScreen() {
         </fieldset>
       </section>
 
-      {principal.role !== "lender_viewer" && (
+      {principal.role !== "lender_viewer" && !noSettingsRoute && (
         <section aria-labelledby="h-notify" className={card}>
           <h3 id="h-notify" className="text-lg font-semibold">{t("settings.notifications")}</h3>
           <QueryView query={settings}>{(data) => <Notifications initial={data} />}</QueryView>
@@ -136,7 +140,7 @@ export function SettingsScreen() {
             >
               {API_MODES.map((mode) => <option key={mode} value={mode}>{t(`settings.apiModes.${mode}`)}</option>)}
             </select>
-            <span className="text-xs text-slate-500">{t("settings.reloadNeeded")}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{t("settings.reloadNeeded")}</span>
           </label>
         )}
       </section>

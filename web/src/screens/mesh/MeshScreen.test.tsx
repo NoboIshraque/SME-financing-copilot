@@ -30,6 +30,16 @@ describe("Mesh screen", () => {
     expect(within(round).getByText("Ashulia Stitch Works (you)").nextSibling).toHaveTextContent("waiting");
   });
 
+  it("lets a ring member's owner propose a round when none is open", async () => {
+    const { user, db } = renderApp("/mesh", { signedInAs: GARMENT });
+    db.rounds.splice(0, db.rounds.length);
+    const rounds = await screen.findByRole("region", { name: "Netting rounds" });
+    expect(await within(rounds).findByText("No netting rounds yet.")).toBeInTheDocument();
+    await user.click(within(rounds).getByRole("button", { name: "Propose a netting round" }));
+    expect(await within(rounds).findByRole("article", { name: "Proposed netting round" })).toBeInTheDocument();
+    expect(within(rounds).queryByRole("button", { name: "Propose a netting round" })).not.toBeInTheDocument();
+  });
+
   it("approves the round only with the owner's code, then waits for the others", async () => {
     const { user, db } = renderApp("/mesh", { signedInAs: GARMENT });
     const round = await screen.findByRole("article", { name: "Proposed netting round" });

@@ -602,7 +602,8 @@ def _quarantine(row: QuarantineRow) -> QuarantineView:
 
 
 @guard_router.post("/check", response_model=VerdictView)
-def guard_check(body: GuardCheckBody, principal: Principal = Depends(current_principal),
+def guard_check(body: GuardCheckBody,
+                principal: Principal = Depends(require(Permission.copilot_ask)),
                 db: Session = Depends(get_session),
                 clock: Clock = Depends(get_clock)) -> VerdictView | JSONResponse:
     try:

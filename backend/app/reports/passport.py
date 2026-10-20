@@ -10,6 +10,7 @@ neither the SME nor DecisionGuard.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Iterable, Sequence
 from datetime import datetime
 from decimal import Decimal
@@ -58,7 +59,9 @@ def build_passport(
     atts = list(attestations)
     version = 1 if previous is None else previous.version + 1
     draft = PassportVersion(
-        id=f"pp-{tenant_id}-v{version}",
+        # Derived from the secret salt, so the public verify page reveals neither which shops
+        # exist nor how many versions they issued (pp-<tenant>-v<n> could be guessed).
+        id="pp-" + hashlib.sha256(f"{salt}:{tenant_id}:{version}".encode()).hexdigest()[:20],
         tenant_id=tenant_id,
         version=version,
         issued_at=now,

@@ -1,7 +1,8 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { renderApp } from "../../test/render";
+import i18n from "../../i18n";
+import { renderApp, requestedPaths } from "../../test/render";
 
 describe("Messages & approvals inbox", () => {
   it("shows the owner what the accountant asked to approve, and clears it once approved with the code", async () => {
@@ -71,6 +72,13 @@ describe("Messages & approvals inbox", () => {
     const draft = await screen.findByRole("article", { name: "Overdue reminder · Customer 9" });
     expect(within(draft).getByText("Your role can't approve this.")).toBeInTheDocument();
     expect(within(draft).queryByRole("button", { name: "Approve message" })).not.toBeInTheDocument();
+  });
+
+  it("asks for Bangla drafts when the owner reads in Bangla", async () => {
+    await i18n.changeLanguage("bn");
+    const { fetchMock } = renderApp("/messages");
+    await screen.findAllByRole("article");
+    expect(requestedPaths(fetchMock)).toContain("/api/messages/drafts?language=bn");
   });
 
   it("does not let staff approve drafts", async () => {

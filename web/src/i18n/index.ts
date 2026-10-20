@@ -30,12 +30,28 @@ export function rememberLanguage(language: Language): void {
   }
 }
 
+/** Hashes, digests and transaction ids: compared character by character, so never localised. */
+const HEX_RUN = /(?:0x)?[0-9a-f]*[a-f][0-9a-f]*/gi;
+const MIN_HEX_RUN = 6;
+
+/** Bangla digits everywhere except inside hex runs (a hash shown in Bangla must still match). */
+export function toBanglaDigitsOutsideHashes(value: string): string {
+  let out = "";
+  let last = 0;
+  for (const match of value.matchAll(HEX_RUN)) {
+    if (match[0].length < MIN_HEX_RUN || !/\d/.test(match[0])) continue;
+    out += toBanglaDigits(value.slice(last, match.index)) + match[0];
+    last = match.index + match[0].length;
+  }
+  return out + toBanglaDigits(value.slice(last));
+}
+
 /** In Bangla, digits inside translated sentences (counts, days, minutes) are written ০-৯. */
 const banglaDigits: PostProcessorModule = {
   type: "postProcessor",
   name: "banglaDigits",
   process(value: string, _key: string | string[], options: { lng?: string }, translator: { language?: string }) {
-    return (options.lng ?? translator.language) === "bn" ? toBanglaDigits(value) : value;
+    return (options.lng ?? translator.language) === "bn" ? toBanglaDigitsOutsideHashes(value) : value;
   },
 };
 

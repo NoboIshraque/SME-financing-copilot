@@ -28,6 +28,12 @@ describe("Trust & audit screen", () => {
     expect(first).toHaveTextContent("Missing: last year's Eid-ul-Adha sales (only 5 months of history)");
   });
 
+  it("is not offered to the accountant, whose role cannot read the audit log", async () => {
+    renderApp("/trust", { signedInAs: "accountant@hishab.demo" });
+    expect(await screen.findByRole("heading", { name: "Not available for your role" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Trust & audit" })).not.toBeInTheDocument();
+  });
+
   it("says where the chain broke when it was tampered with", async () => {
     renderApp("/trust", { overrides: { "GET /api/audit/verify": { body: { ...auditVerification(), valid: false, first_bad_seq: 812, reason: "hash mismatch at seq 812" } } } });
     const chain = await screen.findByRole("region", { name: "Audit log" });

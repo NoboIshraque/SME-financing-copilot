@@ -63,7 +63,7 @@ export function initialPassports(): PassportVersion[] {
       attestations_confirmed: 12,
       attestations_disputed: 1,
       abstention_rate: "0.06",
-      audit_drill_catch_rate: "0.9",
+      audit_drill_catch_rate: null,
       anchor: { chain: "sepolia", digest: "3c9e1a7b5d2f4e6081a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7a8", tx_hash: "0x8d2a4c6e8f0a1b3c5d7e9f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c", block_number: 6612345, explorer_url: null, anchored_at: "2026-09-30T12:05:00Z" },
       data_mode: "synthetic",
     },

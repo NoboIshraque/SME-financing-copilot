@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { ACCOUNTANT, LENDER, renderApp } from "../../test/render";
@@ -28,6 +28,13 @@ describe("Settings screen", () => {
     const notify = await screen.findByRole("region", { name: "Notifications" });
     expect(await within(notify).findByLabelText(/Send low-risk reminders automatically/)).toBeDisabled();
     expect(within(notify).getByText("Only the owner can change this.")).toBeInTheDocument();
+  });
+
+  it("leaves out the notifications card when the server has no settings route", async () => {
+    renderApp("/settings", { overrides: { "GET /api/settings": { status: 404, body: { detail: "Not Found" } } } });
+    expect(await screen.findByRole("heading", { level: 3, name: "Data" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("region", { name: "Notifications" })).not.toBeInTheDocument());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("shows a lender viewer when access ends, without business settings", async () => {
