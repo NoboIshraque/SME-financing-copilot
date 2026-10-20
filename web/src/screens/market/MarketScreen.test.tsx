@@ -1,7 +1,27 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import type { PricePoint } from "../../api/contracts";
+import type { MarketAlert, WatchItem } from "../../api/types";
+import { sessionFor } from "../../mocks/db";
+import { vendorRanking } from "../../mocks/fixtures/market";
 import { renderApp } from "../../test/render";
+
+const TCB_URL = "https://objectstorage.example/office-tcb/2026-10-19.xlsx";
+
+function tcbPoint(amount: string, observed: string): PricePoint {
+  return { commodity: "chickpea", unit: "kg", price: { amount, currency: "BDT" }, low: null, high: null, market: "Dhaka", source: "tcb", source_url: TCB_URL, observed_on: observed, data_mode: "public" };
+}
+
+/** What the WP-09 server answers: TCB's published list, with its date. */
+const LIVE_PRICES: WatchItem[] = [
+  { commodity: "chickpea", unit: "kg", latest: tcbPoint("117.50", "2026-10-19"), median_4w: { amount: "105.00", currency: "BDT" }, change_pct: "11.9", history: [tcbPoint("105.00", "2026-10-12"), tcbPoint("117.50", "2026-10-19")], published_on: "2026-10-19", baseline_basis: "median_4w", baseline_points: 16 },
+];
+const LIVE_ALERTS: MarketAlert[] = [
+  { id: "mk-chickpea", commodity: "chickpea", direction: "rise", observed_on: "2026-10-19", source: "tcb", source_url: TCB_URL, published_on: "2026-10-19", change: { id: "f", label_key: "market.change_vs_median", value: "11.9", unit: "percent", data_mode: "public", provenance: { formula_id: "market.change_vs_4w_median", formula_version: 1 } } },
+];
+const LIVE = { "GET /api/market/prices": { body: LIVE_PRICES }, "GET /api/market/alerts": { body: LIVE_ALERTS } };
+const SAMPLE_LABEL = "Sample data: a preview of a planned feature, not live prices";
 
 describe("Market screen", () => {
   it("shows watched prices with the 4-week median, change, and when the source published them", async () => {
@@ -13,11 +33,86 @@ describe("Market screen", () => {
     expect(within(watch).getByRole("row", { name: /Lentils/ })).toHaveTextContent("-4.5%");
   });
 
+  it("labels every card as sample data when the server has no market prices", async () => {
+    renderApp("/market");
+    expect(await screen.findByText(/The server has no market prices yet/)).toBeInTheDocument();
+    for (const name of ["Prices you watch", "Price alerts", "Best vendor for an order", "Negotiate a sale"]) {
+      expect(within(await screen.findByRole("region", { name })).getByText(SAMPLE_LABEL)).toBeInTheDocument();
+    }
+  });
+
+  it("shows TCB's published list with its date and link, and no sample label on the price cards", async () => {
+    renderApp("/market", { overrides: LIVE });
+    const note = await screen.findByText(/TCB's daily retail price list for Dhaka, published 19 October 2026/);
+    expect(note).toHaveTextContent("these are not live prices");
+    expect(screen.getByRole("link", { name: "Open TCB's list" })).toHaveAttribute("href", TCB_URL);
+    const watch = screen.getByRole("region", { name: "Prices you watch" });
+    expect(within(watch).getByRole("row", { name: /Chickpeas/ })).toHaveTextContent("TCB Dhaka, published 19 Oct");
+    expect(within(watch).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+    const alerts = screen.getByRole("region", { name: "Price alerts" });
+    expect(await within(alerts).findByText(/Chickpeas is up/)).toBeInTheDocument();
+    expect(within(alerts).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+  });
+
+  it("labels vendor results from the bundled sample even when prices are live", async () => {
+    const prices = [...LIVE_PRICES, { ...LIVE_PRICES[0]!, commodity: "rice_coarse" }];
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "GET /api/market/prices": { body: prices } } });
+    const vendors = await screen.findByRole("region", { name: "Best vendor for an order" });
+    expect(within(vendors).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+    await user.click(within(vendors).getByRole("button", { name: "Rank vendors" }));
+    expect(await within(vendors).findByText(SAMPLE_LABEL)).toBeInTheDocument();
+  });
+
+  it("shows the server's ranking of the shop's own suppliers without the sample label", async () => {
+    const ranked = vendorRanking("rice_coarse").map((vendor) => ({ ...vendor, source: "ledger_supplier" as const }));
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "POST /api/market/vendors/rank": { body: ranked } } });
+    const vendors = await screen.findByRole("region", { name: "Best vendor for an order" });
+    await user.click(within(vendors).getByRole("button", { name: "Rank vendors" }));
+    expect(await within(vendors).findByRole("listitem", { name: "Supplier 2" })).toBeInTheDocument();
+    expect(within(vendors).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+  });
+
+  it("asks a shop with no supplier quotes on record to add one", async () => {
+    const abstain = { status: 422, body: { code: "not_enough_data", message_key: "error.not_enough_data", detail: { missing: "supplier_quote" } } };
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "POST /api/market/vendors/rank": abstain } });
+    const vendors = await screen.findByRole("region", { name: "Best vendor for an order" });
+    await user.click(within(vendors).getByRole("button", { name: "Rank vendors" }));
+    expect(await within(vendors).findByText(/Add a supplier quote to compare vendors/)).toBeInTheDocument();
+  });
+
+  it("shows a live negotiation plan with the TCB price and cost of money it used, without the sample label", async () => {
+    const fig = (id: string, label: string, value: string, unit: "BDT" | "percent" = "BDT") => ({ id, label_key: label, value, unit, data_mode: "synthetic" as const, provenance: { formula_id: label, formula_version: 1 } });
+    const plan = {
+      walk_away: fig("w", "negotiation.walk_away", "52.69"),
+      target: fig("t", "negotiation.target", "62.00"),
+      steps: [{ text_key: "negotiation.step.walk_away", figures: [fig("w2", "negotiation.walk_away", "52.69")] }],
+      cost_of_money: fig("c", "market.cost_of_money", "4.07", "percent"),
+      market_price: { ...tcbPoint("52.50", "2026-10-19"), commodity: "rice_coarse" },
+    };
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "POST /api/market/negotiate": { body: plan } } });
+    const negotiate = await screen.findByRole("region", { name: "Negotiate a sale" });
+    expect(within(negotiate).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+    await user.click(within(negotiate).getByRole("button", { name: "Make my plan" }));
+    expect(await within(negotiate).findByText(/Market price used: ৳52.50 \/ kg, TCB, published 19 Oct/)).toBeInTheDocument();
+    expect(negotiate).toHaveTextContent("Your cost of money (best loan you qualify for): 4.07%");
+    expect(within(negotiate).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+  });
+
+  it("never shows sample vendors to a self-service shop as its own", async () => {
+    const { user } = renderApp("/market", {
+      overrides: { "GET /api/auth/me": (_req, state) => ({ body: { ...sessionFor(state.users[0]!), data_mode: "live" } }) },
+    });
+    const vendors = await screen.findByRole("region", { name: "Best vendor for an order" });
+    await user.click(within(vendors).getByRole("button", { name: "Rank vendors" }));
+    expect(await within(vendors).findByText(/Add a supplier quote to compare vendors/)).toBeInTheDocument();
+    expect(within(vendors).queryByText(/Supplier 7/)).not.toBeInTheDocument();
+  });
+
   it("raises an alert for each big move, with advice", async () => {
     renderApp("/market");
     const alerts = await screen.findByRole("region", { name: "Price alerts" });
     const items = await within(alerts).findAllByRole("listitem");
-    expect(items[0]).toHaveTextContent("Onion is up 12.9%");
+    expect(items[0]).toHaveTextContent("Onion (local) is up 12.9%");
     expect(items[0]).toHaveTextContent("Buy only what you need this week");
     expect(items[1]).toHaveTextContent("Lentils (masur) is down -4.5%");
     expect(items[1]).toHaveTextContent("A good time to stock up");

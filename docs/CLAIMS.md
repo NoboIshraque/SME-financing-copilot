@@ -36,3 +36,4 @@ over. Set the old row to `taken over by orch-X` and add your own row.
 | Final end-to-end audit | audit | audit-final | done (merged) | 2026-10-20 06:54 | #41 |
 | Audit fixes (32 of 37 findings; Nobo authorised the merges) | audit | audit-fixes, audit-fixes-2, audit-fixes-3 | done (merged) | 2026-10-20 12:10 | #43, #45, #47 |
 | Session A: copilot answers, role suggestions, AI-model doc | session-a | copilot-answers | active | 2026-10-20 12:40 | — |
+| Session B: sign-in, cash slider, market label, hosting doc; B5 Market back on real public prices (WP-09) | session-B | app-fixes | in progress | 2026-10-20 12:42 | — |

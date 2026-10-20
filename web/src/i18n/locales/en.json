@@ -74,7 +74,11 @@
     "demoAs": "Sign in as {{role}}",
     "demoCode": "Demo code: {{code}}",
     "ownShop": "Or try it on your own numbers:",
-    "ownShopLink": "create your own shop"
+    "ownShopLink": "create your own shop",
+    "serverWaking": "The server is waking up (the free server sleeps when nobody uses it). Wait about a minute, then try again.",
+    "slowServer": "Still connecting: the free server can take about a minute to wake up.",
+    "lockoutNote": "After 5 wrong tries the account locks for 15 minutes.",
+    "demoCodeFresh": "The demo code changes every 30 seconds; this one is refreshed for you."
   },
   "stepUp": {
     "title": "Confirm it's you",
@@ -140,7 +144,9 @@
     "invalid_email": "Enter a valid email address.",
     "signup_closed": "New shops are closed on this demo server.",
     "opening_needs_both": "Enter the opening balance and its date together.",
-    "date_in_future": "That date is in the future."
+    "date_in_future": "That date is in the future.",
+    "invalid_offer": "Enter the buyer's offer per unit, for example 62.",
+    "not_enough_data": "Not enough data on record to answer this yet."
   },
   "today": {
     "asOf": "As of {{date}}",
@@ -302,7 +308,8 @@
     "noLevers": "No fixes needed right now.",
     "dso_before": "Days to get paid, earlier",
     "dso_now": "Days to get paid, now",
-    "lead_time_days": "Days until the gap"
+    "lead_time_days": "Days until the gap",
+    "updating": "Updating…"
   },
   "abstain": {
     "insufficient_data": "I don't have enough data to advise on this safely.",
@@ -319,7 +326,8 @@
     "days_other": "{{value}} days",
     "kg": "kg",
     "litre": "litre",
-    "metric_ton": "tonne"
+    "metric_ton": "tonne",
+    "hali": "hali (4)"
   },
   "receivables": {
     "remindersTitle": "Reminders to send",
@@ -657,7 +665,6 @@
     "propose": "Propose a netting round"
   },
   "market": {
-    "preview": "Preview with sample data: live market prices are not part of this version.",
     "alertsTitle": "Price alerts",
     "noAlerts": "No big price moves today.",
     "rose": "{{commodity}} is up",
@@ -697,14 +704,30 @@
     "unit_price": "Price",
     "delivery_per_unit": "Delivery",
     "delay_cost": "Waiting cost",
-    "reliability_penalty": "Reliability risk"
+    "reliability_penalty": "Reliability risk",
+    "sourceNote": "Prices: TCB's daily retail price list for Dhaka, published {{date}}. TCB publishes once a day, so these are not live prices.",
+    "sourceLink": "Open TCB's list",
+    "sampleNote": "Sample data: a preview of a planned feature, not live prices. The server has no market prices yet.",
+    "sampleLabel": "Sample data: a preview of a planned feature, not live prices",
+    "addQuote": "Add a supplier quote to compare vendors. Sample vendors are not shown as yours.",
+    "change_vs_previous": "Change vs the previous list",
+    "cost_of_money": "Your cost of money (best loan you qualify for)",
+    "priceUsed": "Market price used: {{price}} / {{unit}}, TCB, published {{date}}"
   },
   "commodity": {
-    "onion": "Onion",
+    "onion": "Onion (local)",
     "lentil_masur": "Lentils (masur)",
     "rice_coarse": "Rice (coarse)",
-    "soybean_oil": "Soybean oil",
-    "sugar": "Sugar"
+    "soybean_oil": "Soybean oil (loose)",
+    "sugar": "Sugar",
+    "rice_fine": "Rice (fine)",
+    "atta_loose": "Atta (loose)",
+    "chickpea": "Chickpeas",
+    "potato": "Potato",
+    "egg_farm": "Eggs (farm)",
+    "garlic": "Garlic (local)",
+    "salt": "Salt (iodised)",
+    "ms_rod": "MS rod (60 grade)"
   },
   "negotiation": {
     "step": {

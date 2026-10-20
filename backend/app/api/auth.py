@@ -247,7 +247,7 @@ def demo_accounts(request: Request, response: Response, db: Session = Depends(ge
     now = clock()
     _ensure_demo(request, db, now)
     response.headers.update(NO_STORE)
-    return demo_listing(settings, now)
+    return demo_listing(settings, now, db)
 
 
 @auth_router.post("/totp/enrol", response_model=TotpEnrolment)

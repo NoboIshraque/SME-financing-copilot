@@ -25,6 +25,7 @@ describe("sign-in screen", () => {
     await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("That email and password don't match.");
+    expect(screen.getByRole("alert")).toHaveTextContent("After 5 wrong tries the account locks for 15 minutes.");
     expect(db.session).toBeNull();
   });
 
@@ -59,6 +60,35 @@ describe("sign-in screen", () => {
 
     expect(await screen.findByRole("heading", { level: 2, name: "Enter your code" })).toBeInTheDocument();
     expect(screen.getByText("Demo code: 246810")).toBeInTheDocument();
+  });
+
+  it("shows the demo code fetched on reaching the code step, not the one from page load", async () => {
+    // The listing loaded with the page holds a code that has expired by the time the owner taps.
+    let listings = 0;
+    const { user, db, fetchMock } = renderApp("/", {
+      signedInAs: null,
+      overrides: {
+        "GET /api/auth/demo-accounts": () => {
+          listings += 1;
+          const code = listings === 1 ? "111111" : "222222";
+          return { body: db.users.map((u) => ({ email: u.email, password: u.password, role: u.role, business_name: u.business_name, totp_hint: u.totp ? code : null })) };
+        },
+      },
+    });
+    await user.click(await screen.findByRole("button", { name: /Sign in as Owner.*Mirpur Mudi Store/ }));
+
+    expect(await screen.findByText("Demo code: 222222")).toBeInTheDocument();
+    expect(screen.queryByText("Demo code: 111111")).not.toBeInTheDocument();
+    expect(requestedPaths(fetchMock).filter((path) => path === "/api/auth/demo-accounts")).toHaveLength(2);
+  });
+
+  it("says the free server is waking up when sign-in gets no answer from the API", async () => {
+    const { user } = renderApp("/", { signedInAs: null, overrides: { "POST /api/auth/login": { status: 503 } } });
+    await user.type(await screen.findByLabelText("Email"), "accountant@hishab.demo");
+    await user.type(screen.getByLabelText("Password"), DEMO_PASSWORD);
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("The server is waking up");
   });
 
   it("sends a lender viewer to the only screens their consent covers", async () => {

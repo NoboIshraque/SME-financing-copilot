@@ -74,7 +74,11 @@
     "demoAs": "以{{role}}身份登录",
     "demoCode": "演示验证码：{{code}}",
     "ownShop": "或者用您自己的数字试试：",
-    "ownShopLink": "创建自己的店铺"
+    "ownShopLink": "创建自己的店铺",
+    "serverWaking": "服务器正在唤醒（免费服务器在无人使用时会休眠）。请等待约一分钟后重试。",
+    "slowServer": "仍在连接：免费服务器唤醒可能需要约一分钟。",
+    "lockoutNote": "连续输错 5 次后，账户将被锁定 15 分钟。",
+    "demoCodeFresh": "演示验证码每 30 秒更换一次；此处会自动刷新。"
   },
   "stepUp": {
     "title": "确认是您本人",
@@ -140,7 +144,9 @@
     "invalid_email": "请输入有效的邮箱地址。",
     "signup_closed": "本演示服务器已停止创建新店铺。",
     "opening_needs_both": "请同时填写期初余额和日期。",
-    "date_in_future": "该日期在未来。"
+    "date_in_future": "该日期在未来。",
+    "invalid_offer": "请输入买家的每单位出价，例如 62。",
+    "not_enough_data": "记录中的数据还不足以回答这个问题。"
   },
   "today": {
     "asOf": "截至 {{date}}",
@@ -302,7 +308,8 @@
     "noLevers": "目前不需要采取措施。",
     "dso_before": "此前收回货款的天数",
     "dso_now": "目前收回货款的天数",
-    "lead_time_days": "距离缺口的天数"
+    "lead_time_days": "距离缺口的天数",
+    "updating": "正在更新…"
   },
   "abstain": {
     "insufficient_data": "我没有足够的数据来稳妥地给出建议。",
@@ -319,7 +326,8 @@
     "days_other": "{{value}} 天",
     "kg": "公斤",
     "litre": "升",
-    "metric_ton": "吨"
+    "metric_ton": "吨",
+    "hali": "hali（4个）"
   },
   "receivables": {
     "remindersTitle": "待发送的提醒",
@@ -657,7 +665,6 @@
     "propose": "提出轧差结算轮次"
   },
   "market": {
-    "preview": "预览（示例数据）：此版本不含实时市场价格。",
     "alertsTitle": "价格预警",
     "noAlerts": "今天没有明显的价格变动。",
     "rose": "{{commodity}}上涨",
@@ -697,14 +704,30 @@
     "unit_price": "价格",
     "delivery_per_unit": "运费",
     "delay_cost": "等待成本",
-    "reliability_penalty": "可靠性风险"
+    "reliability_penalty": "可靠性风险",
+    "sourceNote": "价格：孟加拉国贸易公司（TCB）达卡每日零售价格表，发布于 {{date}}。TCB 每天发布一次，因此不是实时价格。",
+    "sourceLink": "打开 TCB 价格表",
+    "sampleNote": "示例数据：计划中功能的预览，不是实时价格。服务器上还没有市场价格。",
+    "sampleLabel": "示例数据：计划中功能的预览，不是实时价格",
+    "addQuote": "添加供应商报价以比较供应商。示例供应商不会显示为您的供应商。",
+    "change_vs_previous": "与上一期价格表相比的变化",
+    "cost_of_money": "您的资金成本（您符合条件的最优贷款）",
+    "priceUsed": "使用的市场价格：{{price}} / {{unit}}，TCB，发布于 {{date}}"
   },
   "commodity": {
-    "onion": "洋葱",
+    "onion": "洋葱（本地）",
     "lentil_masur": "红扁豆",
     "rice_coarse": "粗米",
-    "soybean_oil": "大豆油",
-    "sugar": "白糖"
+    "soybean_oil": "大豆油（散装）",
+    "sugar": "白糖",
+    "rice_fine": "大米（细）",
+    "atta_loose": "全麦面粉（散装）",
+    "chickpea": "鹰嘴豆",
+    "potato": "土豆",
+    "egg_farm": "鸡蛋（养殖场）",
+    "garlic": "大蒜（本地）",
+    "salt": "盐（加碘）",
+    "ms_rod": "钢筋（60级）"
   },
   "negotiation": {
     "step": {

@@ -116,12 +116,28 @@ def ensure_demo_accounts(db: Session, settings: Settings, now: datetime) -> int:
     return created
 
 
-def demo_listing(settings: Settings, now: datetime) -> list[DemoAccountView]:
+def demo_hint(settings: Settings, email: str, now: datetime, last_step: int | None) -> str:
+    """The code a judge can type now. A code is accepted once, so after a sign-in (or step-up)
+    in this 30-second step the hint moves to the next step, which the one-step drift accepts."""
+    step = totp.step_at(now)
+    if last_step is not None and last_step >= step:
+        step = last_step + 1
+    return totp.code_for_step(demo_totp_secret(settings, email), step)
+
+
+def demo_listing(settings: Settings, now: datetime,
+                 db: Session | None = None) -> list[DemoAccountView]:
+    accounts = Accounts(db, settings) if db is not None else None
+
+    def last_step(email: str) -> int | None:
+        user = accounts.by_email(email) if accounts is not None else None
+        return user.totp_last_step if user is not None else None
+
     return [
         DemoAccountView(
             email=demo.email, password=demo.password, role=demo.role,
             business_name=business_name(demo.tenant_id),
-            totp_hint=totp.code_at(demo_totp_secret(settings, demo.email), now)
+            totp_hint=demo_hint(settings, demo.email, now, last_step(demo.email))
             if demo.totp else None,
         )
         for demo in DEMO_ACCOUNTS

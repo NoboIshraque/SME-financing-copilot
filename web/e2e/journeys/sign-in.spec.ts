@@ -43,7 +43,8 @@ test("the owner signs in with a password and a TOTP code, and signs out again", 
     await codeField.fill(wrong);
     const refused = await clickAnswered(page, () => verify.click(), /\/api\/auth\/login\/totp$/);
     expect(refused.status()).toBe(401);
-    await expect(page.getByRole("alert")).toHaveText(app.t("error.invalid_totp"));
+    // It also says what more wrong codes lead to (5 tries lock the account for 15 minutes).
+    await expect(page.getByRole("alert")).toHaveText(`${app.t("error.invalid_totp")} ${app.t("auth.lockoutNote")}`);
     await expect(codeField).toHaveAttribute("aria-invalid", "true");
 
     await codeField.fill(code);
@@ -64,4 +65,29 @@ test("the owner signs in with a password and a TOTP code, and signs out again", 
   await page.goto("/cash");
   await expect(page).toHaveURL(/\/login\?next=%2Fcash$/);
   expect((await page.request.get("/api/auth/me")).status()).toBe(401);
+});
+
+test("the code step shows a demo code fetched then, not the one listed when the page opened", async ({ app, page }, testInfo) => {
+  // One screen size is enough for a timing check, and it spares the sign-in rate limit.
+  test.skip(testInfo.project.name.endsWith("-mobile"), "desktop only");
+  const owner = await app.account("owner");
+  const STALE = "000000";
+  // The listing that loads with the page carries a code that has long expired (B1: a judge reads
+  // the sign-in page for a minute before tapping). Later listings come from the server unchanged.
+  let first = true;
+  await page.route("**/api/auth/demo-accounts", async (route) => {
+    if (!first) return route.continue();
+    first = false;
+    const response = await route.fetch();
+    const listing = (await response.json()) as { email: string; totp_hint?: string | null }[];
+    await route.fulfill({ response, json: listing.map((row) => (row.totp_hint ? { ...row, totp_hint: STALE } : row)) });
+  });
+
+  await page.goto("/login");
+  const demoButton = page.getByRole("button", { name: new RegExp(`^${app.t("auth.demoAs", { role: app.t("role.owner") })}`) })
+    .filter({ hasText: owner.business_name });
+  const login = await clickAnswered(page, () => demoButton.click(), /\/api\/auth\/login$/);
+  expect(login.status()).toBe(200);
+  await expect(page.getByText(tPattern("auth.demoCode", { code: "\\d{6}" }))).toBeVisible();
+  await expect(page.getByText(app.t("auth.demoCode", { code: STALE }))).toHaveCount(0);
 });
