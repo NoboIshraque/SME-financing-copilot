@@ -226,12 +226,18 @@
     "expected_collection": "预计可收回",
     "gap_reduced": "可填补缺口",
     "cost": "成本",
-    "send_pre_due_reminder": "到期前发送友好提醒"
+    "send_pre_due_reminder": "到期前发送友好提醒",
+    "breach_probability_after": "采取此步骤后低于安全缓冲的概率",
+    "stagger_purchase": "把一笔大额采购分成两次",
+    "standby_facility": "在缺口出现前准备一笔备用授信",
+    "surplus_sweep": "把多余现金转入安全缓冲",
+    "surplus_sweep_amount": "可转入缓冲的多余现金"
   },
   "alert": {
     "gap_ahead": "即将出现现金缺口",
     "sales_below_norm": "销售低于本季正常水平",
-    "payroll_at_risk": "工资发放有风险"
+    "payroll_at_risk": "工资发放有风险",
+    "dso_rising": "客户付款变慢了"
   },
   "driver": {
     "salary": "工资",
@@ -241,7 +247,8 @@
     "late_customer": "客户逾期付款",
     "seasonal_dip": "季节性销售下滑",
     "stock_build": "库存积压",
-    "cost_shock": "意外支出"
+    "cost_shock": "意外支出",
+    "disputed_invoice": "有争议的发票"
   },
   "indicator": {
     "dso_rising": "客户付款变慢",
@@ -285,7 +292,10 @@
     "whatIfLowest": "此情景下最低预计余额",
     "reset": "重置",
     "leversTitle": "填补缺口的方法",
-    "noLevers": "目前不需要采取措施。"
+    "noLevers": "目前不需要采取措施。",
+    "dso_before": "此前收回货款的天数",
+    "dso_now": "目前收回货款的天数",
+    "lead_time_days": "距离缺口的天数"
   },
   "abstain": {
     "insufficient_data": "我没有足够的数据来稳妥地给出建议。",
@@ -421,7 +431,8 @@
       "fast": "速度快"
     },
     "effective_apr": "真实年化成本",
-    "total_cost": "总成本"
+    "total_cost": "总成本",
+    "p_buffer_breach": "选择此方案后低于安全缓冲的概率"
   },
   "purpose": {
     "working_capital": "流动资金",
@@ -476,7 +487,21 @@
     "recommended": "推荐",
     "stabilityTitle": "推荐的选择有多稳定？",
     "stabilityHint": "先在上方比较各项决定，就能看到销售、价格或付款方变化时，推荐的选择是否依然成立。",
-    "forecast_accuracy": "预测准确度"
+    "forecast_accuracy": "预测准确度",
+    "cost_correction": "下次预测的成本修正",
+    "decision_cost": "该决定的成本",
+    "dpo": "付款给供应商的天数",
+    "dso": "收回货款的天数",
+    "expected_outcome": "预期余额",
+    "gross_margin": "毛利率",
+    "gross_profit": "毛利",
+    "net_cash_flow": "净现金流",
+    "net_sales": "净销售额",
+    "operating_expenses": "运营费用",
+    "p_buffer_breach": "低于安全缓冲的概率",
+    "risk_adjusted_outcome": "风险调整后的结果",
+    "sales_correction": "下次预测的销售修正",
+    "worst_5pct_outcome": "最差 5% 的结果"
   },
   "statement": {
     "cash_sales": "现金销售",
@@ -497,7 +522,17 @@
     "opening_cash": "期初现金",
     "cash_in": "现金流入",
     "cash_out": "现金流出",
-    "closing_cash": "期末现金"
+    "closing_cash": "期末现金",
+    "collections": "回款",
+    "loan_flows": "借入和偿还的贷款",
+    "net_cash_flow": "净现金流",
+    "operating_cash_flow": "经营现金流",
+    "operating_expenses": "运营费用",
+    "operating_profit": "营业利润",
+    "owner_flows": "店主提取和注资",
+    "revenue": "收入",
+    "total_assets": "总资产",
+    "total_liabilities": "总负债"
   },
   "ratio": {
     "gross_margin": "毛利率",
@@ -506,14 +541,35 @@
     "dso": "回款天数",
     "dpo": "付款天数",
     "top_customer_share": "最大客户占比",
-    "dscr": "偿债覆盖率"
+    "dscr": "偿债覆盖率",
+    "burn": "每月现金消耗",
+    "cash_conversion_cycle": "现金转换周期",
+    "dio": "存货天数",
+    "interest_cover": "利息保障倍数",
+    "missing": {
+      "interest_expense": "需要已付利息数据",
+      "stock_value": "需要存货价值"
+    },
+    "not_applicable": {
+      "not_burning": "没有消耗现金"
+    },
+    "quick_ratio": "速动比率",
+    "runway": "现金可支撑时间"
   },
   "interpretation": {
     "typical_grocery": "在杂货店的常见范围内。",
     "healthy": "状况良好。",
     "pays_fast": "您付款给供应商很快，可以争取更长账期。",
     "concentrated": "单一客户占销售比重较大。",
-    "no_debt": "没有贷款，无需覆盖。"
+    "no_debt": "没有贷款，无需覆盖。",
+    "covers_short_term": "短期资产足以覆盖短期债务。",
+    "dscr": {
+      "cannot_cover": "现金流不足以支付贷款还款。",
+      "comfortable": "现金流能轻松支付贷款还款。"
+    },
+    "loss_making": "生意正在亏损。",
+    "not_burning": "现金没有在减少。",
+    "short_of_current_cover": "短期资产不足以完全覆盖短期债务。"
   },
   "metric": {
     "net_sales": "净销售额",
@@ -522,7 +578,11 @@
     "closing_balance": "月末现金",
     "opening_balance": "期初现金",
     "cash_in": "现金流入",
-    "cash_out": "现金流出"
+    "cash_out": "现金流出",
+    "cash_sales": "现金销售",
+    "net_cash_flow": "净现金流",
+    "other_costs": "其他成本",
+    "supplier_payments": "供应商付款"
   },
   "decision": {
     "retime_supplier": "发薪日后再付供应商",
@@ -768,7 +828,36 @@
     "quarantine_input": "拦截了可疑指令",
     "abstain": "拒绝猜测",
     "share_passport": "分享了护照",
-    "login": "登录"
+    "login": "登录",
+    "approval": {
+      "approved": "已批准",
+      "executed": "已批准的操作已执行（已记录）",
+      "refused": "请求被拒绝",
+      "requested": "已申请批准"
+    },
+    "auth": {
+      "login": "已登录",
+      "logout": "已退出",
+      "password_ok": "密码正确，等待验证码",
+      "step_up_failed": "确认验证码错误",
+      "totp_failed": "登录验证码错误"
+    },
+    "copilot": {
+      "abstain": "助手拒绝猜测"
+    },
+    "guard": {
+      "quarantined": "已拦截可疑指令"
+    },
+    "mesh": {
+      "round_approved": "轧差结算轮次已批准",
+      "round_proposed": "已提出轧差结算轮次",
+      "round_settled": "轧差结算轮次已完成"
+    },
+    "passport": {
+      "issued": "已签发信用护照",
+      "share_revoked": "已撤销护照共享",
+      "shared": "已与贷款方共享护照"
+    }
   },
   "settings": {
     "profile": "个人信息",
@@ -878,5 +967,39 @@
   },
   "ingest": {
     "bad_date": "日期无效"
+  },
+  "scenario": {
+    "reason": {
+      "best_risk_adjusted_outcome": "计入风险后结果最好",
+      "lowest_breach_risk": "低于安全缓冲的概率最低"
+    },
+    "skip": {
+      "no_early_bills": "未纳入：没有可提前支付的账单",
+      "no_shortfall": "未纳入：没有需要弥补的缺口"
+    }
+  },
+  "variance": {
+    "actual": {
+      "cash_sales": "实际现金销售",
+      "closing_balance": "实际月末现金",
+      "collections": "实际回款",
+      "fixed_costs": "实际固定成本",
+      "net_cash_flow": "实际净现金流",
+      "other_costs": "实际其他成本",
+      "other_inflows": "实际其他流入",
+      "supplier_payments": "实际供应商付款",
+      "transfers": "实际转账"
+    },
+    "expected": {
+      "cash_sales": "预期现金销售",
+      "closing_balance": "预期月末现金",
+      "collections": "预期回款",
+      "fixed_costs": "预期固定成本",
+      "net_cash_flow": "预期净现金流",
+      "other_costs": "预期其他成本",
+      "other_inflows": "预期其他流入",
+      "supplier_payments": "预期供应商付款",
+      "transfers": "预期转账"
+    }
   }
 }

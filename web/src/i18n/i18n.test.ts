@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import i18n, { LANGUAGES, resources } from ".";
+import serverKeys from "./server-keys.json";
 import { humanizeKey } from "./serverText";
 
 function keys(value: unknown, prefix = ""): string[] {
@@ -81,5 +82,20 @@ describe("server keys", () => {
     ["plain", "Plain"],
   ])("an untranslated %s reads as %s, never as the raw key", (key, words) => {
     expect(humanizeKey(key)).toBe(words);
+  });
+});
+
+describe("keys the demo API returns (scripts/server_keys.py)", () => {
+  const lookup = (lang: (typeof LANGUAGES)[number], key: string): unknown =>
+    key.split(".").reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], resources[lang].translation);
+
+  it.each(LANGUAGES)("every one is translated in %s, so no screen falls back to English", (lang) => {
+    const missing = serverKeys.filter((key) => typeof lookup(lang, key) !== "string");
+    expect(missing).toEqual([]);
+  });
+
+  it("Bangla and Chinese say it in their own words, not the English", () => {
+    const same = serverKeys.filter((key) => lookup("bn", key) === lookup("en", key) || lookup("zh", key) === lookup("en", key));
+    expect(same).toEqual([]);
   });
 });
