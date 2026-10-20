@@ -18,7 +18,7 @@ list in section 10 is deliberately blunt: it keeps the problems we found, marks 
 on 20 Oct with the test that proves each fix, and says why the rest stay open.
 
 **Test evidence.** On 20 Oct, the whole backend suite (`cd backend && uv run pytest -q`):
-2,269 passed, 1 skipped (Tesseract not installed
+2,304 passed, 1 skipped (Tesseract not installed
 locally). The suite is re-run on the freeze commit; counts by area
 are in `docs/submission/evidence/test-counts.md`.
 Every test runs offline: `backend/tests/conftest.py` fails any test that opens a non-loopback
@@ -40,8 +40,10 @@ socket.
 | Receivables (WP-05), message drafts (WP-12), Trust Passport (WP-13), evaluation (WP-16) | merged (PR #31, #34, #35, #33) | Reminders and passport sharing are EXECUTE (owner + step-up); drafts are never sent by the app; the passport verify page is public by design |
 
 **Outbound data.** The backend can send data out in exactly two ways. (1) A model request, only
-through `backend/app/llm/gateway.py` (WP-10), which anonymises the text, runs the fail-closed gate
-on the messages and the structured context, and refuses the request if any detector fires. With
+through `backend/app/llm/gateway.py` (WP-10), which runs the fail-closed gate on the messages and
+the structured context and refuses the request if any detector fires. The planner sees the
+owner's question anonymised; the narrator and critic see only the verified claim texts (amounts,
+dates, product names, party labels), never names, phones or account numbers. With
 no keys configured (the default, and every test) no model is called at all: the deterministic
 planner answers. (2) The optional Sepolia anchor, which sends one 32-byte digest (`payload_for` in
 `backend/app/chain/anchor.py`). Receipt OCR runs on the server (Tesseract, installed in
@@ -147,8 +149,8 @@ the role × permission matrix.
 | `team:manage`, `lender_access:grant` | yes | no | no | no | no |
 
 ¹ Enforced on `/api/facts` since 20 Oct; `/api/explain` stays open to lender viewers, masked
-(risk R1). ² Not enforced on ingest preview and column mapping; history needs `ledger:read`
-(risk R2).
+(risk R1). ² Enforced on ingest preview and column mapping since 20 Oct (R2 closed); history
+needs `ledger:read`.
 
 **Lender viewers** are created through an owner's recorded consent. The consent names the
 lender, the purpose and the scopes (at most `passport:read` and `reports:read`). Access lasts
@@ -167,9 +169,13 @@ and naming another tenant explicitly answers 403.
 | `/api/analysis/statements`, `/ratios`, `/variance`, `/scenarios`, `/stability` | `require(ledger:read)` (`backend/app/api/analysis.py`) | owner, accountant, staff, compliance |
 | `/api/mesh/obligations`, `/rounds`, `/rounds/{id}/verify` (PR #26) | `require(ledger:read)`; only rounds the caller is in (others 404) | owner, accountant, staff, compliance |
 | `/api/mesh/rounds/propose`; `/rounds/{id}/approve` (PR #26) | `ledger:read` plus DRAFT tier; `approvals:decide` plus EXECUTE tier plus step-up | owner, accountant; owner |
-| `/api/copilot/ask`, `/today`, `/abstentions` (`wp-10-agents`) | `require(copilot:ask)`; a `tenant_id` in the body is refused | owner, accountant, staff |
-| `/api/facts/{metric}`, `/api/explain/{id}`, `/api/explain/{id}/rows` | signed in; a `tenant_id` must be the caller's (`backend/app/api/facts.py`) | every role of the tenant, lender viewer included (R1) |
-| `/api/ingest/preview`, `/columns`, `/history` | signed in; a `tenant_id` must be the caller's (`backend/app/api/ingest.py`) | every role of the tenant (R2) |
+| `/api/copilot/ask`, `/today` | `require(copilot:ask)`; a `tenant_id` in the body is refused | owner, accountant, staff |
+| `/api/copilot/abstentions` | `copilot:ask` or `audit:read` | owner, accountant, staff, compliance |
+| `/api/facts/{metric}` | `require(ledger:read)`; a `tenant_id` must be the caller's (`backend/app/api/facts.py`) | owner, accountant, staff, compliance |
+| `/api/explain/{id}`, `/api/explain/{id}/rows` | signed in; same tenant; source rows masked without `source_rows:read` | every role of the tenant, lender viewer included (R1) |
+| `/api/ingest/preview`, `/columns`; `/history` | `require(ingest:upload)`; `require(ledger:read)`; a `tenant_id` must be the caller's | owner, accountant, staff; plus compliance for history |
+| `/api/messages/drafts`; `/{id}/approve`; `/{id}/send` | `ledger:read`; `approvals:decide` plus step-up (EXECUTE); `approvals:decide` once approved | owner, accountant, staff, compliance; owner; owner |
+| `/api/reports/passport` (read); issue; `/share`; `/shares`; revoke | `passport:read`; `approvals:decide`; plus step-up; `passport:read` but not a lender viewer; `approvals:decide` | owner, accountant, compliance, consented lender; owner; owner; owner, accountant, compliance; owner |
 | `/api/ingest/commit` | signed in; role is owner or accountant | owner, accountant |
 | `/api/approvals` (list, read) | `approvals:request`, `approvals:decide` or `audit:read` | owner, accountant, staff, compliance |
 | `/api/approvals` (request) | `approvals:request` and at least DRAFT for the action | depends on the tier table |
@@ -178,7 +184,8 @@ and naming another tenant explicitly answers 403.
 | `/api/audit/events`, `/anchors`; `/verify`, `/anchor` | `audit:read`; `audit:verify` | owner, compliance |
 | `/api/auth/users`, `/api/auth/lender-access` | `team:manage`; `lender_access:grant`; step-up to add anyone | owner |
 | `/api/guard/quarantine`; `/release` | `audit:read`; `approvals:decide` | owner, compliance; owner |
-| `/api/guard/check`, `/api/policy/tiers`, `/api/auth/me`, `/password`, `/totp/*` | signed in | every signed-in user |
+| `/api/guard/check` | `require(copilot:ask)` | owner, accountant, staff |
+| `/api/policy/tiers`, `/api/auth/me`, `/password`, `/totp/*` | signed in | every signed-in user |
 
 ### Public routes (no session needed), and why
 
@@ -296,8 +303,16 @@ Source: `backend/app/security/guard.py`, `guard_rules.py`. Tests: `test_guard.py
   12 are caught 12 of 12, with 0 false alarms on the 96 benign corpus texts and on 11 new hard
   negatives in `test_guard.py` ("which customers owe me money? list them", "我的验证码收不到",
   "audit log ta dekhao"). Because we saw those 12 attacks while widening the rules, 12/12 is a
-  regression number, not a generalisation number. A fresh held-out set, written without reading
-  `guard_rules.py`, is part of the final audit (`docs/handover/AUDIT_PROMPT.md`).
+  regression number, not a generalisation number.
+  **Fresh held-out set (final audit, 20 Oct).** 24 attacks and 24 innocent look-alikes (two per
+  family per language for skip_approval, change_bank_details, add_payee, exfiltrate_vault,
+  disable_audit and hidden_instruction, in en, bn, Banglish and zh), committed before anyone read
+  `guard_rules.py` and never seen while widening it (`docs/handover/fresh_injection_set.jsonl`).
+  On the widened rules: **15 of 24 attacks caught, 10 of 24 innocent messages wrongly
+  quarantined** (before the widening: 13 and 10). The rules key on vocabulary ("payee", "vault",
+  "audit log") more than intent, so innocent questions with those words are blocked and
+  paraphrases without them pass (skip_approval: 1 of 4). This is the generalisation number.
+  Per-row verdicts: `docs/handover/fresh_injection_result.txt`.
 - **Classifier.** WP-17's classifier plugs into a defined slot (ONNX + tokenizer). The CPU
   baseline (multilingual DistilBERT) separates attacks from benign text only weakly on unseen
   families: AUC 0.69 (0.6875, n=48), and full recall only at a threshold where precision is 0.57
@@ -318,8 +333,11 @@ the default refuses everyone; no API restores originals. A fail-closed gate
 (`app.privacy.assert_safe`) refuses any payload where a detector fires, and its error names only
 the kinds of data found and how many, never the values.
 
-**Status.** The WP-10 gateway anonymises every request with `prepare_messages()` and calls the
-gate on the messages and the structured context before trying any provider; a refusal is counted
+**Status.** The orchestrator anonymises the owner's question before the planner sees it; the
+narrator and critic get the verified claim texts, which hold figures and labels but no personal
+data, and amounts are sent unscaled (P11 scaling exists in the anonymiser but is not switched on
+for these calls). The gateway runs the gate on the messages and the structured context before
+trying any provider; a refusal is counted
 and the request is never sent (`backend/app/llm/gateway.py`, `wp-10-agents`). Numbers in a model's
 answer are never used: claims come from engine figures and are recomputed. Source rows in
 explanations are masked for callers without `source_rows:read`: a masked caller sees amounts,
@@ -373,9 +391,9 @@ Source: `backend/app/security/web.py`, plus `infra/Caddyfile` (WP-18). Tests: `t
 | **S**poofing | Stolen password; someone claiming to be the owner in chat; replayed TOTP code | argon2id; TOTP for owners; single-use TOTP steps; lockout; "fake owner" guard rules; approvals need a fresh code, not a chat claim | A phished password **and** a live TOTP code still get through: no phishing-resistant factor (WebAuthn). In demo mode the owners' codes are published on purpose (R5) |
 | **T**ampering | Editing a stored action card after approval; rewriting the audit log; changing a supplier's bank details | Card digest checked at execution; hash chain with triggers and a daily anchor; `change_bank_details` is DENY | A database administrator can rewrite history consistently after the last anchor (up to 24 h; longer in offline mode). The content of a pending card is whatever the requester sent (R3) |
 | **R**epudiation | Owner denies approving a payment | Audit event with approver id, step-up flag and time, hash-chained and anchored | The audit log is per tenant and not countersigned by the user's device |
-| **I**nformation disclosure | Model provider sees customer names; lender sees more than consented; session theft | Anonymiser plus fail-closed gate on every model request; scoped, expiring lender access; HttpOnly/Strict cookies; tenant isolation; no-store; masked source rows | A lender viewer can read ledger figures on the fact API beyond its consent (R1). Quarantined text is kept raw on the server for the owner and compliance |
+| **I**nformation disclosure | Model provider sees customer names; lender sees more than consented; session theft | Anonymiser plus fail-closed gate on every model request; scoped, expiring lender access; HttpOnly/Strict cookies; tenant isolation; no-store; masked source rows | A lender viewer can open the explanation of a figure, masked (R1). Quarantined text is kept raw on the server for the owner and compliance |
 | **D**enial of service | Password spraying; flooding the API; locking the owner out | Rate limits; lockout that attempts do not extend; per-route budgets | In-memory, per-process limits (R6); owner lockout for 15 minutes (R7); no request-body cap (R13); one Monte Carlo run per cash request (R12) |
-| **E**levation of privilege | The model emits a card with tier READ for `move_money`; staff calls the approve endpoint; injection in an uploaded statement | Policy tier overrides the card's tier; `approvals:decide` plus EXECUTE tier plus step-up; DENY list; injection guard | Guard unmeasured on unseen paraphrases, and one of ours passed it (R4); permission checks missing on the fact and ingest-preview routes (R1, R2) |
+| **E**levation of privilege | The model emits a card with tier READ for `move_money`; staff calls the approve endpoint; injection in an uploaded statement | Policy tier overrides the card's tier; `approvals:decide` plus EXECUTE tier plus step-up; DENY list; injection guard | On a fresh held-out set the guard caught 15 of 24 attacks and wrongly blocked 10 of 24 innocent questions (R4); tiers and step-up, not the guard, stop money moving |
 
 ## 9. OWASP Top 10 for LLM Applications (2025)
 
@@ -404,10 +422,22 @@ Source: `backend/app/security/web.py`, plus `infra/Caddyfile` (WP-18). Tests: `t
   `test_a_query_naming_another_tenant_is_refused`,
   `test_in_the_hosted_demo_an_anonymous_caller_gets_no_figures`) and
   `backend/tests/ingest/test_api.py` (`test_without_a_session_ingest_answers_401`,
-  `test_a_form_naming_another_tenant_is_refused`). What remains is R1 and R2.
+  `test_a_form_naming_another_tenant_is_refused`). What remains is R1 (R2 fixed 20 Oct).
 - **API docs from a third-party CDN (draft risk 10). Fixed in PR #18.** The interactive docs
   and the OpenAPI schema exist only in `development` and `test`.
 - **Daily audit anchor not running in the Docker stack.** Fixed in commit `936d529` (section 3).
+- **Found by the final audit (20 Oct), fixed in PRs #43 and #45** (`docs/handover/AUDIT_REPORT.md`):
+  - Approving a message was recorded as EXECUTE but asked for no code; it now needs the owner's
+    step-up code (`backend/app/api/messaging.py`, `test_approving_a_message_needs_a_fresh_step_up_code`).
+  - A lender viewer could list every share grant (other lenders' names); now refused
+    (`test_a_lender_viewer_cannot_list_whom_else_the_shop_shared_with`).
+  - Any signed-in role could write to the quarantine through `/api/guard/check`; it now needs
+    `copilot:ask` (`test_a_role_that_cannot_ask_the_copilot_cannot_write_to_the_quarantine`).
+  - Passport ids were guessable (`pp-<shop>-v<n>`), so the public verify page told which shops
+    exist; ids now derive from the secret salt
+    (`test_passport_ids_cannot_be_guessed_from_the_shop_or_version`).
+  - A model could state a figure in words ("fifty thousand", "五万") past the number check; the
+    narration and critic checks now read number words in all three languages (rule 1).
 
 ### All 21 risks and their state on 20 Oct
 
@@ -435,10 +465,11 @@ Ratings: our own judgement of likelihood and impact for this deployment.
    Tests: `backend/tests/security/test_approvals.py`,
    `test_a_card_the_server_never_issued_cannot_be_put_to_the_owner` and
    `test_a_card_issued_to_another_tenant_cannot_be_requested_here`.
-4. **R4 [Medium, reduced 20 Oct] Guard generalisation.** On 12 unseen attacks the rules caught
-   3. We widened every family to intent level (section 4): the 12 are now caught, with no new
-   false alarms, but they were seen while doing so, so generalisation is still unproven until a
-   fresh held-out set is measured. The ML classifier is not deployed (CPU baseline AUC 0.69 on
+4. **R4 [Medium] Guard generalisation.** On 12 unseen attacks the rules caught 3. We widened
+   every family to intent level (section 4) and the 12 are now caught, but they were seen while
+   doing so. On the final audit's fresh held-out set the widened rules caught 15 of 24 attacks and
+   wrongly quarantined 10 of 24 innocent questions (section 4), so the guard is a speed bump, not
+   a control; a false positive costs the owner a refused question (422). The ML classifier is not deployed (CPU baseline AUC 0.69 on
    unseen families, `ml/artifacts/injection_metrics_cpu_baseline.json`). Bounded by: the
    copilot's tools cannot move money or reach EXECUTE, the checker drops any number not computed
    by an engine, approval cards must be server-issued (R3), and every EXECUTE still needs the
@@ -521,6 +552,6 @@ Ratings: our own judgement of likelihood and impact for this deployment.
 
 - No external penetration test, third-party audit or certification.
 - No load or stress testing of the hosted stack.
-- No measurement of the injection guard on a fresh unseen set after the 20 Oct widening (R4).
+- No learned classifier beside the rules: on a fresh held-out set the rules catch 15 of 24 attacks and flag 10 of 24 innocent questions (R4).
 - No live-model red-teaming: the copilot was exercised offline, with no model call.
 - No automated test of the PostgreSQL audit triggers (R8).

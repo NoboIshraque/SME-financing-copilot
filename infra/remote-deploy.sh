@@ -16,6 +16,11 @@ fi
 
 cd "$REL"
 docker compose --env-file "$ENV_FILE" -f infra/docker-compose.yml up -d --build --remove-orphans
+# The hosted demo needs its synthetic shops in the ledger, or Today and Cash abstain. The seed is
+# idempotent; a deployment with DEMO_MODE=false (real data) never gets them.
+if ! grep -qiE '^DEMO_MODE=(false|0|no)$' "$ENV_FILE"; then
+  docker compose --env-file "$ENV_FILE" -f infra/docker-compose.yml exec -T api python -m app.facts.seed
+fi
 docker image prune -f >/dev/null
 docker compose --env-file "$ENV_FILE" -f infra/docker-compose.yml ps
 

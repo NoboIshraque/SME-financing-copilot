@@ -24,7 +24,7 @@ show its formula and the source rows behind it.
 | C. Business financial analysis | Statements, ratios, expected vs reality, scenario comparison, decision stability score | `backend/app/engines/analysis/` |
 | Engine room | Typed fact ledger with provenance; privacy tokens (only anonymised data leaves the server); permission tiers READ / SUGGEST / DRAFT / EXECUTE / DENY with owner approval and step-up for EXECUTE; hash-chained audit log; multilingual prompt-injection guard (English, Bangla, Banglish, Chinese) | `backend/app/facts/`, `backend/app/privacy/`, `backend/app/security/` |
 | Liquidity mesh (on-chain) | Clears circular debt between shops with less cash (min-cost-flow netting), every party approves, salted SHA-256 commitments anchored on Ethereum Sepolia (hashes only, never names or amounts) | `backend/app/engines/mesh/`, `backend/app/chain/` |
-| Copilot | Answers questions with decision cards: checked claims, a case against, model agreement, abstention when unsure | `backend/app/agents/`, `backend/app/llm/` (WP-10, being merged) |
+| Copilot | Answers questions with decision cards: checked claims, a case against, model agreement, abstention when unsure | `backend/app/agents/`, `backend/app/llm/` |
 | Web app | React PWA in English, বাংলা and 中文; provenance drawer on every number | `web/` |
 
 Status of this snapshot (20 Oct 2026): see `docs/PLAN.md` §8. Cut for the submission and kept as
@@ -39,6 +39,7 @@ The same commands work in Windows PowerShell, macOS and Linux.
 ```
 npm run setup      # install backend (uv) and web (npm) dependencies
 npm run test       # all backend + web unit tests, offline (no LLM, no network)
+uv --directory backend run python -m app.facts.seed   # load the synthetic demo shops (once)
 npm run dev        # API on http://localhost:8000, web on http://localhost:5173
 npm run e2e        # browser tests (needs `npm run dev` running)
 npm run lint       # ruff + eslint + tsc

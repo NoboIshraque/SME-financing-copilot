@@ -44,7 +44,7 @@ LLM traces are included or claimed.
 | Liquidity mesh: netting, consent, settlement, residual routing, attestations, anchoring, API | WP-08 | Built | PR #26 |
 | LLM gateway, agents, checker, critic, agreement, self-loops, abstention, copilot API | WP-10 | Built | PR #29, 9/9 milestones |
 | Security: auth, roles, tiers, approvals, audit chain, injection guard, hardening | WP-11 | Built | |
-| Trust Passport, sharing, verification, state adapter | WP-13 | Partial | Lender report cut |
+| Trust Passport, sharing, verification, state adapter | WP-13 | Partial | Lender report cut. Sharing records the owner's consent (step-up, expiry, revoke); the lender reads through a consented lender-access account, not a share link |
 | Web app (12 milestones) | WP-14 | Built | Screens whose backend is missing are listed in §2.3 |
 | ML notebooks | WP-17 | Partial | Injection classifier not deployed; GPU run and market backtest cut |
 | Docker, Caddy, deploy with rollback, backups | WP-18 | Partial | China check pending; Vercel mirror cut |
@@ -208,13 +208,16 @@ first, mock only for routes whose router has not landed).
 
 | Live backend in this snapshot | No backend in this snapshot |
 | --- | --- |
-| Sign-in, TOTP, team and lender access, approvals inbox, audit verify | Receivables (WP-05) |
-| Upload: preview, column mapping, commit (WP-02) | Messages (WP-12) |
-| Cash: forecast, gaps, alerts, what-if (WP-04) | Reports, passport sharing, verify page (WP-13 has engines, no API) |
-| Financing: match, lender check, application card (WP-06) | Market (WP-09, cut: hidden or labelled preview) |
-| Analysis: statements, ratios, expected vs reality, compare decisions, stability (WP-07) | Audit-drill card (P8, cut) |
-| Mesh: obligations, rounds, approve with step-up, verify (WP-08, PR #26) | |
-| Copilot panel and abstention log (WP-10, PR pending) | |
+| Sign-in, TOTP, team and lender access, approvals inbox, audit verify | Market (WP-09, cut: labelled sample preview) |
+| Upload: preview, column mapping, commit (WP-02) | Settings notification preferences (card hidden when the route is absent) |
+| Cash: forecast, gaps, alerts, what-if (WP-04) | |
+| Financing: match, lender check, application card (WP-06) | |
+| Analysis: statements, ratios, expected vs reality, compare decisions, stability after Compare (WP-07) | |
+| Mesh: obligations, propose, approve with step-up, verify (WP-08) | |
+| Copilot panel and abstention log (WP-10, PR #29) | |
+| Receivables: aging, risk, reminder ladder (WP-05, PR #31) | |
+| Messages: drafts, owner approval with step-up, copy and send log (WP-12, PR #34) | |
+| Reports: Trust Passport versions, sharing consent, public verify page (WP-13, PR #35) | |
 | Provenance drawer (`/api/explain`) | |
 
 Screens without a backend run only on the mock, which the banner labels. They show how the
@@ -630,8 +633,8 @@ changed after anchoring). The same mechanism seals netting rounds, Trust Passpor
 What runs today: the daily job `security.anchor_audit_heads` (23:55 Dhaka) anchors through
 `SepoliaAnchorer` when `CHAIN_MODE=sepolia` and an RPC URL and key are configured, otherwise
 through `OfflineAnchorer`, labelled `offline`. Settled netting rounds are anchored the same way by
-the mesh API (PR #26). Trust Passport versions are sealed by an engine function that no API calls
-yet. Tests use a fake web3 object and never touch a node
+the mesh API (PR #26), and Trust Passport versions when they are issued (`/api/reports/passport`,
+PR #35). Tests use a fake web3 object and never touch a node
 (`backend/tests/mesh/test_sepolia.py`). **No Sepolia transaction hash is recorded in this
 snapshot.**
 
@@ -657,9 +660,11 @@ Files: `backend/app/privacy/`. Feature spec: FEATURES N6, N18, P11.
 4. **Gate** (`gate.py`): `assert_safe(payload)` runs every detector on the serialised payload and
    raises if any fires. The error names only kinds and counts, never values.
 
-The WP-10 gateway (`backend/app/llm/gateway.py`) anonymises with `prepare_messages()` (one label
-set across all messages, so "Customer 1" means the same party everywhere) and runs the gate on the
-messages *and* the structured context before any provider is tried. If a detector fires, the
+In WP-10 the orchestrator anonymises the owner's question before the planner sees it, and the
+narrator and critic receive only verified claim texts (figures, product names, party labels, no
+personal data; amounts are not scaled for these calls). `prepare_messages()` offers one label set
+across several messages for callers that need it. The gateway (`backend/app/llm/gateway.py`) runs
+the gate on the messages *and* the structured context before any provider is tried. If a detector fires, the
 request is refused and counted, never sent. Model answers come back with labels, which are mapped
 to tokens; numbers in them are never used (§3.8). For field data (WP-20) the
 shop-file anonymiser (`python -m app.privacy.shopfiles`) tokenises CSV/XLSX columns, refuses any
@@ -845,7 +850,9 @@ traces with `python -m app.llm.live_check` (keys required); the evidence index l
   (11 of 12 were still contained, and approval held in all 12). We then widened each attack
   family's rules to intent level, with no new false alarms on the 96 benign corpus texts, and
   the 12 are now caught. Because we saw them while doing so, 12/12 is a regression result, not
-  proof of generalisation; a fresh held-out set is part of the final audit.
+  proof of generalisation. On the final audit's fresh held-out set (24 attacks and 24 innocent
+  look-alikes in four languages, never seen while widening) the rules caught 15 of 24 attacks and
+  wrongly quarantined 10 of 24 innocent questions (`docs/handover/fresh_injection_result.txt`).
 - **Cut** (roadmap only): market watch and negotiation (WP-09: N3, N19), the nightly audit drill
   (P8), the lender report (WP-13), the GPU injection-classifier run and the market backtest
   (WP-17), the Vercel mirror (WP-18).
@@ -977,7 +984,10 @@ The evaluation harness (WP-16) runs offline with `npm run eval` and writes its s
    but they were written with sight of that corpus. On 12 new attacks written without reading the
    rules they caught 3 (the copilot still acted on none, and no approval was granted). We widened
    the rules per family afterwards; they now catch those 12 with no new false alarms, but that is
-   a regression result too. Generalisation needs a fresh held-out set.
+   a regression result too. On a fresh held-out set they caught 15 of 24 attacks and wrongly
+   blocked 10 of 24 innocent questions that use the same words: the guard slows an attacker down,
+   and the approval rules (owner plus a fresh code for anything that leaves DecisionGuard) are what
+   keep money safe.
 5. **Fit is the highest daily breach probability over the forecast, an approximation.** It uses
    the tenant's WP-04 band (normal approximation from P10/P90). When the riskiest day falls
    before the first repayment, every option gets the same fit and fit does not change the order

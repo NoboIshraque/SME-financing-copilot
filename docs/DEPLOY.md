@@ -30,9 +30,14 @@ anchors are kept offline and labelled so).
 ```bash
 git clone <this repo> ~/hishab/releases/manual && cd ~/hishab/releases/manual
 docker compose --env-file ~/hishab/shared/.env -f infra/docker-compose.yml up -d --build
+docker compose --env-file ~/hishab/shared/.env -f infra/docker-compose.yml exec -T api python -m app.facts.seed   # demo only
 ln -sfn "$PWD" ~/hishab/current
 curl https://$DEPLOY_DOMAIN/api/health          # {"status":"ok", ...}
 ```
+
+The seed loads the five synthetic demo shops (idempotent; prints one `seeded …` line per shop).
+Without it Today and Cash abstain on a fresh database. Automatic deploys run it unless the
+server's `.env` says `DEMO_MODE=false`; never seed a deployment that holds real shop data.
 
 Caddy obtains the HTTPS certificate on first start (ports 80/443 must be reachable).
 
@@ -70,4 +75,4 @@ A plain `.dump` (written when the key file is missing) restores with
 
 The server is in Singapore. The web app loads nothing from third-party hosts (no Google Fonts,
 CDNs or analytics): fonts and assets are bundled, and an automated browser test fails if any
-page contacts another host. Measured access from mainland cities: `docs/submission/evidence/china.md`.
+page contacts another host. Access from mainland cities has not been measured yet.
