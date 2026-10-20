@@ -118,7 +118,7 @@ Each component carries one of four status labels:
 | Market intelligence: price watch by location, vendor ranking, negotiation support | Implemented (reduced scope) | Prices from dated public sources in Bangladesh and China (§4.8); vendor quotes are synthetic |
 | Nightly audit drill | Planned (roadmap) | |
 
-Sources: `docs/PLAN.md` §8, `docs/FEATURES.md` and the submitted code.
+Sources: `docs/FEATURES.md` and the submitted code.
 
 ### 1.4 Conventions of this document
 
@@ -1069,7 +1069,7 @@ false alarms on the 96 benign corpus texts, and the 12 are now caught. Because t
 seen while widening the rules, 12/12 is a regression result, not proof of generalisation. On a
 separate held-out set (24 attacks and 24 innocent look-alikes in four languages, never seen while
 widening the rules) the rules caught 15 of 24 attacks and wrongly quarantined 10 of 24 innocent
-questions (`docs/handover/fresh_injection_result.txt`).
+questions (`docs/submission/evidence/injection-heldout/fresh_injection_result.txt`).
 
 ### 6.4 Forecast backtests
 
@@ -1289,7 +1289,6 @@ fonts and assets are bundled. Swagger UI, which loads from a CDN, is disabled ou
 | Execution evidence (test counts, evaluation results, operation log, freeze record) | `docs/submission/evidence/README.md`, `docs/submission/evidence/INDEX.md` |
 | Feature specification | `docs/FEATURES.md` |
 | Problem context and research summary | `docs/CONTEXT.md` |
-| Project plan and status | `docs/PLAN.md` |
 | Deployment guide | `docs/DEPLOY.md` |
 | Demonstration video script | `docs/submission/video-script.md` |
 | API contracts (JSON Schema) | `docs/api/contracts.json` |

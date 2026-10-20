@@ -39,7 +39,7 @@ server sleeps and the first page takes about a minute to load).
 | Copilot | Answers questions with decision cards: checked claims, a case against, model agreement, abstention when unsure | `backend/app/agents/`, `backend/app/llm/` |
 | Web app | React PWA in English, বাংলা and 中文; provenance drawer on every number | `web/` |
 
-Status of this snapshot (20 Oct 2026): see `docs/PLAN.md` §8 and `docs/FEATURES.md` for what is
+Status of this snapshot (20 Oct 2026): see `docs/FEATURES.md` for what is
 built, reduced or on the roadmap (for example, messages are drafted and approved but not sent by
 email, and the nightly audit drill is not built).
 
@@ -113,7 +113,7 @@ rather than guess.
 | `data/public/` | Bangladesh financing catalogue with sources, festival calendar, injection corpus |
 | `ml/` | Notebooks and model artefacts |
 | `infra/` | Docker Compose, Caddy, deploy script |
-| `docs/` | Plan, features, runbook, work packages, submission documents |
+| `docs/` | Features, background, deployment guides, API schema, submission documents (`docs/submission/`) |
 
 ## Tests
 
@@ -134,7 +134,7 @@ Test cases live in `backend/tests/<area>/` (pytest, one folder per engine or API
 **Free, no server of your own (how the live demo runs):** `render.yaml` is a Render Blueprint.
 Render → New → Blueprint → this repository → Apply creates a free PostgreSQL database, the API
 (Docker; it loads the synthetic demo shops on start) and the web app. Step by step:
-`docs/handover/FREE_SERVER.md`.
+`docs/FREE_SERVER.md`.
 
 **Own Linux server:** `docs/DEPLOY.md` sets up the stack from zero on a Linux server (Docker Compose behind Caddy with
 automatic HTTPS). After CI passes on `main`, `.github/workflows/deploy.yml` ships the exact commit
@@ -153,6 +153,7 @@ in `docs/submission/security-self-assessment.md`.
 | --- | --- |
 | 01 Technical documentation | `docs/submission/technical-documentation.md` (PDF in `docs/submission/pdf/`) |
 | 02 Presentation deck | `docs/submission/pdf/deck.pdf` (source: `docs/submission/deck/`) |
+| Narrated deck video | `docs/submission/video/DecisionGuard_TopicE_deck_narrated.mp4` (8.4 min, with subtitles) |
 | 03 Demo video | linked in the submission email; script in `docs/submission/video-script.md` |
 | 04 Source code, README, deployment, tests | this repository, `docs/DEPLOY.md`, `npm run test` |
 | 05 Security self-assessment | `docs/submission/security-self-assessment.md` (PDF in `docs/submission/pdf/`) |
