@@ -3,6 +3,7 @@
     POST /api/copilot/ask {question, language?, private?} -> Recommendation
     GET  /api/copilot/today                              -> Recommendation (the daily check)
     GET  /api/copilot/abstentions                        -> [{id, at, question, abstention}]
+                                                            (also `audit:read`: compliance)
 
 Signed-in callers holding `copilot:ask`, always for their own tenant (WP-11): the tenant comes
 from the principal, never from the body. A recommendation answers with checked claims and at
@@ -31,9 +32,9 @@ from app.llm import LLMGateway
 from app.main import get_app_settings, get_session
 from app.security.approvals import issue_cards
 from app.security.clock import Clock
-from app.security.deps import get_clock, require
-from app.security.errors import ProblemRoute
-from app.security.roles import Permission
+from app.security.deps import current_principal, get_clock, require
+from app.security.errors import ProblemRoute, forbidden
+from app.security.roles import Permission, has_permission
 from app.settings import Settings
 
 router = APIRouter(prefix="/copilot", tags=["copilot"], route_class=ProblemRoute)
@@ -79,6 +80,17 @@ def get_orchestrator(request: Request,
 _asker = require(Permission.copilot_ask)
 
 
+def _abstention_reader(principal: Principal = Depends(current_principal),
+                       clock: Clock = Depends(get_clock)) -> Principal:
+    """The "I don't know" log is part of the trust record: whoever asks the copilot, and the
+    compliance reviewer (`audit:read`), may read it."""
+    now = clock()
+    if not (has_permission(principal, Permission.copilot_ask, now)
+            or has_permission(principal, Permission.audit_read, now)):
+        raise forbidden(Permission.copilot_ask.value)
+    return principal
+
+
 def _run(question: str, principal: Principal, session: Session, clock: Clock,
          orchestrator: Orchestrator, language: str | None = None,
          private: bool = False) -> Recommendation:
@@ -117,7 +129,7 @@ def today(language: Literal["en", "bn", "zh"] = Query(default="en"),
 
 @router.get("/abstentions", response_model=list[AbstentionEntry])
 def abstentions(limit: int = Query(default=100, ge=1, le=500),
-                principal: Principal = Depends(_asker),
+                principal: Principal = Depends(_abstention_reader),
                 session: Session = Depends(get_session)) -> list[AbstentionEntry]:
     return [AbstentionEntry(id=row.recommendation_id, at=row.created_at, question=row.question,
                             abstention=abstain.as_contract(row))

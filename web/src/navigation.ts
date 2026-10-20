@@ -40,7 +40,8 @@ export const QUICK_SCREENS: readonly Screen[] = ["today", "cash", "receivables",
  */
 export const SCREEN_ACCESS: Record<Role, readonly Screen[]> = {
   owner: SCREENS,
-  accountant: SCREENS,
+  // Not Trust: its audit log needs audit:read, which the accountant does not hold.
+  accountant: SCREENS.filter((screen) => screen !== "trust"),
   staff: ["today", "receivables", "market", "messages", "settings"],
   lender_viewer: ["reports", "settings"],
   compliance: ["trust", "reports", "messages", "settings"],

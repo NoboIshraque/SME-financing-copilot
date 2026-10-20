@@ -21,6 +21,7 @@ NOW = datetime(2026, 9, 30, 18, 0, tzinfo=UTC)
 USERS = (("owner@hardware.test", "sme_hardware", Role.owner),
          ("staff@hardware.test", "sme_hardware", Role.staff),
          ("lender@hardware.test", "sme_hardware", Role.lender_viewer),
+         ("compliance@hardware.test", "sme_hardware", Role.compliance),
          ("owner@short.test", "short_shop", Role.owner))
 
 
@@ -129,6 +130,13 @@ def test_abstentions_are_per_tenant(owner, signed_in):
     signed_in("owner@short.test").post("/api/copilot/ask", json={"question": "cash next week?"})
     questions = [e["question"] for e in owner.get("/api/copilot/abstentions").json()]
     assert "cash next week?" not in questions
+
+
+def test_compliance_reads_the_abstention_log_but_cannot_ask(signed_in):
+    compliance = signed_in("compliance@hardware.test")
+    assert compliance.get("/api/copilot/abstentions").status_code == 200
+    assert compliance.post("/api/copilot/ask", json={"question": "cash?"}).status_code == 403
+    assert signed_in("lender@hardware.test").get("/api/copilot/abstentions").status_code == 403
 
 
 def test_staff_get_no_card_they_cannot_draft(signed_in):
