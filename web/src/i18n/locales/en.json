@@ -74,7 +74,11 @@
     "demoAs": "Sign in as {{role}}",
     "demoCode": "Demo code: {{code}}",
     "ownShop": "Or try it on your own numbers:",
-    "ownShopLink": "create your own shop"
+    "ownShopLink": "create your own shop",
+    "serverWaking": "The server is waking up (the free server sleeps when nobody uses it). Wait about a minute, then try again.",
+    "slowServer": "Still connecting: the free server can take about a minute to wake up.",
+    "lockoutNote": "After 5 wrong tries the account locks for 15 minutes.",
+    "demoCodeFresh": "The demo code changes every 30 seconds; this one is refreshed for you."
   },
   "stepUp": {
     "title": "Confirm it's you",

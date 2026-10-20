@@ -5,6 +5,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
+import { ApiRequestError } from "../api/client";
 import { api } from "../api/endpoints";
 import type { DemoAccount, LoginRequest, Session } from "../api/types";
 import { PublicLayout } from "../components/PublicLayout";
@@ -18,6 +19,20 @@ import { SESSION_KEY, safeNext, useSession } from "./session";
 type ErrorText = { key: string; values: Record<string, string> };
 
 const PUBLIC_QUERIES = new Set(["session", "health", "demo-accounts"]);
+
+// A TOTP code lives 30 seconds (one step of drift either way), so the demo code is fetched again
+// when the owner reaches the code step and refreshed while that step is open.
+const DEMO_CODE_REFRESH_MS = 20_000;
+// After this long without an answer the free server is probably waking up from sleep.
+const SLOW_SIGN_IN_MS = 6_000;
+const LOCKOUT_KEYS = new Set(["error.invalid_credentials", "error.invalid_totp"]);
+
+/** Sign-in errors, with a cold start of the free server told apart from a real failure. */
+function describeSignInError(failure: unknown): ErrorText {
+  const waking =
+    !(failure instanceof ApiRequestError) || (failure.body === null && [502, 503, 504].includes(failure.status));
+  return waking ? { key: "auth.serverWaking", values: {} } : describeError(failure);
+}
 
 const INPUT =
   "w-full rounded-xl border border-slate-300 bg-white px-3 py-3 dark:border-slate-600 dark:bg-slate-800";
@@ -38,10 +53,22 @@ export function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
-  const [totpHint, setTotpHint] = useState<string | null>(null);
+  const [demoEmail, setDemoEmail] = useState<string | null>(null);
   const [error, setError] = useState<ErrorText | null>(null);
+  const [slow, setSlow] = useState(false);
+  const [codeStepSince, setCodeStepSince] = useState(0);
 
-  const demo = useQuery({ queryKey: ["demo-accounts"], queryFn: api.auth.demoAccounts, retry: false });
+  const onDemoCodeStep = step === "totp" && demoEmail !== null;
+  const demo = useQuery({
+    queryKey: ["demo-accounts"],
+    queryFn: api.auth.demoAccounts,
+    retry: false,
+    refetchInterval: onDemoCodeStep ? DEMO_CODE_REFRESH_MS : false,
+  });
+  // Only a listing fetched after reaching the code step is shown, never the one from page load.
+  const freshListing = onDemoCodeStep && demo.dataUpdatedAt >= codeStepSince;
+  const totpHint = freshListing ? demo.data?.find((account) => account.email === demoEmail)?.totp_hint ?? null : null;
+  const { refetch: refetchDemo } = demo;
 
   // Whatever ended the last session (sign-out, expiry, a 401), no business data from it stays in
   // memory once the sign-in screen is up.
@@ -58,17 +85,40 @@ export function LoginScreen() {
   const login = useMutation({
     mutationFn: (body: LoginRequest) => api.auth.login(body),
     onSuccess: (result) => {
-      if (result.status === "ok") finish(result.session);
-      else setStep("totp");
+      if (result.status === "ok") {
+        finish(result.session);
+      } else {
+        setCodeStepSince(Date.now());
+        setStep("totp");
+      }
     },
-    onError: (failure) => setError(describeError(failure)),
+    onError: (failure) => setError(describeSignInError(failure)),
   });
 
   const verify = useMutation({
     mutationFn: (digits: string) => api.auth.verifyTotp(digits),
     onSuccess: finish,
-    onError: (failure) => setError(describeError(failure)),
+    onError: (failure) => {
+      setError(describeSignInError(failure));
+      if (demoEmail !== null) void refetchDemo();
+    },
   });
+
+  // The code shown when the page opened may be minutes old: fetch the current one on entering
+  // the code step.
+  useEffect(() => {
+    if (onDemoCodeStep) void refetchDemo();
+  }, [onDemoCodeStep, refetchDemo]);
+
+  const pending = login.isPending || verify.isPending;
+  useEffect(() => {
+    if (!pending) {
+      setSlow(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlow(true), SLOW_SIGN_IN_MS);
+    return () => clearTimeout(timer);
+  }, [pending]);
 
   if (session.data && !login.isPending && !verify.isPending) {
     const next = params.get("next");
@@ -78,6 +128,7 @@ export function LoginScreen() {
   const submitPassword = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    setDemoEmail(null);
     login.mutate({ email: email.trim(), password });
   };
 
@@ -95,15 +146,25 @@ export function LoginScreen() {
   const signInWithDemo = (account: DemoAccount) => {
     setEmail(account.email);
     setPassword(account.password);
-    setTotpHint(account.totp_hint ?? null);
+    setDemoEmail(account.totp_hint ? account.email : null);
     setError(null);
     login.mutate({ email: account.email, password: account.password });
   };
 
-  const errorLine = error && (
-    <p id={ids.error} role="alert" className="text-sm text-red-700 dark:text-red-300">
-      {text(error.key, error.values)}
-    </p>
+  const errorLine = (
+    <>
+      {error && (
+        <p id={ids.error} role="alert" className="text-sm text-red-700 dark:text-red-300">
+          {text(error.key, error.values)}
+          {LOCKOUT_KEYS.has(error.key) && <> {t("auth.lockoutNote")}</>}
+        </p>
+      )}
+      {slow && (
+        <p role="status" className="text-sm text-slate-600 dark:text-slate-400">
+          {t("auth.slowServer")}
+        </p>
+      )}
+    </>
   );
 
   return (
@@ -171,9 +232,10 @@ export function LoginScreen() {
                 invalid={Boolean(error)}
               />
               {totpHint && (
-                <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
-                  {t("auth.demoCode", { code: totpHint })}
-                </p>
+                <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+                  <p>{t("auth.demoCode", { code: totpHint })}</p>
+                  <p className="mt-0.5 text-xs">{t("auth.demoCodeFresh")}</p>
+                </div>
               )}
               {errorLine}
               <button type="submit" disabled={verify.isPending} className={PRIMARY}>
