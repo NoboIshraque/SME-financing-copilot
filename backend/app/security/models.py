@@ -151,6 +151,18 @@ class ApprovalRow(Base):
     result_json: Mapped[str | None] = mapped_column(Text, default=None)
 
 
+class IssuedCardRow(Base):
+    """An EXECUTE-tier action card the server itself issued to a tenant (known risk R3). An
+    approval may only be requested for a card recorded here, so a client cannot make up the
+    payload or figures the owner is asked to approve."""
+
+    __tablename__ = "security_issued_cards"
+
+    tenant_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    card_digest: Mapped[str] = mapped_column(String(64), primary_key=True)
+    issued_at: Mapped[datetime] = mapped_column(UTCDateTime)
+
+
 class AuditRow(Base):
     """One link of a tenant's append-only, SHA-256 hash-chained audit log (milestone 4).
 

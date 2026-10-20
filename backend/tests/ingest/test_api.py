@@ -195,3 +195,15 @@ def test_a_lender_viewer_may_not_list_uploads(client: TestClient):
     _as(client, LENDER)  # consented scopes are passport and reports only, not ledger:read
     res = client.get("/api/ingest/history")
     assert (res.status_code, res.json()["code"]) == (403, "forbidden")
+
+
+COMPLIANCE = Principal(user_id="u-compliance", tenant_id=T, role=Role.compliance)
+
+
+@pytest.mark.parametrize("principal", [LENDER, COMPLIANCE], ids=["lender_viewer", "compliance"])
+def test_only_roles_that_may_upload_can_preview_or_map_columns(client: TestClient, principal):
+    _as(client, principal)  # neither role holds ingest:upload
+    assert _preview(client).status_code == 403
+    res = client.post("/api/ingest/columns", files={"file": ("ledger.csv", AMBIGUOUS, "text/csv")},
+                      data={"tenant_id": T})
+    assert (res.status_code, res.json()["code"]) == (403, "forbidden")

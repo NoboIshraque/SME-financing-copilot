@@ -11,11 +11,12 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.contracts import DataMode, Role
+from app.contracts import ActionCard, DataMode, Role
 from app.db import init_db, make_engine, session_factory
 from app.main import create_app
 from app.security import passwords
 from app.security.accounts import Accounts
+from app.security.approvals import issue_cards
 from app.settings import Settings
 
 START = datetime(2026, 10, 1, 9, 0, 7, tzinfo=UTC)
@@ -95,3 +96,16 @@ def make_user(app: FastAPI, clock: FakeClock):
 
 def sign_in(client: TestClient, email: str = "owner@shop.test", password: str = PASSWORD):
     return client.post("/api/auth/login", json={"email": email, "password": password})
+
+
+@pytest.fixture
+def issue(app: FastAPI, clock: FakeClock):
+    """Record cards as server-issued (known risk R3), as an engine route does before returning
+    them."""
+
+    def record(*cards: ActionCard, tenant_id: str = "t1") -> None:
+        with app.state.session_factory() as session:
+            issue_cards(session, tenant_id, cards, clock())
+            session.commit()
+
+    return record

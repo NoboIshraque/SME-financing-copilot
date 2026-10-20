@@ -63,6 +63,7 @@ from app.engines.financing.ranking import match as rank_options
 from app.facts import FactStore
 from app.main import get_session
 from app.security import policy
+from app.security.approvals import issue_cards
 from app.security.clock import Clock
 from app.security.deps import get_clock, require
 from app.security.errors import ProblemRoute, forbidden
@@ -258,4 +259,6 @@ def application(body: ApplicationBody,
                       product_id=body.product_id[:128])
     if chosen.eligibility.status is EligibilityStatus.fail:
         return _error(422, "not_eligible", "error.not_eligible", product_id=body.product_id)
-    return draft_application(chosen, need, facts, now=clock())
+    card = draft_application(chosen, need, facts, now=clock())
+    issue_cards(session, principal.tenant_id, (card,), clock())
+    return card

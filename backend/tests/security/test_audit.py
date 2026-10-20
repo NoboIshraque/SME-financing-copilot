@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import DatabaseError
 
 from app.chain.anchor import OfflineAnchorer
-from app.contracts import GENESIS_HASH, Role, Tier
+from app.contracts import GENESIS_HASH, ActionCard, Role, Tier
 from app.db import init_db, make_engine, session_factory
 from app.security import totp
 from app.security.audit import AuditLog, anchor_digest_matches, link_hash
@@ -202,12 +202,13 @@ def test_sign_ins_are_audited_without_personal_data(api, app, make_user):
     assert "ghost" not in blob and "owner@shop.test" not in blob and PASSWORD not in blob
 
 
-def test_the_approval_lifecycle_is_audited(api, app, make_user, clock):
+def test_the_approval_lifecycle_is_audited(api, app, make_user, clock, issue):
     make_user(totp_secret=SECRET)
     sign_in(api)
     api.post("/api/auth/login/totp", json={"code": totp.code_at(SECRET, clock())})
     clock.advance(seconds=30)
     card = {"id": "act-1", "title_key": "t", "action_type": "move_money", "tier": "EXECUTE"}
+    issue(ActionCard.model_validate(card))
     approval = api.post("/api/approvals", headers={"X-Idempotency-Key": "idem-0001"},
                         json={"card": card}).json()["approval"]
     api.post(f"/api/approvals/{approval['id']}/approve",

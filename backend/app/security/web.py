@@ -105,6 +105,8 @@ LIMITS: tuple[Limit, ...] = (
     _limit("copilot", r"^/api/copilot/", 20, "POST"),
     _limit("ingest", r"^/api/ingest/", 30, "POST"),
     _limit("guard", r"^/api/guard/check$", 60, "POST"),
+    # Each call runs a 1,000-path simulation (known risk R12).
+    _limit("simulate", r"^/api/(cash/|analysis/scenarios|financing/match)", 120),
     _limit("api", r"^/api/", 300),
 )
 
@@ -174,6 +176,44 @@ class RateLimitMiddleware:
         await self.app(scope, receive, send)
 
 
+MAX_BODY_BYTES = 1024 * 1024  # JSON bodies, sign-in included
+MAX_UPLOAD_BODY_BYTES = 11 * 1024 * 1024  # ingest uploads (10 MiB file + form overhead)
+
+
+def _too_large(limit: int) -> SecurityProblem:
+    return SecurityProblem(413, "body_too_large", "error.body_too_large", max_bytes=str(limit))
+
+
+class BodySizeLimitMiddleware:
+    """Refuse request bodies over a cap before the app reads them (known risk R13): by the
+    declared Content-Length, and by counting when a body arrives without one."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        limit = (MAX_UPLOAD_BODY_BYTES if scope.get("path", "").startswith("/api/ingest/")
+                 else MAX_BODY_BYTES)
+        declared = dict(scope.get("headers") or ()).get(b"content-length")
+        if declared is not None and declared.isdigit() and int(declared) > limit:
+            await _send_problem(send, _too_large(limit))
+            return
+        seen = 0
+
+        async def counted() -> Message:
+            nonlocal seen
+            message = await receive()
+            seen += len(message.get("body", b""))
+            if seen > limit:
+                raise _too_large(limit)
+            return message
+
+        await self.app(scope, counted, send)
+
+
 class OriginCheckMiddleware:
     """Refuse state-changing browser requests from foreign origins. Requests without an
     Origin header (curl, server-to-server, tests) pass unless the browser marks them
@@ -222,5 +262,6 @@ def install_security(app: FastAPI, settings: Settings) -> None:
     set_masker(policy_masker)
     app.add_middleware(OriginCheckMiddleware, allowed_origins=list(settings.cors_origins))
     app.add_middleware(RateLimitMiddleware, now=_clock_seconds)
+    app.add_middleware(BodySizeLimitMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
     app.state.security_installed = True

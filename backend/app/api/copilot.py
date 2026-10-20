@@ -29,6 +29,7 @@ from app.contracts import Abstention, AbstentionReason, ApiError, Principal, Rec
 from app.facts import FactStore
 from app.llm import LLMGateway
 from app.main import get_app_settings, get_session
+from app.security.approvals import issue_cards
 from app.security.clock import Clock
 from app.security.deps import get_clock, require
 from app.security.errors import ProblemRoute
@@ -82,8 +83,10 @@ def _run(question: str, principal: Principal, session: Session, clock: Clock,
          orchestrator: Orchestrator, language: str | None = None,
          private: bool = False) -> Recommendation:
     ctx = ToolContext(FactStore(session), principal.tenant_id, clock())
-    return orchestrator.ask(ctx, question, language=language, role=principal.role,
-                            actor=principal.user_id, private=private).recommendation
+    rec = orchestrator.ask(ctx, question, language=language, role=principal.role,
+                           actor=principal.user_id, private=private).recommendation
+    issue_cards(session, principal.tenant_id, rec.action_cards, ctx.now)
+    return rec
 
 
 @router.post("/ask", response_model=Recommendation)

@@ -130,6 +130,7 @@
     "policy_changed": "The rules changed since approval, so it was not carried out.",
     "approver_inactive": "The person who approved this no longer has access.",
     "rate_limited": "Too many requests. Wait a moment and try again.",
+    "body_too_large": "That request is too large to send.",
     "weak_password": "Choose a longer, harder-to-guess password.",
     "invalid_card": "This action could not be read. Please refresh.",
     "tenant_required": "Choose your business first."

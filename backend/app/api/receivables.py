@@ -43,6 +43,7 @@ from app.facts import FactStore
 from app.facts.provenance import compute, record_figure
 from app.facts.registry import NotComputable
 from app.main import get_session
+from app.security.approvals import issue_cards
 from app.security.clock import Clock
 from app.security.deps import get_clock, require
 from app.security.errors import ProblemRoute
@@ -190,4 +191,6 @@ def reminder_plan(principal: Principal = Depends(require(Permission.ledger_read)
     if found is None:
         return _abstain()
     labels = _labels(found.invoices)
-    return ReceivablesPlan(reminders=ladder.plan(found.invoices, as_of, labels.__getitem__))
+    reminders = ladder.plan(found.invoices, as_of, labels.__getitem__)
+    issue_cards(session, principal.tenant_id, reminders, clock())
+    return ReceivablesPlan(reminders=reminders)

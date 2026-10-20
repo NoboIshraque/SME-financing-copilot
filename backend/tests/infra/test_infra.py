@@ -79,7 +79,8 @@ def test_docker_context_excludes_secrets_and_git():
     assert "**/.env" in ignore and ".git" in ignore
 
 
-def test_deploy_uses_only_the_four_documented_secrets_and_rolls_back():
+def test_deploy_uses_only_the_documented_secrets_and_rolls_back():
     used = set(re.findall(r"secrets\.([A-Z_]+)", DEPLOY))
-    assert used == {"DEPLOY_HOST", "DEPLOY_USER", "DEPLOY_SSH_KEY", "DEPLOY_DOMAIN"}
+    assert used == {"DEPLOY_HOST", "DEPLOY_USER", "DEPLOY_SSH_KEY", "DEPLOY_DOMAIN",
+                    "DEPLOY_KNOWN_HOSTS"}  # the last is optional: it pins the host key (R15)
     assert "Roll back" in DEPLOY and "conclusion == 'success'" in DEPLOY
