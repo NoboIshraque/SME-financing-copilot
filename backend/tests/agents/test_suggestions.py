@@ -22,21 +22,28 @@ from app.settings import LLMMode
 from tests.agents.helpers import NOW, seeded_store
 
 LOCALES = Path(__file__).resolve().parents[3] / "web" / "src" / "i18n" / "locales"
-ASKING_ROLES = {"owner": Role.owner, "accountant": Role.accountant, "staff": Role.staff}
+ASKING_ROLES = {"owner": Role.owner, "accountant": Role.accountant, "staff": Role.staff,
+                "any": Role.owner}
 
 
 def suggestions(language: str) -> list[tuple[str, str, str]]:
-    """(role, n, question) for every suggested question in one locale file."""
+    """(role, n, question) for every suggested question in one locale file. A loose key
+    (`copilot.suggest.chase`, which the e2e journeys type) is listed with role "any"."""
     found = json.loads((LOCALES / f"{language}.json").read_text(encoding="utf-8"))
-    return [(role, n, text) for role, items in found["copilot"]["suggest"].items()
-            for n, text in items.items()]
+    rows = []
+    for key, items in found["copilot"]["suggest"].items():
+        if isinstance(items, dict):
+            rows += [(key, n, text) for n, text in items.items()]
+        else:
+            rows.append(("any", key, items))
+    return rows
 
 
 ALL = [(lang, *row) for lang in ("en", "bn", "zh") for row in suggestions(lang)]
 
 
 def test_every_asking_role_has_suggestions_and_only_asking_roles_do():
-    assert {role for role, _, _ in suggestions("en")} == set(ASKING_ROLES)
+    assert {role for role, _, _ in suggestions("en")} - {"any"} == set(ASKING_ROLES) - {"any"}
 
 
 @pytest.mark.parametrize(("language", "role", "n", "question"), ALL,

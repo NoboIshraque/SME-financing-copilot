@@ -980,7 +980,8 @@
         "1": "What is today's cash position?",
         "2": "Who owes us money?",
         "3": "Draft a payment reminder for the customer who owes the most"
-      }
+      },
+      "chase": "Which customer should I chase first?"
     },
     "suggestUpload": "Upload a bank statement",
     "notYet": "I can't help with that one yet.",
