@@ -18,6 +18,14 @@ def card_json(card: ActionCard = CARD) -> dict:
     return {"card": card.model_dump(mode="json")}
 
 
+@pytest.fixture(autouse=True)
+def card_issued(request) -> None:
+    """Every API test here requests CARD, which an engine route would have issued first."""
+    if "app" in request.fixturenames or "api" in request.fixturenames or \
+            "owner" in request.fixturenames:
+        request.getfixturevalue("issue")(CARD)
+
+
 def key(value: str = "idem-0001") -> dict[str, str]:
     return {"X-Idempotency-Key": value}
 
@@ -131,9 +139,10 @@ def test_repeating_a_request_with_the_same_key_returns_the_same_approval(owner):
     assert len(owner.get("/api/approvals").json()) == 1
 
 
-def test_reusing_a_key_for_a_different_card_is_refused(owner):
+def test_reusing_a_key_for_a_different_card_is_refused(owner, issue):
     requested(owner)
     changed = CARD.model_copy(update={"payload": {"bill_id": "t1:BILL-7", "amount": "99000.00"}})
+    issue(changed)
     response = owner.post("/api/approvals", headers=key(), json=card_json(changed))
     assert response.status_code == 409 and response.json()["code"] == "idempotency_key_reused"
 
@@ -161,8 +170,9 @@ def test_actions_below_execute_need_no_approval(owner):
     assert response.status_code == 422 and response.json()["code"] == "approval_not_needed"
 
 
-def test_a_card_claiming_a_low_tier_is_still_treated_as_execute(owner):
+def test_a_card_claiming_a_low_tier_is_still_treated_as_execute(owner, issue):
     sneaky = CARD.model_copy(update={"tier": Tier.READ})
+    issue(sneaky)
     response = owner.post("/api/approvals", headers=key(), json=card_json(sneaky))
     assert response.json()["approval"]["tier"] == "EXECUTE"
 
@@ -267,3 +277,18 @@ def test_the_policy_table_is_served_to_signed_in_users(owner, api):
 def test_registering_an_executor_for_a_denied_action_is_refused():
     with pytest.raises(ValueError):
         approvals_module.register_executor(ActionType.add_payee, lambda card, a: {})
+
+
+def test_a_card_the_server_never_issued_cannot_be_put_to_the_owner(owner):
+    """Known risk R3: an insider may not invent the payload or figures the owner approves."""
+    forged = CARD.model_copy(update={"payload": {"bill_id": "t1:BILL-7", "amount": "1.00"}})
+    response = owner.post("/api/approvals", headers=key(), json=card_json(forged))
+    assert (response.status_code, response.json()["code"]) == (422, "card_not_issued")
+    assert owner.get("/api/approvals").json() == []
+
+
+def test_a_card_issued_to_another_tenant_cannot_be_requested_here(owner, issue):
+    other = CARD.model_copy(update={"id": "act-pay-2"})
+    issue(other, tenant_id="t2")
+    response = owner.post("/api/approvals", headers=key(), json=card_json(other))
+    assert response.json()["code"] == "card_not_issued"

@@ -128,7 +128,7 @@ async def preview(
     day_first: str | None = Form(None),
     default_channel: str | None = Form(None),
     mapping: str | None = Form(None),
-    principal: Principal = Depends(current_principal),
+    principal: Principal = Depends(require(Permission.ingest_upload)),
     session: Session = Depends(get_session),
 ) -> IngestPreview | JSONResponse:
     tenant = _tenant(principal, tenant_id)
@@ -154,7 +154,7 @@ async def columns(
     request: Request,
     file: UploadFile = File(...),
     tenant_id: str = Form(""),
-    principal: Principal = Depends(current_principal),
+    principal: Principal = Depends(require(Permission.ingest_upload)),
 ) -> ColumnsView | JSONResponse:
     tenant = _tenant(principal, tenant_id)
     if isinstance(tenant, JSONResponse):

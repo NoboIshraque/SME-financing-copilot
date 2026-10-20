@@ -59,6 +59,7 @@ from app.contracts import (
     Period,
     Principal,
     Provenance,
+    Role,
 )
 from app.engines.cash.alerts import build_alerts
 from app.engines.cash.baseline import Baseline, forecast_baseline
@@ -73,6 +74,7 @@ from app.facts import FactStore, cite, fact_id, record_figure
 from app.facts.provenance import compute
 from app.facts.registry import NotComputable
 from app.main import get_session
+from app.security.approvals import issue_cards
 from app.security.deps import require
 from app.security.errors import ProblemRoute
 from app.security.roles import Permission
@@ -248,10 +250,12 @@ class Recorder:
         return gap.model_copy(update={"figures": tuple(self.figure(f) for f in gap.figures)})
 
     def card(self, card: ActionCard) -> ActionCard:
-        return card.model_copy(update={
+        issued = card.model_copy(update={
             "impact": self.figure(card.impact) if card.impact else None,
             "cost": self.figure(card.cost) if card.cost else None,
             "figures": tuple(self.figure(f) for f in card.figures)})
+        issue_cards(self.store.session, self.analysis.tenant_id, (issued,), self.now)
+        return issued
 
     def alert(self, alert: Alert) -> Alert:
         return alert.model_copy(update={
@@ -335,8 +339,14 @@ BufferQuery = Query(default=None, ge=0, description="Tk; default: the buffer tar
 SeedQuery = Query(default=SEED, ge=0, le=SEED_MAX)
 
 
+def _seed(seed: int = SeedQuery, principal: Principal = Depends(_reader)) -> int:
+    """Only the owner may pick a seed: each new seed is a fresh 1,000-path simulation whose
+    figures are recorded as facts (known risk R12). Everyone else gets the engine's seed."""
+    return seed if principal.role is Role.owner else SEED
+
+
 @router.get("/forecast", response_model=CashForecast)
-def get_forecast(buffer: Decimal | None = BufferQuery, seed: int = SeedQuery,
+def get_forecast(buffer: Decimal | None = BufferQuery, seed: int = Depends(_seed),
                  principal: Principal = Depends(_reader),
                  session: Session = Depends(get_session)) -> CashForecast | JSONResponse:
     store = FactStore(session)
@@ -348,7 +358,7 @@ def get_forecast(buffer: Decimal | None = BufferQuery, seed: int = SeedQuery,
 
 
 @router.get("/gaps", response_model=CashGaps)
-def get_gaps(buffer: Decimal | None = BufferQuery, seed: int = SeedQuery,
+def get_gaps(buffer: Decimal | None = BufferQuery, seed: int = Depends(_seed),
              principal: Principal = Depends(_reader),
              session: Session = Depends(get_session)) -> CashGaps | JSONResponse:
     store = FactStore(session)
@@ -371,7 +381,7 @@ def get_gaps(buffer: Decimal | None = BufferQuery, seed: int = SeedQuery,
 
 
 @router.get("/alerts", response_model=list[Alert])
-def get_alerts(buffer: Decimal | None = BufferQuery, seed: int = SeedQuery,
+def get_alerts(buffer: Decimal | None = BufferQuery, seed: int = Depends(_seed),
                principal: Principal = Depends(_reader),
                session: Session = Depends(get_session)) -> list[Alert] | JSONResponse:
     store = FactStore(session)
@@ -386,7 +396,7 @@ def get_alerts(buffer: Decimal | None = BufferQuery, seed: int = SeedQuery,
 
 @router.post("/whatif", response_model=CashForecast)
 def post_whatif(body: WhatIfRequest, buffer: Decimal | None = BufferQuery,
-                seed: int = SeedQuery, principal: Principal = Depends(_reader),
+                seed: int = Depends(_seed), principal: Principal = Depends(_reader),
                 session: Session = Depends(get_session)) -> CashForecast | JSONResponse:
     store = FactStore(session)
     try:

@@ -17,7 +17,7 @@ from __future__ import annotations
 import hashlib
 import json
 import secrets
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -26,7 +26,7 @@ from sqlalchemy.orm import Session
 
 from app.contracts import ActionCard, ActionType, Approval, ApprovalStatus, Principal, Role, Tier
 from app.security import policy
-from app.security.models import ApprovalRow, UserRow
+from app.security.models import ApprovalRow, IssuedCardRow, UserRow
 from app.security.roles import Permission, has_permission
 
 APPROVAL_LIFETIME = timedelta(hours=24)
@@ -66,6 +66,17 @@ def card_digest(card: ActionCard) -> str:
     canonical = json.dumps(card.model_dump(mode="json"), sort_keys=True, separators=(",", ":"),
                            ensure_ascii=False)
     return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def issue_cards(db: Session, tenant_id: str, cards: Iterable[ActionCard], now: datetime) -> None:
+    """Record the EXECUTE-tier cards an engine route is about to return (known risk R3)."""
+    for card in cards:
+        if policy.card_tier(card) is not Tier.EXECUTE:
+            continue
+        digest = card_digest(card)
+        if db.get(IssuedCardRow, (tenant_id, digest)) is None:
+            db.add(IssuedCardRow(tenant_id=tenant_id, card_digest=digest, issued_at=now))
+    db.flush()
 
 
 def check_key(key: str | None) -> str:
@@ -137,6 +148,8 @@ class Approvals:
                 and policy.may_request(principal.role, card.action_type)):
             raise ApprovalProblem(403, "forbidden", reason="tier")
         digest = card_digest(card)
+        if self.db.get(IssuedCardRow, (principal.tenant_id, digest)) is None:
+            raise ApprovalProblem(422, "card_not_issued")
         existing = self.db.scalar(select(ApprovalRow).where(
             ApprovalRow.tenant_id == principal.tenant_id, ApprovalRow.idempotency_key == key))
         if existing is not None:

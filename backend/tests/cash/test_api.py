@@ -46,6 +46,7 @@ def cash_app(universe):
         accounts = Accounts(session, settings)
         for email, tenant, role in (("owner@grocery.test", "sme_grocery", Role.owner),
                                     ("lender@grocery.test", "sme_grocery", Role.lender_viewer),
+                                    ("staff@grocery.test", "sme_grocery", Role.staff),
                                     ("owner@hardware.test", "sme_hardware", Role.owner),
                                     ("owner@garment.test", "sme_garment", Role.owner),
                                     ("owner@short.test", "short_shop", Role.owner),
@@ -302,3 +303,11 @@ def test_an_abstention_for_another_reason_does_not_blame_the_initial_balance(sig
     assert res.status_code == 422
     assert (res.json()["message_key"], res.json()["detail"]) == (
         "facts.no_source_rows", {"missing": "the cash balance at the start of 2026-10-01"})
+
+
+def test_only_the_owner_may_choose_the_simulation_seed(signed_in, grocery):
+    """Known risk R12: every new seed is a fresh simulation recorded as facts."""
+    engine_seed = _band(grocery.get("/api/cash/forecast"))
+    staff = _band(signed_in("staff@grocery.test").get("/api/cash/forecast", params={"seed": 7}))
+    assert staff["seed"] == engine_seed["seed"] == 20261020
+    assert _band(grocery.get("/api/cash/forecast", params={"seed": 7}))["seed"] == 7

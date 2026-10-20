@@ -7,6 +7,10 @@ Mobile). Done something? Tick it in your head and comment "done: <item>" on the 
 <!-- section: nobo -->
 ## Nobo (@NoboIshraque) — PC-1 and PC-2
 
+Step-by-step guides (20 Oct): `docs/handover/VIDEO.md` (recording), `docs/handover/SERVER.md`
+(server or no-card tunnel), `docs/handover/NOTEBOOK01.md` (Labib's notebook, plain words),
+`docs/handover/AUDIT_PROMPT.md` (paste into a new chat for the final audit).
+
 State at 20 Oct 01:00 (orch-C): every work package is merged or cut; the product is now
 **DecisionGuard**. Submission files: `docs/submission/` (PDFs in `docs/submission/pdf/`).
 
