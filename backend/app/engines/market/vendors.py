@@ -10,9 +10,11 @@ settled by their due date (delivery dates are not recorded, so this is the only 
 signal on file). Expected late days = (1 - on-time share) * LATE_DAYS. A supplier with no settled
 bill gets no penalty and says so (`on_time_rate` null).
 
-Quotes for the demo shops are generated (synthetic, labelled so): for each of the shop's real
-ledger suppliers, a price within -6%..+4% of today's TCB price, a delivery charge and a lead time,
-all derived from a hash of (shop, supplier, item) so the same request gives the same quotes.
+Quotes for the demo shops are generated (synthetic, labelled so): each of the shop's real ledger
+suppliers is given a place (a public-price market, chosen by a hash of shop and supplier) and
+quotes -6%..+4% around that place's latest public price for the item (the owner's location
+price when the place has none). Delivery and lead time follow the road distance from the owner's
+location: DELIVERY_BASE + DELIVERY_PER_KM * km per trip, one day per KM_PER_DAY started.
 Ranking is by landed cost, ties broken by the supplier label, so it does not depend on the order
 the quotes arrive in.
 """
@@ -26,6 +28,8 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 from app.contracts import Bill, DataMode, Figure, Money, Provenance, Unit, VendorQuote
+from app.engines.market.locations import Location, distance_km
+from app.engines.market.points import digest
 
 RELIABILITY_SHARE = Decimal("0.05")
 LATE_DAYS = Decimal(3)
@@ -33,6 +37,9 @@ DAYS_PER_YEAR = Decimal(365)
 HUNDRED = Decimal(100)
 CENT = Decimal("0.01")
 MAX_SUPPLIERS = 4
+DELIVERY_BASE = Decimal(150)  # taka per trip: loading and unloading (assumption, stated)
+DELIVERY_PER_KM = Decimal(15)  # taka per road km for one van trip (assumption, stated)
+KM_PER_DAY = Decimal(250)
 
 EXPRESSIONS = {
     "market.landed_cost_per_unit": "price + delivery / quantity + waiting cost + reliability "
@@ -80,22 +87,48 @@ def _unit_hash(*parts: str) -> Decimal:
     return Decimal(int.from_bytes(digest[:4], "big")) / Decimal(2**32)
 
 
+@dataclass(frozen=True)
+class Placed:
+    quote: VendorQuote
+    place: Location
+    distance_km: Decimal
+
+
+def supplier_places(tenant_id: str, suppliers: Sequence[str], pool: Sequence[Location]
+                    ) -> dict[str, Location]:
+    """A stable place for each supplier, chosen from `pool` by a hash of (shop, supplier)."""
+    ordered = sorted(pool, key=lambda place: place.id)
+    return {supplier: ordered[int(_unit_hash(tenant_id, supplier, "place") * len(ordered))]
+            for supplier in suppliers}
+
+
+def delivery_terms(owner: Location, place: Location) -> tuple[Decimal, Decimal, int]:
+    """(road km, delivery cost per trip, lead days) from `place` to the owner's location."""
+    km = distance_km(owner, place)
+    cost = DELIVERY_BASE + DELIVERY_PER_KM * km
+    days = int((km + KM_PER_DAY - 1) // KM_PER_DAY)  # whole km: a started day counts
+    return km, cost, days
+
+
 def synthetic_quotes(tenant_id: str, suppliers: Sequence[str], commodity: str, unit: str,
-                     market_price: Money, bills: Sequence[Bill], quoted_on: date
-                     ) -> list[VendorQuote]:
+                     owner: Location, places: dict[str, Location],
+                     local_prices: dict[str, Money], owner_price: Money, bills: Sequence[Bill],
+                     quoted_on: date) -> list[Placed]:
     """Generated quotes from the shop's real ledger suppliers (demo shops only; synthetic)."""
-    quotes = []
+    found = []
     for supplier in suppliers:
+        place = places[supplier]
+        base = local_prices.get(place.id, owner_price)
         h = _unit_hash(tenant_id, supplier, commodity)
-        price = _q(market_price.amount * (Decimal("0.94") + Decimal("0.10") * h))
-        delivery = Decimal(int(_unit_hash(supplier, "delivery") * 10) * 100)  # 0..900 taka
-        lead = int(_unit_hash(supplier, "lead") * 5)  # 0..4 days
-        quotes.append(VendorQuote(
+        price = _q(base.amount * (Decimal("0.94") + Decimal("0.10") * h))
+        km, delivery, lead = delivery_terms(owner, place)
+        quote = VendorQuote(
             vendor_token=supplier, commodity=commodity, unit=unit,
-            unit_price=Money.of(price), delivery_cost=Money.of(delivery), lead_time_days=lead,
-            on_time_rate=on_time_rate(bills, supplier), quoted_on=quoted_on,
-            data_mode=DataMode.synthetic))
-    return quotes
+            unit_price=Money.of(price), delivery_cost=Money.of(_q(delivery)),
+            lead_time_days=lead, on_time_rate=on_time_rate(bills, supplier),
+            quoted_on=quoted_on, data_mode=DataMode.synthetic)
+        found.append(Placed(quote, place, km))
+    return found
 
 
 def rank(quotes: Sequence[VendorQuote], labels: dict[str, str], quantity: Decimal,
@@ -129,8 +162,8 @@ def rank(quotes: Sequence[VendorQuote], labels: dict[str, str], quantity: Decima
                 params: dict[str, str] = params, refs: tuple[str, ...] = refs,
                 mode: DataMode = mode) -> Figure:
             return Figure(
-                id=f"market:{name}:{quote.vendor_token}:{quote.commodity}:{quantity}:"
-                   f"{apr_percent}:{quote.quoted_on.isoformat()}",
+                id=f"market:{name}:{quote.vendor_token}:{quote.commodity}:"
+                   f"{digest(value, params, refs)}",
                 label_key=f"market.{name}", value=value, unit=Unit.BDT, data_mode=mode,
                 provenance=Provenance(formula_id=formula, formula_version=1,
                                       source_row_ids=refs, parameters=params))

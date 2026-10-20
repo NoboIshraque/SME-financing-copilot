@@ -5,7 +5,7 @@ from decimal import Decimal
 
 import pytest
 
-from app.contracts import DataMode, PriceSource
+from app.contracts import DataMode
 from app.engines.market.tcb import ITEMS, TCB_DIR, TcbFormatError, load_directory, merge, parse_list
 
 HEADER = [
@@ -29,7 +29,7 @@ def test_the_saved_lists_give_every_watched_item_for_every_published_day():
         published = [o for o in found if o.point.commodity == item.commodity
                      and o.published_on == o.point.observed_on]
         assert len(published) == 10, item.commodity
-    assert all(o.point.source is PriceSource.tcb and o.point.data_mode is DataMode.public
+    assert all(o.point.source == "tcb" and o.point.data_mode is DataMode.public
                and o.point.source_url and o.point.source_url.startswith("https://")
                for o in found)
 

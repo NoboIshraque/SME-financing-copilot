@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.api import market
 from app.contracts import Principal, Role
+from app.engines.market import vendors as vendors_mod
 from app.security.deps import current_principal
 
 OWNER = Principal(user_id="u-owner", tenant_id="sme_grocery", role=Role.owner)
@@ -145,3 +146,55 @@ def test_a_shop_without_a_synthetic_ledger_has_no_quotes_to_rank(api: TestClient
                                                           "quantity": "500"})
     assert response.status_code == 422
     assert response.json()["detail"] == {"missing": "supplier_quote"}
+
+
+def test_locations_cover_bangladesh_divisions_and_china(api: TestClient):
+    places = api.get("/api/market/locations").json()
+    assert places[0]["id"] == "tcb-dhaka" and places[0]["cadence"] == "daily"
+    assert {p["id"] for p in places if p["country"] == "CN"} == {"cn-national",
+                                                                 "cn-beijing-xinfadi"}
+    assert len({p["division"] for p in places if p["country"] == "BD"}) == 8
+
+
+@pytest.mark.parametrize("location, source, currency", [
+    ("wfp-4035", "wfp", "BDT"), ("cn-national", "nbs", "CNY"),
+    ("cn-beijing-xinfadi", "xinfadi", "CNY")])
+def test_prices_follow_the_chosen_location(api: TestClient, location, source, currency):
+    body = api.get(f"/api/market/prices?location={location}").json()
+    assert body and all(i["location"] == location and i["latest"]["source"] == source
+                        and i["latest"]["price"]["currency"] == currency for i in body)
+
+
+def test_an_unknown_location_is_refused(api: TestClient):
+    response = api.get("/api/market/prices?location=wfp-1")
+    assert response.status_code == 422 and response.json()["code"] == "invalid_location"
+
+
+def test_negotiation_in_a_chinese_location_abstains_on_financing(grocery: TestClient):
+    body = {**NEGOTIATION, "commodity": "wheat", "location": "cn-national"}
+    response = grocery.post("/api/market/negotiate", json=body)
+    assert response.status_code == 422
+    assert response.json()["detail"] == {"missing": "financing_catalogue"}
+
+
+def test_vendors_carry_their_place_and_distance_and_max_km_keeps_only_near_ones(
+        grocery: TestClient):
+    ask = {"commodity": "rice_coarse", "quantity": "500"}
+    every = grocery.post("/api/market/vendors/rank", json=ask).json()
+    assert all("vendor_location" in v and Decimal(v["distance_km"]) >= 0 for v in every)
+    nearest = min(Decimal(v["distance_km"]) for v in every)
+    near = grocery.post("/api/market/vendors/rank",
+                        json={**ask, "max_km": int(nearest) + 1}).json()
+    assert near and all(Decimal(v["distance_km"]) <= nearest + 1 for v in near)
+    assert len(near) <= len(every)
+
+
+def test_figures_recorded_before_a_rule_change_do_not_block_new_answers(grocery: TestClient,
+                                                                      monkeypatch):
+    ask = {"commodity": "rice_coarse", "quantity": "500"}
+    before = grocery.post("/api/market/vendors/rank", json=ask).json()
+    monkeypatch.setattr(vendors_mod, "DELIVERY_PER_KM", Decimal(40))
+    after = grocery.post("/api/market/vendors/rank", json=ask)
+    assert after.status_code == 200
+    old_ids = {v["landed_cost"]["id"] for v in before}
+    assert {v["landed_cost"]["id"] for v in after.json()} != old_ids

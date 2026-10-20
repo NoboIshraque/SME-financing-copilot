@@ -325,7 +325,9 @@
     "kg": "公斤",
     "litre": "升",
     "metric_ton": "吨",
-    "hali": "hali（4个）"
+    "hali": "hali（4个）",
+    "piece": "个",
+    "jin": "斤"
   },
   "receivables": {
     "remindersTitle": "待发送的提醒",
@@ -675,7 +677,10 @@
       "agripricebd": "AgriPriceBD",
       "worldbank_pinksheet": "世界银行粉色单",
       "vendor": "供应商报价",
-      "manual": "您手动录入"
+      "manual": "您手动录入",
+      "wfp": "WFP",
+      "nbs": "国家统计局",
+      "xinfadi": "北京新发地"
     },
     "watchTitle": "关注的价格",
     "noWatch": "尚未关注任何商品。有采购记录后会自动出现。",
@@ -703,14 +708,34 @@
     "delivery_per_unit": "运费",
     "delay_cost": "等待成本",
     "reliability_penalty": "可靠性风险",
-    "sourceNote": "价格：孟加拉国贸易公司（TCB）达卡每日零售价格表，发布于 {{date}}。TCB 每天发布一次，因此不是实时价格。",
     "sourceLink": "打开 TCB 价格表",
     "sampleNote": "示例数据：计划中功能的预览，不是实时价格。服务器上还没有市场价格。",
     "sampleLabel": "示例数据：计划中功能的预览，不是实时价格",
     "addQuote": "添加供应商报价以比较供应商。示例供应商不会显示为您的供应商。",
     "change_vs_previous": "与上一期价格表相比的变化",
     "cost_of_money": "您的资金成本（您符合条件的最优贷款）",
-    "priceUsed": "使用的市场价格：{{price}} / {{unit}}，TCB，发布于 {{date}}"
+    "priceUsed": "使用的市场价格：{{price}} / {{unit}}，TCB，发布于 {{date}}",
+    "location": "您的所在地",
+    "locationHelp": "价格、提醒、谈判价格和供应商距离都按此地点计算。",
+    "countryBD": "孟加拉国",
+    "countryCN": "中国",
+    "cadence": {
+      "daily": "每日",
+      "10-day": "每10天",
+      "monthly": "每月"
+    },
+    "sourceNoteAt": "价格：{{source}}，{{place}}，发布于 {{date}}。这些是已发布的价格表，不是实时价格。",
+    "sourceName": {
+      "tcb": "孟加拉国贸易公司（TCB）每日零售价格表",
+      "wfp": "世界粮食计划署市场监测（每月）",
+      "nbs": "国家统计局（每10天）",
+      "xinfadi": "新发地批发市场价格（每日）"
+    },
+    "maxDistance": "供应商范围",
+    "anyDistance": "不限距离",
+    "withinKm": "{{km}} 公里内",
+    "vendorPlace": "{{place}}，{{division}} · 距离 {{km}} 公里",
+    "noFinancingHere": "谈判按您可获得的最优贷款利率计算赊账成本，而记录中的贷款为孟加拉国贷款（塔卡）。请选择孟加拉国的地点来规划交易。"
   },
   "commodity": {
     "onion": "洋葱（本地）",
@@ -725,7 +750,28 @@
     "egg_farm": "鸡蛋（养殖场）",
     "garlic": "大蒜（本地）",
     "salt": "盐（加碘）",
-    "ms_rod": "钢筋（60级）"
+    "ms_rod": "钢筋（60级）",
+    "palm_oil": "棕榈油",
+    "egg_piece": "鸡蛋（每个）",
+    "garlic_imported": "大蒜（进口）",
+    "chili_green": "青辣椒",
+    "onion_imported": "洋葱（进口）",
+    "chicken_broiler": "鸡肉（白羽鸡）",
+    "rebar": "螺纹钢（20毫米）",
+    "cement": "水泥（P.O 42.5）",
+    "float_glass": "浮法玻璃",
+    "rice_japonica": "粳稻米",
+    "wheat": "小麦",
+    "corn": "玉米",
+    "soybean": "大豆",
+    "sugar_white": "白砂糖",
+    "peanut": "花生",
+    "urea": "尿素",
+    "diesel": "柴油",
+    "egg_loose": "散鸡蛋",
+    "chinese_cabbage": "大白菜",
+    "cabbage": "圆白菜",
+    "carrot": "胡萝卜"
   },
   "negotiation": {
     "step": {

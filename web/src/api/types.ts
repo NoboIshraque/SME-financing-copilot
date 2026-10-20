@@ -220,6 +220,24 @@ export interface RoundVerification {
 
 // ---- Market (WP-09) ------------------------------------------------------------------------
 
+/** Where public prices come from (WP-09): TCB Dhaka, WFP Bangladesh markets, NBS China, Xinfadi. */
+export type MarketSource = PricePoint["source"] | "wfp" | "nbs" | "xinfadi";
+
+/** GET /api/market/locations (WP-09): a market the owner can pick for prices and vendors. */
+export interface MarketLocation {
+  id: string;
+  name: string;
+  division: string;
+  district: string;
+  latitude: number;
+  longitude: number;
+  source: MarketSource;
+  cadence: "daily" | "10-day" | "monthly";
+  country: string;
+  currency: string;
+  latest_on: string;
+}
+
 /** GET /api/market/prices (WP-09). The server adds `published_on` (the source list's date) and
  *  the baseline it used; the bundled sample (no market route) has neither. */
 export interface WatchItem {
@@ -232,6 +250,7 @@ export interface WatchItem {
   published_on?: string;
   baseline_basis?: "median_4w" | "previous";
   baseline_points?: number;
+  location?: string;
 }
 
 export interface MarketAlert {
@@ -240,9 +259,10 @@ export interface MarketAlert {
   direction: "drop" | "rise";
   change: Figure;
   observed_on: string;
-  source: PricePoint["source"];
+  source: MarketSource;
   source_url?: string | null;
   published_on?: string;
+  location?: string;
 }
 
 export interface VendorRank {
@@ -253,6 +273,9 @@ export interface VendorRank {
   breakdown: Figure[];
   /** Server only (WP-09): generated quotes from the shop's own ledger suppliers. */
   source?: "ledger_supplier";
+  /** Server only: where the vendor is, and the road distance to the owner's chosen location. */
+  vendor_location?: { id: string; name: string; division: string; district: string };
+  distance_km?: string;
 }
 
 export interface NegotiationRequest {
@@ -260,6 +283,7 @@ export interface NegotiationRequest {
   quantity: string;
   offer_price: Money;
   payment_days: number;
+  location?: string;
 }
 
 export interface NegotiationStep {

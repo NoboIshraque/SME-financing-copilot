@@ -48,6 +48,7 @@ import type {
   LoginRequest,
   LoginResponse,
   MarketAlert,
+  MarketLocation,
   MeshGraph,
   NegotiationPlan,
   NegotiationRequest,
@@ -127,11 +128,19 @@ export const api = {
   /** WP-09 was cut (19 Oct): no market router is deployed. When the server has no such route,
    *  the Market screen falls back to the bundled sample data (labelled a preview on screen). */
   market: {
-    prices: () => orSample(apiGet<WatchItem[]>("/api/market/prices"), (m) => m.watchlist()),
-    alerts: () => orSample(apiGet<MarketAlert[]>("/api/market/alerts"), (m) => m.marketAlerts()),
-    rankVendors: (commodity: string, quantity: string) =>
-      orSample(apiPost<VendorRank[]>("/api/market/vendors/rank", { commodity, quantity }),
-        (m) => m.vendorRanking(commodity)),
+    /** Places with public prices; [] when the server has no market router (sample mode). */
+    locations: () => apiGet<MarketLocation[]>("/api/market/locations").catch((error: unknown) => {
+      if (error instanceof ApiRequestError && error.body === null && (error.status === 404 || error.status === 405)) return [];
+      throw error;
+    }),
+    prices: (location?: string) =>
+      orSample(apiGet<WatchItem[]>(`/api/market/prices${location ? `?location=${id(location)}` : ""}`), (m) => m.watchlist()),
+    alerts: (location?: string) =>
+      orSample(apiGet<MarketAlert[]>(`/api/market/alerts${location ? `?location=${id(location)}` : ""}`), (m) => m.marketAlerts()),
+    rankVendors: (commodity: string, quantity: string, location?: string, maxKm?: number) =>
+      orSample(apiPost<VendorRank[]>("/api/market/vendors/rank", {
+        commodity, quantity, ...(location ? { location } : {}), ...(maxKm ? { max_km: maxKm } : {}),
+      }), (m) => m.vendorRanking(commodity)),
     negotiate: (body: NegotiationRequest) =>
       orSample(apiPost<NegotiationPlan>("/api/market/negotiate", body), (m) => m.negotiationPlan(body)),
   },
