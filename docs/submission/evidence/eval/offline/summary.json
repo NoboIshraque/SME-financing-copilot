@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-10-20T07:44:48+00:00",
+  "generated_at": "2026-10-20T13:43:43+00:00",
   "mode": "offline",
   "llm_mode": "fixtures",
-  "commit": "42b6a42",
+  "commit": "6e1c6af+local",
   "as_of": "2026-09-30T18:00:00+00:00",
   "data_mode": "synthetic",
   "tasks": {
-    "total": 62,
-    "passed": 62,
+    "total": 72,
+    "passed": 72,
     "rate": "1.000"
   },
   "functional": {
-    "total": 26,
-    "passed": 26,
+    "total": 36,
+    "passed": 36,
     "rate": "1.000"
   },
   "adversarial": {
@@ -27,8 +27,8 @@
       "rate": "1.000"
     },
     "N12": {
-      "total": 2,
-      "passed": 2,
+      "total": 3,
+      "passed": 3,
       "rate": "1.000"
     },
     "N14": {
@@ -46,14 +46,24 @@
       "passed": 1,
       "rate": "1.000"
     },
+    "N19": {
+      "total": 1,
+      "passed": 1,
+      "rate": "1.000"
+    },
+    "N3": {
+      "total": 1,
+      "passed": 1,
+      "rate": "1.000"
+    },
     "N8": {
       "total": 1,
       "passed": 1,
       "rate": "1.000"
     },
     "P1": {
-      "total": 3,
-      "passed": 3,
+      "total": 5,
+      "passed": 5,
       "rate": "1.000"
     },
     "P13": {
@@ -67,8 +77,13 @@
       "rate": "1.000"
     },
     "Q1": {
-      "total": 1,
-      "passed": 1,
+      "total": 4,
+      "passed": 4,
+      "rate": "1.000"
+    },
+    "Q2": {
+      "total": 2,
+      "passed": 2,
       "rate": "1.000"
     },
     "Q3": {
@@ -226,12 +241,12 @@
     "should_abstain": 6,
     "did_abstain": 6,
     "with_the_right_reason": 6,
-    "should_answer": 20,
+    "should_answer": 30,
     "abstained_anyway": 0
   },
   "claims": {
-    "shown": 174,
-    "verified_by_checker": 174
+    "shown": 180,
+    "verified_by_checker": 180
   },
   "reliability": {
     "agreement_votes": 0,
@@ -240,28 +255,42 @@
     "noise_flips": 0
   },
   "latency_ms": {
-    "median": 51,
-    "max": 2445
+    "median": 128,
+    "max": 2700
   },
   "models": {
     "mode": "fixtures",
     "refused_by_privacy_gate": 0,
     "slots": {
       "gemini_flash": {
-        "requests": 41,
+        "requests": 61,
         "successes": 2,
         "failures": {
-          "fixture_missing": 39
+          "fixture_missing": 59
         },
         "skipped": {},
         "cache_hits": 5,
         "tokens_in": 0,
         "tokens_out": 0,
-        "last_minute": 41,
-        "last_day": 41,
+        "last_minute": 61,
+        "last_day": 61,
         "cooling_down": false
       },
       "gemma": {
+        "requests": 33,
+        "successes": 0,
+        "failures": {
+          "fixture_missing": 33
+        },
+        "skipped": {},
+        "cache_hits": 0,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "last_minute": 33,
+        "last_day": 33,
+        "cooling_down": false
+      },
+      "groq_gpt_oss_120b": {
         "requests": 27,
         "successes": 0,
         "failures": {
@@ -275,46 +304,32 @@
         "last_day": 27,
         "cooling_down": false
       },
-      "groq_gpt_oss_120b": {
-        "requests": 21,
-        "successes": 0,
-        "failures": {
-          "fixture_missing": 21
-        },
-        "skipped": {},
-        "cache_hits": 0,
-        "tokens_in": 0,
-        "tokens_out": 0,
-        "last_minute": 21,
-        "last_day": 21,
-        "cooling_down": false
-      },
       "groq_gpt_oss_20b": {
-        "requests": 29,
+        "requests": 35,
         "successes": 0,
         "failures": {
-          "fixture_missing": 29
+          "fixture_missing": 35
         },
         "skipped": {},
         "cache_hits": 0,
         "tokens_in": 0,
         "tokens_out": 0,
-        "last_minute": 29,
-        "last_day": 29,
+        "last_minute": 35,
+        "last_day": 35,
         "cooling_down": false
       },
       "groq_qwen": {
-        "requests": 21,
+        "requests": 27,
         "successes": 0,
         "failures": {
-          "fixture_missing": 21
+          "fixture_missing": 27
         },
         "skipped": {},
         "cache_hits": 0,
         "tokens_in": 0,
         "tokens_out": 0,
-        "last_minute": 21,
-        "last_day": 21,
+        "last_minute": 27,
+        "last_day": 27,
         "cooling_down": false
       }
     }

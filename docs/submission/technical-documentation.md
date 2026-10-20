@@ -37,8 +37,8 @@ testnet.
 
 The backend is a FastAPI application with pure-function engines over 58 frozen Pydantic
 contracts; the client is a React progressive web app in English, Bangla and Chinese. At the time
-of writing the repository holds 2,605 offline tests, the offline evaluation harness passes 62 of
-62 tasks, and the cash-flow forecaster has been backtested walk-forward on synthetic shops and on
+of writing the repository holds 2,832 offline tests, the offline evaluation harness passes 72 of
+72 tasks, and the cash-flow forecaster has been backtested walk-forward on synthetic shops and on
 two real public datasets, one of them from a Bangladeshi retailer. Limitations are stated
 explicitly in Section 8.
 
@@ -112,7 +112,7 @@ Each component carries one of four status labels:
 | Receivables: aging, risk score, reminder plan, API | Implemented (reduced scope) | Credit limits, dispute log and early-pay calculator are planned |
 | Message drafts: English and Bangla templates, drafts from the reminder plan, owner approval, send log | Implemented (reduced scope) | Sending channels are planned; the owner copies the approved text |
 | End-to-end flows (12 flows, desktop and phone, Playwright with axe) | Implemented | Run in CI on every pull request against a local stack; no hosted run is part of the evidence |
-| Evaluation harness (62 tasks, step logs, evidence bundle) | Implemented (reduced scope) | Mutation score and the nightly audit drill are planned |
+| Evaluation harness (72 tasks, step logs, evidence bundle) | Implemented (reduced scope) | Mutation score and the nightly audit drill are planned |
 | Machine-learning notebooks | Implemented (reduced scope) | Injection classifier not deployed; GPU training run and market backtest planned |
 | Deployment: Docker, Caddy, deploy with rollback, backups, Render Blueprint | Implemented (reduced scope) | Measurement from mainland China is pending; a second front-end mirror is planned |
 | Market intelligence: price watch by location, vendor ranking, negotiation support | Implemented (reduced scope) | Prices from dated public sources in Bangladesh and China (§4.8); vendor quotes are synthetic |
@@ -981,7 +981,7 @@ and no network access.
 
 | Layer | Area | Tests |
 | --- | --- | --- |
-| Backend (pytest) | agents | 346 |
+| Backend (pytest) | agents | 538 |
 | Backend (pytest) | analysis | 132 |
 | Backend (pytest) | cash | 199 |
 | Backend (pytest) | contracts | 137 |
@@ -991,8 +991,8 @@ and no network access.
 | Backend (pytest) | financing | 150 |
 | Backend (pytest) | infra | 20 |
 | Backend (pytest) | ingest | 305 |
-| Backend (pytest) | market | 59 |
-| Backend (pytest) | mesh | 113 |
+| Backend (pytest) | market | 77 |
+| Backend (pytest) | mesh | 117 |
 | Backend (pytest) | messaging | 11 |
 | Backend (pytest) | ml | 7 |
 | Backend (pytest) | onboarding | 9 |
@@ -1001,9 +1001,9 @@ and no network access.
 | Backend (pytest) | reports | 37 |
 | Backend (pytest) | security | 426 |
 | Backend (pytest) | synthetic | 87 |
-| **Backend total** | | **2,368** |
-| Web units (Vitest) | all | 237 |
-| **Total** | | **2,605** |
+| **Backend total** | | **2,582** |
+| Web units (Vitest) | all | 250 |
+| **Total** | | **2,832** |
 
 The evidence file is authoritative and is regenerated whenever the suite changes.
 
@@ -1048,19 +1048,19 @@ harness is not a CI gate.
 
 | Suite | Passed |
 | --- | --- |
-| Functional | 26/26 (100%) |
+| Functional | 36/36 (100%) |
 | Adversarial | 36/36 (100%) |
-| **All tasks** | **62/62 (100%)** |
+| **All tasks** | **72/72 (100%)** |
 
 Reliability metrics from the same run:
 
-- **Abstention:** 6 of 6 tasks that should abstain did so, all 6 with the expected reason; 0 of 20
+- **Abstention:** 6 of 6 tasks that should abstain did so, all 6 with the expected reason; 0 of 30
   answerable tasks abstained.
-- **Numbers shown:** 174 claims, all 174 recomputed by the symbolic checker to the same value.
+- **Numbers shown:** 180 claims, all 180 recomputed by the symbolic checker to the same value.
 - **Noise (N16):** 0 of 16 irrelevant variations in the self-loops flipped a decision.
 - **Agreement (N9):** no vote offline (the voters have no recordings); agreement can only be
   measured in a live run.
-- **Latency per task:** median 51 ms, maximum 2,445 ms.
+- **Latency per task:** median 128 ms, maximum 2,700 ms.
 
 **Interpreting the adversarial result.** The adversarial number must be read with care. The rule
 guard initially caught only 3 of 12 new, unseen attacks (11 of 12 were nevertheless contained, and
