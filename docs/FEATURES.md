@@ -1,7 +1,7 @@
 # Feature list — SME Finance Copilot (working name: DecisionGuard)
 
 > **Scope cuts approved by Nobo, 19 Oct 22:19 Dhaka**, to fit the time before the 20 Oct deadline. Kept whole:
-> WP-10 agents (done). Cut: WP-09 market (N3, N19), WP-12 sending channels (N2 keeps drafts in
+> WP-10 agents (done). Cut: WP-09 market (N3, N19; **re-included 20 Oct by Nobo, reduced**), WP-12 sending channels (N2 keeps drafts in
 > the approval queue), P8 audit drill, WP-17 GPU injection run and market backtest, WP-18 Vercel
 > mirror, WP-13 lender report (Tuesday only if time allows). Shortened: WP-05 to milestones 1, 2,
 > 4, 7; WP-15 to about 12 flows; WP-16 to about 40 tasks without mutation score. P7 real shop
@@ -43,8 +43,8 @@ Every feature lives in exactly one group; the cross-check table at the end prove
 | ID | Feature | Status | How it works |
 | --- | --- | --- | --- |
 | **N2** | **Systemised/automated ledger-based messages** to buyers, lenders and sellers, to cut workload | PARTIAL (19 Oct: drafts in the approval queue; sending cut) | Ledger events trigger drafts: pre-due reminders to buyers, payment-plan offers, supplier term-extension requests, lender status updates. Templates in English and Bangla. Tiered approval: low-risk reminders can auto-send once the owner opts in; anything with money or commitments needs owner approval |
-| **N3** | **Market watch** — price drops for raw materials/inputs notified; also recommends which vendor and route to use | CUT (19 Oct, roadmap) | Daily ingest of public prices (TCB Dhaka daily market prices; AgriPriceBD daily agri prices; World Bank monthly commodity "Pink Sheet") + the SME's own vendor quotes from its ledger. Alert when a tracked input drops/rises past a threshold; vendor ranking by landed cost (price + delivery cost + delay + reliability). *Honest limit: public data is daily/monthly, not tick-by-tick, so "immediately" = same day it is published* |
-| **N19** | **Negotiation support when choosing a buyer**, with instruction breakdowns | CUT (19 Oct, roadmap) | For each buyer/deal: computes our walk-away point, target terms and the trade-offs (price vs payment term vs advance vs volume), e.g. "offer 2% off for payment in 7 days — that costs 0.7% a month, cheaper than the 1.4%/month loan". Outputs a step-by-step script and the numbers behind each step |
+| **N3** | **Market watch** — price drops for raw materials/inputs notified; also recommends which vendor and route to use | IN, reduced (re-included 20 Oct). **Live:** 13 inputs from TCB's published daily Dhaka retail lists (10 lists, 10-19 Oct, saved in the repo), 4-week median, alerts past ±5% with /explain, vendor ranking by landed cost for the demo shops' own ledger suppliers. **Not live:** AgriPriceBD and Pink Sheet, scheduled fetching, real vendor quotes (generated, synthetic), quote form for self-service shops, pickup vs delivery route | Daily ingest of public prices (TCB Dhaka daily market prices; AgriPriceBD daily agri prices; World Bank monthly commodity "Pink Sheet") + the SME's own vendor quotes from its ledger. Alert when a tracked input drops/rises past a threshold; vendor ranking by landed cost (price + delivery cost + delay + reliability). *Honest limit: public data is daily/monthly, not tick-by-tick, so "immediately" = same day it is published* |
+| **N19** | **Negotiation support when choosing a buyer**, with instruction breakdowns | IN, reduced (re-included 20 Oct). **Live:** walk-away at the best eligible APR (WP-06), target, 3-4 step script with its figures; property-tested never below walk-away. **Not live:** advance and volume trade-offs | For each buyer/deal: computes our walk-away point, target terms and the trade-offs (price vs payment term vs advance vs volume), e.g. "offer 2% off for payment in 7 days — that costs 0.7% a month, cheaper than the 1.4%/month loan". Outputs a step-by-step script and the numbers behind each step |
 | **Q1** | **Uneven cash flow → smoothing + alert system** | IN | See answer Q1 below |
 | **Q2** | **Unpaid receivables → causes tackled one by one** | IN | See answer Q2 below |
 | **Q3** | **Spot cash gaps before they happen** | IN | See answer Q3 below |
@@ -179,7 +179,7 @@ on-chain anchored, and doubles as the state-data substitute.
 | --- | --- | --- | --- |
 | N1 | Weekly/quarterly expected vs reality → decisions | C | IN |
 | N2 | Automated ledger-based messages (buyers, lenders, sellers) | B | PARTIAL |
-| N3 | Market watch, price-drop alerts, vendor/route recommendation | B | CUT |
+| N3 | Market watch, price-drop alerts, vendor/route recommendation | B | IN (reduced, 20 Oct) |
 | N4 | Quarterly/annual auto lender report + simulated future | C | IN |
 | N5 | Typed facts, not loose text | D | IN |
 | N6 | Anonymised inputs | D | IN |
@@ -195,7 +195,7 @@ on-chain anchored, and doubles as the state-data substitute.
 | N16 | Decision stability score (stress + noise, ~10 variations) | C | IN |
 | N17 | Required "I don't know" (agreement, data check, stakes, specific asks, log) | D | IN |
 | N18 | Privacy by anonymisation tokens | D | IN |
-| N19 | Negotiation when choosing a buyer, with breakdowns | B | CUT |
+| N19 | Negotiation when choosing a buyer, with breakdowns | B | IN (reduced, 20 Oct) |
 | N20 | Online lender check via track record (mesh) | A | IN |
 | Q1 | Uneven cash flow + alert system | B | IN |
 | Q2 | Unpaid receivables: causes + tackling | B | IN |

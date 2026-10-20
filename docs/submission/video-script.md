@@ -32,8 +32,8 @@ before you record. They are not narration.
 Status on 20 Oct 01:00 (verify again with the pre-flight check on Tuesday): auth, approvals,
 audit, guard, cash, financing (with fit from the forecast), facts/explain, ingest, analysis,
 mesh, copilot (WP-10), receivables (WP-05) and message drafts (WP-12) are on `main`.
-Reports/Passport (WP-13) is on `main`; Settings storage has no backend router (its card is hidden). **Market (WP-09) is cut:**
-its screen is a labelled preview on sample data. The audit-drill card was removed (P8 cut).
+Reports/Passport (WP-13) is on `main`; Settings storage has no backend router (its card is hidden). **Market (WP-09) was re-included on 20 Oct:**
+its screen is live on TCB's published Dhaka price lists (prices, alerts) with synthetic vendor quotes and a negotiation plan. The audit-drill card was removed (P8 cut).
 
 ---
 
@@ -293,10 +293,10 @@ call from Appendix C. The console shows `allowed: false`, `families: ["fake_owne
 | S12 Audit chain | LIVE API | — |
 | S13 Languages | LIVE API (UI) | — |
 
-No shot in the planned cut uses the OFFLINE MOCK. Screens to **skip entirely**: Market (cut,
-a labelled sample) and Settings (off camera, only to switch the API mode). Receivables, Messages
+No shot in the planned cut uses the OFFLINE MOCK. Screens to **skip entirely**: Settings (off camera, only to switch the API mode). Receivables, Messages
 (approving a draft asks for the owner's code) and Reports/Passport have live APIs and can be
-added if time allows. **Rehearse every copilot question in the mode you record in:** offline
+added if time allows; so can Market (say "TCB's list, published <date>", never "live prices";
+vendor quotes are synthetic). **Rehearse every copilot question in the mode you record in:** offline
 (fixtures) the copilot answers only questions with a recorded plan or a rule match, and abstains
 on the rest.
 
