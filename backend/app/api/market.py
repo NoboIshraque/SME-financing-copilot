@@ -1,7 +1,8 @@
 """Market API (WP-09, FEATURES N3): public Dhaka retail prices and price alerts.
 
-    GET /api/market/prices   -> [WatchItem]   latest TCB price, baseline, change, 6-week history
-    GET /api/market/alerts   -> [MarketAlert] moves past +/-5% of the baseline
+    GET /api/market/locations          -> [MarketLocation] where public prices are available
+    GET /api/market/prices?location=   -> [WatchItem]   latest price, baseline, change, history
+    GET /api/market/alerts?location=   -> [MarketAlert] moves past +/-5% of the baseline
     POST /api/market/vendors/rank {commodity, quantity}
                              -> [VendorRank]     suppliers by landed cost per unit
     POST /api/market/negotiate {commodity, quantity, offer_price, payment_days}
@@ -10,21 +11,30 @@
 Shapes follow `web/src/api/types.ts` (WatchItem, MarketAlert), plus a few fields the web may
 show: `published_on` (the TCB list's date; the screen says "published on", never "live"),
 `baseline_basis` ("median_4w", or "previous" when fewer than 4 points fall in the 4 weeks
-before the latest) and `baseline_points`. Prices come only from the TCB lists saved under
-`data/public/prices/tcb/` (source, URL and date on every point); with no list saved the API
-abstains with 422 `not_enough_data` (`missing: price_snapshot`). A commodity with only one
+before the latest) and `baseline_points`. The owner picks the location: `tcb-dhaka` (default;
+TCB's daily Dhaka city lists saved under `data/public/prices/tcb/`) or `wfp-<market_id>` (WFP's
+monthly market monitoring across Bangladesh, `data/public/prices/wfp/`, where the baseline is
+the previous month). Source, URL and date are on every point; an unknown location is 422
+`invalid_location`, and a location with no saved prices abstains with 422 `not_enough_data`
+(`missing: price_snapshot`). A commodity with only one
 point has no baseline and is left out rather than shown with a made-up one.
+
+A Chinese location (yuan) has prices and alerts only: negotiation abstains (`missing:
+financing_catalogue`, the loans on file are Bangladeshi) and so do vendors (`supplier_quote`).
 
 Negotiation prices a sale against today's TCB price for the item (the shop's cash price) and
 the shop's cost of money: the lowest effective APR among the WP-06 financing options it passes
 eligibility for, for a working-capital need the size of the deal over max(payment_days, 30) days.
 With no eligible option, or no TCB price for the item, it abstains with 422 `not_enough_data`
 (`missing: eligible_financing` / `market_price`). The answer also carries `cost_of_money` (that
-APR as a Figure) and `market_price` (the TCB point used).
+APR as a Figure) and `market_price` (the public price point used).
 
 Vendor ranking (demo shops only): the shop's main ledger suppliers, labelled "Supplier N" (stable
-per shop), with generated quotes (`data_mode: synthetic`, `source: "ledger_supplier"`) around
-today's TCB price, ranked by landed cost at the same cost of money; reliability is the share of
+per shop), each placed at a public-price market (synthetic placement, `vendor_location`), with
+delivery and lead time from the road distance to the owner's chosen location (`distance_km`;
+`max_km` keeps only nearer vendors), and generated quotes (`data_mode: synthetic`,
+`source: "ledger_supplier"`) around the latest public price at the vendor's place, ranked by
+landed cost at the same cost of money; reliability is the share of
 each supplier's bills the shop settled on time. A shop whose ledger is not synthetic (a
 self-service shop) has no quotes on record: 422 `not_enough_data` (`missing: supplier_quote`).
 
@@ -35,14 +45,14 @@ so the shop's ledger revision does not move) so `/api/explain/{figure_id}` opens
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
@@ -50,14 +60,13 @@ from sqlalchemy.orm import Session
 from app.api import financing as financing_api
 from app.contracts import (
     ApiError,
+    Currency,
     DataMode,
     EligibilityStatus,
     Figure,
     FinancingNeed,
     FormulaRef,
     Money,
-    PricePoint,
-    PriceSource,
     Principal,
     Provenance,
     Unit,
@@ -67,8 +76,10 @@ from app.engines.analysis.ledger import NotEnoughData
 from app.engines.analysis.store import records
 from app.engines.financing.catalogue import load_catalogue
 from app.engines.financing.ranking import match as rank_options
+from app.engines.market import locations as locations_mod
+from app.engines.market import nbs, tcb, vendors, watch, wfp, xinfadi
 from app.engines.market import negotiate as negotiate_mod
-from app.engines.market import tcb, vendors, watch
+from app.engines.market.points import MarketPrice, digest
 from app.facts import FactStore
 from app.facts.provenance import combined_data_mode
 from app.main import get_session
@@ -80,18 +91,39 @@ from app.security.roles import Permission
 router = APIRouter(prefix="/market", tags=["market"], route_class=ProblemRoute)
 DHAKA = ZoneInfo("Asia/Dhaka")
 PRICE_DIR = tcb.TCB_DIR
+WFP_PRICE_DIR = locations_mod.WFP_DIR
+NBS_PRICE_DIR = nbs.NBS_DIR
+XINFADI_PRICE_DIR = xinfadi.XINFADI_DIR
+DEFAULT_LOCATION = locations_mod.DHAKA_CITY.id
+MAX_AGE = timedelta(days=120)  # an item last priced longer ago than this is not shown
+LocationQuery = Query(DEFAULT_LOCATION, max_length=24, pattern=r"^[a-z0-9-]+$")
+
+
+class MarketLocation(BaseModel):
+    id: str
+    name: str
+    division: str
+    district: str
+    latitude: float
+    longitude: float
+    source: Literal["tcb", "wfp", "nbs", "xinfadi"]
+    cadence: Literal["daily", "10-day", "monthly"]
+    country: str
+    currency: str
+    latest_on: date
 
 
 class WatchItem(BaseModel):
     commodity: str
     unit: str
-    latest: PricePoint
+    latest: MarketPrice
     median_4w: Money
     change_pct: str
-    history: list[PricePoint]
+    history: list[MarketPrice]
     published_on: date
     baseline_basis: Literal["median_4w", "previous"]
     baseline_points: int
+    location: str
 
 
 class MarketAlert(BaseModel):
@@ -100,9 +132,10 @@ class MarketAlert(BaseModel):
     direction: Literal["drop", "rise"]
     change: Figure
     observed_on: date
-    source: PriceSource
+    source: Literal["tcb", "wfp", "nbs", "xinfadi"]
     source_url: str | None
     published_on: date
+    location: str
 
 
 class NegotiationBody(BaseModel):
@@ -111,12 +144,22 @@ class NegotiationBody(BaseModel):
     quantity: str = Field(max_length=20)
     offer_price: Money
     payment_days: int = Field(ge=0, le=180)
+    location: str = Field(DEFAULT_LOCATION, max_length=24, pattern=r"^[a-z0-9-]+$")
 
 
 class VendorBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     commodity: str = Field(max_length=40)
     quantity: str = Field(max_length=20)
+    location: str = Field(DEFAULT_LOCATION, max_length=24, pattern=r"^[a-z0-9-]+$")
+    max_km: int | None = Field(None, ge=1, le=2000)  # only vendors within this road distance
+
+
+class VendorPlace(BaseModel):
+    id: str
+    name: str
+    division: str
+    district: str
 
 
 class VendorRank(BaseModel):
@@ -126,6 +169,9 @@ class VendorRank(BaseModel):
     landed_cost: Figure
     breakdown: list[Figure]
     source: Literal["ledger_supplier"] = "ledger_supplier"
+    vendor_location: VendorPlace
+    distance_km: Decimal
+
 
 
 class NegotiationStep(BaseModel):
@@ -138,7 +184,7 @@ class NegotiationPlan(BaseModel):
     target: Figure
     steps: list[NegotiationStep]
     cost_of_money: Figure
-    market_price: PricePoint
+    market_price: MarketPrice
 
 
 @lru_cache(maxsize=4)
@@ -152,6 +198,70 @@ def observations(directory: Path | None = None) -> tuple[tcb.Observation, ...]:
     files = sorted(folder.glob("*.xlsx")) if folder.is_dir() else []
     stamp = tuple((f.name, f.stat().st_mtime_ns) for f in files)
     return _cached(str(folder), stamp) if files else ()
+
+
+@lru_cache(maxsize=2)
+def _wfp_cached(directory: str, stamp: tuple[str, int]) -> dict[str, tuple[tcb.Observation, ...]]:
+    return {loc: tuple(obs) for loc, obs in wfp.load_directory(Path(directory)).items()}
+
+
+def wfp_observations(directory: Path | None = None) -> dict[str, tuple[tcb.Observation, ...]]:
+    """WFP points per location id, re-read only when the saved file changes."""
+    path = (directory or WFP_PRICE_DIR) / "wfp_food_prices_bgd.csv"
+    if not path.exists():
+        return {}
+    return _wfp_cached(str(path.parent), (path.name, path.stat().st_mtime_ns))
+
+
+@lru_cache(maxsize=4)
+def _china_cached(name: str, stamp: tuple[tuple[str, int], ...]) -> tuple[tcb.Observation, ...]:
+    return tuple(nbs.load_directory(NBS_PRICE_DIR) if name == "nbs"
+                 else xinfadi.load_directory(XINFADI_PRICE_DIR))
+
+
+def china_observations(name: str) -> tuple[tcb.Observation, ...]:
+    """Saved NBS or Xinfadi points, re-read only when a saved file changes."""
+    folder = NBS_PRICE_DIR if name == "nbs" else XINFADI_PRICE_DIR
+    files = sorted(folder.glob("*.html" if name == "nbs" else "*.json")) if folder.is_dir() else []
+    stamp = tuple((f.name, f.stat().st_mtime_ns) for f in files)
+    return _china_cached(name, stamp) if files else ()
+
+
+CHINA = {locations_mod.CHINA_NATIONAL.id: (locations_mod.CHINA_NATIONAL, "nbs"),
+         locations_mod.BEIJING_XINFADI.id: (locations_mod.BEIJING_XINFADI, "xinfadi")}
+
+
+def known_locations() -> dict[str, MarketLocation]:
+    """Dhaka city (TCB) and every WFP market with saved prices, newest data first per division."""
+    found: dict[str, MarketLocation] = {}
+    candidates = [(locations_mod.DHAKA_CITY, observations())]
+    markets = locations_mod.load_wfp_markets(WFP_PRICE_DIR)
+    by_market = wfp_observations()
+    candidates += [(markets[loc], obs) for loc, obs in by_market.items() if loc in markets]
+    candidates += [(place, china_observations(name)) for place, name in CHINA.values()]
+    for place, obs in candidates:
+        if not obs:
+            continue
+        found[place.id] = MarketLocation(
+            id=place.id, name=place.name, division=place.division, district=place.district,
+            latitude=place.latitude, longitude=place.longitude,
+            source=place.source,  # type: ignore[arg-type]
+            cadence=place.cadence,  # type: ignore[arg-type]
+            country=place.country, currency=place.currency,
+            latest_on=max(o.point.observed_on for o in obs))
+    return found
+
+
+def location_observations(location: str) -> tuple[tcb.Observation, ...] | None:
+    """Saved points for a location id, () when it has none, None when the id is unknown."""
+    if location == DEFAULT_LOCATION:
+        return observations()
+    if location in CHINA:
+        return china_observations(CHINA[location][1])
+    by_market = wfp_observations()
+    if location in by_market:
+        return by_market[location]
+    return None
 
 
 def _abstain(missing: str = "price_snapshot") -> JSONResponse:
@@ -183,45 +293,62 @@ def _record(store: FactStore, tenant_id: str, figure: Figure,
         update={"id": f"{tenant_id}:{figure.id}"}))
 
 
-def _rows(clock: Clock) -> list[watch.Watch] | None:
-    found = observations()
+def _rows(clock: Clock, location: str) -> list[watch.Watch] | JSONResponse:
+    found = location_observations(location)
+    if found is None:
+        return _invalid("location")
     if not found:
-        return None
+        return _abstain()
     today = clock().astimezone(DHAKA).date()
-    return [row for row in watch.watchlist(found, today) if row.baseline is not None]
+    fresh = today - MAX_AGE
+    return [row for row in watch.watchlist(found, today)
+            if row.baseline is not None and row.latest.point.observed_on >= fresh]
+
+
+@router.get("/locations", response_model=list[MarketLocation])
+def market_locations(_principal: Principal = Depends(require(Permission.ledger_read))
+                     ) -> list[MarketLocation]:
+    places = known_locations()
+    first = [places[DEFAULT_LOCATION]] if DEFAULT_LOCATION in places else []
+    rest = sorted((p for p in places.values() if p.id != DEFAULT_LOCATION),
+                  key=lambda p: (p.division, p.name))
+    return first + rest
 
 
 @router.get("/prices", response_model=list[WatchItem])
-def prices(_principal: Principal = Depends(require(Permission.ledger_read)),
+def prices(location: str = LocationQuery,
+           _principal: Principal = Depends(require(Permission.ledger_read)),
            clock: Clock = Depends(get_clock)) -> list[WatchItem] | JSONResponse:
-    rows = _rows(clock)
-    if rows is None:
-        return _abstain()
+    rows = _rows(clock, location)
+    if isinstance(rows, JSONResponse):
+        return rows
     return [WatchItem(commodity=row.commodity, unit=row.unit, latest=row.latest.point,
                       median_4w=row.baseline.price, change_pct=str(row.change_pct),
                       history=list(row.history), published_on=row.latest.published_on,
                       baseline_basis=row.baseline.basis,  # type: ignore[arg-type]
-                      baseline_points=len(row.baseline.refs))
+                      baseline_points=len(row.baseline.refs), location=location)
             for row in rows if row.baseline is not None]
 
 
 @router.get("/alerts", response_model=list[MarketAlert])
-def alerts(principal: Principal = Depends(require(Permission.ledger_read)),
+def alerts(location: str = LocationQuery,
+           principal: Principal = Depends(require(Permission.ledger_read)),
            clock: Clock = Depends(get_clock),
            session: Session = Depends(get_session)) -> list[MarketAlert] | JSONResponse:
-    rows = _rows(clock)
-    if rows is None:
-        return _abstain()
+    rows = _rows(clock, location)
+    if isinstance(rows, JSONResponse):
+        return rows
     store = FactStore(session)
     found = []
     for row, figure in watch.alerts(rows):
         recorded = _record(store, principal.tenant_id, figure, watch.EXPRESSIONS)
         point = row.latest.point
         found.append(MarketAlert(
-            id=f"mk-{point.commodity}-{point.observed_on.isoformat()}",
+            id=f"mk-{location}-{point.commodity}-{point.observed_on.isoformat()}",
             commodity=point.commodity, direction="rise" if figure.value > 0 else "drop",
             change=recorded, observed_on=point.observed_on, source=point.source,
-            source_url=point.source_url, published_on=row.latest.published_on))
+            source_url=point.source_url, published_on=row.latest.published_on,
+            location=location))
     return found
 
 
@@ -257,12 +384,14 @@ def negotiate(body: NegotiationBody,
         return _invalid("quantity")
     if body.offer_price.amount <= 0:
         return _invalid("offer")
-    rows = _rows(clock)
-    if rows is None:
-        return _abstain()
+    rows = _rows(clock, body.location)
+    if isinstance(rows, JSONResponse):
+        return rows
     row = next((r for r in rows if r.commodity == body.commodity), None)
     if row is None:
         return _abstain("market_price")
+    if row.latest.point.price.currency is not Currency.BDT:
+        return _abstain("financing_catalogue")  # loans on file are Bangladeshi, in taka
     as_of = clock().astimezone(DHAKA).date()
     deal = Money.of((body.offer_price.amount * quantity).quantize(Decimal("0.01")))
     found = cost_of_money(session, principal.tenant_id, deal, body.payment_days, as_of)
@@ -281,8 +410,8 @@ def negotiate(body: NegotiationBody,
         return _record(store, principal.tenant_id, fig, expressions)
 
     apr_figure = Figure(
-        id=f"market:cost_of_money:{product_id}:{deal.amount}:{max(body.payment_days, 30)}:"
-           f"{as_of.isoformat()}",
+        id=f"market:cost_of_money:{product_id}:"
+           f"{digest(apr, {'amount': str(deal.amount), 'days': str(body.payment_days)})}",
         label_key="market.cost_of_money", value=apr, unit=Unit.percent, data_mode=money_mode,
         provenance=Provenance(formula_id=COST_OF_MONEY, formula_version=1,
                               source_row_ids=(f"financing:{product_id}",),
@@ -305,12 +434,14 @@ def rank_vendors(body: VendorBody,
     quantity = _quantity(body.quantity)
     if quantity is None:
         return _invalid("quantity")
-    rows = _rows(clock)
-    if rows is None:
-        return _abstain()
+    rows = _rows(clock, body.location)
+    if isinstance(rows, JSONResponse):
+        return rows
     row = next((r for r in rows if r.commodity == body.commodity), None)
     if row is None:
         return _abstain("market_price")
+    if row.latest.point.price.currency is not Currency.BDT:
+        return _abstain("supplier_quote")  # no supplier quotes on file outside Bangladesh
     store = FactStore(session)
     try:
         bills = records(store, principal.tenant_id).bills
@@ -327,14 +458,63 @@ def rank_vendors(body: VendorBody,
     apr, product_id, money_mode = found
     labels = {token: f"Supplier {i}" for i, token in
               enumerate(sorted({b.counterparty_token for b in bills}), start=1)}
-    quotes = vendors.synthetic_quotes(principal.tenant_id, vendors.main_suppliers(bills),
-                                      point.commodity, point.unit, point.price, bills, as_of)
-    ranked = vendors.rank(quotes, labels, quantity, apr, f"financing:{product_id}",
+    owner = _place(body.location)
+    pool = supplier_pool()
+    suppliers = vendors.main_suppliers(bills)
+    places = vendors.supplier_places(principal.tenant_id, suppliers, pool)
+    placed = vendors.synthetic_quotes(
+        principal.tenant_id, suppliers, point.commodity, point.unit, owner, places,
+        local_prices(point.commodity, point.unit, {p.id for p in places.values()}, clock),
+        point.price, bills, as_of)
+    if body.max_km is not None:
+        placed = [p for p in placed if p.distance_km <= body.max_km]
+    by_token = {p.quote.vendor_token: p for p in placed}
+    ranked = vendors.rank([p.quote for p in placed], labels, quantity, apr,
+                          f"financing:{product_id}",
                           combined_data_mode([money_mode, DataMode.synthetic]))
 
     def record(fig: Figure) -> Figure:
         return _record(store, principal.tenant_id, fig, vendors.EXPRESSIONS)
 
+    def place(token: str) -> VendorPlace:
+        where = by_token[token].place
+        return VendorPlace(id=where.id, name=where.name, division=where.division,
+                           district=where.district)
+
     return [VendorRank(rank=r.rank, vendor_label=r.label, quote=r.quote,
                        landed_cost=record(r.landed_cost),
-                       breakdown=[record(f) for f in r.breakdown]) for r in ranked]
+                       breakdown=[record(f) for f in r.breakdown],
+                       vendor_location=place(r.quote.vendor_token),
+                       distance_km=by_token[r.quote.vendor_token].distance_km) for r in ranked]
+
+
+def _place(location: str) -> locations_mod.Location:
+    if location == DEFAULT_LOCATION:
+        return locations_mod.DHAKA_CITY
+    return locations_mod.load_wfp_markets(WFP_PRICE_DIR)[location]
+
+
+def supplier_pool() -> list[locations_mod.Location]:
+    """Where demo suppliers can be: Dhaka city, every Dhaka-division WFP market with prices,
+    and one market (the lowest id) in each other division, so some suppliers are far away."""
+    markets = locations_mod.load_wfp_markets(WFP_PRICE_DIR)
+    priced = [markets[loc] for loc in wfp_observations() if loc in markets]
+    pool = [locations_mod.DHAKA_CITY] + [m for m in priced if m.division == "Dhaka"]
+    for division in sorted({m.division for m in priced} - {"Dhaka"}):
+        pool.append(min((m for m in priced if m.division == division),
+                        key=lambda m: int(m.id.removeprefix("wfp-"))))
+    return pool
+
+
+def local_prices(commodity: str, unit: str, place_ids: set[str], clock: Clock
+                 ) -> dict[str, Money]:
+    """The latest public price of the item at each place that has one (same unit only)."""
+    today = clock().astimezone(DHAKA).date()
+    found = {}
+    for place_id in place_ids:
+        obs = [o for o in location_observations(place_id) or ()
+               if o.point.commodity == commodity and o.point.unit == unit
+               and o.point.observed_on <= today]
+        if obs:
+            found[place_id] = max(obs, key=lambda o: o.point.observed_on).point.price
+    return found

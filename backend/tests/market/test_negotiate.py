@@ -7,15 +7,16 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from app.contracts import DataMode, Money, PricePoint, PriceSource
+from app.contracts import DataMode, Money
 from app.engines.market.negotiate import plan
+from app.engines.market.points import MarketPrice
 
 
-def point(mid: str, high: str | None = None) -> PricePoint:
-    return PricePoint(commodity="rice_coarse", unit="kg", price=Money.of(mid),
+def point(mid: str, high: str | None = None) -> MarketPrice:
+    return MarketPrice(commodity="rice_coarse", unit="kg", price=Money.of(mid),
                       low=Money.of(mid) if high else None,
                       high=Money.of(high) if high else None, market="Dhaka",
-                      source=PriceSource.tcb, observed_on=date(2026, 10, 19),
+                      source="tcb", observed_on=date(2026, 10, 19),
                       data_mode=DataMode.public)
 
 

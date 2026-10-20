@@ -7,7 +7,15 @@ from decimal import Decimal
 import pytest
 
 from app.contracts import Bill, DataMode, DocumentStatus, Money, VendorQuote
-from app.engines.market.vendors import main_suppliers, on_time_rate, rank, synthetic_quotes
+from app.engines.market.locations import Location
+from app.engines.market.vendors import (
+    delivery_terms,
+    main_suppliers,
+    on_time_rate,
+    rank,
+    supplier_places,
+    synthetic_quotes,
+)
 
 DAY = date(2026, 10, 20)
 
@@ -82,15 +90,40 @@ def test_equal_landed_costs_rank_by_label():
         "Supplier a", "Supplier b"]
 
 
-def test_generated_quotes_are_synthetic_repeatable_and_near_the_market_price():
+HERE = Location("here", "Here", "Dhaka", "Dhaka", 23.81, 90.41, "tcb", "daily")
+FAR = Location("far", "Far", "Chittagong", "Chittagong", 22.33, 91.84, "wfp", "monthly")
+
+
+def test_generated_quotes_are_synthetic_repeatable_and_near_the_price_where_the_vendor_is():
     bills = [bill("S1", 10, 9, 1), bill("S2", 10, 11, 2)]
-    first = synthetic_quotes("t", ["S1", "S2"], "rice_coarse", "kg", Money.of("52.50"), bills, DAY)
-    again = synthetic_quotes("t", ["S1", "S2"], "rice_coarse", "kg", Money.of("52.50"), bills, DAY)
-    assert first == again
-    for q in first:
-        assert q.data_mode is DataMode.synthetic
-        assert Decimal("49.35") <= q.unit_price.amount <= Decimal("54.60")  # -6% .. +4%
-    assert [q.on_time_rate for q in first] == [Decimal("1.00"), Decimal("0.00")]
+    places = {"S1": HERE, "S2": FAR}
+    local = {"far": Money.of("40.00")}  # the far market has its own public price
+
+    def make():
+        return synthetic_quotes("t", ["S1", "S2"], "rice_coarse", "kg", HERE, places, local,
+                                Money.of("52.50"), bills, DAY)
+
+    first = make()
+    assert first == make()
+    near, far = first
+    assert all(p.quote.data_mode is DataMode.synthetic for p in first)
+    assert Decimal("49.35") <= near.quote.unit_price.amount <= Decimal("54.60")  # -6% .. +4%
+    assert Decimal("37.60") <= far.quote.unit_price.amount <= Decimal("41.60")
+    assert [p.quote.on_time_rate for p in first] == [Decimal("1.00"), Decimal("0.00")]
+
+
+def test_delivery_and_lead_time_grow_with_road_distance():
+    assert delivery_terms(HERE, HERE) == (Decimal(0), Decimal(150), 0)
+    km, cost, days = delivery_terms(HERE, FAR)
+    assert km == Decimal(286)  # about 220 km straight * 1.3 for roads
+    assert cost == Decimal(150) + 15 * km and days == 2
+
+
+def test_each_supplier_keeps_its_place():
+    pool = [FAR, HERE]
+    first = supplier_places("t", ["S1", "S2", "S3"], pool)
+    assert first == supplier_places("t", ["S1", "S2", "S3"], list(reversed(pool)))
+    assert set(first.values()) <= set(pool)
 
 
 def test_main_suppliers_are_the_ones_with_most_bills():

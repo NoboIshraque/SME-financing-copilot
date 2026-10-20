@@ -1,0 +1,172 @@
+market_id,market,countryiso3,admin1,admin2,latitude,longitude
+112,Barisal Division,BGD,Barisal,Barisal,22.7,90.37
+114,Chittagong Division,BGD,Chittagong,Chittagong,22.33,91.84
+116,Dhaka Division,BGD,Dhaka,Dhaka,23.72,90.41
+118,Khulna Division,BGD,Khulna,Khulna,22.82,89.56
+120,Rajshahi Division,BGD,Rajshahi,Rajshahi,24.37,88.6
+122,Sylhet Division,BGD,Sylhet,Sylhet,24.9,91.87
+2574,Dhaka,BGD,Dhaka,Dhaka,23.81,90.41
+3032,Mymensing Sadar,BGD,Mymensingh,Mymensingh,24.75,90.41
+3033,Rangpur Sadar,BGD,Rangpur,Rangpur,25.75,89.25
+3143,Balukhali Bazar,BGD,Chittagong,Cox'S Bazar,21.18,92.16
+3144,Balukhali Informal Market,BGD,Chittagong,Cox'S Bazar,21.18,92.16
+3145,Balukhali E-Voucher Shop,BGD,Chittagong,Cox'S Bazar,21.19,92.17
+3146,Camp 4 Informal Market,BGD,Chittagong,Cox'S Bazar,21.2,92.15
+3147,Court Bazar,BGD,Chittagong,Cox'S Bazar,21.28,92.1
+3148,Jamtoli Informal Market,BGD,Chittagong,Cox'S Bazar,21.16,92.15
+3149,Kutupalong Bazar,BGD,Chittagong,Cox'S Bazar,21.22,92.16
+3150,Kutupalong E-Voucher Shop,BGD,Chittagong,Cox'S Bazar,21.21,92.16
+3151,Leda Bazar,BGD,Chittagong,Cox'S Bazar,20.97,92.25
+3152,Leda E-Voucher Shop,BGD,Chittagong,Cox'S Bazar,20.97,92.24
+3153,Moricha Bazar,BGD,Chittagong,Cox'S Bazar,21.31,92.1
+3154,Nayapara RC Bazar,BGD,Chittagong,Cox'S Bazar,20.96,92.25
+3155,Nayapara RC E-Voucher Shop,BGD,Chittagong,Cox'S Bazar,20.96,92.25
+3156,Nhila Bazar,BGD,Chittagong,Cox'S Bazar,21.01,92.25
+3157,Palongkhali Bazar,BGD,Chittagong,Cox'S Bazar,21.14,92.16
+3158,Shamlapur Bazar,BGD,Chittagong,Cox'S Bazar,21.08,92.14
+3159,Teknaf Market,BGD,Chittagong,Cox'S Bazar,20.87,92.3
+3160,Thaingkhali Bazar,BGD,Chittagong,Cox'S Bazar,21.17,92.16
+3161,Unchiprang Bazar,BGD,Chittagong,Cox'S Bazar,21.09,92.21
+3162,Ukhia Market,BGD,Chittagong,Cox'S Bazar,21.24,92.14
+3163,Whykong Bazar,BGD,Chittagong,Cox'S Bazar,21.12,92.2
+4020,Bagerhat Sadar,BGD,Khulna,Bagerhat,22.67,89.79
+4021,Chuadanga Sadar,BGD,Khulna,Chuadanga,23.59,88.94
+4022,Jessore Sadar,BGD,Khulna,Jessore,23.16,89.23
+4023,Jhenaidah Sadar,BGD,Khulna,Jhenaidah,23.54,89.17
+4024,Kushtia Sadar,BGD,Khulna,Kushtia,23.89,89.09
+4025,Magura Sadar,BGD,Khulna,Magura,23.49,89.42
+4026,Meherpur Sadar,BGD,Khulna,Meherpur,23.77,88.63
+4027,Narail Sadar,BGD,Khulna,Narail,23.16,89.51
+4028,Satkhira Sadar,BGD,Khulna,Satkhira,22.71,89.07
+4029,Barguna Sadar,BGD,Barisal,Barguna,22.16,90.12
+4030,Bhola Sadar,BGD,Barisal,Bhola,22.69,90.64
+4031,Jhalokati Sadar,BGD,Barisal,Jhalokati,22.7,90.2
+4032,Patuakhali Sadar,BGD,Barisal,Jhalokati,22.72,90.25
+4033,Pirojpur Sadar,BGD,Barisal,Pirojpur,22.58,89.97
+4034,Faridpur Sadar,BGD,Dhaka,Faridpur,23.59,89.81
+4035,Gazipur Sadar,BGD,Dhaka,Gazipur,24,90.42
+4036,Gopalgonj Sadar,BGD,Dhaka,Gopalganj,23.01,89.83
+4037,Kishoregonj Sadar,BGD,Dhaka,Kishoreganj,24.46,90.78
+4038,Madaripur Sadar,BGD,Dhaka,Madaripur,23.17,90.14
+4039,Manikganj Sadar,BGD,Dhaka,Manikganj,23.87,90.03
+4040,Munshiganj Sadar,BGD,Dhaka,Munshiganj,23.55,90.53
+4041,Narayanganj Sadar,BGD,Dhaka,Narayanganj,23.62,90.5
+4042,Narsingdi Sadar,BGD,Dhaka,Narsingdi,23.94,90.73
+4043,Rajbari Sadar,BGD,Dhaka,Rajbari,23.77,89.65
+4044,Shariatpur Sadar,BGD,Dhaka,Shariatpur,23.22,90.35
+4045,Tangail sadar Market,BGD,Dhaka,Tangail,24.25,89.91
+4046,Jamalpur Sadar,BGD,Mymensingh,Jamalpur,24.93,89.95
+4047,Netrakona Sadar,BGD,Mymensingh,Netrakona,24.88,90.73
+4048,Sherpur Sadar,BGD,Mymensingh,Sherpur,25.02,90.01
+4049,Bandarban Sadar,BGD,Chittagong,Bandarban,22.22,92.22
+4050,Brahmonbaria Sadar,BGD,Chittagong,Brahamanbaria,23.98,91.11
+4051,Chandpur Sadar,BGD,Chittagong,Chandpur,23.24,90.66
+4052,Chittagong Sadar,BGD,Chittagong,Chittagong,22.57,91.81
+4053,Comilla Sadar,BGD,Chittagong,Comilla,23.49,91.18
+4054,Cox`s Bazar Sadar,BGD,Chittagong,Cox'S Bazar,21.47,91.98
+4055,Feni Sadar,BGD,Chittagong,Feni,23.01,91.4
+4056,Khagrachari Sadar,BGD,Chittagong,Khagrachhari,23.11,91.98
+4057,Laxmipur Sadar,BGD,Chittagong,Lakshmipur,22.94,90.83
+4058,Noakhali Sadar,BGD,Chittagong,Noakhali,22.89,91.11
+4059,Rangamati Sadar,BGD,Chittagong,Rangamati,22.67,92.19
+4060,Dinajpur Sadar,BGD,Rangpur,Dinajpur,25.62,88.64
+4061,Gaibandha Sadar,BGD,Rangpur,Gaibandha,25.33,89.55
+4062,Kurigram Sadar,BGD,Rangpur,Kurigram,25.81,89.65
+4063,Lalmonirhat Sadar,BGD,Rangpur,Lalmonirhat,25.91,89.45
+4064,Nilphamari Sadar,BGD,Rangpur,Nilphamari,25.85,88.87
+4065,Panchagarh Sadar,BGD,Rangpur,Panchagarh,26.33,88.56
+4066,Rangpur Municipality Market,BGD,Rangpur,Rangpur,25.75,89.25
+4067,Thakurgaon Sadar,BGD,Rangpur,Thakurgaon,26.02,88.47
+4068,Bogra Sadar,BGD,Rajshahi,Bogra,24.85,89.37
+4069,Jaipurhat Sadar,BGD,Rajshahi,Joypurhat,25.1,89.03
+4070,Naogaon Sadar,BGD,Rajshahi,Naogaon,24.81,88.94
+4071,Natore Sadar,BGD,Rajshahi,Natore,24.41,88.98
+4072,Nawabgonj Sadar,BGD,Rajshahi,Nawabganj,24.6,88.28
+4073,Pabna Sadar,BGD,Rajshahi,Pabna,24.01,89.24
+4074,Rajshahi Sadar,BGD,Rajshahi,Rajshahi,24.37,88.6
+4075,Sirajgonj Sadar,BGD,Rajshahi,Sirajganj,24.46,89.7
+4076,Habigonj Sadar,BGD,Sylhet,Habiganj,24.37,91.42
+4077,Maulavibazar Sadar,BGD,Sylhet,Maulvibazar,24.49,91.76
+4078,Sunamgonj Sadar,BGD,Sylhet,Sunamganj,25.07,91.4
+4079,Sylhet Sadar,BGD,Sylhet,Sylhet,24.89,91.87
+4080,Patiya Sadar,BGD,Chittagong,Chittagong,22.3,91.98
+4081,Khulna Sadar,BGD,Khulna,Khulna,22.81,89.55
+4082,Barisal Sadar,BGD,Barisal,Barisal,22.71,90.36
+4083,Dhaka Sadar,BGD,Dhaka,Dhaka,23.73,90.38
+4609,Mainnergona E-Voucher Shop,BGD,Chittagong,Cox'S Bazar,21.18,92.16
+6424,Bhashan Char,BGD,Chittagong,Chittagong,22.33,91.16
+7931,Ashuganj,BGD,Chittagong,Brahamanbaria,24.04,91.01
+7932,Babu Bazar (Rice),BGD,Dhaka,Dhaka,23.71,90.4
+7933,Bahachara,BGD,Chittagong,Cox'S Bazar,21.44,91.97
+7934,Boro Bazar,BGD,Chittagong,Cox'S Bazar,21.44,91.98
+7935,Chaktai Wholesale Market,BGD,Chittagong,Chittagong,22.33,91.85
+7936,Chalk Bazar,BGD,Chittagong,Chittagong,22.36,91.84
+7937,Chokoria Wholesale Market Terminal,BGD,Chittagong,Cox'S Bazar,21.76,92.08
+7938,Dinajpur Rice Market,BGD,Rangpur,Dinajpur,25.63,88.65
+7939,Eidgaon Bazar,BGD,Chittagong,Cox'S Bazar,21.55,92.07
+7940,Falmondi,BGD,Chittagong,Chittagong,22.34,91.82
+7941,Fishery ghat,BGD,Chittagong,Cox'S Bazar,21.45,91.97
+7942,Kawran Bazar Dhaka,BGD,Dhaka,Dhaka,23.75,90.39
+7943,Khatungonj Wholesale Market,BGD,Chittagong,Chittagong,22.34,91.84
+7944,Kolghar Bazar,BGD,Chittagong,Cox'S Bazar,21.43,92.08
+7945,Pahartoli Rice Market,BGD,Chittagong,Chittagong,22.35,91.79
+7946,Reaz Uddin Bazar,BGD,Chittagong,Chittagong,22.34,91.83
+7947,Sonarpara Bazar,BGD,Chittagong,Cox'S Bazar,21.28,92.06
+7948,Telkhola Bazar,BGD,Chittagong,Cox'S Bazar,21.17,92.12
+8241,Fakira Bazar,BGD,Chittagong,Cox'S Bazar,21.43,92.11
+8958,Sandwip,BGD,Chittagong,Chittagong,22.49,91.49
+8959,Hatiya,BGD,Chittagong,Noakhali,22.23,91.11
+11783,Amtali,BGD,Barisal,Barguna,22.13,90.23
+11784,Amtoli,BGD,Chittagong,Brahamanbaria,24.03,91.23
+11785,Begumganj,BGD,Chittagong,Noakhali,22.87,91.1
+11786,Chagalnaiya,BGD,Chittagong,Feni,23.08,91.5
+11787,Chandina,BGD,Chittagong,Comilla,23.49,91.01
+11788,Kangshanagar,BGD,Chittagong,Comilla,23.63,91.06
+11789,Kaptai,BGD,Chittagong,Rangamati,22.5,92.21
+11790,Kaukhali,BGD,Barisal,Pirojpur,22.63,90.07
+11791,Lalmai,BGD,Chittagong,Comilla,23.36,91.14
+11792,Lama,BGD,Chittagong,Bandarban,21.78,92.2
+11793,Raipur,BGD,Chittagong,Lakshmipur,23.06,90.79
+11794,Bajitpur,BGD,Dhaka,Kishoreganj,24.2,90.93
+11795,Dhanbari,BGD,Dhaka,Tangail,24.68,89.95
+11796,Mirpur 1 no.,BGD,Dhaka,Dhaka,23.8,90.35
+11797,Saturia,BGD,Dhaka,Manikganj,23.97,90.04
+11798,Shibpur,BGD,Dhaka,Narsingdi,24.04,90.74
+11799,Singair,BGD,Dhaka,Manikganj,23.81,90.15
+11800,Kalaroa,BGD,Khulna,Satkhira,22.86,89.04
+11801,Kaliganj - Jhenaidah,BGD,Khulna,Jhenaidah,23.42,89.14
+11802,Mohanganj,BGD,Mymensingh,Netrakona,24.87,90.98
+11803,Mechua,BGD,Mymensingh,Mymensingh,24.76,90.41
+11804,Trisal,BGD,Mymensingh,Mymensingh,24.58,90.39
+11805,Baneshor,BGD,Rajshahi,Rajshahi,24.39,88.75
+11806,Godagari Sadar,BGD,Rajshahi,Rajshahi,24.48,88.32
+11807,Sapahar,BGD,Rajshahi,Naogaon,25.12,88.59
+11808,Shibgonj Sadar,BGD,Rajshahi,Nawabganj,24.69,88.16
+11809,Gobindaganj,BGD,Rangpur,Gaibandha,25.14,89.39
+11810,Mithapukur,BGD,Rangpur,Rangpur,25.57,89.28
+11811,Nageshwari,BGD,Rangpur,Kurigram,25.97,89.7
+11812,Parbatipur,BGD,Rangpur,Dinajpur,25.65,88.92
+11813,Beanibazar,BGD,Sylhet,Sylhet,24.82,92.16
+11814,Golapganj,BGD,Sylhet,Sylhet,24.86,92.01
+11815,Madhupur,BGD,Dhaka,Tangail,24.61,90.03
+11832,Banyachong,BGD,Sylhet,Habiganj,24.53,91.35
+11833,Dumuria,BGD,Khulna,Khulna,22.81,89.42
+12293,Hajiganj,BGD,Chittagong,Chandpur,23.25,90.85
+12294,Damurhuda,BGD,Khulna,Chuadanga,23.61,88.78
+12295,Burichong,BGD,Chittagong,Comilla,23.51,91.15
+12298,Chakaria,BGD,Chittagong,Cox'S Bazar,21.76,92.07
+12299,Nawabganj,BGD,Dhaka,Dhaka,23.72,90.38
+12300,Savar,BGD,Dhaka,Dhaka,23.85,90.25
+12301,Tungipara,BGD,Dhaka,Gopalganj,22.89,89.9
+12302,Manirampur,BGD,Khulna,Jessore,23.02,89.23
+12303,Navaron,BGD,Khulna,Jessore,23.06,88.99
+12304,Matiranga,BGD,Chittagong,Khagrachhari,23.04,91.87
+12305,Kaliganj - Lalmonirhat,BGD,Rangpur,Lalmonirhat,25.97,89.2
+12306,Gangni,BGD,Khulna,Meherpur,23.82,88.76
+12307,Kamalganj,BGD,Sylhet,Sylhet,24.88,92.45
+12308,Srimangal,BGD,Sylhet,Maulvibazar,24.31,91.73
+12309,Fulbaria,BGD,Mymensingh,Mymensingh,24.61,90.72
+12310,Domar,BGD,Rangpur,Nilphamari,26.19,88.86
+12311,Saidpur,BGD,Rangpur,Nilphamari,25.77,88.92
+12312,Nazirpur,BGD,Barisal,Pirojpur,22.71,89.97
+12313,Sirajganj Sadar,BGD,Rajshahi,Sirajganj,24.45,89.71

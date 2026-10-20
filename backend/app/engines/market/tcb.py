@@ -22,7 +22,8 @@ from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
-from app.contracts import DataMode, Money, PricePoint, PriceSource
+from app.contracts import DataMode, Money
+from app.engines.market.points import MarketPrice
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 TCB_DIR = REPO_ROOT / "data" / "public" / "prices" / "tcb"
@@ -62,7 +63,7 @@ ITEMS: tuple[Item, ...] = (
 class Observation:
     """A price point and where it was read: the list it came from and the row/column."""
 
-    point: PricePoint
+    point: MarketPrice
     ref: str  # e.g. "tcb:2026-10-19.xlsx#r12:today"
     published_on: date
 
@@ -121,9 +122,9 @@ def parse_list(rows: Sequence[Sequence[object]], file_name: str, published_on: d
             high = _number(row[high_col]) if len(row) > high_col else None
             if low is None or high is None or low <= 0 or high < low:
                 continue  # not on sale that day, or not a range: no point
-            point = PricePoint(
+            point = MarketPrice(
                 commodity=item.commodity, unit=item.unit, price=_money((low + high) / 2),
-                low=_money(low), high=_money(high), market=MARKET, source=PriceSource.tcb,
+                low=_money(low), high=_money(high), market=MARKET, source="tcb",
                 source_url=source_url, observed_on=day, data_mode=DataMode.public)
             found.append(Observation(point, f"tcb:{file_name}#r{number}:{column}", published_on))
     return found

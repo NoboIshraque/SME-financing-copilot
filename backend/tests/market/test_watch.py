@@ -5,7 +5,8 @@ from decimal import Decimal
 
 import pytest
 
-from app.contracts import DataMode, Money, PricePoint, PriceSource
+from app.contracts import DataMode, Money
+from app.engines.market.points import MarketPrice
 from app.engines.market.tcb import Observation
 from app.engines.market.watch import alerts, baseline, change_figure, watchlist
 
@@ -14,8 +15,8 @@ LATEST = date(2026, 10, 19)
 
 def obs(price: str, days_before: int, commodity: str = "sugar") -> Observation:
     day = LATEST - timedelta(days=days_before)
-    point = PricePoint(commodity=commodity, unit="kg", price=Money.of(price), market="Dhaka",
-                       source=PriceSource.tcb, source_url="https://tcb.gov.bd/x",
+    point = MarketPrice(commodity=commodity, unit="kg", price=Money.of(price), market="Dhaka",
+                       source="tcb", source_url="https://tcb.gov.bd/x",
                        observed_on=day, data_mode=DataMode.public)
     return Observation(point, f"tcb:{day}.xlsx#r1:today", day)
 
