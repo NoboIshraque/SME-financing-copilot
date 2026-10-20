@@ -40,11 +40,21 @@ async function problems(page: Page, path: string): Promise<string[]> {
   }
   const width = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   if (width > 0) found.push("too wide");
+  // Scrolled to the end, the last thing on the screen must sit above the floating Ask button.
+  const covered = await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    const ask = Array.from(document.querySelectorAll("button")).find((b) => getComputedStyle(b).position === "fixed");
+    const last = document.querySelector("main")?.lastElementChild;
+    if (!ask || !last) return false;
+    return last.getBoundingClientRect().bottom > ask.getBoundingClientRect().top + 1;
+  });
+  if (covered) found.push("covered by the Ask button");
   return found.sort();
 }
 
 function describe(name: string, entry: string): string {
   if (entry === "too wide") return `WP-14 (layout): the ${name} page is wider than the device, so it pans sideways`;
+  if (entry === "covered by the Ask button") return `WP-14 (layout): the end of the ${name} page sits under the floating Ask button`;
   const [theme, rule = ""] = entry.split(" ");
   return `WP-14 (WCAG 2.1 AA): ${name}, ${theme} theme: ${MEANING[rule] ?? rule}`;
 }

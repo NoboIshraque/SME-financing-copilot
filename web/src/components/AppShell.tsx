@@ -126,7 +126,7 @@ export function AppShell() {
           </div>
         </nav>
 
-        <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-4 pb-28 pt-4 outline-none md:px-8 md:pb-10">
+        <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-4 pb-36 pt-4 outline-none md:px-8 md:pb-24">
           <Outlet />
         </main>
         {COPILOT_ROLES.has(role) && <CopilotPanel />}
