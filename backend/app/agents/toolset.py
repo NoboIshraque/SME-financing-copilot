@@ -18,14 +18,15 @@ input facts they cite.
 
 Tools whose engine has not landed are registered without a runner, so the planner knows them
 and the agent abstains with the engine's name instead of improvising: analysis.stability
-(WP-07), market.prices and market.negotiate (WP-09, cut from this version). Reminder drafts
-(WP-12) are built from the receivables plan, so the drafting intent reads receivables.plan.
+(WP-07). market.prices and market.negotiate read the WP-09 market engine (TCB lists).
+Reminder drafts (WP-12) are built from the receivables plan, which drafting reads.
 """
 
 from __future__ import annotations
 
 from datetime import date, timedelta
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -40,6 +41,7 @@ from app.agents.tools import (
     most_cautious,
 )
 from app.api import cash as cash_api
+from app.api import market as market_api
 from app.contracts import (
     ActionCard,
     ActionType,
@@ -61,6 +63,8 @@ from app.engines.financing.application import draft_application
 from app.engines.financing.catalogue import load_catalogue
 from app.engines.financing.eligibility import evaluate
 from app.engines.financing.ranking import match as rank_options
+from app.engines.market import negotiate as negotiate_mod
+from app.engines.market import watch
 from app.engines.mesh.graph import build_graph
 from app.engines.mesh.netting import FORMULA_ID as NETTING_FORMULA
 from app.engines.mesh.netting import FORMULA_VERSION as NETTING_VERSION
@@ -74,6 +78,7 @@ RATIO_METRICS = ("net_sales", "gross_profit", "gross_margin", "operating_expense
                  "net_cash_flow", "dso", "dpo")
 TOP_OPTIONS = 3
 TOP_FIXES = 3
+DHAKA = ZoneInfo("Asia/Dhaka")
 TOP_DUE = 4  # upcoming payments named one by one (all of them are counted and totalled)
 TOP_CUSTOMERS = 3
 DEFAULT_TENOR_DAYS = 90
@@ -101,6 +106,18 @@ class FinancingParams(_Params):
     tenor_days: int = Field(default=DEFAULT_TENOR_DAYS, ge=1, le=3650)
     purpose_key: str = Field(default="working_capital", max_length=64)
     safe_size: bool = Field(default=False, description="also size the largest safe loan")
+
+
+class MarketParams(_Params):
+    commodities: tuple[str, ...] = Field(default=(), max_length=13,
+                                         description="TCB item keys; default: biggest movers")
+
+
+class DealParams(_Params):
+    commodity: str | None = Field(default=None, max_length=40)
+    quantity: Decimal | None = Field(default=None, gt=0)
+    offer: Decimal | None = Field(default=None, gt=0, description="Tk per unit")
+    payment_days: int | None = Field(default=None, ge=0, le=180)
 
 
 class DueParams(_Params):
@@ -432,6 +449,96 @@ def receivables_plan(ctx: ToolContext, params: NoParams) -> ToolResult:
                       notes=() if found.open_ids else ("receivables.none_open",), data_mode=mode)
 
 
+# ---------------------------------------------------------------- WP-09 market
+
+TCB_PRICE = "market.tcb_price"  # a TCB list's midpoint for one item on one day, as read
+MARKET_STAPLES = ("rice_coarse", "soybean_oil", "onion")  # shown when nothing moved or was named
+
+
+def market_today(ctx: ToolContext) -> date:
+    """Public prices are dated by the calendar (Dhaka), not by the shop's ledger."""
+    return ctx.now.astimezone(DHAKA).date()
+
+
+def _market_rows(ctx: ToolContext, tool: str) -> list[watch.Watch]:
+    found = market_api.observations()
+    if not found:
+        raise InsufficientData(tool, ["a saved TCB price list"])
+    return watch.watchlist(found, market_today(ctx))
+
+
+def price_figure(row: watch.Watch) -> Figure:
+    point = row.latest.point
+    return Figure(id=f"market:{point.commodity}:price:{point.observed_on.isoformat()}",
+                  label_key="copilot.market_price", value=point.price.amount, unit=Unit.BDT,
+                  data_mode=point.data_mode,
+                  provenance=Provenance(formula_id=TCB_PRICE, formula_version=1,
+                                        source_row_ids=(row.latest.ref,),
+                                        parameters={"commodity": point.commodity,
+                                                    "unit": point.unit,
+                                                    "observed_on": point.observed_on.isoformat(),
+                                                    "published_on":
+                                                        row.latest.published_on.isoformat(),
+                                                    "source": point.source.value}))
+
+
+def market_prices(ctx: ToolContext, params: MarketParams) -> ToolResult:
+    rows = _market_rows(ctx, "market.prices")
+    by_key = {row.commodity: row for row in rows}
+    if params.commodities:
+        chosen = [by_key[c] for c in params.commodities if c in by_key]
+        if not chosen:
+            raise InsufficientData("market.prices", ["a TCB price for that item"])
+    else:
+        moved = [row for row, _ in watch.alerts(rows)]
+        chosen = moved[:TOP_OPTIONS] or [by_key[c] for c in MARKET_STAPLES if c in by_key]
+    figures: list[Figure] = []
+    for row in chosen:
+        figures.append(price_figure(row))
+        change = watch.change_figure(row)
+        if change is not None:
+            figures.append(change)
+    return ToolResult("market.prices", figures=tuple(figures),
+                      payload={"rows": tuple(chosen), "named": bool(params.commodities)},
+                      data_mode=most_cautious(f.data_mode for f in figures))
+
+
+def market_negotiate(ctx: ToolContext, params: DealParams) -> ToolResult:
+    """Walk-away and target for a sale the owner described (WP-09 N19); abstains naming
+    exactly which of the deal's terms the question did not state."""
+    missing = [label for value, label in (
+        (params.commodity, "which item (for example rice, oil, sugar)"),
+        (params.quantity, "how much you are selling (for example 500 kg)"),
+        (params.offer, "the buyer's offer per unit (for example Tk 60)"),
+        (params.payment_days, "when the buyer pays (for example in 30 days, or cash)"))
+        if value is None]
+    if missing:
+        raise InsufficientData("market.negotiate", missing)
+    rows = {row.commodity: row for row in _market_rows(ctx, "market.negotiate")}
+    row = rows.get(params.commodity or "")
+    if row is None:
+        raise InsufficientData("market.negotiate", ["a TCB price for that item"])
+    deal = Money.of((params.offer * params.quantity).quantize(Decimal("0.01")))
+    with ctx.db() as store:
+        found = market_api.cost_of_money(store.session, ctx.tenant_id, deal,
+                                         params.payment_days, market_today(ctx))
+    if found is None:
+        raise InsufficientData("market.negotiate", ["a financing option you are eligible for "
+                                                    "(it prices your cost of money)"])
+    apr, product_id, money_mode = found
+    point = row.latest.point
+    plan = negotiate_mod.plan(market=point, market_ref=row.latest.ref, offer=params.offer,
+                              quantity=params.quantity, payment_days=params.payment_days,
+                              apr_percent=apr, apr_ref=f"financing:{product_id}",
+                              data_mode=most_cautious([money_mode, point.data_mode]))
+    figures = {f.id: f for f in (plan.walk_away, plan.target,
+                                 *(f for step in plan.steps for f in step.figures))}
+    return ToolResult("market.negotiate", figures=tuple(figures.values()),
+                      payload={"plan": plan, "row": row, "product_id": product_id,
+                               "apr": apr, "deal": deal},
+                      data_mode=most_cautious([money_mode, point.data_mode]))
+
+
 # ---------------------------------------------------------------- the registry
 
 
@@ -463,9 +570,12 @@ def build_registry() -> ToolRegistry:
              "first", "WP-05 receivables engine", run=receivables_plan),
         Tool("analysis.stability", "Whether a recommendation holds under stressed inputs",
              "WP-07 analysis engine"),
-        Tool("market.prices", "Wholesale prices and cheaper vendors", "WP-09 market engine"),
-        Tool("market.negotiate", "A negotiation script with the numbers behind each step",
-             "WP-09 market engine"),
+        Tool("market.prices", "Today's public Dhaka retail prices (TCB lists) for the items "
+             "asked about, or the biggest moves against their 4-week median",
+             "WP-09 market engine", MarketParams, run=market_prices),
+        Tool("market.negotiate", "Walk-away and target price for a sale the owner describes "
+             "(item, quantity, offer per unit, payment days), priced at the shop's cost of "
+             "money", "WP-09 market engine", DealParams, run=market_negotiate),
     ])
 
 

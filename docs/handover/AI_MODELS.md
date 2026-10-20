@@ -65,10 +65,11 @@ never stops answering because of a limit.** It just sounds plainer.
 
 ## Are the rules good enough to be the fallback?
 
-Yes, as of today. The 67 everyday questions in `backend/tests/agents/test_everyday_questions.py`
+Yes, as of today. The 72 everyday questions in `backend/tests/agents/test_everyday_questions.py`
 (English, Bangla, Banglish and Chinese: cash, salaries, bills, who owes me, loans, profit,
-what-ifs, debts with other shops, reminders, greetings) all plan correctly with the rules alone.
-This morning 30 of them got "I can't answer that one yet". The offline evaluation passes 70 of 70 tasks with no model.
+what-ifs, debts with other shops, reminders, market prices, pricing a sale, greetings) all plan
+correctly with the rules alone. This morning 30 of the first 67 got "I can't answer that one
+yet". The offline evaluation passes 72 of 72 tasks with no model.
 
 **Recommendation: switching to `live` for judging is safe.** If a provider rate-limits during
 the session, the rules take over and every one of those questions still gets an answer. If live

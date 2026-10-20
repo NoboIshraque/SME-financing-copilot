@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
+from app.agents import marketwords
 from app.agents.tools import ToolResult
 from app.contracts import ActionCard, Claim, Figure, Unit
 from app.engines.financing import cost as cost_mod
@@ -176,6 +177,38 @@ TEMPLATES: dict[str, tuple[str, str, str]] = {
                              "নিরাপত্তা বাফারের উপরে থাকে না।",
                              "任何金额的贷款在还款期间都无法让保守预测保持在 {v} 塔卡的安全缓冲"
                              "之上。"),
+    # WP-09 market, read from TCB's published Dhaka lists. {item}/{unit}/{when} are names.
+    "copilot.market_price": ("{item}: Tk {v} per {unit} in Dhaka (TCB list of {when}).",
+                             "{item}: প্রতি {unit} {v} টাকা, ঢাকা (টিসিবির {when} তারিখের তালিকা)।",
+                             "{item}：每{unit} {v} 塔卡，达卡（TCB {when}价格表）。"),
+    "market.change_vs_median": ("Against its median of the past four weeks: {v}.",
+                                "গত চার সপ্তাহের মধ্যমা দামের তুলনায়: {v}।",
+                                "与过去四周的中位价相比：{v}。"),
+    "market.change_vs_previous": ("Against the list before: {v}.", "আগের তালিকার তুলনায়: {v}।",
+                                  "与上一份价格表相比：{v}。"),
+    "negotiation.offer_low": ("The offer is below your walk-away price of Tk {v} per {unit}: "
+                              "do not accept it as it stands.",
+                              "প্রস্তাবটি আপনার সর্বনিম্ন গ্রহণযোগ্য দাম প্রতি {unit} {v} টাকার নিচে: "
+                              "এভাবে মেনে নেবেন না।",
+                              "该报价低于您的底价每{unit} {v} 塔卡：不要照此接受。"),
+    "negotiation.offer_ok": ("The offer clears your walk-away price of Tk {v} per {unit}: you "
+                             "can accept it, but ask for more first.",
+                             "প্রস্তাবটি আপনার সর্বনিম্ন গ্রহণযোগ্য দাম প্রতি {unit} {v} টাকার উপরে: "
+                             "মেনে নিতে পারেন, তবে আগে বেশি চেয়ে দেখুন।",
+                             "该报价高于您的底价每{unit} {v} 塔卡：可以接受，但先争取更高价格。"),
+    "negotiation.open": ("Open by asking Tk {v} per {unit}.", "শুরুতে প্রতি {unit} {v} টাকা চান।",
+                         "开价每{unit} {v} 塔卡。"),
+    "negotiation.target_price": ("Aim to settle at Tk {v} per {unit}.",
+                                 "প্রতি {unit} {v} টাকায় রফা করার চেষ্টা করুন।",
+                                 "争取以每{unit} {v} 塔卡成交。"),
+    "negotiation.credit_cost": ("Waiting for the payment costs you Tk {v} per {unit} in "
+                                "interest.",
+                                "টাকা পরে পাওয়ায় আপনার সুদের খরচ প্রতি {unit} {v} টাকা।",
+                                "延期收款让您每{unit}承担 {v} 塔卡利息成本。"),
+    "negotiation.discount": ("Or offer {v} off for payment on delivery: it costs you less than "
+                             "borrowing.",
+                             "অথবা হাতে হাতে টাকা দিলে {v} ছাড় দিন: এতে ঋণের চেয়ে খরচ কম।",
+                             "或者货到付款给 {v} 折扣：比借钱更便宜。"),
 }
 _LANG = {"en": 0, "bn": 1, "zh": 2}
 
@@ -362,12 +395,48 @@ def _receivables(result: ToolResult, language: str) -> list[Statement]:
     return out
 
 
+def _market(result: ToolResult, language: str) -> list[Statement]:
+    out: list[Statement] = []
+    by_id = {f.id: f for f in result.figures}
+    for row in result.payload.get("rows") or ():
+        point = row.latest.point
+        names = {"item": marketwords.name(point.commodity, language),
+                 "unit": marketwords.unit(point.unit, language)}
+        price = by_id.get(f"market:{point.commodity}:price:{point.observed_on.isoformat()}")
+        if price is not None:
+            out.append(statement("copilot.market_price", price, language, **names,
+                                 when=day_text(row.latest.published_on, language)))
+        change = by_id.get(f"market:{point.commodity}:change:{point.observed_on.isoformat()}")
+        if change is not None and change.label_key in TEMPLATES:
+            out.append(statement(change.label_key, change, language))
+    return out
+
+
+def _negotiation(result: ToolResult, language: str) -> list[Statement]:
+    plan, row = result.payload.get("plan"), result.payload.get("row")
+    if plan is None or row is None:
+        return []
+    unit = marketwords.unit(row.latest.point.unit, language)
+    offer = Decimal(plan.walk_away.provenance.parameters["offer"])
+    verdict = "negotiation.offer_ok" if offer >= plan.walk_away.value else "negotiation.offer_low"
+    out = [statement(verdict, plan.walk_away, language, unit=unit)]
+    by_formula = {f.provenance.formula_id: f for step in plan.steps for f in step.figures}
+    for formula in ("negotiation.open", "negotiation.target_price", "negotiation.credit_cost",
+                    "negotiation.discount"):
+        figure = by_formula.get(formula)
+        if figure is not None:
+            out.append(statement(formula, figure, language, unit=unit))
+    return out
+
+
 def _mesh(result: ToolResult, language: str) -> list[Statement]:
     return _labelled(result.figures, language, ("mesh.gross_total", "mesh.net_total",
                                                 "mesh.cash_saved"))
 
 
 COMPOSERS = {
+    "market.prices": _market,
+    "market.negotiate": _negotiation,
     "payables.upcoming": _payables,
     "receivables.plan": _receivables,
     "cash.forecast": _forecast,

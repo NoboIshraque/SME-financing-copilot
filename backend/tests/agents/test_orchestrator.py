@@ -13,8 +13,8 @@ from app.agents.checker import unverified_numbers
 from app.agents.models import AbstentionRow, RejectedClaimRow
 from app.agents.orchestrator import Orchestrator
 from app.agents.stakes import Stakes
-from app.agents.tools import ToolContext
-from app.agents.toolset import build_registry
+from app.agents.tools import ToolContext, ToolRegistry
+from app.agents.toolset import REGISTRY, build_registry
 from app.api import cash as cash_api
 from app.contracts import AbstentionReason, ActionType, CheckStatus, DataMode, Role
 from app.llm import LLMGateway, Outcome
@@ -134,15 +134,23 @@ def test_off_topic_question_is_out_of_scope(orch, ledger):
     assert rec.abstention.message_key == "abstain.out_of_scope"
 
 
-def test_primary_intent_without_an_engine_abstains_with_the_engine_name(orch, ledger):
-    rec = ask(orch, ledger, "What is the wholesale price of rice?").recommendation
+@pytest.fixture
+def no_market(settings):
+    """A deployment where the WP-09 market engine is not installed."""
+    tools = [dataclasses.replace(REGISTRY.get(n), run=None) if n.startswith("market.")
+             else REGISTRY.get(n) for n in REGISTRY.names()]
+    return Orchestrator(LLMGateway(settings), ToolRegistry(tools))
+
+
+def test_primary_intent_without_an_engine_abstains_with_the_engine_name(no_market, ledger):
+    rec = ask(no_market, ledger, "What is the wholesale price of rice?").recommendation
     assert rec.abstention.reason is AbstentionReason.out_of_scope
-    assert rec.abstention.message_key == "abstain.market_unavailable"  # cut, said politely
+    assert rec.abstention.message_key == "abstain.market_unavailable"  # said politely
     assert rec.abstention.missing == ("WP-09 market engine",)
 
 
-def test_secondary_intent_without_an_engine_is_skipped_not_fatal(orch, ledger):
-    run = ask(orch, ledger, "Will I run out of cash? Also the wholesale price of rice?")
+def test_secondary_intent_without_an_engine_is_skipped_not_fatal(no_market, ledger):
+    run = ask(no_market, ledger, "Will I run out of cash or hit a gap? Also, the rice price?")
     assert run.recommendation.abstention is None
     assert "market.prices" in run.skipped
     assert run.recommendation.tools_used == ("cash.forecast", "cash.gaps")

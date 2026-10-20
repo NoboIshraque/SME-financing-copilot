@@ -113,8 +113,6 @@ def test_parameters_are_validated_before_the_engine_runs(ledger, name, params, f
 
 @pytest.mark.parametrize(("name", "engine"), [
     ("analysis.stability", "WP-07"),
-    ("market.prices", "WP-09"),
-    ("market.negotiate", "WP-09"),
 ])
 def test_tools_without_an_engine_are_known_but_unavailable(ledger, name, engine):
     assert name in REGISTRY and name not in REGISTRY.names(available_only=True)
@@ -149,7 +147,8 @@ def test_manifest_describes_every_tool_for_the_planner():
     assert manifest["cash.gaps"]["params"] == ["buffer", "seed"]
     assert manifest["cash.gaps"]["min_history_days"] == 56
     assert manifest["mesh.propose"]["tier"] == "DRAFT"
-    assert manifest["market.prices"]["available"] is False
+    assert manifest["market.prices"]["params"] == ["commodities"]
+    assert manifest["analysis.stability"]["available"] is False
 
 
 # --- provenance is enforced ----------------------------------------------------------------

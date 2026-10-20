@@ -422,7 +422,9 @@ class Orchestrator:
             for fig in (*card.figures, card.impact, card.cost):
                 if fig is not None:
                     figures.setdefault(fig.id, fig)
-        modes = [r.data_mode for r in results.values()] or [ctx.data_mode]
+        # The shop's own label counts too: an answer to a synthetic shop is labelled synthetic
+        # even when it only quotes public prices (CLAUDE.md rule 8; most cautious wins).
+        modes = [*(r.data_mode for r in results.values()), ctx.data_mode]
         recommendation = Recommendation(
             id=rec_id, tenant_id=ctx.tenant_id, question=question,
             answer_text=answer if abstention is None else None,

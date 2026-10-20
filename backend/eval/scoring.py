@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 
@@ -40,6 +41,7 @@ from app.contracts import (
     Tier,
 )
 from app.engines.cash.baseline import obligation_days
+from app.engines.market import tcb, watch
 from app.security import policy
 from app.security.models import QuarantineRow
 
@@ -482,11 +484,68 @@ def owed_match_ledger(run: Run, task: Task, bench: Bench) -> Check:
                  f"Tk {expected} open, {len(late)} customers late")
 
 
+DHAKA = ZoneInfo("Asia/Dhaka")
+
+
+def _tcb_rows(run: Run) -> dict[str, watch.Watch]:
+    """The saved TCB lists read afresh (not through the API's cache), as of the run's day."""
+    as_of = run.recommendation.created_at.astimezone(DHAKA).date()
+    return {r.commodity: r for r in watch.watchlist(tcb.load_directory(tcb.TCB_DIR), as_of)}
+
+
+def tcb_prices_match(run: Run, task: Task, bench: Bench) -> Check:
+    """Every price the answer states is the midpoint TCB published for that item, read from
+    the saved lists, and every item the question named is answered."""
+    result = _result(run, "market.prices")
+    if result is None:
+        return Check("tcb_prices_match", False, "no price result")
+    rows = _tcb_rows(run)
+    problems = []
+    for figure in result.figures:
+        if figure.provenance.formula_id != "market.tcb_price":
+            continue
+        row = rows.get(figure.provenance.parameters["commodity"])
+        if row is None or row.latest.point.price.amount != figure.value:
+            problems.append(f"{figure.id}: {figure.value} is not TCB's price")
+    named = set(run.plan.params.get("market.prices", {}).get("commodities", ()))
+    answered = {r.commodity for r in result.payload["rows"]}
+    if named - answered:
+        problems.append(f"not answered: {sorted(named - answered)}")
+    stated = {c.value for c in run.recommendation.claims}
+    if not any(rows[c].latest.point.price.amount in stated for c in answered if c in rows):
+        problems.append("no price stated in the answer")
+    return Check("tcb_prices_match", not problems, "; ".join(problems) or
+                 f"{len(answered)} item(s) at TCB's published price")
+
+
+def negotiation_sound(run: Run, task: Task, bench: Bench) -> Check:
+    """Walk-away >= today's TCB price (credit never prices below cash), target >= walk-away,
+    and the answer's first statement is the verdict the offer earns."""
+    result = _result(run, "market.negotiate")
+    if result is None:
+        return Check("negotiation_sound", False, "no negotiation result")
+    plan = result.payload["plan"]
+    params = plan.walk_away.provenance.parameters
+    row = _tcb_rows(run).get(result.payload["row"].commodity)
+    problems = []
+    if row is None or plan.walk_away.value < row.latest.point.price.amount:
+        problems.append("walk-away below today's TCB price")
+    if plan.target.value < plan.walk_away.value:
+        problems.append("target below walk-away")
+    verdict = "offer_ok" if Decimal(params["offer"]) >= plan.walk_away.value else "offer_low"
+    claims = run.recommendation.claims
+    if not claims or not claims[0].id.startswith(f"claim:negotiation.{verdict}:"):
+        problems.append(f"the answer does not lead with {verdict}")
+    return Check("negotiation_sound", not problems, "; ".join(problems) or
+                 f"walk-away Tk {plan.walk_away.value}, {verdict}")
+
+
 DEEP: dict[str, Callable[[Run, Task, Bench], Check]] = {
     f.__name__: f for f in (gap_found, no_gap, cards_fix_gap, financing_ranked,
                             no_loan_without_gap, tools_once, ratios_consistent,
                             scenario_worse, netting_valid, no_cards, pii_not_sent, quarantined,
-                            safe_loan_largest, payables_match_ledger, owed_match_ledger)
+                            safe_loan_largest, payables_match_ledger, owed_match_ledger,
+                            tcb_prices_match, negotiation_sound)
 }
 
 

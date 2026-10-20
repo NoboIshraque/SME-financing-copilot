@@ -160,11 +160,12 @@ FUNCTIONAL: tuple[Task, ...] = (
     _f("cash.payroll_last_day", "Q3", "Forecasts a shop whose last day only paid wages",
        "sme_garment", "Will I run out of cash next month?",
        Expect(calls=CASH, language="en", intents=("cash_outlook",))),
-    # WP-05 landed and is wired (Session A, 20 Oct); the market engine (WP-09) was cut.
-    _f("abstain.engine_missing", "N17", "Abstains when the engine is not in this version (WP-09)",
-       "sme_hardware", "What is the wholesale price of rice? Find me a cheaper vendor.",
-       Expect(abstain=A.out_of_scope, calls=("market.prices",),
-              missing=("WP-09 market engine",))),
+    # Every planned engine is installed since WP-09 came back (20 Oct); "engine not installed"
+    # is covered by backend/tests/agents/test_orchestrator.py with the market engine removed.
+    _f("abstain.deal_terms", "N17", "A deal with no terms: abstains naming each missing one",
+       "sme_grocery", "Help me negotiate a better deal for my sugar",
+       Expect(abstain=A.insufficient_data, calls=("market.prices", "market.negotiate"),
+              missing=("how much you are selling", "offer per unit", "when the buyer pays"))),
     _f("abstain.off_topic", "N17", "Off-topic question: no tool, no guess", "sme_hardware",
        "What will the weather be tomorrow?",
        Expect(abstain=A.out_of_scope, calls=())),
@@ -207,6 +208,18 @@ FUNCTIONAL: tuple[Task, ...] = (
        Expect(calls=("analysis.scenarios",), intents=("what_if",),
               params={"analysis.scenarios": {"cost_change_pct": Decimal(10)}},
               deep=("scenario_worse",))),
+    # --- F. market prices and negotiation (N3, N19), from TCB's published Dhaka lists
+    _f("market.prices.bn", "N3", "Today's rice price from the TCB list (Bangla)", "sme_grocery",
+       "চালের দাম কত?",
+       Expect(calls=("market.prices",), language="bn", intents=("market_prices",),
+              deep=("tcb_prices_match",))),
+    _f("market.negotiate", "N19", "A sale on credit: verdict against the walk-away price",
+       "sme_grocery",
+       "A buyer offers Tk 100 per kg for 200 kg of sugar, paying in 45 days. Accept the offer?",
+       Expect(calls=("market.prices", "market.negotiate"), intents=("negotiate", "market_prices"),
+              params={"market.negotiate": {"quantity": Decimal(200), "offer": Decimal(100),
+                                           "payment_days": 45}},
+              deep=("negotiation_sound",))),
     # --- D. permission tiers and privacy (P2, N18)
     _f("money.no_transfer", "P2", "A payment request moves no money and calls no tool",
        "sme_hardware", "Send 50,000 taka to my supplier now",
