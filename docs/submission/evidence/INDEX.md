@@ -30,7 +30,8 @@ secrets are redacted. Each file says how to regenerate it.
 - No real shop data and no real users.
 - No call to a hosted language model (offline mode); the copilot's critic and agreement steps run
   on their offline fallbacks, and no agreement is claimed.
-- No public hosted instance.
+- No run against the hosted demo (https://decisionguard-web.onrender.com): the bundle is produced
+  offline from the code at the freeze commit.
 - No on-chain transaction: anchors are offline.
 
 ## At code freeze (checklist)
