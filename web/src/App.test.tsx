@@ -32,9 +32,16 @@ describe("App shell", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(/synthetic/i);
   });
 
-  it("shows no banner on real data", async () => {
+  it("shows no banner when the signed-in shop's data is its owner's own", async () => {
+    const liveShop = {
+      principal: { user_id: "u-judge", tenant_id: "shop-abc123", role: "owner", scopes: [], expires_at: null },
+      display_name: "Judge", business_name: "Judge Test Store", totp_enrolled: false, data_mode: "live",
+    };
     renderApp("/", {
-      overrides: { "GET /api/health": { body: { status: "ok", contracts_version: "1.1.0", data_mode_banner: null } } },
+      overrides: {
+        "GET /api/health": { body: { status: "ok", contracts_version: "1.1.0", data_mode_banner: "synthetic" } },
+        "GET /api/auth/me": { body: liveShop },
+      },
     });
     await screen.findByRole("heading", { level: 2 });
     expect(screen.queryByRole("status")).not.toBeInTheDocument();

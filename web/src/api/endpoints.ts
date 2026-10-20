@@ -38,6 +38,9 @@ import type {
   CashForecast,
   CashGaps,
   DemoAccount,
+  ShopProfile,
+  SignupRequest,
+  TotpEnrolment,
   FinancingMatch,
   Health,
   IngestCommitRequest,
@@ -74,6 +77,15 @@ export const api = {
     verifyTotp: (code: string) => apiPost<Session>("/api/auth/login/totp", { code }),
     logout: () => apiPost<void>("/api/auth/logout", {}),
     demoAccounts: () => apiGet<DemoAccount[]>("/api/auth/demo-accounts"),
+    /** Self-service shop (demo mode only): creates the shop and signs its owner in. */
+    signup: (body: SignupRequest) => apiPost<Session>("/api/onboarding/signup", body),
+    totpEnrol: () => apiPost<TotpEnrolment>("/api/auth/totp/enrol", {}),
+    totpConfirm: (code: string) => apiPost<Session>("/api/auth/totp/confirm", { code }),
+  },
+  /** The numbers a self-service shop enters by hand: opening cash and the facts lenders check. */
+  onboarding: {
+    profile: () => apiGet<ShopProfile>("/api/onboarding/profile"),
+    saveProfile: (body: ShopProfile) => apiPost<ShopProfile>("/api/onboarding/profile", body),
   },
   /** WP-01: formula, inputs and source rows behind any figure (N13). */
   explain: (figureId: string) => apiGet<Explanation>(`/api/explain/${id(figureId)}`),

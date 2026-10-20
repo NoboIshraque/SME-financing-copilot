@@ -20,8 +20,13 @@ from app.llm.providers import Role
     ("এই মাসে লাভ কেমন হলো?", ["business_health"], "bn"),
     ("Is the wholesale price of rice cheaper elsewhere?", ["market_prices"], "en"),
     ("Tell me a joke", ["unknown"], "en"),
+    ("Can I pay salaries on 31 October?", ["cash_outlook"], "en"),
+    ("Who do I have to pay next", ["cash_outlook"], "en"),
+    ("৩১ তারিখে কর্মচারীদের বেতন দিতে পারব?", ["cash_outlook"], "bn"),
+    ("这个月的房租和工资付得起吗？", ["cash_outlook"], "zh"),
 ], ids=["en-cash", "bn-loan-not-market", "banglish-baki", "zh-two-intents", "what-if",
-        "netting", "negotiate", "draft", "bn-profit", "prices", "unknown"])
+        "netting", "negotiate", "draft", "bn-profit", "prices", "unknown", "en-salaries",
+        "en-pay-next", "bn-salaries", "zh-rent-wages"])
 def test_plan_intents_across_languages(question, intents, language):
     plan = deterministic.plan(question)
     assert plan["intents"] == intents

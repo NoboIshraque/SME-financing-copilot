@@ -48,10 +48,17 @@ MAX_INTENTS = 3
 # Chinese has no spaces between words, so Chinese keywords match anywhere.
 KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
     "cash_outlook": {
+        # Paying what is due (wages, rent, bills, suppliers) is a cash question too: the forecast
+        # and the gaps' drivers answer "can I pay salaries on the 31st?" and "who do I pay next?".
         "latin": ("cash", "cash flow", "cashflow", "forecast", "run out", "shortfall", "gap",
-                  "liquidity", "balance next", "taka thakbe", "hate taka", "ghatti"),
+                  "liquidity", "balance next", "taka thakbe", "hate taka", "ghatti",
+                  "salary", "salaries", "wage", "wages", "payroll", "rent", "bill", "bills",
+                  "can i pay", "can i afford", "afford", "have to pay", "need to pay",
+                  "pay next", "payments due", "due next", "upcoming payments", "beton",
+                  "bhara", "dite parbo"),
         "script": ("নগদ", "ক্যাশ", "ঘাটতি", "পূর্বাভাস", "হাতে টাকা", "টাকা থাকবে",
-                   "现金", "预测", "缺口", "资金"),
+                   "বেতন", "মজুরি", "ভাড়া", "দিতে পারব",
+                   "现金", "预测", "缺口", "资金", "工资", "薪水", "房租", "账单", "付款"),
     },
     "collect_receivables": {
         "latin": ("receivable", "receivables", "owe me", "owes me", "overdue", "unpaid",

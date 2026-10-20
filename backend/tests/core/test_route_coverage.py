@@ -16,6 +16,7 @@ PUBLIC = {
     ("POST", "/api/auth/logout"),
     ("GET", "/api/auth/demo-accounts"),
     ("GET", "/api/verify/{passport_id}"),  # Trust Passport check for lenders (WP-13)
+    ("POST", "/api/onboarding/signup"),  # judges create their own shop (demo mode only)
 }
 
 
