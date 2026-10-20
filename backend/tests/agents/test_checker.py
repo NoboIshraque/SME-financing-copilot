@@ -185,6 +185,37 @@ def test_a_narrated_number_must_come_from_a_verified_claim(run):
                               items) == {Decimal(50000)}
 
 
+
+@pytest.mark.parametrize(("text", "values"), [
+    ("You will be short by about fifty thousand taka.", {50000}),
+    ("Borrow seventy-three thousand four hundred and five taka.", {73405}),
+    ("Ask the bank for three lakh.", {300000}),
+    ("আগামী মাসে প্রায় পঞ্চাশ হাজার টাকা ঘাটতি হবে।", {50000}),
+    ("তিনটি বিল বাকি।", {3}),
+    ("下个月你将短缺五万塔卡。", {50000}),
+    ("两千五百塔卡，十二天后。", {2500, 12}),
+], ids=["en-thousand", "en-compound", "en-lakh", "bn-thousand", "bn-classifier", "zh-wan",
+        "zh-two-runs"])
+def test_numbers_written_as_words_are_numbers(text, values):
+    assert numbers_in(text) == {Decimal(v) for v in values}
+
+
+@pytest.mark.parametrize("text", [
+    "This one is the cheapest option.",
+    "তিনি এখন দোকানে নেই, এটা জরুরি নয়।",
+    "给你一些建议，先看一下现金。",
+], ids=["en-lone-one", "bn-he-and-not", "zh-lone-yi"])
+def test_ordinary_words_are_not_read_as_numbers(text):
+    assert numbers_in(text) == set()
+
+
+def test_a_narrated_number_in_words_must_come_from_a_verified_claim(run):
+    items = [run[2]["cash.closing_balance"]]
+    value = render(items[0].claim.value, Unit.BDT)
+    assert unverified_numbers(f"You hold Tk {value}; borrow fifty thousand today.",
+                              items) == {Decimal(50000)}
+    assert unverified_numbers("下个月借五万塔卡。", items) == {Decimal(50000)}
+
 # --- logging ------------------------------------------------------------------------------
 
 def test_removed_claims_are_logged_without_personal_data(run, ledger):

@@ -259,6 +259,18 @@ def test_narration_with_an_invented_number_is_replaced_by_the_claims(live_settin
     assert any(e.name == "narration" and e.outcome == "rejected" for e in run.trace)
 
 
+
+def test_narration_with_a_number_in_words_is_replaced_by_the_claims(live_settings, ledger,
+                                                                   clock):
+    plan = json.dumps({"intents": ["cash_outlook"], "tools": [], "language": "en"})
+    narration = json.dumps({"text": "Borrow about fifty thousand taka today to be safe."})
+    gateway = LLMGateway(live_settings,
+                         transport=Scripted({"gemini_flash": [plan, narration]}), clock=clock)
+    run = Orchestrator(gateway).ask(ToolContext(ledger, "sme_hardware", NOW), CASH_Q)
+    rec = run.recommendation
+    assert rec.answer_text == " ".join(c.text for c in rec.claims)
+    assert any(e.name == "narration" and e.outcome == "rejected" for e in run.trace)
+
 RUNS = [
     ("sme_hardware", CASH_Q),
     ("sme_hardware", "আগামী মাসে কি লোন নেওয়া দরকার?"),
