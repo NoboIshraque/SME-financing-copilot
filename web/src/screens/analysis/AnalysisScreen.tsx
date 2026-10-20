@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { compareDecimal } from "../../api/decimal";
 import { api } from "../../api/endpoints";
 import type { Statements } from "../../api/types";
-import { FigureValue } from "../../components/FigureValue";
+import { FigureValue, Num } from "../../components/FigureValue";
 import { StabilityBar } from "../../components/StabilityBar";
 import { ErrorState, QueryView } from "../../components/States";
 import { useDocumentTitle } from "../../components/useDocumentTitle";
@@ -90,7 +90,7 @@ export function AnalysisScreen() {
               {data.map((ratio) => (
                 <li key={ratio.name} className={card} aria-label={text(`ratio.${ratio.name}`)}>
                   <p className="text-sm text-slate-600 dark:text-slate-400">{text(`ratio.${ratio.name}`)}</p>
-                  <p className="text-2xl font-semibold tabular-nums">{ratio.value === null || ratio.value === undefined ? t("analysis.notApplicable") : format.value(ratio.value, ratio.unit)}</p>
+                  <p className="text-2xl font-semibold tabular-nums">{ratio.value === null || ratio.value === undefined ? t("analysis.notApplicable") : <Num value={ratio.value} unit={ratio.unit} label={text(`ratio.${ratio.name}`)} provenance={ratio.provenance} />}</p>
                   {ratio.benchmark && <p className="text-xs text-slate-500 dark:text-slate-400">{t("analysis.benchmark", { value: ratio.benchmark })}</p>}
                   {ratio.interpretation_key && <p className="mt-1 text-sm">{text(ratio.interpretation_key)}</p>}
                 </li>
@@ -120,12 +120,13 @@ export function AnalysisScreen() {
                 <tbody>
                   {[...data.variances].sort((a, b) => a.rank - b.rank).map((row) => {
                     const direction = compareDecimal(row.actual, row.expected);
+                    const line = data.lines?.[row.metric];
                     return (
                       <tr key={row.metric} className="border-t border-slate-100 dark:border-slate-800">
                         <th scope="row" className="py-1 text-left font-normal">{text(`metric.${row.metric}`)}</th>
-                        <td className="py-1 text-right tabular-nums">{format.value(row.expected, row.unit)}</td>
+                        <td className="py-1 text-right tabular-nums">{line ? <FigureValue figure={line.expected} /> : format.value(row.expected, row.unit)}</td>
                         <td className="py-1 text-right tabular-nums font-semibold">
-                          {format.value(row.actual, row.unit)}{" "}
+                          {line ? <FigureValue figure={line.actual} /> : format.value(row.actual, row.unit)}{" "}
                           <span className="sr-only">{t(direction < 0 ? "analysis.below" : direction > 0 ? "analysis.above" : "analysis.onTarget")}</span>
                           <span aria-hidden="true">{direction < 0 ? "▼" : direction > 0 ? "▲" : "="}</span>
                         </td>
@@ -179,15 +180,21 @@ export function AnalysisScreen() {
             <tbody>
               {compare.data.scenarios.map((scenario) => {
                 const best = scenario.id === compare.data.recommended_id;
+                const figure = (formula: string) =>
+                  compare.data.figures?.[scenario.id]?.find((f) => f.provenance.formula_id === `analysis.scenario.${formula}`);
+                const shown = (formula: string, fallback: string) => {
+                  const found = figure(formula);
+                  return found ? <FigureValue figure={found} /> : fallback;
+                };
                 return (
                   <tr key={scenario.id} className={`border-t border-slate-100 dark:border-slate-800 ${best ? "bg-emerald-50 font-semibold dark:bg-emerald-950/40" : ""}`}>
                     <th scope="row" className="py-1.5 text-left font-normal">
                       {text(scenario.name_key)}
                       {best && <span className="ml-2 rounded-full bg-emerald-600 px-2 py-0.5 text-xs text-white">{t("analysis.recommended")}</span>}
                     </th>
-                    <td className="text-right tabular-nums">{format.money(scenario.expected_outcome)}</td>
-                    <td className="text-right tabular-nums">{format.money(scenario.worst_5pct_outcome)}</td>
-                    <td className="text-right tabular-nums">{format.probability(scenario.p_buffer_breach)}</td>
+                    <td className="text-right tabular-nums">{shown("expected_outcome", format.money(scenario.expected_outcome))}</td>
+                    <td className="text-right tabular-nums">{shown("worst_5pct_outcome", format.money(scenario.worst_5pct_outcome))}</td>
+                    <td className="text-right tabular-nums">{shown("p_buffer_breach", format.probability(scenario.p_buffer_breach))}</td>
                   </tr>
                 );
               })}

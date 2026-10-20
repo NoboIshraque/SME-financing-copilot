@@ -58,6 +58,22 @@ describe("Analysis screen", () => {
     expect(within(scenarios).getByRole("button", { name: "Compare" })).toBeDisabled();
   });
 
+  it("opens the provenance of ratios, expected and actual values, and compared outcomes", async () => {
+    const { user } = renderApp("/analysis");
+    const ratios = await screen.findByRole("region", { name: "Key ratios" });
+    const margin = await within(ratios).findByRole("listitem", { name: "Gross margin" });
+    expect(within(margin).getByRole("button", { name: /Gross margin/ })).toHaveAttribute("aria-haspopup", "dialog");
+
+    const variance = screen.getByRole("region", { name: "Expected vs reality" });
+    const sales = await within(variance).findByRole("row", { name: /Net sales/ });
+    expect(within(sales).getAllByRole("button")).toHaveLength(2);
+
+    const scenarios = screen.getByRole("region", { name: "Compare decisions" });
+    await user.click(within(scenarios).getByRole("button", { name: "Compare" }));
+    const retime = await within(scenarios).findByRole("row", { name: /Pay the supplier after salary day/ });
+    expect(within(retime).getAllByRole("button")).toHaveLength(3);
+  });
+
   it("asks for the stability of the recommended choice only once decisions are compared", async () => {
     const { user, fetchMock } = renderApp("/analysis");
     const region = await screen.findByRole("region", { name: "How stable is the recommended choice?" });
