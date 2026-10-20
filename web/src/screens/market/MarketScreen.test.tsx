@@ -55,6 +55,24 @@ describe("Market screen", () => {
     expect(within(screen.getByRole("region", { name: "Best vendor for an order" })).getByText(SAMPLE_LABEL)).toBeInTheDocument();
   });
 
+  it("shows a live negotiation plan with the TCB price and cost of money it used, without the sample label", async () => {
+    const fig = (id: string, label: string, value: string, unit: "BDT" | "percent" = "BDT") => ({ id, label_key: label, value, unit, data_mode: "synthetic" as const, provenance: { formula_id: label, formula_version: 1 } });
+    const plan = {
+      walk_away: fig("w", "negotiation.walk_away", "52.69"),
+      target: fig("t", "negotiation.target", "62.00"),
+      steps: [{ text_key: "negotiation.step.walk_away", figures: [fig("w2", "negotiation.walk_away", "52.69")] }],
+      cost_of_money: fig("c", "market.cost_of_money", "4.07", "percent"),
+      market_price: { ...tcbPoint("52.50", "2026-10-19"), commodity: "rice_coarse" },
+    };
+    const { user } = renderApp("/market", { overrides: { ...LIVE, "POST /api/market/negotiate": { body: plan } } });
+    const negotiate = await screen.findByRole("region", { name: "Negotiate a sale" });
+    expect(within(negotiate).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+    await user.click(within(negotiate).getByRole("button", { name: "Make my plan" }));
+    expect(await within(negotiate).findByText(/Market price used: ৳52.50 \/ kg, TCB, published 19 Oct/)).toBeInTheDocument();
+    expect(negotiate).toHaveTextContent("Your cost of money (best loan you qualify for): 4.07%");
+    expect(within(negotiate).queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+  });
+
   it("never shows sample vendors to a self-service shop as its own", async () => {
     const { user } = renderApp("/market", {
       overrides: { "GET /api/auth/me": (_req, state) => ({ body: { ...sessionFor(state.users[0]!), data_mode: "live" } }) },

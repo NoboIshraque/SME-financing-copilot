@@ -2,6 +2,8 @@
 
     GET /api/market/prices   -> [WatchItem]   latest TCB price, baseline, change, 6-week history
     GET /api/market/alerts   -> [MarketAlert] moves past +/-5% of the baseline
+    POST /api/market/negotiate {commodity, quantity, offer_price, payment_days}
+                             -> NegotiationPlan  walk-away, target, script (N19)
 
 Shapes follow `web/src/api/types.ts` (WatchItem, MarketAlert), plus a few fields the web may
 show: `published_on` (the TCB list's date; the screen says "published on", never "live"),
@@ -11,6 +13,13 @@ before the latest) and `baseline_points`. Prices come only from the TCB lists sa
 abstains with 422 `not_enough_data` (`missing: price_snapshot`). A commodity with only one
 point has no baseline and is left out rather than shown with a made-up one.
 
+Negotiation prices a sale against today's TCB price for the item (the shop's cash price) and
+the shop's cost of money: the lowest effective APR among the WP-06 financing options it passes
+eligibility for, for a working-capital need the size of the deal over max(payment_days, 30) days.
+With no eligible option, or no TCB price for the item, it abstains with 422 `not_enough_data`
+(`missing: eligible_financing` / `market_price`). The answer also carries `cost_of_money` (that
+APR as a Figure) and `market_price` (the TCB point used).
+
 The caller is the signed-in principal with `ledger:read`. Prices are public, the same for every
 shop. Alert figures are recorded in the caller's tenant ledger (formula + figure, no raw fact,
 so the shop's ledger revision does not move) so `/api/explain/{figure_id}` opens them.
@@ -19,6 +28,7 @@ so the shop's ledger revision does not move) so `/api/explain/{figure_id}` opens
 from __future__ import annotations
 
 from datetime import date
+from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -26,12 +36,30 @@ from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from app.contracts import ApiError, Figure, FormulaRef, Money, PricePoint, PriceSource, Principal
+from app.api import financing as financing_api
+from app.contracts import (
+    ApiError,
+    DataMode,
+    EligibilityStatus,
+    Figure,
+    FinancingNeed,
+    FormulaRef,
+    Money,
+    PricePoint,
+    PriceSource,
+    Principal,
+    Provenance,
+    Unit,
+)
+from app.engines.financing.catalogue import load_catalogue
+from app.engines.financing.ranking import match as rank_options
+from app.engines.market import negotiate as negotiate_mod
 from app.engines.market import tcb, watch
 from app.facts import FactStore
+from app.facts.provenance import combined_data_mode
 from app.main import get_session
 from app.security.clock import Clock
 from app.security.deps import get_clock, require
@@ -66,6 +94,27 @@ class MarketAlert(BaseModel):
     published_on: date
 
 
+class NegotiationBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    commodity: str = Field(max_length=40)
+    quantity: str = Field(max_length=20)
+    offer_price: Money
+    payment_days: int = Field(ge=0, le=180)
+
+
+class NegotiationStep(BaseModel):
+    text_key: str
+    figures: list[Figure]
+
+
+class NegotiationPlan(BaseModel):
+    walk_away: Figure
+    target: Figure
+    steps: list[NegotiationStep]
+    cost_of_money: Figure
+    market_price: PricePoint
+
+
 @lru_cache(maxsize=4)
 def _cached(directory: str, stamp: tuple[tuple[str, int], ...]) -> tuple[tcb.Observation, ...]:
     return tuple(tcb.load_directory(Path(directory)))
@@ -79,10 +128,25 @@ def observations(directory: Path | None = None) -> tuple[tcb.Observation, ...]:
     return _cached(str(folder), stamp) if files else ()
 
 
-def _abstain() -> JSONResponse:
+def _abstain(missing: str = "price_snapshot") -> JSONResponse:
     body = ApiError(code="not_enough_data", message_key="error.not_enough_data",
-                    detail={"missing": "price_snapshot"})
+                    detail={"missing": missing})
     return JSONResponse(status_code=422, content=body.model_dump(mode="json"))
+
+
+def _invalid(what: str) -> JSONResponse:
+    body = ApiError(code=f"invalid_{what}", message_key=f"error.invalid_{what}")
+    return JSONResponse(status_code=422, content=body.model_dump(mode="json"))
+
+
+def _record(store: FactStore, tenant_id: str, figure: Figure,
+            expressions: dict[str, str]) -> Figure:
+    """Record the formula and the figure in the tenant ledger, so /api/explain opens it."""
+    formula_id = figure.provenance.formula_id
+    store.put_formula(FormulaRef(formula_id=formula_id, version=1,
+                                 expression=expressions[formula_id]))
+    return store.put_figure(tenant_id, figure.model_copy(
+        update={"id": f"{tenant_id}:{figure.id}"}))
 
 
 def _rows(clock: Clock) -> list[watch.Watch] | None:
@@ -117,10 +181,7 @@ def alerts(principal: Principal = Depends(require(Permission.ledger_read)),
     store = FactStore(session)
     found = []
     for row, figure in watch.alerts(rows):
-        store.put_formula(FormulaRef(formula_id=figure.provenance.formula_id, version=1,
-                                     expression=watch.EXPRESSIONS[figure.provenance.formula_id]))
-        recorded = store.put_figure(principal.tenant_id, figure.model_copy(
-            update={"id": f"{principal.tenant_id}:{figure.id}"}))
+        recorded = _record(store, principal.tenant_id, figure, watch.EXPRESSIONS)
         point = row.latest.point
         found.append(MarketAlert(
             id=f"mk-{point.commodity}-{point.observed_on.isoformat()}",
@@ -128,3 +189,78 @@ def alerts(principal: Principal = Depends(require(Permission.ledger_read)),
             change=recorded, observed_on=point.observed_on, source=point.source,
             source_url=point.source_url, published_on=row.latest.published_on))
     return found
+
+
+COST_OF_MONEY = "market.cost_of_money"
+COST_OF_MONEY_EXPRESSION = ("lowest effective APR among the financing options the shop passes "
+                            "eligibility for (WP-06)")
+
+
+def cost_of_money(session: Session, tenant_id: str, amount: Money, days: int,
+                  as_of: date) -> tuple[Decimal, str, DataMode] | None:
+    """(best eligible effective APR in percent, product id, data mode), or None if none passes."""
+    products = load_catalogue()
+    facts, modes = financing_api._facts(FactStore(session), tenant_id, products, as_of)
+    need = FinancingNeed(tenant_id=tenant_id, amount=amount, needed_by=as_of,
+                         tenor_days=max(days, 30))
+    eligible = [c.option for c in rank_options(need, products, facts, start=as_of)
+                if c.option.eligibility.status is EligibilityStatus.pass_]
+    if not eligible:
+        return None
+    best = min(eligible, key=lambda option: (option.effective_apr, option.product.id))
+    mode = combined_data_mode([*modes, best.product.data_mode]) if modes \
+        else best.product.data_mode
+    return best.effective_apr, best.product.id, mode
+
+
+@router.post("/negotiate", response_model=NegotiationPlan)
+def negotiate(body: NegotiationBody,
+              principal: Principal = Depends(require(Permission.ledger_read)),
+              clock: Clock = Depends(get_clock),
+              session: Session = Depends(get_session)) -> NegotiationPlan | JSONResponse:
+    try:
+        quantity = Decimal(body.quantity.strip())
+    except InvalidOperation:
+        return _invalid("quantity")
+    if not quantity.is_finite() or quantity <= 0:
+        return _invalid("quantity")
+    if body.offer_price.amount <= 0:
+        return _invalid("offer")
+    rows = _rows(clock)
+    if rows is None:
+        return _abstain()
+    row = next((r for r in rows if r.commodity == body.commodity), None)
+    if row is None:
+        return _abstain("market_price")
+    as_of = clock().astimezone(DHAKA).date()
+    deal = Money.of((body.offer_price.amount * quantity).quantize(Decimal("0.01")))
+    found = cost_of_money(session, principal.tenant_id, deal, body.payment_days, as_of)
+    if found is None:
+        return _abstain("eligible_financing")
+    apr, product_id, money_mode = found
+    mode = combined_data_mode([money_mode, row.latest.point.data_mode])
+    plan = negotiate_mod.plan(market=row.latest.point, market_ref=row.latest.ref,
+                              offer=body.offer_price.amount, quantity=quantity,
+                              payment_days=body.payment_days, apr_percent=apr,
+                              apr_ref=f"financing:{product_id}", data_mode=mode)
+    store = FactStore(session)
+    expressions = {**negotiate_mod.EXPRESSIONS, COST_OF_MONEY: COST_OF_MONEY_EXPRESSION}
+
+    def record(fig: Figure) -> Figure:
+        return _record(store, principal.tenant_id, fig, expressions)
+
+    apr_figure = Figure(
+        id=f"market:cost_of_money:{product_id}:{deal.amount}:{max(body.payment_days, 30)}:"
+           f"{as_of.isoformat()}",
+        label_key="market.cost_of_money", value=apr, unit=Unit.percent, data_mode=money_mode,
+        provenance=Provenance(formula_id=COST_OF_MONEY, formula_version=1,
+                              source_row_ids=(f"financing:{product_id}",),
+                              parameters={"product_id": product_id,
+                                          "amount": str(deal.amount),
+                                          "tenor_days": str(max(body.payment_days, 30))}))
+    return NegotiationPlan(
+        walk_away=record(plan.walk_away), target=record(plan.target),
+        steps=[NegotiationStep(text_key=step.text_key,
+                               figures=[record(fig) for fig in step.figures])
+               for step in plan.steps],
+        cost_of_money=record(apr_figure), market_price=row.latest.point)

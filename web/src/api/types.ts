@@ -270,6 +270,9 @@ export interface NegotiationPlan {
   walk_away: Figure;
   target: Figure;
   steps: NegotiationStep[];
+  /** Server only (WP-09): the APR used (best eligible financing) and the TCB price used. */
+  cost_of_money?: Figure;
+  market_price?: PricePoint;
 }
 
 // ---- Messages, approvals, reports, trust, settings (WP-11/12/13/16) -------------------------

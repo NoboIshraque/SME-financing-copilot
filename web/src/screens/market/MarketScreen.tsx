@@ -101,9 +101,10 @@ function VendorRanking({ commodities }: { commodities: string[] }) {
   );
 }
 
-function Negotiation({ commodities }: { commodities: string[] }) {
+function Negotiation({ commodities, live }: { commodities: string[]; live: boolean }) {
   const { t } = useTranslation();
   const text = useServerText();
+  const format = useFormat();
   const ids = { commodity: useId(), quantity: useId(), price: useId(), days: useId(), error: useId() };
   const [commodity, setCommodity] = useState(commodities.includes("rice_coarse") ? "rice_coarse" : (commodities[0] ?? ""));
   const [quantity, setQuantity] = useState("500");
@@ -120,7 +121,7 @@ function Negotiation({ commodities }: { commodities: string[] }) {
   return (
     <section aria-labelledby="h-negotiate" className={card}>
       <h3 id="h-negotiate" className="text-lg font-semibold">{t("market.negotiateTitle")}</h3>
-      <SampleLabel />
+      {(plan.data ? !plan.data.cost_of_money : !live) && <SampleLabel />}
       <p className="text-sm text-slate-600 dark:text-slate-400">{t("market.negotiateHelp")}</p>
       <form onSubmit={submit} noValidate className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
@@ -161,6 +162,17 @@ function Negotiation({ commodities }: { commodities: string[] }) {
               <dd className="text-xl font-semibold"><FigureValue figure={plan.data.target} /></dd>
             </div>
           </dl>
+          {plan.data.cost_of_money && plan.data.market_price && (
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {t("market.priceUsed", {
+                price: format.money(plan.data.market_price.price),
+                unit: text(`unit.${plan.data.market_price.unit}`),
+                date: format.date(plan.data.market_price.observed_on),
+              })}
+              {" · "}
+              {t("market.cost_of_money")}: <FigureValue figure={plan.data.cost_of_money} className="font-semibold" />
+            </p>
+          )}
           {compareDecimal(plan.data.target.value, plan.data.walk_away.value) < 0 && (
             <p role="alert" className="text-sm font-medium text-red-700 dark:text-red-300">{t("market.belowWalkAway")}</p>
           )}
@@ -272,7 +284,7 @@ export function MarketScreen() {
       </section>
 
       {commodities.length > 0 && <VendorRanking commodities={commodities} />}
-      {commodities.length > 0 && <Negotiation commodities={commodities} />}
+      {commodities.length > 0 && <Negotiation commodities={commodities} live={live} />}
     </section>
   );
 }
