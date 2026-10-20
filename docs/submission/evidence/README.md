@@ -1,6 +1,6 @@
 # Execution evidence (deliverable 06)
 
-Generated 2026-10-20 01:09 UTC by `npm run evidence`. Every figure below comes from a run in this repository; all data is synthetic (`data_mode: "synthetic"`). The hand-written index (freeze record, sandbox operation log, worked examples, what the evidence does not show) is [`INDEX.md`](INDEX.md).
+Generated 2026-10-20 01:40 UTC by `npm run evidence`. Every figure below comes from a run in this repository; all data is synthetic (`data_mode: "synthetic"`). The hand-written index (freeze record, sandbox operation log, worked examples, what the evidence does not show) is [`INDEX.md`](INDEX.md).
 
 | Path | What |
 | --- | --- |
@@ -143,12 +143,12 @@ Honest limit: the guard's rules were written with sight of the whole injection c
 | Backend (pytest) | analysis | 132 |
 | Backend (pytest) | cash | 198 |
 | Backend (pytest) | contracts | 137 |
-| Backend (pytest) | core | 34 |
+| Backend (pytest) | core | 37 |
 | Backend (pytest) | eval | 17 |
 | Backend (pytest) | facts | 146 |
 | Backend (pytest) | financing | 150 |
 | Backend (pytest) | infra | 19 |
-| Backend (pytest) | ingest | 304 |
+| Backend (pytest) | ingest | 305 |
 | Backend (pytest) | mesh | 113 |
 | Backend (pytest) | messaging | 10 |
 | Backend (pytest) | ml | 7 |
@@ -157,9 +157,9 @@ Honest limit: the guard's rules were written with sight of the whole injection c
 | Backend (pytest) | reports | 35 |
 | Backend (pytest) | security | 422 |
 | Backend (pytest) | synthetic | 87 |
-| **Backend total** | | **2270** |
-| Web units (Vitest) | all | 210 |
-| **Total** | | **2480** |
+| **Backend total** | | **2274** |
+| Web units (Vitest) | all | 212 |
+| **Total** | | **2486** |
 
 ## Reproduce
 

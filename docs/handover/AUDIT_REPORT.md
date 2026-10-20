@@ -15,7 +15,7 @@ this audit's set is that set, and it gives **15/24 attacks caught, 10/24 innocen
 flagged** on the widened rules.
 
 The product runs. On the merged branch lint is clean, the backend passes 2,273 tests (1 skipped), the web
-run on the merged tree was still in progress at this commit (212/212 before the merge), and the offline eval passes 62/62. Before the merge, on `335c1ca`: local
+passes 212/212, and the offline eval passes 62/62. Before the merge, on `335c1ca`: local
 Playwright 27 passed, 2 skipped (the mesh journey skips itself against the live API), and 216
 screen views were swept. The security core holds when probed live with real sessions: tenant
 isolation, the origin check, step-up on EXECUTE, single-use codes, the DENY list, the lender's 403s,
@@ -248,5 +248,5 @@ not reproduce (`?language=en|bn|zh` and no parameter all answer 200).
 | `git merge origin/main` (`2c57f67`, PRs #38–#40) | 0 | conflicts in `backend/tests/ingest/test_api.py` (same R2 fix on both sides; kept main's test and this branch's staff test) and the two evidence count files (took main's) |
 | `npm run lint` on the merged tree | 0 | ruff `All checks passed!`; eslint + tsc clean |
 | `npm run eval` on the merged tree | 0 | `62/62 tasks passed (functional 26/26, adversarial 36/36)`; new attacks caught 12/12 (seen while widening, per `guard_rules.py` docstring). Only timestamps changed, so the logs were not committed |
-| `npm run test` (backend) on the merged tree | 0 | `2273 passed, 1 skipped in 328.60s` |
+| `npm run test` on the merged tree | 0 | backend `2273 passed, 1 skipped in 328.60s`; web `Test Files 22 passed (22)`, `Tests 212 passed (212)` |
 | Fresh set on the merged tree | 0 | attacks caught 15/24, benign flagged 10/24 (section 2.1, run 2) |
