@@ -1,6 +1,6 @@
 // Mock of the WP-08 mesh router: graph, rounds, EXECUTE approval with step-up, verification.
 import { callerRole, DEMO_TOTP_CODE } from "../db";
-import { meshGraph } from "../fixtures/mesh";
+import { initialRounds, meshGraph } from "../fixtures/mesh";
 import { apiError, ok, type MockRoute } from "../http";
 
 export const meshRoutes: MockRoute[] = [
@@ -19,7 +19,13 @@ export const meshRoutes: MockRoute[] = [
     handler: (_req, db) => {
       const tenant = db.session?.principal.tenant_id ?? "sme_garment";
       const open = db.rounds.find((round) => round.status === "proposed" && round.participants.includes(tenant));
-      return open ? ok(open) : apiError(409, "nothing_to_net", "error.nothing_to_net");
+      if (open) return ok(open);
+      // Like the API: a ring member gets a fresh round over the open debts, approved by nobody yet.
+      const template = initialRounds().find((round) => round.status === "proposed" && round.participants.includes(tenant));
+      if (!template) return apiError(409, "nothing_to_net", "error.nothing_to_net");
+      const fresh = { ...template, id: `${template.id}-new`, approvals: {} };
+      db.rounds.push(fresh);
+      return ok(fresh);
     },
   },
   {

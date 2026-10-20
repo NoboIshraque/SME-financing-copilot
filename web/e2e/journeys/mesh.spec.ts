@@ -61,3 +61,41 @@ test("a ring member's owner approves the proposed netting round with a code, and
   await settled.getByRole("button", { name: app.t("mesh.verify") }).click();
   await expect(settled.getByRole("status")).toHaveText(app.t("mesh.valid"));
 });
+
+// The same journey against the live WP-08 API: three owners, three sessions, one settlement.
+test("the three ring owners propose and approve a netting round with codes, and the settled round verifies", async ({ app, page }) => {
+  test.skip(!(await routeIsLive("GET /api/mesh/rounds")), "the mesh API is not live: the mock journey above covers the screen");
+  test.skip(app.isPhone, "a ring settles once per database: the desktop project runs this journey");
+  const accounts = await demoAccounts(page.request);
+  const owner = (shop: string) => {
+    const account = accounts.find((candidate) => candidate.role === "owner" && candidate.email.startsWith(`owner@${shop}.`));
+    if (!account) throw new Error(`no demo owner for ${shop}`);
+    return account;
+  };
+  const ring = [owner("garment"), owner("fabric"), owner("hardware")];
+  await app.signInAs(ring[0] as (typeof ring)[number]);
+  const before = (await (await page.request.get("/api/mesh/rounds")).json()) as { status: string }[];
+  test.skip(
+    before.some((round) => round.status === "settled") && !before.some((round) => round.status === "proposed"),
+    "this database already settled the demo ring: run against a fresh database (CI does)",
+  );
+
+  for (const [index, account] of ring.entries()) {
+    await app.signInAs(account);
+    await app.start("mesh");  // a fresh page load, so the screen shows this owner's session
+    const rounds = page.getByRole("region", { name: app.t("mesh.roundsTitle") });
+    const propose = rounds.getByRole("button", { name: app.t("mesh.propose") });
+    const proposed = rounds.getByRole("article").filter({ hasText: app.t("mesh.proposedTitle") });
+    await expect(propose.or(proposed).first()).toBeVisible();  // the rounds list has loaded
+    if (index === 0 && (await propose.isVisible())) await propose.click();
+    await proposed.getByRole("button", { name: app.t("mesh.approve") }).click();
+    await app.confirmStepUp(account, MESH_APPROVE);
+  }
+
+  // The last approval settles the round; its salted hash is anchored and anyone in it can check.
+  const rounds = page.getByRole("region", { name: app.t("mesh.roundsTitle") });
+  const settled = rounds.getByRole("article").filter({ hasText: tPattern("mesh.settledTitle", { date: ".+" }) }).first();
+  await expect(settled).toBeVisible();
+  await settled.getByRole("button", { name: app.t("mesh.verify") }).click();
+  await expect(settled.getByRole("status")).toHaveText(app.t("mesh.valid"));
+});

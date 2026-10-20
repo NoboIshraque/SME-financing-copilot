@@ -644,7 +644,8 @@
     "verify": "与链上记录核对",
     "valid": "已核实：记录与锚定哈希一致。",
     "invalid": "与锚定哈希不一致，请勿信任此记录。",
-    "stepUpSummary": "共支付 {{net}}，清偿 {{gross}} 债务"
+    "stepUpSummary": "共支付 {{net}}，清偿 {{gross}} 债务",
+    "propose": "提出轧差结算轮次"
   },
   "market": {
     "preview": "预览（示例数据）：此版本不含实时市场价格。",

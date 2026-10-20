@@ -644,7 +644,8 @@
     "verify": "Verify against the chain",
     "valid": "Verified: the record matches the anchored hash.",
     "invalid": "Does not match the anchored hash. Do not trust this record.",
-    "stepUpSummary": "Clear {{gross}} of debt by paying {{net}} in total"
+    "stepUpSummary": "Clear {{gross}} of debt by paying {{net}} in total",
+    "propose": "Propose a netting round"
   },
   "market": {
     "preview": "Preview with sample data: live market prices are not part of this version.",
